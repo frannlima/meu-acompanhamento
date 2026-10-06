@@ -5,11 +5,12 @@ const STORE_CODES = ["073","084","108","113","138","142","146","175","177","222"
 const WORLD_LABELS = {feminino:"Feminino",masculino:"Masculino",infantil:"Infantil",casa:"Casa",beleza_relogios:"Beleza/Relógios"};
 const GROUP_LABELS = {feminino_moda:"Feminino Moda",masculino_moda:"Masculino Moda",infantil_moda:"Infantil Moda",moda_casa:"Moda Casa",cba:"CBA",beleza:"Beleza",relogios:"Relógios",lpg:"LPG",basket:"Basket"};
 const WORLD_ORDER = ["feminino","masculino","infantil","casa","beleza_relogios"];
+const GROUP_ORDER = ["feminino_moda","masculino_moda","infantil_moda","moda_casa","cba","beleza","relogios","lpg","basket"];
 const EXCLUDED_DCO = new Set([530,531,532,552]);
 
 const state = {
   logged:false, matricula:"", storeCode:"", employeeName:"", role:"colaborador",
-  world:"feminino", section:"inicio", day:null, detail:null, history:[], regional:[],
+  world:"feminino", section:"inicio", day:null, detail:null, groupSummary:null, history:[], regional:[],
   commercial:null, dcoCatalog:[], commercialPhotoData:""
 };
 
@@ -181,13 +182,14 @@ async function loadAll(){
   $("workspaceLabel").textContent="WORKSPACE • LOJA "+state.storeCode;
   $("dateBadge").textContent=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
   try{
-    const [day,detail,history]=await Promise.all([
+    const [day,detail,groups,history]=await Promise.all([
       api("dashboard",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
       api("detail",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
+      api("groups",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
       api("history",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode})
     ]);
-    state.day=day; state.detail=detail; state.history=Array.isArray(history)?history:[];
-    renderDashboard(); renderGroups(); renderHistory();
+    state.day=day; state.detail=detail; state.groupSummary=groups; state.history=Array.isArray(history)?history:[];
+    renderDashboard(); renderGroups(); renderGroupSharePanel(); renderHistory();
     if(state.section==="comerciais") await loadCommercials();
   }catch(e){
     toast(e.message,true);
@@ -295,6 +297,163 @@ function renderGroups(){
     }).join("");
     return '<section class="group-card"><div class="group-card-head"><div><span class="eyebrow">GRUPO</span><h2>'+esc(GROUP_LABELS[g]||g)+'</h2></div><div class="group-summary"><div><span>Venda</span><strong>'+money(t.sale,2)+'</strong></div><div><span>% Meta</span><strong class="'+(attainment>=100?"positive":attainment>=90?"warning":"negative")+'">'+pct(attainment)+'</strong></div><div><span>Desvio</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</strong></div></div></div><div class="table-wrap"><table><thead><tr><th>DCO</th><th>Departamento</th><th>Meta</th><th>Venda</th><th>% Meta</th><th>Desvio</th><th>Física</th><th>LY</th><th>Evol.</th><th>Vs Input</th></tr></thead><tbody>'+trs+'<tr class="total-row"><td colspan="2">TOTAL • '+esc(GROUP_LABELS[g]||g)+'</td><td>'+money(t.target,2)+'</td><td>'+money(t.sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</td><td>'+num(t.physical)+'</td><td>'+(t.ly?money(t.ly,2):"—")+'</td><td>—</td><td>—</td></tr></tbody></table></div></section>';
   }).join("");
+}
+
+
+function performanceClass(value, good=100, warn=70){
+  const n=Number(value||0);
+  return n>=good?"perf-good":n>=warn?"perf-warn":"perf-bad";
+}
+
+function signedMoney(value, digits=2){
+  const n=Number(value||0);
+  return (n>=0?"+ ":"- ")+money(Math.abs(n),digits);
+}
+
+function buildGroupPanelHtml(){
+  const d=state.day||{};
+  const groups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
+  const ordered=GROUP_ORDER.map(code=>groups.find(g=>g.group_code===code)).filter(Boolean);
+
+  const target=Number(d.target_financial||ordered.reduce((a,g)=>a+Number(g.target_financial||0),0));
+  const sale=Number(d.sales_financial||ordered.reduce((a,g)=>a+Number(g.sales_financial||0),0));
+  const targetPhysical=Number(d.target_physical||ordered.reduce((a,g)=>a+Number(g.target_physical||0),0));
+  const salesPhysical=Number(d.sales_physical||ordered.reduce((a,g)=>a+Number(g.sales_physical||0),0));
+  const ly=Number(d.ly_financial||ordered.reduce((a,g)=>a+Number(g.ly_financial||0),0));
+  const attainment=target?sale/target*100:0;
+  const deviation=sale-target;
+  const evolution=ly&&d.has_input?((sale/ly)-1)*100:null;
+
+  const interval=Number(d.interval_sales_financial||0);
+  const intervalDelta=Number(d.interval_delta_financial||0);
+  const intervalGrowth=d.interval_growth_pct===null||d.interval_growth_pct===undefined?null:Number(d.interval_growth_pct);
+  const intervalMinutes=Number(d.interval_minutes||0);
+  const remaining=calcClock();
+  const currentPerHour=d.has_input&&intervalMinutes>0?interval/(intervalMinutes/60):0;
+  const projection=d.has_input&&currentPerHour>0?sale+currentPerHour*remaining:0;
+  const projectionAttainment=target&&projection?projection/target*100:0;
+  const projectionDelta=projection-target;
+
+  const dateLabel=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
+  const updated=d.captured_at?localTime(d.captured_at):"sem input";
+
+  const rows=ordered.map(g=>{
+    const meta=Number(g.target_financial||0);
+    const venda=Number(g.sales_financial||0);
+    const ating=meta?venda/meta*100:0;
+    const desvio=venda-meta;
+    const vendaLy=Number(g.ly_financial||0);
+    const evol=g.evolution_vs_ly===null||g.evolution_vs_ly===undefined?null:Number(g.evolution_vs_ly);
+    const metaFis=Number(g.target_physical||0);
+    const vendaFis=Number(g.sales_physical||0);
+    const atingFis=metaFis?vendaFis/metaFis*100:0;
+
+    return '<tr>'+
+      '<td class="group-name-cell">'+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</td>'+
+      '<td>'+money(meta,2)+'</td>'+
+      '<td>'+money(venda,2)+'</td>'+
+      '<td class="'+performanceClass(ating,100,70)+'">'+pct(ating)+'</td>'+
+      '<td class="'+(desvio>=0?"perf-good":"perf-soft-bad")+'">'+(desvio>=0?signedMoney(desvio,2):signedMoney(desvio,2))+'</td>'+
+      '<td>'+money(vendaLy,2)+'</td>'+
+      '<td class="'+(evol===null?"":evol>=0?"perf-good":"perf-soft-bad")+'">'+(evol===null?"—":(evol>=0?"▲ ":"▼ ")+pct(evol))+'</td>'+
+      '<td>'+num(metaFis)+'</td>'+
+      '<td>'+num(vendaFis)+'</td>'+
+      '<td class="'+performanceClass(atingFis,100,70)+'">'+pct(atingFis)+'</td>'+
+    '</tr>';
+  }).join("");
+
+  const physicalAttainment=targetPhysical?salesPhysical/targetPhysical*100:0;
+  const below=ordered.filter(g=>Number(g.attainment||0)<100).length;
+  const bestAtt=[...ordered].sort((a,b)=>Number(b.attainment||0)-Number(a.attainment||0))[0];
+  const bestEvolution=[...ordered].filter(g=>g.evolution_vs_ly!==null&&g.evolution_vs_ly!==undefined).sort((a,b)=>Number(b.evolution_vs_ly)-Number(a.evolution_vs_ly))[0];
+  const worst=[...ordered].sort((a,b)=>Number(a.deviation||0)-Number(b.deviation||0)).slice(0,2);
+
+  const projectionStatus=!projection
+    ? '<span class="group-kpi-note neutral">Aguardando ritmo para projetar</span>'
+    : '<span class="group-kpi-note '+(projectionDelta>=0?"positive":"negative")+'">'+
+      (projectionDelta>=0?"▲ crescimento ":"▼ retração ")+signedMoney(projectionDelta,2)+'</span>';
+
+  const lyStatus=evolution===null
+    ? '<span class="group-kpi-note neutral">Aguardando venda</span>'
+    : '<span class="group-kpi-note '+(evolution>=0?"positive":"negative")+'">'+(evolution>=0?"▲ evolução":"▼ involução")+' '+pct(evolution)+'</span>';
+
+  const hourStatus=intervalGrowth===null
+    ? '<span class="group-kpi-note neutral">Disponível após o 2º input</span>'
+    : '<span class="group-kpi-note '+(intervalGrowth>=0?"positive":"negative")+'">'+(intervalGrowth>=0?"▲ evolução ":"▼ involução ")+pct(intervalGrowth)+' • '+signedMoney(intervalDelta,2)+'</span>';
+
+  return '<div class="group-share-header">'+
+      '<div class="group-share-brand"><img src="./assets/riachuelo-logo.svg" alt="Riachuelo"></div>'+
+      '<div class="group-share-title"><h3>DESEMPENHO POR GRUPO DE VENDA</h3><p>Parcial hora a hora • Loja '+esc(state.storeCode)+' • '+dateLabel+' • Atualizado às '+updated+'</p></div>'+
+      '<div class="group-share-slogan">MODA QUE<br>INSPIRA O BRASIL</div>'+
+    '</div>'+
+    '<div class="group-share-kpis">'+
+      '<div class="group-kpi"><span>Meta do dia</span><strong>'+money(target,2)+'</strong><small>Meta física '+num(targetPhysical)+' peças</small></div>'+
+      '<div class="group-kpi"><span>Venda atual</span><strong>'+money(sale,2)+'</strong><small>'+pct(attainment)+' da meta</small></div>'+
+      '<div class="group-kpi projection"><span>Projeção de venda</span><strong>'+(projection?money(projection,2):"—")+'</strong><small>'+(projection?pct(projectionAttainment)+' de atingimento':"Aguardando 2º input")+'</small>'+projectionStatus+'</div>'+
+      '<div class="group-kpi"><span>Evolução vs LY</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong>'+lyStatus+'</div>'+
+      '<div class="group-kpi"><span>Evolução vs hora anterior</span><strong class="'+(intervalGrowth===null?"":intervalGrowth>=0?"positive":"negative")+'">'+(intervalGrowth===null?"—":pct(intervalGrowth))+'</strong>'+hourStatus+'</div>'+
+      '<div class="group-kpi deviation"><span>Desvio total</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+signedMoney(deviation,2)+'</strong><small>'+pct(attainment-100)+' em relação à meta</small></div>'+
+    '</div>'+
+    '<div class="group-share-table-wrap"><table class="group-share-table"><thead><tr>'+
+      '<th>Grupo de venda</th><th>Meta Fin.</th><th>Venda Fin.</th><th>% Meta</th><th>Desvio</th><th>Venda LY</th><th>Evolução / Involução vs LY</th><th>Meta Fís.</th><th>Venda Fís.</th><th>% Meta Fís.</th>'+
+    '</tr></thead><tbody>'+rows+
+      '<tr class="group-total-row"><td>Total</td><td>'+money(target,2)+'</td><td>'+money(sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+signedMoney(deviation,2)+'</td><td>'+money(ly,2)+'</td><td>'+(evolution===null?"—":(evolution>=0?"▲ ":"▼ ")+pct(evolution))+'</td><td>'+num(targetPhysical)+'</td><td>'+num(salesPhysical)+'</td><td>'+pct(physicalAttainment)+'</td></tr>'+
+    '</tbody></table></div>'+
+    '<div class="group-share-insights">'+
+      '<div><strong>'+below+' grupos</strong><span>abaixo da meta financeira</span></div>'+
+      '<div><strong>'+(bestAtt?esc(GROUP_LABELS[bestAtt.group_code]||bestAtt.group_code):"—")+'</strong><span>maior atingimento '+(bestAtt?pct(bestAtt.attainment):"—")+'</span></div>'+
+      '<div><strong>'+(bestEvolution?esc(GROUP_LABELS[bestEvolution.group_code]||bestEvolution.group_code):"—")+'</strong><span>melhor evolução vs LY '+(bestEvolution?pct(bestEvolution.evolution_vs_ly):"—")+'</span></div>'+
+      '<div><strong>'+(worst.length?worst.map(g=>esc(GROUP_LABELS[g.group_code]||g.group_code)).join(" e "):"—")+'</strong><span>maiores desvios em valor</span></div>'+
+    '</div>'+
+    '<div class="group-share-footer"><span>RIACHUELO</span><b>Moda que inspira o Brasil</b></div>';
+}
+
+function renderGroupSharePanel(){
+  const html=buildGroupPanelHtml();
+  $("groupSharePanel").innerHTML=html;
+  $("groupPanelModalContent").innerHTML=html;
+}
+
+function openGroupPanel(){
+  renderGroupSharePanel();
+  $("groupPanelModal").classList.remove("hidden");
+}
+
+function closeGroupPanel(){
+  $("groupPanelModal").classList.add("hidden");
+}
+
+async function shareGroupPanelSummary(){
+  const d=state.day||{};
+  const target=Number(d.target_financial||0);
+  const sale=Number(d.sales_financial||0);
+  const attainment=target?sale/target*100:0;
+  const deviation=sale-target;
+  const ly=Number(d.ly_financial||0);
+  const evolution=ly&&d.has_input?((sale/ly)-1)*100:null;
+  const intervalGrowth=d.interval_growth_pct===null||d.interval_growth_pct===undefined?null:Number(d.interval_growth_pct);
+
+  const textMsg='📊 *DESEMPENHO POR GRUPO DE VENDA*\n'+
+    'Loja '+state.storeCode+' • '+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+' • '+(d.captured_at?'Atualizado '+localTime(d.captured_at):'Sem input')+'\n\n'+
+    '🎯 Meta: '+money(target,2)+'\n'+
+    '💰 Venda: '+money(sale,2)+' • '+pct(attainment)+'\n'+
+    '↕️ Desvio: '+signedMoney(deviation,2)+'\n'+
+    '📈 Vs LY: '+(evolution===null?'—':pct(evolution))+'\n'+
+    '🕐 Vs hora anterior: '+(intervalGrowth===null?'—':pct(intervalGrowth))+'\n\n'+
+    'Painel completo disponível no Meu Acompanhamento.';
+
+  try{
+    if(navigator.share){
+      await navigator.share({title:"Desempenho por Grupo de Venda",text:textMsg});
+    }else if(navigator.clipboard){
+      await navigator.clipboard.writeText(textMsg);
+      toast("Resumo copiado. O painel está pronto para print.");
+    }else{
+      toast("Painel pronto para print.");
+    }
+  }catch(e){
+    if(e?.name!=="AbortError") toast("Não foi possível compartilhar o resumo.",true);
+  }
 }
 
 function renderHistory(){
@@ -490,6 +649,11 @@ function bind(){
   $("logoutBtn").onclick=logout; $("adminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
   $("refreshRegional").onclick=loadRegional;
   $("refreshCommercials").onclick=loadCommercials;
+  $("openGroupPanel").onclick=openGroupPanel;
+  $("openGroupPanelInline").onclick=openGroupPanel;
+  $("closeGroupPanel").onclick=closeGroupPanel;
+  $("shareGroupPanel").onclick=shareGroupPanelSummary;
+  $("groupPanelModal").addEventListener("click",e=>{if(e.target===$("groupPanelModal")) closeGroupPanel()});
   $("commercialWorldFilter").onchange=renderCommercialDcos;
   $("selectAllCommercialDcos").onclick=()=>document.querySelectorAll("#commercialDcoSelector input[type=checkbox]").forEach(el=>el.checked=true);
   $("saveCommercialBtn").onclick=saveCommercial;
