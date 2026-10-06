@@ -8,7 +8,7 @@
   <title>Meu Acompanhamento</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/riachuelo-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=4">
+  <link rel="stylesheet" href="./styles.css?v=5">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -102,6 +102,20 @@
           <div id="paceGrid" class="pace-grid"></div>
         </section>
 
+        <section class="card group-panel-shell home-group-panel">
+          <div class="card-head group-panel-app-head">
+            <div>
+              <span class="eyebrow">PARCIAL HORA A HORA</span>
+              <h2>Resultado de todos os grupos</h2>
+              <p>Painel geral da loja para acompanhar e compartilhar a parcial de vendas.</p>
+            </div>
+            <button id="openGroupPanelHome" class="btn primary">Abrir painel para compartilhar</button>
+          </div>
+          <div class="group-share-scroll">
+            <div id="homeGroupSharePanel" class="group-share-panel"></div>
+          </div>
+        </section>
+
         <div class="two-col">
           <section class="card">
             <div class="card-head"><div><span class="eyebrow">VELOCIDADE</span><h2>Último intervalo</h2></div><span class="icon-dot">↗</span></div>
@@ -159,52 +173,9 @@
         <div id="commercialKpis" class="kpi-grid compact"></div>
         <div id="commercialEmpty" class="card empty-box hidden"></div>
         <div id="commercialGrid" class="commercial-grid"></div>
-
-        <section id="commercialAdminPanel" class="card admin-only hidden">
-          <div class="card-head">
-            <div>
-              <span class="eyebrow">ADMINISTRAÇÃO • COMERCIAIS</span>
-              <h2>Cadastrar / atualizar responsável</h2>
-            </div>
-            <span class="badge soft" id="commercialAdminStore">Loja —</span>
-          </div>
-          <p class="modal-hint">O resultado do comercial é calculado automaticamente pela soma dos DCOs atribuídos. Um DCO só pode ter um responsável ativo por loja.</p>
-
-          <div class="commercial-form-grid">
-            <label class="field">
-              <span>Nome do comercial</span>
-              <input id="commercialName" type="text" placeholder="Ex.: Gabriela" autocomplete="off">
-            </label>
-            <label class="field">
-              <span>Foto</span>
-              <input id="commercialPhoto" type="file" accept="image/*">
-            </label>
-            <label class="field">
-              <span>Filtrar mundo</span>
-              <select id="commercialWorldFilter">
-                <option value="">Todos os mundos</option>
-                <option value="feminino">Feminino</option>
-                <option value="masculino">Masculino</option>
-                <option value="infantil">Infantil</option>
-                <option value="casa">Casa</option>
-                <option value="beleza_relogios">Beleza/Relógios</option>
-              </select>
-            </label>
-          </div>
-
-          <div class="dco-selector-head">
-            <div><strong>DCOs sob responsabilidade</strong><small>Selecione um ou vários DCOs.</small></div>
-            <button id="selectAllCommercialDcos" class="btn secondary small" type="button">Selecionar visíveis</button>
-          </div>
-          <div id="commercialDcoSelector" class="dco-selector"></div>
-          <div id="commercialSaveFeedback" class="form-error hidden"></div>
-          <div class="modal-actions">
-            <button id="saveCommercialBtn" class="btn primary" type="button">Salvar comercial</button>
-          </div>
-        </section>
       </section>
 
-      <section id="section-regional" class="section">
+            <section id="section-regional" class="section">
         <div class="section-head">
           <div><span class="eyebrow">CE+PI</span><h1>Consolidado Regional</h1><p>Meta, venda, desvio e evolução por filial no dia.</p></div>
           <button id="refreshRegional" class="btn secondary">Atualizar</button>
@@ -237,16 +208,172 @@
 
       <section id="section-admin" class="section">
         <div class="section-head">
-          <div><span class="eyebrow">GOVERNANÇA</span><h1>Administração</h1><p>Parâmetros e controles do Meu Acompanhamento.</p></div>
+          <div><span class="eyebrow">GOVERNANÇA</span><h1>Administração</h1><p>Cadastros, parâmetros, escalas, produtividade e controles do Meu Acompanhamento.</p></div>
         </div>
-        <div class="admin-grid">
-          <article class="admin-card"><span>🎯</span><strong>Metas / LY</strong><small>Meta diária da filial carregada automaticamente.</small></article>
-          <article class="admin-card"><span>👥</span><strong>Acessos</strong><small>Login por matrícula + loja de origem.</small></article>
-          <article class="admin-card admin-link" data-section="comerciais"><span>◎</span><strong>Comerciais</strong><small>Cadastro de responsáveis e DCOs da filial.</small></article>
-          <article class="admin-card"><span>▦</span><strong>Estrutura</strong><small>Mundos, grupos e DCOs centralizados no backend.</small></article>
-          <article class="admin-card"><span>◷</span><strong>Controle de Inputs</strong><small>Snapshots preservados ao longo do dia.</small></article>
+
+        <div id="adminTabs" class="admin-tabs">
+          <button class="admin-tab active" data-admin-tab="metas">🎯 Metas / LY</button>
+          <button class="admin-tab" data-admin-tab="escalas">👥 Escalas / Produtividade</button>
+          <button class="admin-tab" data-admin-tab="comerciais">◎ Comerciais</button>
+          <button class="admin-tab" data-admin-tab="estrutura">▦ Grupo / DCO</button>
+          <button class="admin-tab" data-admin-tab="acessos">🔐 Acessos</button>
+          <button class="admin-tab" data-admin-tab="inputs">◷ Controle de Inputs</button>
         </div>
-        <section class="card">
+
+        <div id="adminPanel-metas" class="admin-panel active">
+          <div id="adminMetaKpis" class="kpi-grid compact"></div>
+          <section class="card">
+            <div class="card-head"><div><span class="eyebrow">META E REFERÊNCIA</span><h2>Parâmetros do dia</h2></div><span id="adminMetaStore" class="badge soft">Loja —</span></div>
+            <div id="adminMetaGroups" class="table-wrap"></div>
+          </section>
+        </div>
+
+        <div id="adminPanel-escalas" class="admin-panel">
+          <div id="scaleKpis" class="kpi-grid compact"></div>
+          <section class="card">
+            <div class="card-head">
+              <div><span class="eyebrow">ESCALAS / PRODUTIVIDADE</span><h2 id="scaleFormTitle">Adicionar escala</h2></div>
+              <button id="newScaleBtn" class="btn secondary small">＋ Nova escala</button>
+            </div>
+            <div class="scale-form-grid">
+              <label class="field"><span>Data</span><input id="scaleDate" type="date"></label>
+              <label class="field"><span>Grupo</span>
+                <select id="scaleGroup">
+                  <option value="feminino_moda">Feminino Moda</option>
+                  <option value="masculino_moda">Masculino Moda</option>
+                  <option value="infantil_moda">Infantil Moda</option>
+                  <option value="moda_casa">Moda Casa</option>
+                  <option value="cba">CBA</option>
+                  <option value="beleza">Beleza</option>
+                  <option value="relogios">Relógios</option>
+                  <option value="lpg">LPG</option>
+                  <option value="basket">Basket</option>
+                </select>
+              </label>
+              <label class="field"><span>Turno</span><input id="scaleShift" type="text" placeholder="Ex.: Abertura"></label>
+              <label class="field"><span>Entrada</span><input id="scaleStart" type="time"></label>
+              <label class="field"><span>Saída</span><input id="scaleEnd" type="time"></label>
+              <label class="field"><span>HC planejado</span><input id="scalePlannedHc" type="number" min="0" value="0"></label>
+              <label class="field"><span>HC real</span><input id="scaleActualHc" type="number" min="0" value="0"></label>
+              <label class="field"><span>Meta da escala</span><input id="scaleTarget" type="number" min="0" step="0.01" value="0"></label>
+              <label class="field wide"><span>Observação</span><input id="scaleNotes" type="text" placeholder="Opcional"></label>
+            </div>
+            <div id="scaleFeedback" class="form-error hidden"></div>
+            <div class="modal-actions">
+              <button id="cancelScaleEdit" class="btn secondary hidden">Cancelar edição</button>
+              <button id="saveScaleBtn" class="btn primary">Salvar escala</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head"><div><span class="eyebrow">PRODUTIVIDADE</span><h2>Resultado por grupo x HC</h2></div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Grupo</th><th>HC Plan.</th><th>HC Real</th><th>Meta Escala</th><th>Venda Atual</th><th>R$/HC</th><th>Peças/HC</th><th>Meta/HC</th></tr></thead>
+                <tbody id="productivityTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-head"><div><span class="eyebrow">CADASTROS DO DIA</span><h2>Escalas lançadas</h2></div></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Grupo</th><th>Turno</th><th>Horário</th><th>HC Plan.</th><th>HC Real</th><th>Meta</th><th>Ação</th></tr></thead>
+                <tbody id="scaleTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div id="adminPanel-comerciais" class="admin-panel">
+          <section class="card">
+            <div class="card-head">
+              <div><span class="eyebrow">RESPONSÁVEIS COMERCIAIS</span><h2>Cadastros da filial</h2></div>
+              <button id="newCommercialBtn" class="btn primary small">＋ Novo comercial</button>
+            </div>
+            <div id="adminCommercialList" class="admin-commercial-list"></div>
+          </section>
+
+          <section id="commercialAdminPanel" class="card">
+            <div class="card-head">
+              <div>
+                <span class="eyebrow">CADASTRO / EDIÇÃO</span>
+                <h2 id="commercialFormTitle">Cadastrar responsável</h2>
+              </div>
+              <span class="badge soft" id="commercialAdminStore">Loja —</span>
+            </div>
+            <p class="modal-hint">Revise nome, foto e DCOs. Ao salvar uma edição, o painel comercial é atualizado automaticamente.</p>
+
+            <div class="commercial-form-grid">
+              <label class="field">
+                <span>Nome do comercial</span>
+                <input id="commercialName" type="text" placeholder="Ex.: Gabriela" autocomplete="off">
+              </label>
+              <label class="field">
+                <span>Foto</span>
+                <input id="commercialPhoto" type="file" accept="image/*">
+              </label>
+              <label class="field">
+                <span>Filtrar mundo</span>
+                <select id="commercialWorldFilter">
+                  <option value="">Todos os mundos</option>
+                  <option value="feminino">Feminino</option>
+                  <option value="masculino">Masculino</option>
+                  <option value="infantil">Infantil</option>
+                  <option value="casa">Casa</option>
+                  <option value="beleza_relogios">Beleza/Relógios</option>
+                </select>
+              </label>
+            </div>
+            <div id="commercialCurrentPhoto" class="commercial-current-photo hidden"></div>
+            <div class="dco-selector-head">
+              <div><strong>DCOs sob responsabilidade</strong><small>Você pode revisar e alterar a responsabilidade de cada comercial.</small></div>
+              <button id="selectAllCommercialDcos" class="btn secondary small" type="button">Selecionar visíveis</button>
+            </div>
+            <div id="commercialDcoSelector" class="dco-selector"></div>
+            <div id="commercialSaveFeedback" class="form-error hidden"></div>
+            <div class="modal-actions">
+              <button id="cancelCommercialEdit" class="btn secondary hidden" type="button">Cancelar edição</button>
+              <button id="saveCommercialBtn" class="btn primary" type="button">Salvar comercial</button>
+            </div>
+          </section>
+        </div>
+
+        <div id="adminPanel-estrutura" class="admin-panel">
+          <div id="adminStructureKpis" class="kpi-grid compact"></div>
+          <section class="card">
+            <div class="card-head"><div><span class="eyebrow">ESTRUTURA COMERCIAL</span><h2>Grupos e DCOs</h2></div></div>
+            <div id="adminStructureList" class="structure-list"></div>
+          </section>
+        </div>
+
+        <div id="adminPanel-acessos" class="admin-panel">
+          <section class="card">
+            <div class="card-head"><div><span class="eyebrow">ACESSOS</span><h2>Governança de usuários</h2></div></div>
+            <div class="rule-row"><span>Login</span><strong>Matrícula + loja de origem</strong></div>
+            <div class="rule-row"><span>Administrador</span><strong>Acesso regional e parametrizações</strong></div>
+            <div class="rule-row"><span>Gerente / Supervisor</span><strong>Operação da própria filial + reset diário</strong></div>
+            <div class="rule-row"><span>Colaborador / Comercial</span><strong>Consulta da própria filial</strong></div>
+          </section>
+        </div>
+
+        <div id="adminPanel-inputs" class="admin-panel">
+          <section class="card">
+            <div class="card-head">
+              <div><span class="eyebrow">CONTROLE DE INPUTS</span><h2>Snapshots ativos de hoje</h2></div>
+              <button id="adminResetDayBtn" class="btn danger">↺ Zerar acompanhamento do dia</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Horário</th><th>Venda acumulada</th><th>Venda do intervalo</th><th>Venda física</th><th>Linhas válidas</th><th>Excluídas</th></tr></thead>
+                <tbody id="adminHistoryTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <section class="card admin-rules-card">
           <div class="card-head"><div><span class="eyebrow">REGRAS FIXAS</span><h2>Escopo do aplicativo</h2></div></div>
           <div class="rule-row"><span>Filiais excluídas</span><strong>109 e 519</strong></div>
           <div class="rule-row"><span>Eletrônicos excluídos</span><strong>DCOs 530, 531, 532 e 552</strong></div>
@@ -349,6 +476,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=4" defer></script>
+  <script src="./app.js?v=5" defer></script>
 </body>
 </html>
