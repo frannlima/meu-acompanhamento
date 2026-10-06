@@ -515,11 +515,16 @@ async function loadCommercials(){
     });
     state.commercial=data||{commercials:[]};
     renderCommercials();
-    if(state.role==="administrador") await ensureCommercialCatalog();
+    if(state.role==="administrador"){
+      await ensureCommercialCatalog();
+      renderAdminCommercials();
+    }
   }catch(e){
     toast(e.message,true);
-    $("commercialEmpty").textContent=e.message;
-    $("commercialEmpty").classList.remove("hidden");
+    if($("commercialEmpty")){
+      $("commercialEmpty").textContent=e.message;
+      $("commercialEmpty").classList.remove("hidden");
+    }
   }
 }
 
@@ -535,7 +540,7 @@ function renderCommercials(){
   const attainment=total.target?total.sale/total.target*100:0;
   const deviation=total.sale-total.target;
 
-  $("commercialKpis").innerHTML=[
+  if($("commercialKpis")) $("commercialKpis").innerHTML=[
     kpi("Comerciais ativos",num(rows.length),"Com DCOs atribuídos na Loja "+state.storeCode),
     kpi("Meta atribuída",money(total.target,2),"Soma automática dos DCOs"),
     kpi("Venda atual",money(total.sale,2),rows.length?pct(attainment)+" da meta":"Aguardando cadastro",rows.length?(attainment>=100?"positive":attainment>=90?"warning":"negative"):""),
@@ -544,12 +549,13 @@ function renderCommercials(){
 
   const empty=$("commercialEmpty");
   const grid=$("commercialGrid");
-  $("commercialAdminStore").textContent="Loja "+state.storeCode;
+  if($("commercialAdminStore")) $("commercialAdminStore").textContent="Loja "+state.storeCode;
 
+  if(!grid||!empty) return;
   if(!rows.length){
     grid.innerHTML="";
     empty.innerHTML=state.role==="administrador"
-      ? "<b>Nenhum comercial cadastrado para esta filial.</b><br>Use o cadastro abaixo para informar o responsável e seus DCOs."
+      ? "<b>Nenhum comercial cadastrado para esta filial.</b><br>Cadastre em Administração → Comerciais."
       : "<b>Nenhum comercial cadastrado para esta filial.</b><br>O cadastro é realizado pela Administração.";
     empty.classList.remove("hidden");
     return;
@@ -598,24 +604,100 @@ async function ensureCommercialCatalog(){
   try{
     state.dcoCatalog=await api("catalog",{matricula:state.matricula,store_code:state.storeCode})||[];
     renderCommercialDcos();
+    renderAdminStructure();
   }catch(e){
-    $("commercialSaveFeedback").textContent=e.message;
-    $("commercialSaveFeedback").className="form-error";
+    if($("commercialSaveFeedback")){
+      $("commercialSaveFeedback").textContent=e.message;
+      $("commercialSaveFeedback").className="form-error";
+    }
   }
 }
 
 function renderCommercialDcos(){
-  const filter=$("commercialWorldFilter").value;
-  const rows=(Array.isArray(state.dcoCatalog)?state.dcoCatalog:[]).filter(d=>!filter||d.world_code===filter);
   const box=$("commercialDcoSelector");
+  if(!box) return;
+  const filter=$("commercialWorldFilter")?.value||"";
+  const rows=(Array.isArray(state.dcoCatalog)?state.dcoCatalog:[]).filter(d=>!filter||d.world_code===filter);
   box.innerHTML=rows.length?rows.map(d=>
-    '<label class="dco-check"><input type="checkbox" value="'+esc(d.code)+'"><span><b>'+esc(d.code)+' • '+esc(d.name)+'</b><small>'+esc(GROUP_LABELS[d.group_code]||d.group_code||"Sem grupo")+' · '+esc(WORLD_LABELS[d.world_code]||d.world_code||"Geral")+'</small></span></label>'
+    '<label class="dco-check"><input type="checkbox" value="'+esc(d.code)+'" '+(state.commercialSelectedDcos.has(Number(d.code))?"checked":"")+'><span><b>'+esc(d.code)+' • '+esc(d.name)+'</b><small>'+esc(GROUP_LABELS[d.group_code]||d.group_code||"Sem grupo")+' · '+esc(WORLD_LABELS[d.world_code]||d.world_code||"Geral")+'</small></span></label>'
   ).join(""):'<div class="empty-box small-empty">Nenhum DCO disponível neste filtro.</div>';
+  box.querySelectorAll('input[type="checkbox"]').forEach(el=>el.addEventListener("change",()=>{
+    const code=Number(el.value);
+    if(el.checked) state.commercialSelectedDcos.add(code);
+    else state.commercialSelectedDcos.delete(code);
+  }));
+}
+
+function resetCommercialForm(){
+  state.editingCommercialId=null;
+  state.commercialSelectedDcos=new Set();
+  state.commercialPhotoData="";
+  if($("commercialName")) $("commercialName").value="";
+  if($("commercialPhoto")) $("commercialPhoto").value="";
+  if($("commercialWorldFilter")) $("commercialWorldFilter").value="";
+  if($("commercialFormTitle")) $("commercialFormTitle").textContent="Cadastrar responsável";
+  if($("saveCommercialBtn")) $("saveCommercialBtn").textContent="Salvar comercial";
+  if($("cancelCommercialEdit")) $("cancelCommercialEdit").classList.add("hidden");
+  if($("commercialCurrentPhoto")){$("commercialCurrentPhoto").innerHTML="";$("commercialCurrentPhoto").classList.add("hidden")}
+  if($("commercialSaveFeedback")) $("commercialSaveFeedback").classList.add("hidden");
+  renderCommercialDcos();
+}
+
+function editCommercial(id){
+  const row=(state.commercial?.commercials||[]).find(r=>r.commercial_id===id);
+  if(!row) return;
+  state.editingCommercialId=id;
+  state.commercialPhotoData="";
+  state.commercialSelectedDcos=new Set((row.dcos||[]).map(d=>Number(d.dco_code)));
+  $("commercialName").value=row.commercial_name||"";
+  $("commercialPhoto").value="";
+  $("commercialWorldFilter").value="";
+  $("commercialFormTitle").textContent="Editar "+(row.commercial_name||"comercial");
+  $("saveCommercialBtn").textContent="Salvar alterações";
+  $("cancelCommercialEdit").classList.remove("hidden");
+  const photoBox=$("commercialCurrentPhoto");
+  if(row.photo_url){
+    photoBox.innerHTML='<img src="'+esc(row.photo_url)+'" alt="'+esc(row.commercial_name)+'"><span>Foto atual. Selecione outra imagem apenas se quiser substituir.</span>';
+    photoBox.classList.remove("hidden");
+  }else{
+    photoBox.innerHTML='<span>Sem foto cadastrada. Você pode adicionar agora.</span>';
+    photoBox.classList.remove("hidden");
+  }
+  renderCommercialDcos();
+  $("commercialAdminPanel").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function renderAdminCommercials(){
+  const box=$("adminCommercialList");
+  if(!box) return;
+  const rows=Array.isArray(state.commercial?.commercials)?state.commercial.commercials:[];
+  if(!rows.length){
+    box.innerHTML='<div class="empty-box">Nenhum comercial cadastrado nesta filial.</div>';
+    return;
+  }
+  box.innerHTML=rows.map(r=>{
+    const dcos=Array.isArray(r.dcos)?r.dcos:[];
+    const initials=String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
+    const photo=r.photo_url?'<img src="'+esc(r.photo_url)+'" alt="'+esc(r.commercial_name)+'">':'<span>'+esc(initials)+'</span>';
+    return '<article class="admin-commercial-row">'+
+      '<div class="commercial-avatar small-avatar">'+photo+'</div>'+
+      '<div class="admin-commercial-info"><strong>'+esc(r.commercial_name)+'</strong><span>'+num(dcos.length)+' DCO(s) • '+dcos.map(d=>d.dco_code).join(", ")+'</span></div>'+
+      '<button class="btn secondary small edit-commercial-btn" data-commercial-id="'+esc(r.commercial_id)+'">Editar cadastro</button>'+
+    '</article>';
+  }).join("");
+  box.querySelectorAll(".edit-commercial-btn").forEach(btn=>btn.onclick=()=>editCommercial(btn.dataset.commercialId));
+}
+
+function selectVisibleCommercialDcos(){
+  document.querySelectorAll("#commercialDcoSelector input[type=checkbox]").forEach(el=>{
+    el.checked=true;
+    state.commercialSelectedDcos.add(Number(el.value));
+  });
 }
 
 async function saveCommercial(){
   const name=$("commercialName").value.trim();
-  const codes=[...document.querySelectorAll("#commercialDcoSelector input[type=checkbox]:checked")].map(el=>Number(el.value));
+  const codes=[...state.commercialSelectedDcos];
   const feedback=$("commercialSaveFeedback");
   if(!name){feedback.textContent="Informe o nome do comercial.";feedback.className="form-error";return}
   if(!codes.length){feedback.textContent="Selecione ao menos um DCO.";feedback.className="form-error";return}
@@ -627,22 +709,193 @@ async function saveCommercial(){
       store_code:state.storeCode,
       commercial_name:name,
       photo_url:state.commercialPhotoData||null,
-      dco_codes:codes
+      dco_codes:codes,
+      commercial_id:state.editingCommercialId
     });
-    feedback.textContent="Comercial salvo com "+num(result?.dco_count||codes.length)+" DCO(s).";
+    feedback.textContent=(state.editingCommercialId?"Cadastro revisado":"Comercial cadastrado")+" com "+num(result?.dco_count||codes.length)+" DCO(s).";
     feedback.className="form-error form-success";
-    $("commercialName").value="";
-    $("commercialPhoto").value="";
-    state.commercialPhotoData="";
     await loadCommercials();
+    resetCommercialForm();
+    renderAdminCommercials();
     toast("Cadastro comercial atualizado.");
   }catch(e){
     feedback.textContent=e.message; feedback.className="form-error"; toast(e.message,true);
   }finally{
-    btn.disabled=false; btn.textContent="Salvar comercial";
+    btn.disabled=false;
+    btn.textContent=state.editingCommercialId?"Salvar alterações":"Salvar comercial";
   }
 }
 
+function setAdminTab(tab){
+  state.adminTab=tab;
+  document.querySelectorAll(".admin-tab").forEach(el=>el.classList.toggle("active",el.dataset.adminTab===tab));
+  document.querySelectorAll(".admin-panel").forEach(el=>el.classList.toggle("active",el.id==="adminPanel-"+tab));
+  if(tab==="comerciais") loadCommercials();
+  if(tab==="escalas") loadScales();
+  if(tab==="estrutura") ensureCommercialCatalog();
+  if(tab==="metas") renderAdminMeta();
+  if(tab==="inputs") renderAdminInputs();
+}
+
+async function loadAdmin(){
+  if(state.role!=="administrador") return;
+  if($("scaleDate")&&!$("scaleDate").value) $("scaleDate").value=localDate();
+  renderAdminMeta();
+  renderAdminInputs();
+  await ensureCommercialCatalog();
+  await loadCommercials();
+  if(state.adminTab==="escalas") await loadScales();
+  setAdminTab(state.adminTab||"metas");
+}
+
+function renderAdminMeta(){
+  if(!$("adminMetaKpis")) return;
+  const d=state.day||{};
+  const target=Number(d.target_financial||0), physical=Number(d.target_physical||0), ly=Number(d.ly_financial||0);
+  $("adminMetaStore").textContent="Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
+  $("adminMetaKpis").innerHTML=[
+    kpi("Meta financeira",money(target,2),"Meta do dia"),
+    kpi("Meta física",num(physical)+" peças","Meta do dia"),
+    kpi("Venda LY",money(ly,2),"Referência ano anterior"),
+    kpi("Abertura",d.opening_time||"10:00","Base do cálculo do ritmo")
+  ].join("");
+  const groups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
+  $("adminMetaGroups").innerHTML='<table><thead><tr><th>Grupo</th><th>Meta Fin.</th><th>Meta Fís.</th><th>Venda LY</th></tr></thead><tbody>'+
+    GROUP_ORDER.map(code=>{
+      const g=groups.find(x=>x.group_code===code);
+      if(!g) return "";
+      return '<tr><td><b>'+esc(GROUP_LABELS[code]||code)+'</b></td><td>'+money(g.target_financial,2)+'</td><td>'+num(g.target_physical)+'</td><td>'+money(g.ly_financial,2)+'</td></tr>';
+    }).join("")+'</tbody></table>';
+}
+
+function renderAdminInputs(){
+  const target=$("adminHistoryTable");
+  if(!target) return;
+  const rows=Array.isArray(state.history)?state.history:[];
+  let prev=0;
+  target.innerHTML=rows.length?rows.map(r=>{
+    const sale=Number(r.sales_financial||0), interval=sale-prev; prev=sale;
+    return '<tr><td>'+localTime(r.captured_at)+'</td><td>'+money(sale,2)+'</td><td class="'+(interval>=0?"positive":"negative")+'">'+signedMoney(interval,2)+'</td><td>'+num(r.sales_physical)+'</td><td>'+num(r.rows_valid)+'</td><td>'+num(r.rows_excluded)+'</td></tr>';
+  }).join(""):'<tr><td colspan="6" style="text-align:center;padding:28px;color:#6F7C77">Nenhum input ativo hoje.</td></tr>';
+}
+
+function renderAdminStructure(){
+  if(!$("adminStructureKpis")||!$("adminStructureList")) return;
+  const rows=Array.isArray(state.dcoCatalog)?state.dcoCatalog:[];
+  const worlds=new Set(rows.map(r=>r.world_code).filter(Boolean));
+  const groups=new Set(rows.map(r=>r.group_code).filter(Boolean));
+  $("adminStructureKpis").innerHTML=[
+    kpi("Mundos",num(worlds.size),"Estrutura ativa"),
+    kpi("Grupos",num(groups.size),"Grupos de venda"),
+    kpi("DCOs",num(rows.length),"Eletrônicos excluídos"),
+    kpi("Filial",state.storeCode,"Em parametrização")
+  ].join("");
+  $("adminStructureList").innerHTML=GROUP_ORDER.map(code=>{
+    const dcos=rows.filter(r=>r.group_code===code);
+    return '<div class="structure-group"><strong>'+esc(GROUP_LABELS[code]||code)+'</strong><span>'+dcos.map(d=>esc(d.code)+" • "+esc(d.name)).join(" · ")+'</span></div>';
+  }).join("");
+}
+
+async function loadScales(){
+  if(state.role!=="administrador") return;
+  const date=$("scaleDate")?.value||localDate();
+  try{
+    state.scales=await api("scaleProductivity",{
+      matricula:state.matricula,business_date:date,store_code:state.storeCode
+    })||{scales:[],productivity:[]};
+    renderScales();
+  }catch(e){toast(e.message,true)}
+}
+
+function renderScales(){
+  const scales=Array.isArray(state.scales?.scales)?state.scales.scales:[];
+  const productivity=Array.isArray(state.scales?.productivity)?state.scales.productivity:[];
+  const totals=productivity.reduce((a,r)=>{
+    a.plan+=Number(r.planned_hc||0);a.actual+=Number(r.actual_hc||0);
+    a.target+=Number(r.scale_target||0);a.sale+=Number(r.sales_financial||0);a.phys+=Number(r.sales_physical||0);
+    return a;
+  },{plan:0,actual:0,target:0,sale:0,phys:0});
+  if($("scaleKpis")) $("scaleKpis").innerHTML=[
+    kpi("HC planejado",num(totals.plan),"Escalas cadastradas"),
+    kpi("HC real",num(totals.actual),"Presença informada"),
+    kpi("Venda / HC",totals.actual?money(totals.sale/totals.actual,2):"—","Produtividade financeira"),
+    kpi("Peças / HC",totals.actual?(totals.phys/totals.actual).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1}):"—","Produtividade física")
+  ].join("");
+
+  if($("productivityTable")) $("productivityTable").innerHTML=productivity.length?productivity.map(r=>
+    '<tr><td><b>'+esc(GROUP_LABELS[r.group_code]||r.group_code)+'</b></td><td>'+num(r.planned_hc)+'</td><td>'+num(r.actual_hc)+'</td><td>'+money(r.scale_target,2)+'</td><td>'+money(r.sales_financial,2)+'</td><td>'+money(r.financial_per_hc,2)+'</td><td>'+Number(r.physical_per_hc||0).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+'</td><td>'+money(r.target_per_hc,2)+'</td></tr>'
+  ).join(""):'<tr><td colspan="8" style="text-align:center;padding:28px;color:#6F7C77">Cadastre a escala para iniciar a leitura de produtividade.</td></tr>';
+
+  if($("scaleTable")) $("scaleTable").innerHTML=scales.length?scales.map(r=>
+    '<tr><td>'+esc(GROUP_LABELS[r.group_code]||r.group_code||"Geral")+'</td><td>'+esc(r.shift_name)+'</td><td>'+esc((r.start_time||"—")+"–"+(r.end_time||"—"))+'</td><td>'+num(r.planned_hc)+'</td><td>'+num(r.actual_hc)+'</td><td>'+money(r.target_financial,2)+'</td><td><button class="btn secondary small edit-scale-btn" data-scale-id="'+esc(r.id)+'">Editar</button></td></tr>'
+  ).join(""):'<tr><td colspan="7" style="text-align:center;padding:28px;color:#6F7C77">Nenhuma escala cadastrada nesta data.</td></tr>';
+
+  document.querySelectorAll(".edit-scale-btn").forEach(btn=>btn.onclick=()=>editScale(btn.dataset.scaleId));
+}
+
+function resetScaleForm(){
+  state.editingScaleId=null;
+  $("scaleDate").value=$("scaleDate").value||localDate();
+  $("scaleGroup").value="feminino_moda";
+  $("scaleShift").value="";
+  $("scaleStart").value="";
+  $("scaleEnd").value="";
+  $("scalePlannedHc").value="0";
+  $("scaleActualHc").value="0";
+  $("scaleTarget").value="0";
+  $("scaleNotes").value="";
+  $("scaleFormTitle").textContent="Adicionar escala";
+  $("saveScaleBtn").textContent="Salvar escala";
+  $("cancelScaleEdit").classList.add("hidden");
+  $("scaleFeedback").classList.add("hidden");
+}
+
+function editScale(id){
+  const row=(state.scales?.scales||[]).find(r=>r.id===id);
+  if(!row) return;
+  state.editingScaleId=id;
+  $("scaleDate").value=row.business_date||localDate();
+  $("scaleGroup").value=row.group_code||"feminino_moda";
+  $("scaleShift").value=row.shift_name||"";
+  $("scaleStart").value=row.start_time||"";
+  $("scaleEnd").value=row.end_time||"";
+  $("scalePlannedHc").value=row.planned_hc||0;
+  $("scaleActualHc").value=row.actual_hc||0;
+  $("scaleTarget").value=row.target_financial||0;
+  $("scaleNotes").value=row.notes||"";
+  $("scaleFormTitle").textContent="Editar escala";
+  $("saveScaleBtn").textContent="Salvar alterações";
+  $("cancelScaleEdit").classList.remove("hidden");
+}
+
+async function saveScale(){
+  const feedback=$("scaleFeedback");
+  const shift=$("scaleShift").value.trim();
+  if(!shift){feedback.textContent="Informe o turno.";feedback.className="form-error";return}
+  const btn=$("saveScaleBtn");btn.disabled=true;btn.textContent="Salvando...";
+  try{
+    await api("saveScale",{
+      matricula:state.matricula,
+      scale_id:state.editingScaleId,
+      business_date:$("scaleDate").value||localDate(),
+      store_code:state.storeCode,
+      group_code:$("scaleGroup").value,
+      shift_name:shift,
+      start_time:$("scaleStart").value||null,
+      end_time:$("scaleEnd").value||null,
+      planned_hc:Number($("scalePlannedHc").value||0),
+      actual_hc:Number($("scaleActualHc").value||0),
+      target_financial:Number($("scaleTarget").value||0),
+      notes:$("scaleNotes").value.trim()||null
+    });
+    feedback.textContent=state.editingScaleId?"Escala atualizada.":"Escala cadastrada.";
+    feedback.className="form-error form-success";
+    resetScaleForm();
+    await loadScales();
+    toast("Escala e produtividade atualizadas.");
+  }catch(e){feedback.textContent=e.message;feedback.className="form-error";toast(e.message,true)}
+  finally{btn.disabled=false;btn.textContent=state.editingScaleId?"Salvar alterações":"Salvar escala"}
+}
 
 function openResetDay(){
   $("resetStoreLabel").textContent="Loja "+state.storeCode;
