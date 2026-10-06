@@ -709,49 +709,187 @@ function closeRegionalPanel(){
   $("regionalPanelModal").classList.add("hidden");
 }
 
-async function shareRegionalPanel(){
+async function createRegionalPanelImage(){
   const rows=Array.isArray(state.regional)?state.regional:[];
+  const width=1800;
+  const rowH=46;
+  const height=350+(rows.length+1)*rowH+100;
+  const canvas=document.createElement("canvas");
+  canvas.width=width; canvas.height=height;
+  const ctx=canvas.getContext("2d");
+  if(!ctx) throw new Error("Não foi possível gerar o painel.");
+
+  const C={green:"#173F35",green2:"#466964",cream:"#F6F3EC",line:"#DAD9D6",white:"#FFFFFF",orange:"#DE7C00",red:"#B4493A",good:"#2E6B58",ink:"#17352E",muted:"#6F7C77",soft:"#F7F8F6"};
+  ctx.fillStyle=C.white; ctx.fillRect(0,0,width,height);
+  ctx.fillStyle=C.green; ctx.fillRect(0,0,width,142);
+  ctx.fillStyle=C.orange; ctx.fillRect(0,142,width,7);
+
+  ctx.fillStyle=C.white;
+  ctx.font="800 28px Arial";
+  ctx.fillText("RIACHUELO",52,58);
+  ctx.font="700 14px Arial";
+  ctx.fillText("CE+PI • PARCIAL HORA A HORA",52,88);
+  ctx.font="800 40px Arial";
+  ctx.fillText("CONSOLIDADO REGIONAL",520,66);
+  ctx.font="400 16px Arial";
+  ctx.fillStyle="#D6D2C4";
+  ctx.fillText(new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+" • visão por lojas",520,96);
+  ctx.textAlign="right";
+  ctx.font="700 13px Arial";
+  ctx.fillStyle=C.white;
+  ctx.fillText("MODA QUE INSPIRA O BRASIL",1745,72);
+  ctx.textAlign="left";
+
   const total=rows.reduce((a,r)=>{
-    a.meta+=Number(r.target_financial||0);
-    a.sale+=Number(r.sales_financial||0);
-    a.ly+=Number(r.ly_financial||0);
+    a.meta+=Number(r.target_financial||0); a.sale+=Number(r.sales_financial||0);
+    a.ly+=Number(r.ly_financial||0); a.physical+=Number(r.sales_physical||0);
     a.interval+=Number(r.interval_sales_financial||0);
     a.previousInterval+=Number(r.previous_interval_sales_financial||0);
-    a.inputs+=r.has_input?1:0;
+    a.inputs+=r.has_input?1:0; return a;
+  },{meta:0,sale:0,ly:0,physical:0,interval:0,previousInterval:0,inputs:0});
+  const att=total.meta?total.sale/total.meta*100:0;
+  const dev=total.sale-total.meta;
+  const ev=total.ly?((total.sale/total.ly)-1)*100:null;
+  const hourEv=total.previousInterval?((total.interval/total.previousInterval)-1)*100:null;
+
+  const cards=[
+    ["META REGIONAL",money(total.meta,0),"Meta do dia"],
+    ["VENDA REGIONAL",money(total.sale,0),pct(att)+" da meta"],
+    ["DESVIO",signedMoney(dev,0),dev>=0?"Acima da meta":"Saldo para meta"],
+    ["VS LY",ev===null?"—":pct(ev),ev===null?"Sem referência":ev>=0?"Evolução":"Involução"],
+    ["VS HORA ANTERIOR",hourEv===null?"—":pct(hourEv),"Ritmo regional"],
+    ["LOJAS ATUALIZADAS",total.inputs+"/"+rows.length,pct(rows.length?total.inputs/rows.length*100:0)+" com input"]
+  ];
+  const gap=12,cardW=(width-104-gap*5)/6,cardY=174,cardH=116;
+  cards.forEach((c,i)=>{
+    const x=52+i*(cardW+gap);
+    ctx.fillStyle=C.soft; ctx.strokeStyle=C.line; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.roundRect(x,cardY,cardW,cardH,14); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=C.green2; ctx.font="700 12px Arial"; ctx.fillText(c[0],x+16,cardY+26);
+    ctx.fillStyle=(c[0]==="DESVIO"&&dev<0)||(c[0]==="VS LY"&&ev!==null&&ev<0)||(c[0]==="VS HORA ANTERIOR"&&hourEv!==null&&hourEv<0)?C.red:C.ink;
+    ctx.font="800 24px Arial"; ctx.fillText(c[1],x+16,cardY+60);
+    ctx.fillStyle=C.muted; ctx.font="400 12px Arial"; ctx.fillText(c[2],x+16,cardY+84);
+  });
+
+  const cols=[
+    {k:"store",label:"Loja",w:90,align:"left"},
+    {k:"meta",label:"Meta Dia",w:185},
+    {k:"sale",label:"Venda Atual",w:185},
+    {k:"att",label:"% Ating.",w:112},
+    {k:"dev",label:"Desvio",w:175},
+    {k:"physical",label:"Venda Fís.",w:110},
+    {k:"ly",label:"Venda LY",w:170},
+    {k:"ev",label:"Vs LY",w:110},
+    {k:"interval",label:"Último Input",w:170},
+    {k:"hour",label:"Vs Hora Ant.",w:125},
+    {k:"update",label:"Atualização",w:110}
+  ];
+  const tableX=52,tableY=318;
+  let x=tableX;
+  ctx.fillStyle=C.green; ctx.fillRect(tableX,tableY,width-104,rowH);
+  cols.forEach(col=>{
+    ctx.fillStyle=C.white;ctx.font="700 12px Arial";
+    if(col.align==="left"){ctx.textAlign="left";ctx.fillText(col.label,x+10,tableY+29)}
+    else{ctx.textAlign="right";ctx.fillText(col.label,x+col.w-10,tableY+29)}
+    x+=col.w;
+  });
+
+  function compactMoney(v){return money(Number(v||0),0)}
+  rows.forEach((r,idx)=>{
+    const y=tableY+rowH*(idx+1);
+    ctx.fillStyle=idx%2===0?C.white:"#FBFCFB";ctx.fillRect(tableX,y,width-104,rowH);
+    ctx.strokeStyle="#E8EBE9";ctx.beginPath();ctx.moveTo(tableX,y+rowH);ctx.lineTo(width-52,y+rowH);ctx.stroke();
+
+    const meta=Number(r.target_financial||0),sale=Number(r.sales_financial||0),ly=Number(r.ly_financial||0);
+    const attainment=meta?sale/meta*100:0, deviation=sale-meta;
+    const evol=ly&&r.has_input?((sale/ly)-1)*100:null;
+    const interval=Number(r.interval_sales_financial||0),prev=Number(r.previous_interval_sales_financial||0);
+    const hEv=prev?((interval/prev)-1)*100:null;
+    const vals={
+      store:r.store_code,
+      meta:compactMoney(meta),
+      sale:compactMoney(sale),
+      att:r.has_input?pct(attainment):"Sem input",
+      dev:r.has_input?signedMoney(deviation,0):"—",
+      physical:num(r.sales_physical),
+      ly:compactMoney(ly),
+      ev:evol===null?"—":pct(evol),
+      interval:r.has_input?compactMoney(interval):"—",
+      hour:hEv===null?"—":pct(hEv),
+      update:localTime(r.captured_at)
+    };
+    x=tableX;
+    cols.forEach(col=>{
+      let tone=C.ink;
+      if(col.k==="att"&&r.has_input) tone=attainment>=100?C.good:attainment>=90?C.orange:C.red;
+      if(col.k==="dev"&&r.has_input) tone=deviation>=0?C.good:C.red;
+      if(col.k==="ev"&&evol!==null) tone=evol>=0?C.good:C.red;
+      if(col.k==="hour"&&hEv!==null) tone=hEv>=0?C.good:C.red;
+      ctx.fillStyle=tone;ctx.font=(col.k==="store"?"800":"600")+" 12px Arial";
+      if(col.align==="left"){ctx.textAlign="left";ctx.fillText(String(vals[col.k]),x+10,y+29)}
+      else{ctx.textAlign="right";ctx.fillText(String(vals[col.k]),x+col.w-10,y+29)}
+      x+=col.w;
+    });
+  });
+
+  const ty=tableY+rowH*(rows.length+1);
+  ctx.fillStyle=C.green;ctx.fillRect(tableX,ty,width-104,rowH);
+  const totalVals=["CE+PI",compactMoney(total.meta),compactMoney(total.sale),pct(att),signedMoney(dev,0),num(total.physical),compactMoney(total.ly),ev===null?"—":pct(ev),compactMoney(total.interval),hourEv===null?"—":pct(hourEv),"—"];
+  x=tableX;
+  cols.forEach((col,i)=>{
+    ctx.fillStyle=C.white;ctx.font="800 12px Arial";
+    if(col.align==="left"){ctx.textAlign="left";ctx.fillText(totalVals[i],x+10,ty+29)}
+    else{ctx.textAlign="right";ctx.fillText(totalVals[i],x+col.w-10,ty+29)}
+    x+=col.w;
+  });
+
+  ctx.textAlign="left";ctx.fillStyle=C.green2;ctx.font="700 12px Arial";
+  ctx.fillText("MEU ACOMPANHAMENTO • Resultado regional atualizado conforme último input de cada filial",52,height-38);
+  ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",width-52,height-38);
+  ctx.textAlign="left";
+
+  return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Falha ao gerar imagem.")),"image/png",1));
+}
+
+async function shareRegionalPanel(){
+  const rows=Array.isArray(state.regional)?state.regional:[];
+  if(!rows.length){toast("Ainda não há dados regionais para compartilhar.",true);return}
+
+  const total=rows.reduce((a,r)=>{
+    a.meta+=Number(r.target_financial||0);a.sale+=Number(r.sales_financial||0);
+    a.ly+=Number(r.ly_financial||0);a.interval+=Number(r.interval_sales_financial||0);
+    a.previousInterval+=Number(r.previous_interval_sales_financial||0);a.inputs+=r.has_input?1:0;
     return a;
   },{meta:0,sale:0,ly:0,interval:0,previousInterval:0,inputs:0});
   const att=total.meta?total.sale/total.meta*100:0;
   const dev=total.sale-total.meta;
   const ev=total.ly?((total.sale/total.ly)-1)*100:null;
   const hourEv=total.previousInterval?((total.interval/total.previousInterval)-1)*100:null;
+  const textMsg='📊 *CONSOLIDADO REGIONAL | HORA A HORA*\nCE+PI • '+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+
+    '\n\n🎯 Meta: '+money(total.meta,2)+'\n💰 Venda: '+money(total.sale,2)+' • '+pct(att)+
+    '\n↕️ Desvio: '+signedMoney(dev,2)+'\n📈 Vs LY: '+(ev===null?'—':pct(ev))+
+    '\n🕐 Vs hora anterior: '+(hourEv===null?'—':pct(hourEv))+'\n🏬 Lojas atualizadas: '+total.inputs+'/'+rows.length;
 
-  const storeLines=rows.map(r=>{
-    const meta=Number(r.target_financial||0),sale=Number(r.sales_financial||0);
-    const a=meta?sale/meta*100:0;
-    return r.store_code+' ➜ '+(r.has_input?(money(sale,0)+' | '+pct(a)):'sem input');
-  }).join('\n');
-
-  const textMsg='📊 *CONSOLIDADO REGIONAL | HORA A HORA*\n'+
-    'CE+PI • '+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+'\n\n'+
-    '🎯 Meta: '+money(total.meta,2)+'\n'+
-    '💰 Venda: '+money(total.sale,2)+' • '+pct(att)+'\n'+
-    '↕️ Desvio: '+signedMoney(dev,2)+'\n'+
-    '📈 Vs LY: '+(ev===null?'—':pct(ev))+'\n'+
-    '🕐 Vs hora anterior: '+(hourEv===null?'—':pct(hourEv))+'\n'+
-    '🏬 Lojas atualizadas: '+total.inputs+'/'+rows.length+'\n\n'+
-    '*Visão por loja*\n'+storeLines;
-
+  const btn=$("shareRegionalPanel");
+  btn.disabled=true;btn.textContent="Gerando painel...";
   try{
-    if(navigator.share){
-      await navigator.share({title:"Consolidado Regional CE+PI",text:textMsg});
-    }else if(navigator.clipboard){
-      await navigator.clipboard.writeText(textMsg);
-      toast("Resumo regional copiado. O painel está pronto para print.");
+    const blob=await createRegionalPanelImage();
+    const file=new File([blob],"Consolidado_Regional_CEPI_"+localDate()+".png",{type:"image/png"});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({title:"Consolidado Regional CE+PI",text:textMsg,files:[file]});
+      toast("Painel regional compartilhado.");
     }else{
-      toast("Painel regional pronto para print.");
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      if(navigator.clipboard) await navigator.clipboard.writeText(textMsg).catch(()=>{});
+      toast("Imagem do painel gerada. Resumo copiado para acompanhar o envio.");
     }
   }catch(e){
-    if(e?.name!=="AbortError") toast("Não foi possível compartilhar o painel regional.",true);
+    if(e?.name!=="AbortError") toast(e.message||"Não foi possível compartilhar o painel regional.",true);
+  }finally{
+    btn.disabled=false;btn.textContent="Compartilhar painel";
   }
 }
 
