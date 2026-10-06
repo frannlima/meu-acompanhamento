@@ -362,7 +362,7 @@ async function boot(){
       await doLogin(s.matricula,s.storeCode,false);
     }catch(_){localStorage.removeItem("meu_acompanhamento_session")}
   }else{
-    $("matricula").value="2457695"; $("storeCode").value="108";
+    $("matricula").value=""; $("storeCode").value="";
   }
 }
 boot();
