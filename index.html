@@ -8,7 +8,7 @@
   <title>Meu Acompanhamento</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/riachuelo-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=6">
+  <link rel="stylesheet" href="./styles.css?v=7">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -180,15 +180,18 @@
 
             <section id="section-regional" class="section">
         <div class="section-head">
-          <div><span class="eyebrow">CE+PI</span><h1>Consolidado Regional</h1><p>Meta, venda, desvio e evolução por filial no dia.</p></div>
-          <button id="refreshRegional" class="btn secondary">Atualizar</button>
+          <div><span class="eyebrow">CE+PI</span><h1>Consolidado Regional</h1><p>Meta, venda, desvio, evolução e movimento hora a hora por filial.</p></div>
+          <div class="section-actions">
+            <button id="openRegionalPanel" class="btn primary">▣ Compartilhar painel</button>
+            <button id="refreshRegional" class="btn secondary">Atualizar</button>
+          </div>
         </div>
         <div id="regionalVisualSummary" class="visual-summary"></div>
         <div id="regionalKpis" class="kpi-grid compact"></div>
         <section class="card">
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Loja</th><th>Meta Dia</th><th>Venda Atual</th><th>% Ating.</th><th>Desvio</th><th>Venda Física</th><th>Venda LY</th><th>Evol. vs LY</th><th>Atualização</th></tr></thead>
+              <thead><tr><th>Loja</th><th>Meta Dia</th><th>Venda Atual</th><th>% Ating.</th><th>Desvio</th><th>Venda Física</th><th>Venda LY</th><th>Evol. vs LY</th><th>Vs último input</th><th>Atualização</th></tr></thead>
               <tbody id="regionalTable"></tbody>
             </table>
           </div>
@@ -447,6 +450,20 @@
     </div>
   </div>
 
+
+  <div id="regionalPanelModal" class="overlay group-panel-overlay hidden">
+    <div class="group-panel-modal regional-panel-modal">
+      <div class="group-panel-modal-actions">
+        <button id="closeRegionalPanel" class="btn secondary">Fechar</button>
+        <button id="shareRegionalPanel" class="btn primary">Compartilhar painel</button>
+      </div>
+      <div class="group-share-scroll modal-scroll">
+        <div id="regionalPanelModalContent" class="regional-share-panel"></div>
+      </div>
+      <div class="group-print-hint">Consolidado regional em formato horizontal para print e envio nas parciais de hora em hora.</div>
+    </div>
+  </div>
+
   <div id="groupPanelModal" class="overlay group-panel-overlay hidden">
     <div class="group-panel-modal">
       <div class="group-panel-modal-actions">
@@ -482,6 +499,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=6" defer></script>
+  <script src="./app.js?v=7" defer></script>
 </body>
 </html>
