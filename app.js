@@ -476,10 +476,12 @@ async function shareGroupPanelSummary(){
 function renderHistory(){
   const rows=Array.isArray(state.history)?state.history:[];
   let prev=0;
-  $("historyTable").innerHTML=rows.length?rows.map(r=>{
+  const html=rows.length?rows.map(r=>{
     const sale=Number(r.sales_financial||0), interval=sale-prev; prev=sale;
     return '<tr><td>'+localTime(r.captured_at)+'</td><td>'+money(sale,2)+'</td><td class="'+(interval>=0?"positive":"negative")+'">'+(interval>=0?"+ ":"- ")+money(Math.abs(interval),2)+'</td><td>'+num(r.sales_physical)+'</td><td>'+num(r.rows_valid)+'</td><td>'+num(r.rows_excluded)+'</td></tr>';
   }).join(""):'<tr><td colspan="6" style="text-align:center;padding:30px;color:#6F7C77">Nenhum input registrado hoje.</td></tr>';
+  if($("historyTable")) $("historyTable").innerHTML=html;
+  renderAdminInputs();
 }
 
 async function loadRegional(){
@@ -960,18 +962,35 @@ function bind(){
   $("refreshCommercials").onclick=loadCommercials;
   $("openGroupPanel").onclick=openGroupPanel;
   $("openGroupPanelInline").onclick=openGroupPanel;
+  $("openGroupPanelHome").onclick=openGroupPanel;
   $("closeGroupPanel").onclick=closeGroupPanel;
   $("shareGroupPanel").onclick=shareGroupPanelSummary;
   $("groupPanelModal").addEventListener("click",e=>{if(e.target===$("groupPanelModal")) closeGroupPanel()});
   $("commercialWorldFilter").onchange=renderCommercialDcos;
-  $("selectAllCommercialDcos").onclick=()=>document.querySelectorAll("#commercialDcoSelector input[type=checkbox]").forEach(el=>el.checked=true);
+  $("selectAllCommercialDcos").onclick=selectVisibleCommercialDcos;
   $("saveCommercialBtn").onclick=saveCommercial;
+  $("newCommercialBtn").onclick=resetCommercialForm;
+  $("cancelCommercialEdit").onclick=resetCommercialForm;
+  document.querySelectorAll(".admin-tab").forEach(el=>el.onclick=()=>setAdminTab(el.dataset.adminTab));
+  $("newScaleBtn").onclick=resetScaleForm;
+  $("cancelScaleEdit").onclick=resetScaleForm;
+  $("saveScaleBtn").onclick=saveScale;
+  $("scaleDate").onchange=loadScales;
+  $("adminResetDayBtn").onclick=openResetDay;
   $("commercialPhoto").onchange=e=>{
     const file=e.target.files?.[0];
     if(!file){state.commercialPhotoData="";return}
     if(file.size>600000){toast("Use uma foto de até 600 KB.",true);e.target.value="";return}
     const reader=new FileReader();
-    reader.onload=()=>{state.commercialPhotoData=String(reader.result||"");toast("Foto pronta para salvar.")};
+    reader.onload=()=>{
+      state.commercialPhotoData=String(reader.result||"");
+      const box=$("commercialCurrentPhoto");
+      if(box){
+        box.innerHTML='<img src="'+esc(state.commercialPhotoData)+'" alt="Nova foto"><span>Nova foto selecionada. Ela será aplicada ao salvar.</span>';
+        box.classList.remove("hidden");
+      }
+      toast("Foto pronta para salvar.");
+    };
     reader.readAsDataURL(file);
   };
   $("worldChoices").innerHTML=WORLD_ORDER.map(w=>'<button class="world-choice" data-world="'+w+'"><strong>'+esc(WORLD_LABELS[w])+'</strong><span>Abrir resultado do mundo</span></button>').join("");
