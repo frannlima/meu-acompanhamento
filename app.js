@@ -392,7 +392,7 @@ function buildGroupPanelHtml(){
 
   const hourStatus=intervalGrowth===null
     ? '<span class="group-kpi-note neutral">Disponível após o 2º input</span>'
-    : '<span class="group-kpi-note '+(intervalGrowth>=0?"positive":"negative")+'">'+(intervalGrowth>=0?"▲ evolução ":"▼ involução ")+pct(intervalGrowth)+' • '+signedMoney(intervalDelta,2)+'</span>';
+    : '<span class="group-kpi-note '+(intervalGrowth>=0?"positive":"negative")+'">'+(intervalGrowth>=0?"▲ evolução ":"▼ involução ")+pct(intervalGrowth)+' • '+signedMoney(intervalDelta,2)+'/h</span>';
 
   return '<div class="group-share-header">'+
       '<div class="group-share-brand"><img src="./assets/riachuelo-logo.svg" alt="Riachuelo"></div>'+
