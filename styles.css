@@ -111,3 +111,45 @@
 @media(max-width:700px){
   .section-actions .btn.danger{order:3;width:100%}
 }
+
+/* Administração expandida */
+.admin-tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px;margin-bottom:4px}
+.admin-tab{border:1px solid var(--border);background:#F8F6F0;color:var(--primary);border-radius:12px;padding:10px 13px;font-size:10px;font-weight:800;white-space:nowrap;cursor:pointer}
+.admin-tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.admin-panel{display:none}
+.admin-panel.active{display:block}
+.admin-panel>.card,.admin-panel>.kpi-grid{margin-bottom:14px}
+.admin-rules-card{margin-top:14px}
+
+.admin-commercial-list{display:grid;gap:8px;margin-top:12px}
+.admin-commercial-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--border);border-radius:12px;background:#FAF9F5}
+.small-avatar{width:44px;height:44px;flex-basis:44px;font-size:13px}
+.admin-commercial-info{min-width:0}
+.admin-commercial-info strong,.admin-commercial-info span{display:block}
+.admin-commercial-info strong{font-size:11px;color:var(--primary)}
+.admin-commercial-info span{font-size:9px;color:var(--muted-fg);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.commercial-current-photo{display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px;border-radius:11px;background:#F5F2EA;border:1px solid var(--border)}
+.commercial-current-photo img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.commercial-current-photo span{font-size:9px;color:var(--muted-fg)}
+
+.scale-form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
+.scale-form-grid .wide{grid-column:span 2}
+.structure-list{display:grid;gap:8px}
+.structure-group{padding:12px;border:1px solid var(--border);border-radius:11px;background:#FAF9F5}
+.structure-group strong,.structure-group span{display:block}
+.structure-group strong{font-size:10px;color:var(--primary)}
+.structure-group span{font-size:8px;line-height:1.55;color:var(--muted-fg);margin-top:5px}
+
+.home-group-panel{margin-top:14px}
+.home-group-panel .group-share-panel{box-shadow:none}
+
+@media(max-width:900px){
+  .scale-form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .admin-tabs{margin-left:-2px;margin-right:-2px}
+  .admin-commercial-row{grid-template-columns:auto 1fr}
+  .admin-commercial-row .btn{grid-column:1/-1;width:100%}
+  .scale-form-grid{grid-template-columns:1fr}
+  .scale-form-grid .wide{grid-column:auto}
+}
