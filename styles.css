@@ -98,3 +98,16 @@
   .group-share-panel{min-width:1180px}
   .group-panel-modal{width:100%;border-radius:14px}
 }
+
+/* Reset diário */
+.btn.danger{background:#76232F;color:#fff}
+.btn.danger:hover{background:#6B1F2A}
+.danger-dot{background:rgba(118,35,47,.12);color:#76232F}
+.reset-modal{width:min(560px,100%)}
+.reset-rule{margin-top:14px;padding:13px 14px;border-radius:12px;background:#F7F3EA;border:1px solid #E3DDD0}
+.reset-rule b,.reset-rule span{display:block}
+.reset-rule b{font-size:11px;color:#173F35}
+.reset-rule span{margin-top:5px;font-size:10px;line-height:1.5;color:#6F7C77}
+@media(max-width:700px){
+  .section-actions .btn.danger{order:3;width:100%}
+}
