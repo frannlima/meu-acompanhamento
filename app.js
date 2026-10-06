@@ -585,6 +585,9 @@ function renderRegional(){
   const total=rows.reduce((a,r)=>{a.meta+=Number(r.target_financial||0);a.sale+=Number(r.sales_financial||0);a.physical+=Number(r.sales_physical||0);a.ly+=Number(r.ly_financial||0);a.inputs+=r.has_input?1:0;return a},{meta:0,sale:0,physical:0,ly:0,inputs:0});
   const att=total.meta?total.sale/total.meta*100:0, dev=total.sale-total.meta;
   const regionalEvolution=total.ly?((total.sale/total.ly)-1)*100:null;
+  const intervalTotal=rows.reduce((a,r)=>a+Number(r.interval_sales_financial||0),0);
+  const previousIntervalTotal=rows.reduce((a,r)=>a+Number(r.previous_interval_sales_financial||0),0);
+  const regionalHourEvolution=previousIntervalTotal?((intervalTotal/previousIntervalTotal)-1)*100:null;
   const activePct=rows.length?total.inputs/rows.length*100:0;
   const avgAttRows=rows.filter(r=>r.has_input&&Number(r.target_financial||0)>0);
   const avgAtt=avgAttRows.length?avgAttRows.reduce((a,r)=>a+(Number(r.sales_financial||0)/Number(r.target_financial||1)*100),0)/avgAttRows.length:0;
@@ -592,7 +595,7 @@ function renderRegional(){
     visualDonut("Atingimento regional",att,pct(att),"Venda regional x meta",att>=100?"good":att>=90?"warn":"bad")+
     visualDonut("Lojas atualizadas",activePct,pct(activePct),total.inputs+" de "+rows.length+" lojas",activePct>=90?"good":activePct>=70?"warn":"bad")+
     visualDonut("Vs LY",regionalEvolution===null?0:regionalEvolution,regionalEvolution===null?"—":pct(regionalEvolution),"Evolução / involução regional",regionalEvolution===null?"neutral":regionalEvolution>=0?"good":"bad")+
-    visualDonut("Média lojas",avgAtt,pct(avgAtt),"Atingimento médio das atualizadas",avgAtt>=100?"good":avgAtt>=90?"warn":"bad");
+    visualDonut("Vs hora anterior",regionalHourEvolution===null?0:regionalHourEvolution,regionalHourEvolution===null?"—":pct(regionalHourEvolution),"Ritmo regional entre parciais",regionalHourEvolution===null?"neutral":regionalHourEvolution>=0?"good":"bad");
   $("regionalKpis").innerHTML=[
     kpi("Meta regional",money(total.meta,2),rows.length+" lojas"),
     kpi("Venda regional",money(total.sale,2),pct(att)+" da meta",att>=100?"positive":att>=90?"warning":"negative"),
@@ -601,8 +604,155 @@ function renderRegional(){
   ].join("");
   $("regionalTable").innerHTML=rows.map(r=>{
     const meta=Number(r.target_financial||0),sale=Number(r.sales_financial||0),ly=Number(r.ly_financial||0),a=meta?sale/meta*100:0,d=sale-meta,e=ly&&r.has_input?((sale/ly)-1)*100:null;
-    return '<tr><td><b>'+esc(r.store_code)+'</b></td><td>'+money(meta,2)+'</td><td>'+money(sale,2)+'</td><td class="'+(r.has_input?(a>=100?"cell-good":a>=90?"cell-warn":"cell-bad"):"")+'">'+(r.has_input?pct(a):"Sem input")+'</td><td class="'+(r.has_input?(d>=0?"positive":"negative"):"")+'">'+(r.has_input?(d>=0?"+ ":"- ")+money(Math.abs(d),2):"—")+'</td><td>'+num(r.sales_physical)+'</td><td>'+money(ly,2)+'</td><td class="'+(e===null?"":e>=0?"positive":"negative")+'">'+(e===null?"—":pct(e))+'</td><td>'+localTime(r.captured_at)+'</td></tr>';
+    const interval=Number(r.interval_sales_financial||0);
+    const prevInterval=Number(r.previous_interval_sales_financial||0);
+    const hourEvol=prevInterval?((interval/prevInterval)-1)*100:null;
+    return '<tr><td><b>'+esc(r.store_code)+'</b></td><td>'+money(meta,2)+'</td><td>'+money(sale,2)+'</td><td class="'+(r.has_input?(a>=100?"cell-good":a>=90?"cell-warn":"cell-bad"):"")+'">'+(r.has_input?pct(a):"Sem input")+'</td><td class="'+(r.has_input?(d>=0?"positive":"negative"):"")+'">'+(r.has_input?(d>=0?"+ ":"- ")+money(Math.abs(d),2):"—")+'</td><td>'+num(r.sales_physical)+'</td><td>'+money(ly,2)+'</td><td class="'+(e===null?"":e>=0?"positive":"negative")+'">'+(e===null?"—":pct(e))+'</td><td class="'+(hourEvol===null?"":hourEvol>=0?"positive":"negative")+'">'+(hourEvol===null?"—":(hourEvol>=0?"▲ ":"▼ ")+pct(hourEvol))+'</td><td>'+localTime(r.captured_at)+'</td></tr>';
   }).join("");
+  renderRegionalSharePanel();
+}
+
+function buildRegionalPanelHtml(){
+  const rows=Array.isArray(state.regional)?state.regional:[];
+  const total=rows.reduce((a,r)=>{
+    a.meta+=Number(r.target_financial||0);
+    a.sale+=Number(r.sales_financial||0);
+    a.physical+=Number(r.sales_physical||0);
+    a.ly+=Number(r.ly_financial||0);
+    a.interval+=Number(r.interval_sales_financial||0);
+    a.previousInterval+=Number(r.previous_interval_sales_financial||0);
+    a.inputs+=r.has_input?1:0;
+    return a;
+  },{meta:0,sale:0,physical:0,ly:0,interval:0,previousInterval:0,inputs:0});
+
+  const attainment=total.meta?total.sale/total.meta*100:0;
+  const deviation=total.sale-total.meta;
+  const evolution=total.ly?((total.sale/total.ly)-1)*100:null;
+  const hourEvolution=total.previousInterval?((total.interval/total.previousInterval)-1)*100:null;
+  const activePct=rows.length?total.inputs/rows.length*100:0;
+  const updatedTimes=rows.filter(r=>r.captured_at).map(r=>new Date(r.captured_at).getTime());
+  const latestUpdate=updatedTimes.length?localTime(new Date(Math.max(...updatedTimes)).toISOString()):"sem input";
+  const dateLabel=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
+
+  const tableRows=rows.map(r=>{
+    const meta=Number(r.target_financial||0);
+    const sale=Number(r.sales_financial||0);
+    const ly=Number(r.ly_financial||0);
+    const att=meta?sale/meta*100:0;
+    const dev=sale-meta;
+    const ev=ly&&r.has_input?((sale/ly)-1)*100:null;
+    const interval=Number(r.interval_sales_financial||0);
+    const prevInterval=Number(r.previous_interval_sales_financial||0);
+    const hourEv=prevInterval?((interval/prevInterval)-1)*100:null;
+    return '<tr>'+
+      '<td class="regional-store-cell">'+esc(r.store_code)+'</td>'+
+      '<td>'+money(meta,2)+'</td>'+
+      '<td>'+money(sale,2)+'</td>'+
+      '<td class="'+(r.has_input?performanceClass(att,100,90):"")+'">'+(r.has_input?pct(att):"Sem input")+'</td>'+
+      '<td class="'+(r.has_input?(dev>=0?"perf-good":"perf-soft-bad"):"")+'">'+(r.has_input?signedMoney(dev,2):"—")+'</td>'+
+      '<td>'+num(r.sales_physical)+'</td>'+
+      '<td>'+money(ly,2)+'</td>'+
+      '<td class="'+(ev===null?"":ev>=0?"perf-good":"perf-soft-bad")+'">'+(ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev))+'</td>'+
+      '<td>'+money(interval,2)+'</td>'+
+      '<td class="'+(hourEv===null?"":hourEv>=0?"perf-good":"perf-soft-bad")+'">'+(hourEv===null?"—":(hourEv>=0?"▲ ":"▼ ")+pct(hourEv))+'</td>'+
+      '<td>'+localTime(r.captured_at)+'</td>'+
+    '</tr>';
+  }).join("");
+
+  const topStores=[...rows]
+    .filter(r=>r.has_input&&Number(r.target_financial||0)>0)
+    .sort((a,b)=>(Number(b.sales_financial||0)/Number(b.target_financial||1))-(Number(a.sales_financial||0)/Number(a.target_financial||1)))
+    .slice(0,3);
+
+  const attention=[...rows]
+    .filter(r=>r.has_input)
+    .sort((a,b)=>(Number(a.sales_financial||0)-Number(a.target_financial||0))-(Number(b.sales_financial||0)-Number(b.target_financial||0)))
+    .slice(0,3);
+
+  return '<div class="regional-share-header">'+
+      '<div class="regional-share-brand"><img src="./assets/riachuelo-logo.svg" alt="Riachuelo"></div>'+
+      '<div class="regional-share-title"><span>CE+PI • PARCIAL HORA A HORA</span><h3>CONSOLIDADO REGIONAL</h3><p>'+dateLabel+' • Atualização mais recente às '+latestUpdate+'</p></div>'+
+      '<div class="regional-share-slogan">MODA QUE<br>INSPIRA O BRASIL</div>'+
+    '</div>'+
+    '<div class="regional-share-kpis">'+
+      '<div><span>Meta regional</span><strong>'+money(total.meta,2)+'</strong><small>'+rows.length+' lojas</small></div>'+
+      '<div><span>Venda regional</span><strong>'+money(total.sale,2)+'</strong><small>'+pct(attainment)+' da meta</small></div>'+
+      '<div><span>Desvio regional</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+signedMoney(deviation,2)+'</strong><small>Meta x realizado</small></div>'+
+      '<div><span>Vs LY</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong><small>'+(evolution===null?"Sem referência":evolution>=0?"Evolução":"Involução")+'</small></div>'+
+      '<div><span>Vs hora anterior</span><strong class="'+(hourEvolution===null?"":hourEvolution>=0?"positive":"negative")+'">'+(hourEvolution===null?"—":pct(hourEvolution))+'</strong><small>Ritmo entre parciais</small></div>'+
+      '<div><span>Lojas atualizadas</span><strong>'+total.inputs+'/'+rows.length+'</strong><small>'+pct(activePct)+' com input</small></div>'+
+    '</div>'+
+    '<div class="regional-share-table-wrap"><table class="regional-share-table"><thead><tr>'+
+      '<th>Loja</th><th>Meta Dia</th><th>Venda Atual</th><th>% Ating.</th><th>Desvio</th><th>Venda Fís.</th><th>Venda LY</th><th>Vs LY</th><th>Venda último input</th><th>Vs hora anterior</th><th>Atualização</th>'+
+    '</tr></thead><tbody>'+tableRows+
+      '<tr class="group-total-row"><td>CE+PI</td><td>'+money(total.meta,2)+'</td><td>'+money(total.sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+signedMoney(deviation,2)+'</td><td>'+num(total.physical)+'</td><td>'+money(total.ly,2)+'</td><td>'+(evolution===null?"—":pct(evolution))+'</td><td>'+money(total.interval,2)+'</td><td>'+(hourEvolution===null?"—":pct(hourEvolution))+'</td><td>'+latestUpdate+'</td></tr>'+
+    '</tbody></table></div>'+
+    '<div class="regional-share-insights">'+
+      '<div><span>TOP ATINGIMENTO</span><strong>'+(topStores.length?topStores.map(r=>"Loja "+esc(r.store_code)+" "+pct(Number(r.sales_financial||0)/Number(r.target_financial||1)*100)).join(" • "):"Aguardando inputs")+'</strong></div>'+
+      '<div><span>MAIORES DESVIOS</span><strong>'+(attention.length?attention.map(r=>"Loja "+esc(r.store_code)+" "+signedMoney(Number(r.sales_financial||0)-Number(r.target_financial||0),0)).join(" • "):"Aguardando inputs")+'</strong></div>'+
+      '<div><span>ATUALIZAÇÃO</span><strong>'+total.inputs+' de '+rows.length+' lojas com parcial</strong></div>'+
+    '</div>'+
+    '<div class="group-share-footer"><span>RIACHUELO</span><b>Moda que inspira o Brasil</b></div>';
+}
+
+function renderRegionalSharePanel(){
+  if($("regionalPanelModalContent")) $("regionalPanelModalContent").innerHTML=buildRegionalPanelHtml();
+}
+
+function openRegionalPanel(){
+  if(state.role!=="administrador") return;
+  renderRegionalSharePanel();
+  $("regionalPanelModal").classList.remove("hidden");
+}
+
+function closeRegionalPanel(){
+  $("regionalPanelModal").classList.add("hidden");
+}
+
+async function shareRegionalPanel(){
+  const rows=Array.isArray(state.regional)?state.regional:[];
+  const total=rows.reduce((a,r)=>{
+    a.meta+=Number(r.target_financial||0);
+    a.sale+=Number(r.sales_financial||0);
+    a.ly+=Number(r.ly_financial||0);
+    a.interval+=Number(r.interval_sales_financial||0);
+    a.previousInterval+=Number(r.previous_interval_sales_financial||0);
+    a.inputs+=r.has_input?1:0;
+    return a;
+  },{meta:0,sale:0,ly:0,interval:0,previousInterval:0,inputs:0});
+  const att=total.meta?total.sale/total.meta*100:0;
+  const dev=total.sale-total.meta;
+  const ev=total.ly?((total.sale/total.ly)-1)*100:null;
+  const hourEv=total.previousInterval?((total.interval/total.previousInterval)-1)*100:null;
+
+  const storeLines=rows.map(r=>{
+    const meta=Number(r.target_financial||0),sale=Number(r.sales_financial||0);
+    const a=meta?sale/meta*100:0;
+    return r.store_code+' ➜ '+(r.has_input?(money(sale,0)+' | '+pct(a)):'sem input');
+  }).join('\n');
+
+  const textMsg='📊 *CONSOLIDADO REGIONAL | HORA A HORA*\n'+
+    'CE+PI • '+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+'\n\n'+
+    '🎯 Meta: '+money(total.meta,2)+'\n'+
+    '💰 Venda: '+money(total.sale,2)+' • '+pct(att)+'\n'+
+    '↕️ Desvio: '+signedMoney(dev,2)+'\n'+
+    '📈 Vs LY: '+(ev===null?'—':pct(ev))+'\n'+
+    '🕐 Vs hora anterior: '+(hourEv===null?'—':pct(hourEv))+'\n'+
+    '🏬 Lojas atualizadas: '+total.inputs+'/'+rows.length+'\n\n'+
+    '*Visão por loja*\n'+storeLines;
+
+  try{
+    if(navigator.share){
+      await navigator.share({title:"Consolidado Regional CE+PI",text:textMsg});
+    }else if(navigator.clipboard){
+      await navigator.clipboard.writeText(textMsg);
+      toast("Resumo regional copiado. O painel está pronto para print.");
+    }else{
+      toast("Painel regional pronto para print.");
+    }
+  }catch(e){
+    if(e?.name!=="AbortError") toast("Não foi possível compartilhar o painel regional.",true);
+  }
 }
 
 
@@ -1060,6 +1210,10 @@ function bind(){
   $("finishChecklist").onclick=()=>{$("checklistModal").classList.add("hidden");showWorldModal()};
   $("logoutBtn").onclick=logout; $("adminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
   $("refreshRegional").onclick=loadRegional;
+  $("openRegionalPanel").onclick=openRegionalPanel;
+  $("closeRegionalPanel").onclick=closeRegionalPanel;
+  $("shareRegionalPanel").onclick=shareRegionalPanel;
+  $("regionalPanelModal").addEventListener("click",e=>{if(e.target===$("regionalPanelModal")) closeRegionalPanel()});
   $("refreshCommercials").onclick=loadCommercials;
   $("openGroupPanel").onclick=openGroupPanel;
   $("openGroupPanelInline").onclick=openGroupPanel;
