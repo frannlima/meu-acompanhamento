@@ -8,7 +8,7 @@
   <title>Meu Acompanhamento</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/riachuelo-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=5">
+  <link rel="stylesheet" href="./styles.css?v=6">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -90,6 +90,7 @@
         </div>
 
         <div id="metaNotice" class="notice hidden"></div>
+        <div id="homeVisualSummary" class="visual-summary"></div>
         <div id="kpiGrid" class="kpi-grid"></div>
 
         <div id="signalGrid" class="signal-grid hidden"></div>
@@ -136,6 +137,7 @@
             <button class="btn accent open-paste">＋ Novo input</button>
           </div>
         </div>
+        <div id="worldVisualSummary" class="visual-summary"></div>
         <div class="world-bar">
           <div><span class="eyebrow">MUNDO EM FOCO</span><strong id="worldTitle">Feminino</strong></div>
           <div id="worldSwitcher" class="world-switcher"></div>
@@ -170,6 +172,7 @@
           <button id="refreshCommercials" class="btn secondary">Atualizar</button>
         </div>
 
+        <div id="commercialVisualSummary" class="visual-summary"></div>
         <div id="commercialKpis" class="kpi-grid compact"></div>
         <div id="commercialEmpty" class="card empty-box hidden"></div>
         <div id="commercialGrid" class="commercial-grid"></div>
@@ -180,6 +183,7 @@
           <div><span class="eyebrow">CE+PI</span><h1>Consolidado Regional</h1><p>Meta, venda, desvio e evolução por filial no dia.</p></div>
           <button id="refreshRegional" class="btn secondary">Atualizar</button>
         </div>
+        <div id="regionalVisualSummary" class="visual-summary"></div>
         <div id="regionalKpis" class="kpi-grid compact"></div>
         <section class="card">
           <div class="table-wrap">
@@ -196,6 +200,7 @@
           <div><span class="eyebrow">RASTREABILIDADE</span><h1>Histórico de Inputs</h1><p>Cada colagem salva um snapshot para comparação de ritmo.</p></div>
           <button class="btn accent open-paste">＋ Novo input</button>
         </div>
+        <div id="historyVisualSummary" class="visual-summary"></div>
         <section class="card">
           <div class="table-wrap">
             <table>
@@ -211,6 +216,7 @@
           <div><span class="eyebrow">GOVERNANÇA</span><h1>Administração</h1><p>Cadastros, parâmetros, escalas, produtividade e controles do Meu Acompanhamento.</p></div>
         </div>
 
+        <div id="adminVisualSummary" class="visual-summary"></div>
         <div id="adminTabs" class="admin-tabs">
           <button class="admin-tab active" data-admin-tab="metas">🎯 Metas / LY</button>
           <button class="admin-tab" data-admin-tab="escalas">👥 Escalas / Produtividade</button>
@@ -476,6 +482,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=5" defer></script>
+  <script src="./app.js?v=6" defer></script>
 </body>
 </html>
