@@ -211,6 +211,86 @@ function kpi(label,value,foot,tone=""){
   return '<article class="kpi"><span>'+esc(label)+'</span><strong class="'+tone+'">'+esc(value)+'</strong><small>'+esc(foot)+'</small></article>';
 }
 
+
+function clampPct(value){
+  return Math.max(0,Math.min(100,Math.abs(Number(value)||0)));
+}
+
+function visualDonut(label, ringValue, valueText, note, tone="primary"){
+  return '<article class="visual-card">'+
+    '<div class="visual-donut '+tone+'" style="--p:'+clampPct(ringValue)+'"><div><strong>'+esc(valueText)+'</strong><span>'+esc(label)+'</span></div></div>'+
+    '<div class="visual-copy"><b>'+esc(label)+'</b><span>'+esc(note)+'</span></div>'+
+  '</article>';
+}
+
+function renderHomeVisualSummary(metrics){
+  const box=$("homeVisualSummary"); if(!box) return;
+  const {has,attainment,projectionAttainment,evolution,intervalGrowth,pacePct,projection}=metrics;
+  box.innerHTML=
+    visualDonut("Atingimento",has?attainment:0,has?pct(attainment):"—",has?"Meta financeira do dia":"Aguardando input",has?(attainment>=100?"good":attainment>=90?"warn":"bad"):"neutral")+
+    visualDonut("Projeção",projection?projectionAttainment:0,projection?pct(projectionAttainment):"—",projection?"Projeção de fechamento":"Disponível após formar ritmo",projection?(projectionAttainment>=100?"good":projectionAttainment>=90?"warn":"bad"):"neutral")+
+    visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Aguardando venda":(evolution>=0?"Evolução":"Involução"),evolution===null?"neutral":evolution>=0?"good":"bad")+
+    visualDonut("Vs hora anterior",intervalGrowth===null?0:intervalGrowth,intervalGrowth===null?"—":pct(intervalGrowth),intervalGrowth===null?"Disponível após o 2º input":(intervalGrowth>=0?"Ritmo evoluindo":"Ritmo retraindo"),intervalGrowth===null?"neutral":intervalGrowth>=0?"good":"bad")+
+    visualDonut("Ritmo necessário",pacePct||0,has?pct(pacePct||0):"—",has?"R$/h atual x necessário":"Aguardando acompanhamento",has?(pacePct>=100?"good":pacePct>=85?"warn":"bad"):"neutral");
+}
+
+function renderWorldVisual(metrics){
+  const box=$("worldVisualSummary"); if(!box) return;
+  const {attainment,physicalAttainment,evolution,intervalPct,hasRows}=metrics;
+  box.innerHTML=
+    visualDonut("% Meta",attainment,hasRows?pct(attainment):"—","Atingimento do mundo",hasRows?(attainment>=100?"good":attainment>=90?"warn":"bad"):"neutral")+
+    visualDonut("Meta física",physicalAttainment,hasRows?pct(physicalAttainment):"—","Peças x meta física",hasRows?(physicalAttainment>=100?"good":physicalAttainment>=90?"warn":"bad"):"neutral")+
+    visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Sem referência":"Resultado do mundo vs LY",evolution===null?"neutral":evolution>=0?"good":"bad")+
+    visualDonut("Último input",intervalPct,hasRows?pct(intervalPct):"—","Quanto do alvo veio no último input",hasRows?(intervalPct>=10?"good":intervalPct>=5?"warn":"bad"):"neutral");
+}
+
+function renderCommercialVisual(rows,total){
+  const box=$("commercialVisualSummary"); if(!box) return;
+  const ly=rows.reduce((a,r)=>a+Number(r.ly_financial||0),0);
+  const evolution=ly?((total.sale/ly)-1)*100:null;
+  const intervalPct=total.target?total.interval/total.target*100:0;
+  const dcos=[...new Set(rows.flatMap(r=>(r.dcos||[]).map(d=>Number(d.dco_code))))];
+  const coverage=detailRows().length?dcos.length/detailRows().length*100:0;
+  const attainment=total.target?total.sale/total.target*100:0;
+  box.innerHTML=
+    visualDonut("Atingimento",attainment,pct(attainment),"Meta dos comerciais atribuídos",attainment>=100?"good":attainment>=90?"warn":"bad")+
+    visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Sem referência":"Evolução / involução comercial",evolution===null?"neutral":evolution>=0?"good":"bad")+
+    visualDonut("Último input",intervalPct,pct(intervalPct),"Incremento do input sobre a meta",intervalPct>=10?"good":intervalPct>=5?"warn":"bad")+
+    visualDonut("Cobertura DCO",coverage,pct(coverage),dcos.length+" DCO(s) com responsável",coverage>=90?"good":coverage>=70?"warn":"bad");
+}
+
+function renderHistoryVisual(){
+  const box=$("historyVisualSummary"); if(!box) return;
+  const d=state.day||{};
+  const has=!!d.has_input;
+  const target=Number(d.target_financial||0),sale=Number(d.sales_financial||0),ly=Number(d.ly_financial||0);
+  const attainment=target?sale/target*100:0;
+  const evolution=has&&ly?((sale/ly)-1)*100:null;
+  const intervalGrowth=d.interval_growth_pct===null||d.interval_growth_pct===undefined?null:Number(d.interval_growth_pct);
+  const inputCount=state.history.length;
+  const cadence=Math.min(100,inputCount*12.5);
+  box.innerHTML=
+    visualDonut("Inputs hoje",cadence,String(inputCount),inputCount?"Snapshots registrados":"Nenhum snapshot","primary")+
+    visualDonut("Atingimento",attainment,has?pct(attainment):"—","Posição atual do dia",has?(attainment>=100?"good":attainment>=90?"warn":"bad"):"neutral")+
+    visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":pct(evolution),"Comparação acumulada",evolution===null?"neutral":evolution>=0?"good":"bad")+
+    visualDonut("Vs hora anterior",intervalGrowth===null?0:intervalGrowth,intervalGrowth===null?"—":pct(intervalGrowth),"Evolução / retração do ritmo",intervalGrowth===null?"neutral":intervalGrowth>=0?"good":"bad");
+}
+
+function renderAdminVisual(){
+  const box=$("adminVisualSummary"); if(!box||state.role!=="administrador") return;
+  const d=state.day||{};
+  const mapped=Array.isArray(state.dcoCatalog)?state.dcoCatalog.length:0;
+  const scales=Array.isArray(state.scales?.scales)?state.scales.scales:[];
+  const hc=scales.reduce((a,r)=>a+Number(r.actual_hc||0),0);
+  const planned=scales.reduce((a,r)=>a+Number(r.planned_hc||0),0);
+  const hcPct=planned?hc/planned*100:0;
+  box.innerHTML=
+    visualDonut("Meta do dia",d.has_target?100:0,d.has_target?"OK":"—",d.has_target?"Meta carregada":"Meta pendente",d.has_target?"good":"bad")+
+    visualDonut("DCOs mapeados",mapped?100:0,mapped?String(mapped):"—","Estrutura ativa do app",mapped?"good":"neutral")+
+    visualDonut("Input da loja",d.has_input?100:0,d.has_input?"ATIVO":"0",d.has_input?"Há snapshot válido hoje":"Aguardando venda",d.has_input?"good":"warn")+
+    visualDonut("HC real x plano",hcPct,hcPct?pct(hcPct):"—",planned?hc+" de "+planned+" HC":"Escala ainda não cadastrada",hcPct>=95?"good":hcPct>=80?"warn":"neutral");
+}
+
 function renderDashboard(){
   const d=state.day||{};
   const target=Number(d.target_financial||0), targetPhysical=Number(d.target_physical||0);
@@ -226,6 +306,9 @@ function renderDashboard(){
   const needed=target&&remaining>0?Math.max(0,target-sale)/remaining:0;
   const projection=has&&currentPerHour>0?sale+currentPerHour*remaining:0;
   const projDev=projection-target;
+  const projectionAttainment=target&&projection?projection/target*100:0;
+  const pacePct=needed&&currentPerHour?currentPerHour/needed*100:0;
+  renderHomeVisualSummary({has,attainment,projectionAttainment,evolution,intervalGrowth,pacePct,projection});
   $("updateBadge").textContent=d.captured_at?"Atualizado "+localTime(d.captured_at):"Hoje";
   if($("resetDayBtn")){
     const canReset=["administrador","gerente","supervisor"].includes(state.role);
@@ -291,6 +374,11 @@ function renderGroups(){
   const rows=all.filter(r=>r.world_code===state.world || (state.world==="beleza_relogios" && ["beleza","relogios"].includes(r.group_code)));
   const total=rows.reduce((a,r)=>{a.sale+=Number(r.sales_financial||0);a.target+=Number(r.target_financial||0);a.physical+=Number(r.sales_physical||0);a.ly+=Number(r.ly_financial||0);a.delta+=Number(r.interval_sales_financial||0);return a},{sale:0,target:0,physical:0,ly:0,delta:0});
   const att=total.target?total.sale/total.target*100:0, dev=total.sale-total.target;
+  const targetPhysical=rows.reduce((a,r)=>a+Number(r.target_physical||0),0);
+  const physicalAttainment=targetPhysical?total.physical/targetPhysical*100:0;
+  const evolution=total.ly?((total.sale/total.ly)-1)*100:null;
+  const intervalPct=total.target?total.delta/total.target*100:0;
+  renderWorldVisual({attainment:att,physicalAttainment,evolution,intervalPct,hasRows:rows.length>0});
   $("worldKpis").innerHTML=[
     kpi("Meta do mundo",rows.length?money(total.target,2):"—","Soma dos DCOs"),
     kpi("Venda atual",rows.length?money(total.sale,2):"—",rows.length?pct(att)+" da meta":"Aguardando input",rows.length?(att>=100?"positive":att>=90?"warning":"negative"):""),
@@ -474,6 +562,7 @@ async function shareGroupPanelSummary(){
 }
 
 function renderHistory(){
+  renderHistoryVisual();
   const rows=Array.isArray(state.history)?state.history:[];
   let prev=0;
   const html=rows.length?rows.map(r=>{
@@ -495,6 +584,15 @@ function renderRegional(){
   const rows=Array.isArray(state.regional)?state.regional:[];
   const total=rows.reduce((a,r)=>{a.meta+=Number(r.target_financial||0);a.sale+=Number(r.sales_financial||0);a.physical+=Number(r.sales_physical||0);a.ly+=Number(r.ly_financial||0);a.inputs+=r.has_input?1:0;return a},{meta:0,sale:0,physical:0,ly:0,inputs:0});
   const att=total.meta?total.sale/total.meta*100:0, dev=total.sale-total.meta;
+  const regionalEvolution=total.ly?((total.sale/total.ly)-1)*100:null;
+  const activePct=rows.length?total.inputs/rows.length*100:0;
+  const avgAttRows=rows.filter(r=>r.has_input&&Number(r.target_financial||0)>0);
+  const avgAtt=avgAttRows.length?avgAttRows.reduce((a,r)=>a+(Number(r.sales_financial||0)/Number(r.target_financial||1)*100),0)/avgAttRows.length:0;
+  if($("regionalVisualSummary")) $("regionalVisualSummary").innerHTML=
+    visualDonut("Atingimento regional",att,pct(att),"Venda regional x meta",att>=100?"good":att>=90?"warn":"bad")+
+    visualDonut("Lojas atualizadas",activePct,pct(activePct),total.inputs+" de "+rows.length+" lojas",activePct>=90?"good":activePct>=70?"warn":"bad")+
+    visualDonut("Vs LY",regionalEvolution===null?0:regionalEvolution,regionalEvolution===null?"—":pct(regionalEvolution),"Evolução / involução regional",regionalEvolution===null?"neutral":regionalEvolution>=0?"good":"bad")+
+    visualDonut("Média lojas",avgAtt,pct(avgAtt),"Atingimento médio das atualizadas",avgAtt>=100?"good":avgAtt>=90?"warn":"bad");
   $("regionalKpis").innerHTML=[
     kpi("Meta regional",money(total.meta,2),rows.length+" lojas"),
     kpi("Venda regional",money(total.sale,2),pct(att)+" da meta",att>=100?"positive":att>=90?"warning":"negative"),
@@ -541,6 +639,7 @@ function renderCommercials(){
   },{target:0,sale:0,interval:0});
   const attainment=total.target?total.sale/total.target*100:0;
   const deviation=total.sale-total.target;
+  renderCommercialVisual(rows,total);
 
   if($("commercialKpis")) $("commercialKpis").innerHTML=[
     kpi("Comerciais ativos",num(rows.length),"Com DCOs atribuídos na Loja "+state.storeCode),
@@ -745,6 +844,7 @@ async function loadAdmin(){
   renderAdminMeta();
   renderAdminInputs();
   await ensureCommercialCatalog();
+  renderAdminVisual();
   await loadCommercials();
   if(state.adminTab==="escalas") await loadScales();
   setAdminTab(state.adminTab||"metas");
@@ -806,6 +906,7 @@ async function loadScales(){
       matricula:state.matricula,business_date:date,store_code:state.storeCode
     })||{scales:[],productivity:[]};
     renderScales();
+    renderAdminVisual();
   }catch(e){toast(e.message,true)}
 }
 
