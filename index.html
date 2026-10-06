@@ -8,7 +8,7 @@
   <title>Meu Acompanhamento</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/riachuelo-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=1">
+  <link rel="stylesheet" href="./styles.css?v=2">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -53,6 +53,7 @@
       <nav id="nav" class="nav">
         <button data-section="inicio" class="nav-item active"><span>⌂</span>Visão Geral</button>
         <button data-section="grupos" class="nav-item"><span>◫</span>Mundo / DCOs</button>
+        <button data-section="comerciais" class="nav-item"><span>◎</span>Comerciais</button>
         <button data-section="regional" class="nav-item admin-only hidden"><span>▦</span>Consolidado Regional</button>
         <button data-section="historico" class="nav-item"><span>◷</span>Histórico de Inputs</button>
         <button data-section="admin" class="nav-item admin-only hidden"><span>⚙</span>Administração</button>
@@ -125,6 +126,65 @@
         <div id="groupContent" class="group-stack"></div>
       </section>
 
+
+      <section id="section-comerciais" class="section">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">PERFORMANCE POR RESPONSÁVEL</span>
+            <h1>Comerciais</h1>
+            <p>Meta automática pela soma dos DCOs, venda, desvio, evolução vs LY e movimento do último input.</p>
+          </div>
+          <button id="refreshCommercials" class="btn secondary">Atualizar</button>
+        </div>
+
+        <div id="commercialKpis" class="kpi-grid compact"></div>
+        <div id="commercialEmpty" class="card empty-box hidden"></div>
+        <div id="commercialGrid" class="commercial-grid"></div>
+
+        <section id="commercialAdminPanel" class="card admin-only hidden">
+          <div class="card-head">
+            <div>
+              <span class="eyebrow">ADMINISTRAÇÃO • COMERCIAIS</span>
+              <h2>Cadastrar / atualizar responsável</h2>
+            </div>
+            <span class="badge soft" id="commercialAdminStore">Loja —</span>
+          </div>
+          <p class="modal-hint">O resultado do comercial é calculado automaticamente pela soma dos DCOs atribuídos. Um DCO só pode ter um responsável ativo por loja.</p>
+
+          <div class="commercial-form-grid">
+            <label class="field">
+              <span>Nome do comercial</span>
+              <input id="commercialName" type="text" placeholder="Ex.: Gabriela" autocomplete="off">
+            </label>
+            <label class="field">
+              <span>Foto</span>
+              <input id="commercialPhoto" type="file" accept="image/*">
+            </label>
+            <label class="field">
+              <span>Filtrar mundo</span>
+              <select id="commercialWorldFilter">
+                <option value="">Todos os mundos</option>
+                <option value="feminino">Feminino</option>
+                <option value="masculino">Masculino</option>
+                <option value="infantil">Infantil</option>
+                <option value="casa">Casa</option>
+                <option value="beleza_relogios">Beleza/Relógios</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="dco-selector-head">
+            <div><strong>DCOs sob responsabilidade</strong><small>Selecione um ou vários DCOs.</small></div>
+            <button id="selectAllCommercialDcos" class="btn secondary small" type="button">Selecionar visíveis</button>
+          </div>
+          <div id="commercialDcoSelector" class="dco-selector"></div>
+          <div id="commercialSaveFeedback" class="form-error hidden"></div>
+          <div class="modal-actions">
+            <button id="saveCommercialBtn" class="btn primary" type="button">Salvar comercial</button>
+          </div>
+        </section>
+      </section>
+
       <section id="section-regional" class="section">
         <div class="section-head">
           <div><span class="eyebrow">CE+PI</span><h1>Consolidado Regional</h1><p>Meta, venda, desvio e evolução por filial no dia.</p></div>
@@ -163,6 +223,7 @@
         <div class="admin-grid">
           <article class="admin-card"><span>🎯</span><strong>Metas / LY</strong><small>Meta diária da filial carregada automaticamente.</small></article>
           <article class="admin-card"><span>👥</span><strong>Acessos</strong><small>Login por matrícula + loja de origem.</small></article>
+          <article class="admin-card admin-link" data-section="comerciais"><span>◎</span><strong>Comerciais</strong><small>Cadastro de responsáveis e DCOs da filial.</small></article>
           <article class="admin-card"><span>▦</span><strong>Estrutura</strong><small>Mundos, grupos e DCOs centralizados no backend.</small></article>
           <article class="admin-card"><span>◷</span><strong>Controle de Inputs</strong><small>Snapshots preservados ao longo do dia.</small></article>
         </div>
@@ -179,6 +240,7 @@
     <nav class="mobile-dock">
       <button data-section="inicio" class="dock-item active"><span>⌂</span>Início</button>
       <button data-section="grupos" class="dock-item"><span>◫</span>Mundo</button>
+      <button data-section="comerciais" class="dock-item"><span>◎</span>Comercial</button>
       <button data-section="historico" class="dock-item"><span>◷</span>Inputs</button>
       <button data-section="regional" class="dock-item admin-only hidden"><span>▦</span>Regional</button>
       <button data-section="admin" class="dock-item admin-only hidden"><span>⚙</span>ADM</button>
@@ -231,6 +293,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=1" defer></script>
+  <script src="./app.js?v=2" defer></script>
 </body>
 </html>
