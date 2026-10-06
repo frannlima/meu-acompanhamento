@@ -1,0 +1,11 @@
+{
+  "name":"Meu Acompanhamento",
+  "short_name":"Acompanhamento",
+  "description":"Acompanhamento comercial CE+PI",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#F4F1E9",
+  "theme_color":"#173F35",
+  "icons":[]
+}
