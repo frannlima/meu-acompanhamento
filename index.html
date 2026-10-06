@@ -8,7 +8,7 @@
   <title>Meu Acompanhamento</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/riachuelo-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=2">
+  <link rel="stylesheet" href="./styles.css?v=3">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -116,13 +116,31 @@
       <section id="section-grupos" class="section">
         <div class="section-head">
           <div><span class="eyebrow">LEITURA OPERACIONAL</span><h1>Mundo / Grupos / DCOs</h1><p>Da visão macro até o DCO que está impulsionando ou retraindo a entrega.</p></div>
-          <button class="btn accent open-paste">＋ Novo input</button>
+          <div class="section-actions">
+            <button id="openGroupPanel" class="btn secondary">▣ Painel por grupos</button>
+            <button class="btn accent open-paste">＋ Novo input</button>
+          </div>
         </div>
         <div class="world-bar">
           <div><span class="eyebrow">MUNDO EM FOCO</span><strong id="worldTitle">Feminino</strong></div>
           <div id="worldSwitcher" class="world-switcher"></div>
         </div>
         <div id="worldKpis" class="kpi-grid compact"></div>
+
+        <section class="card group-panel-shell">
+          <div class="card-head group-panel-app-head">
+            <div>
+              <span class="eyebrow">PARCIAL HORA A HORA</span>
+              <h2>Desempenho por grupo de venda</h2>
+              <p>Visão geral da loja pronta para acompanhamento e print.</p>
+            </div>
+            <button id="openGroupPanelInline" class="btn primary">Abrir para print</button>
+          </div>
+          <div class="group-share-scroll">
+            <div id="groupSharePanel" class="group-share-panel"></div>
+          </div>
+        </section>
+
         <div id="groupContent" class="group-stack"></div>
       </section>
 
@@ -271,6 +289,20 @@
     </div>
   </div>
 
+
+  <div id="groupPanelModal" class="overlay group-panel-overlay hidden">
+    <div class="group-panel-modal">
+      <div class="group-panel-modal-actions">
+        <button id="closeGroupPanel" class="btn secondary">Fechar</button>
+        <button id="shareGroupPanel" class="btn primary">Compartilhar resumo</button>
+      </div>
+      <div class="group-share-scroll modal-scroll">
+        <div id="groupPanelModalContent" class="group-share-panel"></div>
+      </div>
+      <div class="group-print-hint">Painel preparado em formato horizontal para print e envio no grupo.</div>
+    </div>
+  </div>
+
   <div id="pasteModal" class="overlay hidden">
     <div class="modal paste-modal">
       <div class="card-head">
@@ -293,6 +325,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=2" defer></script>
+  <script src="./app.js?v=3" defer></script>
 </body>
 </html>
