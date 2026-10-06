@@ -145,6 +145,7 @@ async function doLogin(matricula, storeCode, save=true){
   $("identityRole").textContent=roleLabel(state.role)+" • Loja "+state.storeCode;
   document.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
   $("adminStoreBar").classList.toggle("hidden",state.role!=="administrador");
+  document.querySelectorAll(".reset-capable").forEach(el=>el.classList.toggle("hidden",!["administrador","gerente","supervisor"].includes(state.role)));
   buildAdminStoreSelect();
   await loadAll();
   if(state.role==="supervisor") $("checklistModal").classList.remove("hidden");
@@ -214,15 +215,27 @@ function renderDashboard(){
   const has=!!d.has_input, attainment=target? sale/target*100:0, deviation=sale-target;
   const evolution=has&&ly?((sale/ly)-1)*100:null;
   const interval=Number(d.interval_sales_financial||0), delta=Number(d.interval_delta_financial||0);
+  const intervalGrowth=d.interval_growth_pct===null||d.interval_growth_pct===undefined?null:Number(d.interval_growth_pct);
   const intervalMinutes=Number(d.interval_minutes||0), remaining=calcClock();
+  const openingTime=d.opening_time||"10:00";
+  const firstInput=has && state.history.length===1;
   const currentPerHour=has&&intervalMinutes>0?interval/(intervalMinutes/60):0;
   const needed=target&&remaining>0?Math.max(0,target-sale)/remaining:0;
   const projection=has&&currentPerHour>0?sale+currentPerHour*remaining:0;
   const projDev=projection-target;
   $("updateBadge").textContent=d.captured_at?"Atualizado "+localTime(d.captured_at):"Hoje";
+  if($("resetDayBtn")){
+    const canReset=["administrador","gerente","supervisor"].includes(state.role);
+    $("resetDayBtn").classList.toggle("hidden",!(canReset&&has));
+  }
   const notice=$("metaNotice");
-  if(d.has_target&&!has){notice.innerHTML="<b>Meta do dia carregada.</b> Faça o primeiro input da venda para iniciar o acompanhamento.";notice.className="notice";}
-  else notice.classList.add("hidden");
+  if(d.has_target&&!has){
+    notice.innerHTML="<b>Meta do dia carregada e venda zerada.</b> Faça o primeiro input quando iniciar o acompanhamento. Se ele acontecer mais tarde, o ritmo considera o tempo desde a abertura às "+esc(openingTime)+".";
+    notice.className="notice";
+  } else if(firstInput){
+    notice.innerHTML="<b>Primeiro input do dia.</b> O ritmo atual foi calculado considerando todo o período desde a abertura às "+esc(openingTime)+" até "+esc(localTime(d.captured_at))+".";
+    notice.className="notice";
+  } else notice.classList.add("hidden");
   $("kpiGrid").innerHTML=[
     kpi("Meta do dia",d.has_target?money(target,2):"Sem meta","Meta física "+num(targetPhysical)+" peças"),
     kpi("Venda atual",has?money(sale,2):"Aguardando input",has?pct(attainment)+" da meta":"Cole a primeira parcial",has?(attainment>=100?"positive":attainment>=90?"warning":"negative"):""),
@@ -230,7 +243,7 @@ function renderDashboard(){
     kpi("Desvio total",has?(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2):"—",has?(deviation>=0?"Acima da meta":"Saldo para a meta"):"Será calculado no 1º input",has?(deviation>=0?"positive":"negative"):""),
     kpi("Projeção do dia",projection?money(projection,2):"—",projection?(projDev>=0?"+ ":"- ")+money(Math.abs(projDev),2)+" projetado":"Aguardando ritmo",projection?(projDev>=0?"positive":"negative"):""),
     kpi(evolution!==null&&evolution<0?"Involução vs LY":"Evolução vs LY",evolution!==null?pct(evolution):"—",evolution!==null?"Venda LY "+money(ly,2):"Disponível após o input",evolution!==null?(evolution>=0?"positive":"negative"):""),
-    kpi("Último intervalo",has?money(interval,2):"—",has?(delta>=0?"+ ":"- ")+money(Math.abs(delta),2)+" vs anterior":"Aguardando histórico",has?(delta>=0?"positive":"negative"):""),
+    kpi("Último intervalo",has?money(interval,2):"—",firstInput?"Desde a abertura às "+openingTime:(intervalGrowth===null?"Aguardando comparação":pct(intervalGrowth)+" vs ritmo anterior"),intervalGrowth===null?"":intervalGrowth>=0?"positive":"negative"),
     kpi("R$/h necessário",needed?money(needed,2):"—","Para alcançar a meta até 22h","warning"),
     kpi("R$/h atual",currentPerHour?money(currentPerHour,2):"—",currentPerHour&&needed?pct((currentPerHour/needed-1)*100)+" vs necessário":"Aguardando 2º input",currentPerHour?(currentPerHour>=needed?"positive":"negative"):""),
     kpi("Tempo restante",remaining?remaining.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+" h":"Encerrado","Fechamento às 22h")
@@ -239,7 +252,7 @@ function renderDashboard(){
   const sg=$("signalGrid");
   if(has){
     sg.classList.remove("hidden");
-    sg.innerHTML='<div class="signal '+(delta>=0?"good":"bad")+'"><b>'+(delta>=0?"Ganho":"Perda")+' de ritmo:</b> '+(delta>=0?"+ ":"- ")+money(Math.abs(delta),2)+'</div>'+
+    sg.innerHTML='<div class="signal '+(intervalGrowth===null?"warn":intervalGrowth>=0?"good":"bad")+'"><b>'+(firstInput?"Ritmo desde a abertura":intervalGrowth>=0?"Evolução do ritmo":"Retração do ritmo")+':</b> '+(firstInput?money(currentPerHour,2)+" por hora":pct(intervalGrowth)+" • "+(delta>=0?"+ ":"- ")+money(Math.abs(delta),2)+"/h")+'</div>'+
       '<div class="signal '+(deviation>=0?"good":"warn")+'"><b>Desvio total:</b> '+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</div>'+
       '<div class="signal '+(projection?(projDev>=0?"good":"warn"):"warn")+'"><b>Projeção:</b> '+(projection?(projDev>=0?"+ ":"- ")+money(Math.abs(projDev),2):"aguardando histórico")+'</div>';
   }else sg.classList.add("hidden");
@@ -253,13 +266,13 @@ function renderDashboard(){
     ["R$/h necessário",needed?money(needed,2):"—",""],
     ["R$/h atual",currentPerHour?money(currentPerHour,2):"—",currentPerHour>=needed?"positive":"negative"],
     ["Projeção",projection?money(projection,2):"—",projection?(projDev>=0?"positive":"negative"):""],
-    ["Vs intervalo anterior",has?(delta>=0?"+ ":"- ")+money(Math.abs(delta),2):"—",delta>=0?"positive":"negative"]
+    ["Vs ritmo anterior",firstInput?"1º input":intervalGrowth===null?"—":pct(intervalGrowth),intervalGrowth===null?"":intervalGrowth>=0?"positive":"negative"]
   ].map(x=>'<div><span>'+x[0]+'</span><strong class="'+x[2]+'">'+x[1]+'</strong></div>').join("");
 
   $("intervalBox").className=has?"interval-live":"empty-box";
-  $("intervalBox").innerHTML=has?'<strong>'+money(interval,2)+'</strong><span>venda do último intervalo</span><small>Atualização '+localTime(d.captured_at)+'</small>':"Faça o primeiro input para iniciar o acompanhamento do ritmo.";
+  $("intervalBox").innerHTML=has?'<strong>'+money(interval,2)+'</strong><span>'+(firstInput?'venda acumulada desde a abertura':'venda do último intervalo')+'</span><small>'+(firstInput?'Período considerado: '+openingTime+' até '+localTime(d.captured_at):'Atualização '+localTime(d.captured_at))+'</small>':"Faça o primeiro input para iniciar o acompanhamento do ritmo.";
   $("movementBox").className=has?"movement-live":"empty-box";
-  $("movementBox").innerHTML=has?'<div><span>Último intervalo</span><strong>'+money(interval,2)+'</strong></div><div><span>Vs anterior</span><strong class="'+(delta>=0?"positive":"negative")+'">'+(delta>=0?"+ ":"- ")+money(Math.abs(delta),2)+'</strong></div><div><span>Atualização</span><strong>'+localTime(d.captured_at)+'</strong></div>':"Após o segundo input, o app mostra a variação do intervalo.";
+  $("movementBox").innerHTML=has?'<div><span>'+(firstInput?'Desde abertura':'Último intervalo')+'</span><strong>'+money(interval,2)+'</strong></div><div><span>Vs ritmo anterior</span><strong class="'+(intervalGrowth===null?"":intervalGrowth>=0?"positive":"negative")+'">'+(intervalGrowth===null?"—":pct(intervalGrowth))+'</strong></div><div><span>Atualização</span><strong>'+localTime(d.captured_at)+'</strong></div>':"Após o segundo input, o app mostra a evolução ou retração do ritmo.";
 }
 
 function detailRows(){return Array.isArray(state.detail?.rows)?state.detail.rows:[]}
@@ -626,6 +639,43 @@ async function saveCommercial(){
   }
 }
 
+
+function openResetDay(){
+  $("resetStoreLabel").textContent="Loja "+state.storeCode;
+  $("resetFeedback").classList.add("hidden");
+  $("resetDayModal").classList.remove("hidden");
+}
+
+function closeResetDay(){
+  $("resetDayModal").classList.add("hidden");
+}
+
+async function confirmResetDay(){
+  const btn=$("confirmResetDay");
+  btn.disabled=true;
+  btn.textContent="Zerando...";
+  try{
+    const result=await api("resetDay",{
+      matricula:state.matricula,
+      store_code:state.storeCode,
+      business_date:localDate(),
+      reason:"Reinício manual do acompanhamento pelo usuário"
+    });
+    $("resetFeedback").textContent=(result?.voided_batches||0)+" input(s) retirado(s) do cálculo. O próximo input recomeça o acompanhamento desde a abertura.";
+    $("resetFeedback").className="form-error form-success";
+    await loadAll();
+    setTimeout(closeResetDay,800);
+    toast("Acompanhamento de hoje zerado.");
+  }catch(e){
+    $("resetFeedback").textContent=e.message;
+    $("resetFeedback").className="form-error";
+    toast(e.message,true);
+  }finally{
+    btn.disabled=false;
+    btn.textContent="Sim, zerar acompanhamento";
+  }
+}
+
 function logout(){
   localStorage.removeItem("meu_acompanhamento_session");
   state.logged=false; $("appShell").classList.add("hidden"); $("loginScreen").classList.remove("hidden");
@@ -644,6 +694,8 @@ function bind(){
   document.querySelectorAll("[data-section]").forEach(el=>el.addEventListener("click",()=>setSection(el.dataset.section)));
   document.querySelectorAll(".open-paste").forEach(el=>el.onclick=showPaste);
   $("pasteBtn").onclick=showPaste; $("closePaste").onclick=hidePaste; $("cancelPaste").onclick=hidePaste;
+  $("resetDayBtn").onclick=openResetDay; $("cancelResetDay").onclick=closeResetDay; $("confirmResetDay").onclick=confirmResetDay;
+  $("resetDayModal").addEventListener("click",e=>{if(e.target===$("resetDayModal")) closeResetDay()});
   $("pasteArea").addEventListener("input",updatePastePreview); $("confirmPaste").onclick=confirmPaste;
   $("finishChecklist").onclick=()=>{$("checklistModal").classList.add("hidden");showWorldModal()};
   $("logoutBtn").onclick=logout; $("adminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
