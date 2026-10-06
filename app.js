@@ -11,7 +11,9 @@ const EXCLUDED_DCO = new Set([530,531,532,552]);
 const state = {
   logged:false, matricula:"", storeCode:"", employeeName:"", role:"colaborador",
   world:"feminino", section:"inicio", day:null, detail:null, groupSummary:null, history:[], regional:[],
-  commercial:null, dcoCatalog:[], commercialPhotoData:""
+  commercial:null, dcoCatalog:[], commercialPhotoData:"",
+  editingCommercialId:null, commercialSelectedDcos:new Set(),
+  scales:{scales:[],productivity:[]}, editingScaleId:null, adminTab:"metas"
 };
 
 const $ = (id) => document.getElementById(id);
@@ -47,6 +49,7 @@ function setSection(section){
   if(section==="regional" && state.role==="administrador") loadRegional();
   if(section==="comerciais") loadCommercials();
   if(section==="historico") renderHistory();
+  if(section==="admin" && state.role==="administrador") loadAdmin();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -423,8 +426,9 @@ function buildGroupPanelHtml(){
 
 function renderGroupSharePanel(){
   const html=buildGroupPanelHtml();
-  $("groupSharePanel").innerHTML=html;
-  $("groupPanelModalContent").innerHTML=html;
+  if($("groupSharePanel")) $("groupSharePanel").innerHTML=html;
+  if($("homeGroupSharePanel")) $("homeGroupSharePanel").innerHTML=html;
+  if($("groupPanelModalContent")) $("groupPanelModalContent").innerHTML=html;
 }
 
 function openGroupPanel(){
