@@ -517,7 +517,7 @@ function buildGroupPanelHtml(){
       '<div class="insight-card insight-positive"><span class="insight-icon" aria-hidden="true">↗</span><div class="insight-copy"><strong>'+(bestEvolution?esc(GROUP_LABELS[bestEvolution.group_code]||bestEvolution.group_code):"—")+'</strong><span>melhor evolução vs LY '+(bestEvolution?pct(bestEvolution.evolution_vs_ly):"—")+'</span></div></div>'+
       '<div class="insight-card insight-risk"><span class="insight-icon" aria-hidden="true">!</span><div class="insight-copy"><strong>'+(worst.length?worst.map(g=>esc(GROUP_LABELS[g.group_code]||g.group_code)).join(" e "):"—")+'</strong><span>maiores desvios em valor</span></div></div>'+
     '</div>'+
-    '<div class="group-share-footer"><span>RIACHUELO</span><b>Moda que inspira o Brasil</b></div>';
+    '<div class="group-share-footer"><span>MEU ACOMPANHAMENTO</span><b>Moda que inspira o Brasil</b></div>';
 }
 
 function renderGroupSharePanel(){
