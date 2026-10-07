@@ -3,13 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Meu Acompanhamento">
+  <meta name="format-detection" content="telephone=no">
   <meta name="theme-color" content="#173F35">
   <meta name="description" content="Meu Acompanhamento — acompanhamento comercial CE+PI">
   <title>Meu Acompanhamento</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/riachuelo-logo-vertical.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css?v=9">
-  <link rel="stylesheet" href="./enhancements-v9.css?v=6">
+  <link rel="stylesheet" href="./enhancements-v9.css?v=7">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -404,8 +409,8 @@
   <div id="worldModal" class="overlay hidden">
     <div class="modal world-modal">
       <span id="welcomeEyebrow" class="eyebrow">BEM-VINDO</span>
-      <h2>Seja bem-vindo ao acompanhamento de venda do dia.</h2>
-      <p id="welcomeText">Escolha seu mundo de atuação para abrir a leitura correta.</p>
+      <h2>Escolha o mundo que deseja analisar.</h2>
+      <p id="welcomeText">Use esta seleção somente quando quiser aprofundar a leitura por mundo e DCO.</p>
       <div id="worldChoices" class="world-choices"></div>
     </div>
   </div>
@@ -429,7 +434,7 @@
       <div id="supervisorWelcomeBlock" class="supervisor-welcome hidden">
         <h3>Você já planejou sua rotina na loja hoje?</h3>
         <p>Acesse o checklist do supervisor e garanta uma operação ainda mais eficiente.</p>
-        <a href="https://rotina-super-ria-ce-pi.franlimabreu.chatgpt.site/" target="_blank" rel="noopener" class="btn accent">Vamos conferir?</a>
+        <a id="supervisorChecklistLink" href="https://rotina-super-ria-ce-pi.franlimabreu.chatgpt.site/" target="_blank" rel="noopener noreferrer" class="btn accent">Abrir checklist do supervisor</a>
       </div>
       <button id="continueDailyWelcome" class="btn secondary full">Continuar para o acompanhamento</button>
     </div>
@@ -507,6 +512,6 @@
   </div>
 
   <script src="./app.js?v=11" defer></script>
-  <script src="./enhancements-v9.js?v=3" defer></script>
+  <script src="./enhancements-v9.js?v=4" defer></script>
 </body>
 </html>
