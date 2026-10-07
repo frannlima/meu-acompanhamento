@@ -209,3 +209,236 @@
   .mobile-greeting strong{font-family:"Bricolage Grotesque";font-size:13px;color:#173F35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mobile-greeting span{font-size:7.5px;color:#6F7C77;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 }
+
+
+/* v12 — painel principal de grupos 100% enquadrado, sem rolagem horizontal */
+.home-group-panel,
+.home-group-panel .group-share-scroll,
+.home-group-panel .group-share-panel{
+  width:100%;
+  max-width:100%;
+  min-width:0!important;
+  box-sizing:border-box;
+}
+.home-group-panel .group-share-scroll{
+  overflow-x:hidden!important;
+  padding-bottom:0!important;
+}
+.home-group-panel .group-share-panel{
+  padding:16px 14px 12px!important;
+  border-radius:16px;
+}
+.home-group-panel .group-share-header{
+  grid-template-columns:86px minmax(0,1fr) 118px!important;
+  gap:14px!important;
+  min-width:0;
+}
+.home-group-panel .group-share-brand{
+  width:70px;
+  height:86px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  background:#F8F7F2;
+}
+.home-group-panel .group-share-brand img{
+  width:60px!important;
+  max-width:60px!important;
+  height:76px!important;
+  object-fit:contain;
+}
+.home-group-panel .group-share-title{
+  min-width:0;
+  padding-left:14px!important;
+}
+.home-group-panel .group-share-title h3{
+  font-size:clamp(18px,2.15vw,26px)!important;
+  line-height:1.05;
+  white-space:normal;
+}
+.home-group-panel .group-share-title p{
+  font-size:8px!important;
+  white-space:normal;
+}
+.home-group-panel .group-share-slogan{
+  font-size:7px!important;
+  letter-spacing:.13em!important;
+}
+.home-group-panel .group-share-kpis{
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:6px!important;
+}
+.home-group-panel .group-kpi{
+  min-width:0;
+  min-height:92px!important;
+  padding:10px!important;
+}
+.home-group-panel .group-kpi>span{font-size:6.7px!important}
+.home-group-panel .group-kpi>strong{
+  font-size:clamp(15px,1.55vw,20px)!important;
+  overflow-wrap:anywhere;
+}
+.home-group-panel .group-kpi>small,
+.home-group-panel .group-kpi-note{font-size:6.6px!important;line-height:1.25}
+
+.home-group-panel .group-share-table-wrap{
+  width:100%;
+  max-width:100%;
+  overflow:hidden!important;
+}
+.home-group-panel .group-share-table{
+  width:100%!important;
+  min-width:0!important;
+  table-layout:fixed!important;
+  font-size:7.2px!important;
+}
+.home-group-panel .group-share-table th,
+.home-group-panel .group-share-table td{
+  padding:6px 4px!important;
+  min-width:0!important;
+  max-width:none!important;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.home-group-panel .group-share-table th{
+  font-size:6.4px!important;
+  line-height:1.15;
+}
+.home-group-panel .group-share-table td{
+  font-size:7px!important;
+  white-space:nowrap!important;
+}
+.home-group-panel .group-share-table th:nth-child(1),
+.home-group-panel .group-share-table td:nth-child(1){width:14%}
+.home-group-panel .group-share-table th:nth-child(2),
+.home-group-panel .group-share-table td:nth-child(2){width:10%}
+.home-group-panel .group-share-table th:nth-child(3),
+.home-group-panel .group-share-table td:nth-child(3){width:10%}
+.home-group-panel .group-share-table th:nth-child(4),
+.home-group-panel .group-share-table td:nth-child(4){width:7%}
+.home-group-panel .group-share-table th:nth-child(5),
+.home-group-panel .group-share-table td:nth-child(5){width:10%}
+.home-group-panel .group-share-table th:nth-child(6),
+.home-group-panel .group-share-table td:nth-child(6){width:10%}
+.home-group-panel .group-share-table th:nth-child(7),
+.home-group-panel .group-share-table td:nth-child(7){width:13%}
+.home-group-panel .group-share-table th:nth-child(8),
+.home-group-panel .group-share-table td:nth-child(8){width:8%}
+.home-group-panel .group-share-table th:nth-child(9),
+.home-group-panel .group-share-table td:nth-child(9){width:8%}
+.home-group-panel .group-share-table th:nth-child(10),
+.home-group-panel .group-share-table td:nth-child(10){width:10%}
+
+.home-group-panel .group-share-insights{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  padding:8px 10px!important;
+  gap:4px!important;
+}
+.home-group-panel .group-share-insights>div{
+  min-width:0;
+  min-height:45px!important;
+  padding:5px 8px!important;
+}
+.home-group-panel .group-share-insights strong{font-size:10px!important;overflow-wrap:anywhere}
+.home-group-panel .group-share-insights span{font-size:6.6px!important}
+.home-group-panel .group-share-footer{font-size:6px}
+
+@media(max-width:1100px){
+  .home-group-panel .group-share-header{
+    grid-template-columns:70px minmax(0,1fr)!important;
+  }
+  .home-group-panel .group-share-slogan{display:none}
+  .home-group-panel .group-share-kpis{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .home-group-panel .group-kpi{min-height:82px!important}
+  .home-group-panel .group-share-table{font-size:6.6px!important}
+  .home-group-panel .group-share-table th{font-size:5.8px!important}
+  .home-group-panel .group-share-table td{font-size:6.3px!important;padding:5px 2px!important}
+}
+
+@media(max-width:760px){
+  .home-group-panel{overflow:visible!important}
+  .home-group-panel .group-share-panel{padding:11px!important}
+  .home-group-panel .group-share-header{
+    grid-template-columns:56px minmax(0,1fr)!important;
+    gap:9px!important;
+  }
+  .home-group-panel .group-share-brand{
+    width:50px;height:62px;border-radius:11px;
+  }
+  .home-group-panel .group-share-brand img{
+    width:42px!important;height:54px!important;
+  }
+  .home-group-panel .group-share-title{padding-left:8px!important}
+  .home-group-panel .group-share-title h3{font-size:17px!important}
+  .home-group-panel .group-share-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+
+  /* No celular, cada grupo vira um bloco completo — sem barra horizontal */
+  .home-group-panel .group-share-table-wrap{
+    border:0!important;
+    overflow:visible!important;
+  }
+  .home-group-panel .group-share-table,
+  .home-group-panel .group-share-table tbody,
+  .home-group-panel .group-share-table tr{
+    display:block;
+    width:100%!important;
+  }
+  .home-group-panel .group-share-table thead{display:none}
+  .home-group-panel .group-share-table tr{
+    margin:0 0 8px;
+    padding:8px;
+    border:1px solid #D9E0DD;
+    border-radius:12px;
+    background:#fff;
+    box-sizing:border-box;
+  }
+  .home-group-panel .group-share-table td{
+    display:grid;
+    grid-template-columns:112px minmax(0,1fr);
+    align-items:center;
+    width:100%!important;
+    min-height:24px;
+    padding:4px 2px!important;
+    border-bottom:1px solid #EEF0EE!important;
+    text-align:right!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    font-size:8px!important;
+  }
+  .home-group-panel .group-share-table td:first-child{
+    display:block;
+    text-align:left!important;
+    font-size:11px!important;
+    padding:3px 2px 8px!important;
+    border-bottom:1px solid #DDE4E1!important;
+  }
+  .home-group-panel .group-share-table td:not(:first-child)::before{
+    text-align:left;
+    color:#65756F;
+    font-size:6.8px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.035em;
+  }
+  .home-group-panel .group-share-table td:nth-child(2)::before{content:"Meta Fin."}
+  .home-group-panel .group-share-table td:nth-child(3)::before{content:"Venda Fin."}
+  .home-group-panel .group-share-table td:nth-child(4)::before{content:"% Meta"}
+  .home-group-panel .group-share-table td:nth-child(5)::before{content:"Desvio"}
+  .home-group-panel .group-share-table td:nth-child(6)::before{content:"Venda LY"}
+  .home-group-panel .group-share-table td:nth-child(7)::before{content:"Evol. vs LY"}
+  .home-group-panel .group-share-table td:nth-child(8)::before{content:"Meta Fís."}
+  .home-group-panel .group-share-table td:nth-child(9)::before{content:"Venda Fís."}
+  .home-group-panel .group-share-table td:nth-child(10)::before{content:"% Meta Fís."}
+  .home-group-panel .group-total-row td{
+    background:#0C463D!important;
+    color:#fff!important;
+  }
+  .home-group-panel .group-share-insights{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
