@@ -194,6 +194,50 @@ function restoreAfterChecklist(){
   toast("Você voltou ao Meu Acompanhamento.");
 }
 
+let deferredInstallPrompt=null;
+
+function isStandaloneApp(){
+  return window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator.standalone===true;
+}
+
+function refreshInstallButton(){
+  const btn=$("installAppBtn");
+  if(!btn) return;
+  btn.classList.toggle("hidden",isStandaloneApp());
+}
+
+async function requestInstallApp(){
+  closeMobileMore();
+  if(isStandaloneApp()){
+    toast("O Meu Acompanhamento já está instalado como aplicativo.");
+    return;
+  }
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    try{await deferredInstallPrompt.userChoice}catch(_){}
+    deferredInstallPrompt=null;
+    refreshInstallButton();
+    return;
+  }
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent||"");
+  if(ios){
+    toast("No iPhone/iPad: Compartilhar > Adicionar à Tela de Início.");
+  }else{
+    toast("No menu do navegador, escolha Instalar aplicativo ou Adicionar à tela inicial.");
+  }
+}
+
+window.addEventListener("beforeinstallprompt",event=>{
+  event.preventDefault();
+  deferredInstallPrompt=event;
+  refreshInstallButton();
+});
+window.addEventListener("appinstalled",()=>{
+  deferredInstallPrompt=null;
+  refreshInstallButton();
+  toast("Meu Acompanhamento instalado com sucesso.");
+});
+
 function openMobileMore(){
   const sheet=$("mobileMoreSheet");
   if(!sheet) return;
@@ -587,6 +631,8 @@ document.addEventListener("DOMContentLoaded",()=>{
   if($("closeMobileMore")) $("closeMobileMore").onclick=closeMobileMore;
   if($("mobileMoreBackdrop")) $("mobileMoreBackdrop").onclick=closeMobileMore;
   if($("mobileLogoutBtn")) $("mobileLogoutBtn").onclick=()=>{closeMobileMore();logout()};
+  if($("installAppBtn")) $("installAppBtn").onclick=requestInstallApp;
+  refreshInstallButton();
   if($("closeSupervisorChecklist")) $("closeSupervisorChecklist").onclick=()=>closeSupervisorChecklist(false);
   if($("supervisorChecklistFrame")) $("supervisorChecklistFrame").onload=handleChecklistFrameLoad;
   if($("supervisorChecklistModal")) $("supervisorChecklistModal").addEventListener("click",e=>{if(e.target===$("supervisorChecklistModal")) closeSupervisorChecklist(false)});
