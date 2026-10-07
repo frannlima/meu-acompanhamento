@@ -1,11 +1,11 @@
-const CACHE="meu-acompanhamento-v10";
+const CACHE="meu-acompanhamento-v11";
 const ASSETS=[
   "./",
   "./index.html",
   "./styles.css?v=9",
   "./enhancements-v9.css?v=2",
   "./app.js?v=10",
-  "./enhancements-v9.js?v=2",
+  "./enhancements-v9.js?v=3",
   "./manifest.webmanifest",
   "./assets/riachuelo-logo-vertical.svg"
 ];
