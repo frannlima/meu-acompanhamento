@@ -306,35 +306,132 @@ function loadCanvasImage(src){return new Promise((resolve,reject)=>{const im=new
 async function createGroupPanelImage(){
   const d=state.day||{};
   const groups=GROUP_ORDER.map(code=>(state.groupSummary?.groups||[]).find(g=>g.group_code===code)).filter(Boolean);
-  const width=1700,rowH=46,height=360+(groups.length+1)*rowH+70;
+  const width=1840,rowH=46,height=360+(groups.length+1)*rowH+165;
   const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
   const ctx=canvas.getContext("2d");
-  const C={green:"#173F35",green2:"#466964",cream:"#F7F4ED",line:"#DAD9D6",white:"#FFFFFF",orange:"#DE7C00",red:"#AE535C",good:"#2E6B58",ink:"#17352E",muted:"#6F7C77",pink:"#E68699"};
+  const C={
+    green:"#173F35",green2:"#466964",cream:"#F7F4ED",line:"#DAD9D6",white:"#FFFFFF",
+    orange:"#DE7C00",red:"#AE535C",good:"#2E6B58",ink:"#17352E",muted:"#6F7C77",
+    goodBg:"#DDEFE5",warnBg:"#F7E9A5",badBg:"#F8D8D5",riskBg:"#F7E1E3",projectionBg:"#EEF5EF"
+  };
+  const perfFill=(v,good=100,warn=70)=>Number(v)>=good?C.goodBg:Number(v)>=warn?C.warnBg:C.badBg;
+  const perfText=(v,good=100,warn=70)=>Number(v)>=good?C.good:Number(v)>=warn?"#7A6400":C.red;
   ctx.fillStyle=C.white;ctx.fillRect(0,0,width,height);
   ctx.fillStyle=C.green;ctx.fillRect(0,0,width,130);
-  try{const logo=await loadCanvasImage("./assets/riachuelo-logo-vertical.svg");ctx.fillStyle="#fff";canvasRoundedRect(ctx,42,20,90,90,18,"#F8F6F0");ctx.drawImage(logo,51,29,72,72)}catch(_){}
-  ctx.fillStyle=C.white;ctx.font="800 30px Arial";ctx.fillText("DESEMPENHO POR GRUPO DE VENDA",175,55);
-  ctx.font="400 15px Arial";ctx.fillStyle="#D6D2C4";ctx.fillText("Parcial hora a hora • Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+" • "+(d.captured_at?"Atualizado "+localTime(d.captured_at):"sem input"),175,87);
-  ctx.textAlign="right";ctx.font="700 13px Arial";ctx.fillStyle=C.white;ctx.fillText("MODA QUE INSPIRA O BRASIL",width-42,63);ctx.textAlign="left";
+
+  try{
+    const logo=await loadCanvasImage("./assets/riachuelo-logo-vertical.svg");
+    canvasRoundedRect(ctx,42,20,90,90,18,"#F8F6F0");
+    ctx.drawImage(logo,51,29,72,72);
+  }catch(_){}
+
+  ctx.fillStyle=C.white;ctx.font="800 30px Arial";ctx.textAlign="left";
+  ctx.fillText("DESEMPENHO POR GRUPO DE VENDA",175,55);
+  ctx.font="400 15px Arial";ctx.fillStyle="#D6D2C4";
+  ctx.fillText("Parcial hora a hora • Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+" • "+(d.captured_at?"Atualizado "+localTime(d.captured_at):"sem input"),175,87);
+  ctx.textAlign="right";ctx.font="700 13px Arial";ctx.fillStyle=C.white;
+  ctx.fillText("MODA QUE INSPIRA O BRASIL",width-42,63);
+  ctx.textAlign="left";
 
   const target=Number(d.target_financial||0),sale=Number(d.sales_financial||0),ly=Number(d.ly_financial||0);
   const att=target?sale/target*100:0,dev=sale-target,ev=ly&&d.has_input?((sale/ly)-1)*100:null;
   const intGrowth=d.interval_growth_pct===null||d.interval_growth_pct===undefined?null:Number(d.interval_growth_pct);
   const remaining=calcClock(),interval=Number(d.interval_sales_financial||0),mins=Number(d.interval_minutes||0);
-  const rate=d.has_input&&mins>0?interval/(mins/60):0,projection=d.has_input&&rate>0?sale+rate*remaining:0,projAtt=target&&projection?projection/target*100:0;
-  const cards=[["META DO DIA",money(target,0)],["VENDA ATUAL",money(sale,0)],["PROJEÇÃO",projection?money(projection,0):"—"],["VS LY",ev===null?"—":pct(ev)],["VS HORA ANT.",intGrowth===null?"—":pct(intGrowth)],["ATINGIMENTO",pct(att)]];
+  const rate=d.has_input&&mins>0?interval/(mins/60):0;
+  const projection=d.has_input&&rate>0?sale+rate*remaining:0;
+  const projAtt=target&&projection?projection/target*100:0;
+
+  const cards=[
+    ["META DO DIA",money(target,0),C.cream,C.ink],
+    ["VENDA ATUAL",money(sale,0),C.cream,C.ink],
+    ["PROJEÇÃO",projection?money(projection,0):"—",projection?perfFill(projAtt,100,90):C.projectionBg,projection?perfText(projAtt,100,90):C.ink],
+    ["VS LY",ev===null?"—":pct(ev),ev===null?C.cream:(ev>=0?C.goodBg:C.riskBg),ev===null?C.ink:(ev>=0?C.good:C.red)],
+    ["VS HORA ANT.",intGrowth===null?"—":pct(intGrowth),intGrowth===null?C.cream:(intGrowth>=0?C.goodBg:C.riskBg),intGrowth===null?C.ink:(intGrowth>=0?C.good:C.red)],
+    ["ATINGIMENTO",pct(att),target?perfFill(att,100,70):C.cream,target?perfText(att,100,70):C.ink]
+  ];
   const gap=10,cw=(width-84-gap*5)/6,cy=150,ch=94;
-  cards.forEach((c,i)=>{const x=42+i*(cw+gap);canvasRoundedRect(ctx,x,cy,cw,ch,14,i===2?"#EEF5EF":C.cream,C.line);ctx.fillStyle=C.green2;ctx.font="700 11px Arial";ctx.fillText(c[0],x+14,cy+25);ctx.fillStyle=C.ink;ctx.font="800 20px Arial";ctx.fillText(c[1],x+14,cy+58)});
-  const cols=[["Grupo",200],["Meta Fin.",170],["Venda Fin.",170],["% Meta",110],["Desvio",170],["Venda LY",160],["Vs LY",110],["Meta Fís.",100],["Venda Fís.",100],["% Fís.",100]];
-  let x=42,ty=270;ctx.fillStyle=C.green;ctx.fillRect(42,ty,width-84,rowH);
-  cols.forEach(([lab,w],i)=>{ctx.fillStyle=C.white;ctx.font="700 11px Arial";ctx.textAlign=i===0?"left":"right";ctx.fillText(lab,i===0?x+10:x+w-10,ty+29);x+=w});
-  groups.forEach((g,idx)=>{const y=ty+rowH*(idx+1);ctx.fillStyle=idx%2?C.cream:C.white;ctx.fillRect(42,y,width-84,rowH);
-    const meta=Number(g.target_financial||0),v=Number(g.sales_financial||0),a=meta?v/meta*100:0,dv=v-meta,lv=Number(g.ly_financial||0),e=g.evolution_vs_ly==null?null:Number(g.evolution_vs_ly),mf=Number(g.target_physical||0),vf=Number(g.sales_physical||0),pf=mf?vf/mf*100:0;
-    const vals=[GROUP_LABELS[g.group_code]||g.group_code,money(meta,0),money(v,0),pct(a),signedMoney(dv,0),money(lv,0),e===null?"—":pct(e),num(mf),num(vf),pct(pf)];
-    x=42;cols.forEach(([lab,w],i)=>{let color=C.ink;if(i===3)color=a>=100?C.good:a>=90?C.orange:C.red;if(i===4)color=dv>=0?C.good:C.red;if(i===6&&e!==null)color=e>=0?C.good:C.red;ctx.fillStyle=color;ctx.font=(i===0?"800":"600")+" 11px Arial";ctx.textAlign=i===0?"left":"right";ctx.fillText(vals[i],i===0?x+10:x+w-10,y+29);x+=w});
+  cards.forEach((c,i)=>{
+    const x=42+i*(cw+gap);
+    canvasRoundedRect(ctx,x,cy,cw,ch,14,c[2],C.line);
+    ctx.fillStyle=C.green2;ctx.font="700 11px Arial";ctx.fillText(c[0],x+14,cy+25);
+    ctx.fillStyle=c[3];ctx.font="800 20px Arial";ctx.fillText(c[1],x+14,cy+58);
   });
-  const fy=ty+rowH*(groups.length+1);ctx.fillStyle=C.green;ctx.fillRect(42,fy,width-84,rowH);ctx.fillStyle=C.white;ctx.font="800 11px Arial";ctx.textAlign="left";ctx.fillText("TOTAL",52,fy+29);ctx.textAlign="right";ctx.fillText(pct(att),42+200+170+170+110-10,fy+29);ctx.fillText(signedMoney(dev,0),42+200+170+170+110+170-10,fy+29);
-  ctx.fillStyle=C.green2;ctx.font="700 11px Arial";ctx.textAlign="left";ctx.fillText("MEU ACOMPANHAMENTO • Parcial pronta para compartilhamento",42,height-28);ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",width-42,height-28);
+
+  const cols=[
+    ["Grupo",220],["Meta Fin.",175],["Venda Fin.",175],["% Meta",115],["Desvio",175],
+    ["Venda LY",165],["Vs LY",125],["Meta Fís.",105],["Venda Fís.",105],["% Fís.",110],["Projeção dia",230]
+  ];
+  const tableWidth=cols.reduce((a,c)=>a+c[1],0);
+  let x=42,ty=270;
+  ctx.fillStyle=C.green;ctx.fillRect(42,ty,tableWidth,rowH);
+  cols.forEach(([lab,w],i)=>{
+    ctx.fillStyle=C.white;ctx.font="700 11px Arial";ctx.textAlign=i===0?"left":"right";
+    ctx.fillText(lab,i===0?x+10:x+w-10,ty+29);x+=w;
+  });
+
+  groups.forEach((g,idx)=>{
+    const y=ty+rowH*(idx+1);
+    ctx.fillStyle=idx%2?C.cream:C.white;ctx.fillRect(42,y,tableWidth,rowH);
+    const meta=Number(g.target_financial||0),v=Number(g.sales_financial||0),a=meta?v/meta*100:0,dv=v-meta;
+    const lv=Number(g.ly_financial||0),e=g.evolution_vs_ly==null?null:Number(g.evolution_vs_ly);
+    const mf=Number(g.target_physical||0),vf=Number(g.sales_physical||0),pf=mf?vf/mf*100:0;
+    const groupInterval=Number(g.interval_sales_financial||0);
+    const groupRate=d.has_input&&mins>0?groupInterval/(mins/60):0;
+    const gp=d.has_input&&groupRate>0?v+groupRate*remaining:0;
+    const gpAtt=meta&&gp?gp/meta*100:0;
+    const vals=[
+      GROUP_LABELS[g.group_code]||g.group_code,money(meta,0),money(v,0),pct(a),signedMoney(dv,0),
+      money(lv,0),e===null?"—":pct(e),num(mf),num(vf),pct(pf),gp?money(gp,0):"—"
+    ];
+    x=42;
+    cols.forEach(([lab,w],i)=>{
+      let fill=null,color=C.ink;
+      if(i===3){fill=perfFill(a,100,70);color=perfText(a,100,70)}
+      if(i===4){fill=dv>=0?C.goodBg:C.riskBg;color=dv>=0?C.good:C.red}
+      if(i===6&&e!==null){fill=e>=0?C.goodBg:C.riskBg;color=e>=0?C.good:C.red}
+      if(i===9){fill=perfFill(pf,100,70);color=perfText(pf,100,70)}
+      if(i===10&&gp){fill=perfFill(gpAtt,100,90);color=perfText(gpAtt,100,90)}
+      if(fill){ctx.fillStyle=fill;ctx.fillRect(x,y,w,rowH)}
+      ctx.fillStyle=color;ctx.font=(i===0?"800":"600")+" 11px Arial";ctx.textAlign=i===0?"left":"right";
+      ctx.fillText(vals[i],i===0?x+10:x+w-10,y+29);
+      x+=w;
+    });
+  });
+
+  const fy=ty+rowH*(groups.length+1);
+  ctx.fillStyle=C.green;ctx.fillRect(42,fy,tableWidth,rowH);
+  const totalVals=["TOTAL",money(target,0),money(sale,0),pct(att),signedMoney(dev,0),money(ly,0),ev===null?"—":pct(ev),num(d.target_physical||0),num(d.sales_physical||0),d.target_physical?pct(Number(d.sales_physical||0)/Number(d.target_physical||0)*100):"0,0%",projection?money(projection,0):"—"];
+  x=42;
+  cols.forEach(([lab,w],i)=>{
+    ctx.fillStyle=C.white;ctx.font="800 11px Arial";ctx.textAlign=i===0?"left":"right";
+    ctx.fillText(totalVals[i],i===0?x+10:x+w-10,fy+29);x+=w;
+  });
+
+  const below=groups.filter(g=>Number(g.attainment||0)<100).length;
+  const bestAtt=[...groups].sort((a,b)=>Number(b.attainment||0)-Number(a.attainment||0))[0];
+  const bestEvolution=[...groups].filter(g=>g.evolution_vs_ly!==null&&g.evolution_vs_ly!==undefined).sort((a,b)=>Number(b.evolution_vs_ly)-Number(a.evolution_vs_ly))[0];
+  const worst=[...groups].sort((a,b)=>Number(a.deviation||0)-Number(b.deviation||0)).slice(0,2);
+
+  const insights=[
+    ["◎",below+" grupos","abaixo da meta financeira","#E7F0EB",C.green2],
+    ["▥",bestAtt?(GROUP_LABELS[bestAtt.group_code]||bestAtt.group_code):"—","maior atingimento "+(bestAtt?pct(bestAtt.attainment):"—"),"#F7EACD",C.orange],
+    ["↗",bestEvolution?(GROUP_LABELS[bestEvolution.group_code]||bestEvolution.group_code):"—","melhor evolução vs LY "+(bestEvolution?pct(bestEvolution.evolution_vs_ly):"—"),"#E1F0E8",C.good],
+    ["!",worst.length?worst.map(g=>GROUP_LABELS[g.group_code]||g.group_code).join(" e "):"—","maiores desvios em valor","#F8E1E4",C.red]
+  ];
+  const insightY=fy+rowH+16,insGap=10,insW=(tableWidth-insGap*3)/4,insH=72;
+  insights.forEach((it,i)=>{
+    const ix=42+i*(insW+insGap);
+    canvasRoundedRect(ctx,ix,insightY,insW,insH,14,it[3],C.line);
+    ctx.fillStyle=it[4];ctx.beginPath();ctx.arc(ix+31,insightY+36,18,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=C.white;ctx.font="800 16px Arial";ctx.textAlign="center";ctx.fillText(it[0],ix+31,insightY+42);
+    ctx.textAlign="left";ctx.fillStyle=C.ink;ctx.font="800 13px Arial";ctx.fillText(it[1],ix+60,insightY+29);
+    ctx.fillStyle=C.muted;ctx.font="600 9px Arial";ctx.fillText(it[2],ix+60,insightY+48);
+  });
+
+  ctx.fillStyle=C.green2;ctx.font="700 11px Arial";ctx.textAlign="left";
+  ctx.fillText("MEU ACOMPANHAMENTO • Parcial pronta para compartilhamento",42,height-28);
+  ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",width-42,height-28);
+
   return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Falha ao gerar painel.")),"image/png",1));
 }
 async function shareMainGroupPanel(){
