@@ -67,39 +67,92 @@ async function refreshAdminStoreCatalog(){
   }catch(e){ console.warn("Store catalog",e); }
 }
 
+function dailyWelcomeKey(day=localDate()){
+  return "ma_acolher_"+day+"_"+state.matricula;
+}
+
+function enterMainApp(){
+  if($("dailyWelcomeModal")) $("dailyWelcomeModal").classList.add("hidden");
+  if($("worldModal")) $("worldModal").classList.add("hidden");
+  setSection("inicio");
+  window.scrollTo({top:0,behavior:"auto"});
+}
+
 window.afterMeuAcompanhamentoLogin = async function(person){
   state.user=person;
   updateIdentity(person);
   await refreshAdminStoreCatalog();
 
   const day=localDate();
+  const key=dailyWelcomeKey(day);
+
+  // O controle local evita repetição no mesmo aparelho mesmo se o endpoint
+  // de status oscilar ou o PWA for recarregado ao voltar de um link externo.
+  if(localStorage.getItem(key)==="1"){
+    enterMainApp();
+    return;
+  }
+
   let already=false;
   try{
     already=!!(await api("welcomeStatus",{matricula:state.matricula,business_date:day}));
   }catch(_){
-    already=localStorage.getItem("ma_acolher_"+day+"_"+state.matricula)==="1";
+    already=false;
   }
 
   if(already){
-    showWorldModal();
+    localStorage.setItem(key,"1");
+    enterMainApp();
     return;
   }
 
+  // Marca antes de exibir para impedir duplicidade por reload/retorno do mobile.
+  localStorage.setItem(key,"1");
   try{
     await api("markWelcome",{matricula:state.matricula,business_date:day,store_code:state.storeCode});
-  }catch(_){
-    localStorage.setItem("ma_acolher_"+day+"_"+state.matricula,"1");
+  }catch(e){
+    console.warn("Não foi possível registrar o acolhimento no servidor.",e);
   }
 
-  const sup=/SUPERVISOR/i.test(String(person?.job_title||""));
+  const sup=state.role==="supervisor" || /SUPERVISOR/i.test(String(person?.job_title||""));
   if($("dailyWelcomeTitle")) $("dailyWelcomeTitle").textContent=greetingByTime()+", "+personDisplayName(person)+"!";
   if($("supervisorWelcomeBlock")) $("supervisorWelcomeBlock").classList.toggle("hidden",!sup);
+  setSection("inicio");
   $("dailyWelcomeModal").classList.remove("hidden");
 };
 
 function closeDailyWelcomeFlow(){
-  $("dailyWelcomeModal").classList.add("hidden");
-  showWorldModal();
+  enterMainApp();
+}
+
+function openSupervisorChecklist(event){
+  if(event) event.preventDefault();
+  const link=$("supervisorChecklistLink");
+  const url=link?.href||"https://rotina-super-ria-ce-pi.franlimabreu.chatgpt.site/";
+  localStorage.setItem(dailyWelcomeKey(),"1");
+  enterMainApp();
+
+  sessionStorage.setItem("ma_checklist_open","1");
+  sessionStorage.setItem("ma_checklist_open_at",String(Date.now()));
+
+  // Abre fora do contexto do PWA: o Meu Acompanhamento permanece aberto
+  // e não pode ser substituído pelo arquivo Excel da página externa.
+  const child=window.open(url,"_blank","noopener,noreferrer");
+  if(!child){
+    sessionStorage.removeItem("ma_checklist_open");
+    sessionStorage.removeItem("ma_checklist_open_at");
+    toast("O navegador bloqueou a abertura do checklist. Libere pop-ups para este app.",true);
+  }
+}
+
+function restoreAfterChecklist(){
+  if(sessionStorage.getItem("ma_checklist_open")!=="1") return;
+  const openedAt=Number(sessionStorage.getItem("ma_checklist_open_at")||0);
+  if(Date.now()-openedAt<1200) return;
+  sessionStorage.removeItem("ma_checklist_open");
+  sessionStorage.removeItem("ma_checklist_open_at");
+  enterMainApp();
+  toast("Checklist finalizado. Você voltou ao Meu Acompanhamento.");
 }
 
 changeAdminStore = async function(code){
@@ -450,15 +503,35 @@ async function shareMainGroupPanel(){
   finally{if(btn){btn.disabled=false;btn.textContent="Compartilhar painel"}}
 }
 
+function applyResponsiveTableLabels(root=document){
+  root.querySelectorAll(".table-wrap table:not(.group-share-table):not(.regional-share-table)").forEach(table=>{
+    const headers=[...table.querySelectorAll("thead th")].map(th=>th.textContent.trim());
+    table.querySelectorAll("tbody tr").forEach(row=>{
+      [...row.children].forEach((cell,index)=>{
+        if(cell.tagName==="TD" && !cell.dataset.label) cell.dataset.label=headers[index]||"";
+      });
+    });
+  });
+}
+
 document.addEventListener("DOMContentLoaded",()=>{
   if($("closeDailyWelcome")) $("closeDailyWelcome").onclick=closeDailyWelcomeFlow;
   if($("continueDailyWelcome")) $("continueDailyWelcome").onclick=closeDailyWelcomeFlow;
   if($("dailyWelcomeModal")) $("dailyWelcomeModal").addEventListener("click",e=>{if(e.target===$("dailyWelcomeModal")) closeDailyWelcomeFlow()});
+  if($("supervisorChecklistLink")) $("supervisorChecklistLink").onclick=openSupervisorChecklist;
   if($("refreshDiscounts")) $("refreshDiscounts").onclick=loadDiscounts;
   if($("saveDailyHCBtn")) $("saveDailyHCBtn").onclick=saveDailyHC;
   if($("monthlyTargetFile")) $("monthlyTargetFile").onchange=e=>importMonthlyTargets(e.target.files?.[0]);
   if($("shareGroupPanelHome")) $("shareGroupPanelHome").onclick=shareMainGroupPanel;
   if($("shareGroupPanel")) $("shareGroupPanel").onclick=shareMainGroupPanel;
-  document.querySelectorAll(".embrace-card a, #supervisorWelcomeBlock a").forEach(a=>a.addEventListener("click",()=>setTimeout(closeDailyWelcomeFlow,80)));
+  document.querySelectorAll(".embrace-card a").forEach(a=>a.addEventListener("click",()=>setTimeout(closeDailyWelcomeFlow,80)));
+
+  applyResponsiveTableLabels();
+  const tableObserver=new MutationObserver(()=>applyResponsiveTableLabels());
+  tableObserver.observe(document.body,{subtree:true,childList:true});
+
+  window.addEventListener("focus",restoreAfterChecklist);
+  window.addEventListener("pageshow",restoreAfterChecklist);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden) restoreAfterChecklist()});
   updateIdentity(state.user);
 });
