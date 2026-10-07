@@ -283,19 +283,17 @@ async function importMonthlyTargets(file){
     let binary="";const bytes=new Uint8Array(buf);const chunk=0x8000;
     for(let i=0;i<bytes.length;i+=chunk) binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));
     const b64=btoa(binary);
-    const res=await fetch("https://vvgejviwvtnlahbyopah.supabase.co/functions/v1/import-monthly-targets",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({matricula:state.matricula,filename:file.name,file_base64:b64})
-    });
-    const body=await res.json();
-    if(!res.ok) throw new Error(body.error||"Falha na importação.");
-    const r=body.data||{};
+    const r=await api("importTargets",{
+      matricula:state.matricula,
+      filename:file.name,
+      file_base64:b64
+    })||{};
     status.className="import-status success";
     status.innerHTML='<strong>Importação concluída.</strong> '+num(r.rows_imported)+' linhas • '+num(r.stores)+' lojas • '+num(r.dcos)+' DCOs • período '+esc(r.date_from||"—")+' a '+esc(r.date_to||"—")+'.';
     await loadAll();
     toast("Metas do mês atualizadas.");
   }catch(e){
-    status.className="import-status error";status.textContent=e.message;toast(e.message,true);
+    status.className="import-status error";status.textContent="Falha na importação: "+(e.message||"erro não identificado");toast(e.message||"Falha na importação.",true);
   }finally{$("monthlyTargetFile").value=""}
 }
 
