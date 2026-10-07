@@ -14,7 +14,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./assets/riachuelo-logo-vertical.svg" type="image/svg+xml">
   <link rel="stylesheet" href="./styles.css?v=9">
-  <link rel="stylesheet" href="./enhancements-v9.css?v=8">
+  <link rel="stylesheet" href="./enhancements-v9.css?v=9">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -74,7 +74,7 @@
 
     <main class="main">
       <header class="mobile-header">
-        <img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo">
+        <img src="./assets/riachuelo-logo.svg" alt="Riachuelo">
         <div class="mobile-greeting">
           <strong id="mobileGreetingName">Meu Acompanhamento</strong>
           <span id="mobileGreetingMeta">Seu acompanhamento de vendas</span>
@@ -395,15 +395,33 @@
       </section>
     </main>
 
-    <nav class="mobile-dock">
+    <nav class="mobile-dock" aria-label="Navegação principal">
       <button data-section="inicio" class="dock-item active"><span>⌂</span>Início</button>
       <button data-section="grupos" class="dock-item"><span>◫</span>Mundo</button>
       <button data-section="comerciais" class="dock-item"><span>◎</span>Comercial</button>
-      <button data-section="descontos" class="dock-item"><span>%</span>Descontos</button>
       <button data-section="estore" class="dock-item"><span>▣</span>eStore</button>
-      <button data-section="regional" class="dock-item admin-only hidden"><span>▦</span>Regional</button>
-      <button data-section="admin" class="dock-item admin-only hidden"><span>⚙</span>ADM</button>
+      <button id="mobileMoreBtn" type="button" class="dock-item"><span>•••</span>Mais</button>
     </nav>
+
+    <div id="mobileMoreSheet" class="mobile-more-sheet hidden" aria-hidden="true">
+      <button id="mobileMoreBackdrop" type="button" class="mobile-more-backdrop" aria-label="Fechar menu"></button>
+      <section class="mobile-more-panel" role="dialog" aria-modal="true" aria-labelledby="mobileMoreTitle">
+        <div class="mobile-more-handle"></div>
+        <div class="mobile-more-head">
+          <div>
+            <span class="eyebrow">ACESSOS</span>
+            <h2 id="mobileMoreTitle">Mais opções</h2>
+          </div>
+          <button id="closeMobileMore" type="button" class="mobile-more-close" aria-label="Fechar">×</button>
+        </div>
+        <div class="mobile-more-grid">
+          <button data-section="descontos" class="mobile-more-item"><span>%</span><b>Descontos</b><small>Painel e desvios</small></button>
+          <button data-section="regional" class="mobile-more-item admin-only hidden"><span>▦</span><b>Regional</b><small>Consolidado CE+PI</small></button>
+          <button data-section="admin" class="mobile-more-item admin-only hidden"><span>⚙</span><b>Administração</b><small>Gestão do app</small></button>
+          <button id="mobileLogoutBtn" type="button" class="mobile-more-item danger-more"><span>↪</span><b>Sair</b><small>Encerrar sessão</small></button>
+        </div>
+      </section>
+    </div>
   </div>
 
   <div id="worldModal" class="overlay hidden">
@@ -539,6 +557,6 @@
   </div>
 
   <script src="./app.js?v=11" defer></script>
-  <script src="./enhancements-v9.js?v=5" defer></script>
+  <script src="./enhancements-v9.js?v=6" defer></script>
 </body>
 </html>
