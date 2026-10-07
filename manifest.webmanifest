@@ -1,13 +1,29 @@
 {
-  "name":"Meu Acompanhamento",
-  "short_name":"Acompanhamento",
-  "description":"Acompanhamento comercial CE+PI",
-  "start_url":"./",
-  "scope":"./",
-  "display":"standalone",
-  "background_color":"#F4F1E9",
-  "theme_color":"#173F35",
-  "icons":[
-    {"src":"./assets/riachuelo-logo-vertical.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  "name": "Meu Acompanhamento",
+  "short_name": "Acompanhamento",
+  "description": "Acompanhamento comercial CE+PI",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F4F1E9",
+  "theme_color": "#173F35",
+  "icons": [
+    {
+      "src": "./assets/riachuelo-logo-vertical.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "id": "./",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "categories": [
+    "business",
+    "productivity"
   ]
 }
