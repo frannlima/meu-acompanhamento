@@ -67,13 +67,26 @@ window.afterMeuAcompanhamentoLogin = async function(person){
   state.user=person;
   updateIdentity(person);
   await refreshAdminStoreCatalog();
-  const key="ma_acolher_"+localDate()+"_"+state.matricula;
-  const already=localStorage.getItem(key)==="1";
+
+  const day=localDate();
+  let already=false;
+  try{
+    already=!!(await api("welcomeStatus",{matricula:state.matricula,business_date:day}));
+  }catch(_){
+    already=localStorage.getItem("ma_acolher_"+day+"_"+state.matricula)==="1";
+  }
+
   if(already){
     showWorldModal();
     return;
   }
-  localStorage.setItem(key,"1");
+
+  try{
+    await api("markWelcome",{matricula:state.matricula,business_date:day,store_code:state.storeCode});
+  }catch(_){
+    localStorage.setItem("ma_acolher_"+day+"_"+state.matricula,"1");
+  }
+
   const sup=/SUPERVISOR/i.test(String(person?.job_title||""));
   if($("dailyWelcomeTitle")) $("dailyWelcomeTitle").textContent=greetingByTime()+", "+personDisplayName(person)+"!";
   if($("supervisorWelcomeBlock")) $("supervisorWelcomeBlock").classList.toggle("hidden",!sup);
@@ -347,5 +360,6 @@ document.addEventListener("DOMContentLoaded",()=>{
   if($("monthlyTargetFile")) $("monthlyTargetFile").onchange=e=>importMonthlyTargets(e.target.files?.[0]);
   if($("shareGroupPanelHome")) $("shareGroupPanelHome").onclick=shareMainGroupPanel;
   if($("shareGroupPanel")) $("shareGroupPanel").onclick=shareMainGroupPanel;
+  document.querySelectorAll(".embrace-card a, #supervisorWelcomeBlock a").forEach(a=>a.addEventListener("click",()=>setTimeout(closeDailyWelcomeFlow,80)));
   updateIdentity(state.user);
 });
