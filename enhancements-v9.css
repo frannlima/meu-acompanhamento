@@ -557,3 +557,64 @@
     width:38px;height:38px;font-size:18px;
   }
 }
+
+
+/* v14 — valores financeiros completos nos cards do painel principal */
+.home-group-panel .group-kpi{
+  min-width:0;
+  padding:12px 14px!important;
+}
+.home-group-panel .group-kpi>strong{
+  display:block;
+  width:100%;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+  font-size:clamp(16px,1.45vw,22px)!important;
+  letter-spacing:-.045em;
+  line-height:1.02!important;
+}
+
+/* Em notebook/desktop médio, aumenta a caixa de cada indicador */
+@media(max-width:1500px) and (min-width:761px){
+  .home-group-panel .group-share-kpis{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+  .home-group-panel .group-kpi{
+    min-height:104px!important;
+    padding:13px 15px!important;
+  }
+  .home-group-panel .group-kpi>strong{
+    font-size:clamp(18px,2vw,25px)!important;
+    letter-spacing:-.04em;
+  }
+  .home-group-panel .group-kpi>span{
+    font-size:7.4px!important;
+  }
+  .home-group-panel .group-kpi>small,
+  .home-group-panel .group-kpi-note{
+    font-size:7.2px!important;
+  }
+}
+
+@media(max-width:760px){
+  .home-group-panel .group-kpi{
+    min-height:94px!important;
+    padding:11px 12px!important;
+  }
+  .home-group-panel .group-kpi>strong{
+    font-size:clamp(15px,4.3vw,20px)!important;
+    letter-spacing:-.045em;
+  }
+}
+
+@media(max-width:390px){
+  .home-group-panel .group-share-kpis{
+    grid-template-columns:1fr!important;
+  }
+  .home-group-panel .group-kpi>strong{
+    font-size:22px!important;
+  }
+}
