@@ -194,6 +194,29 @@ function restoreAfterChecklist(){
   toast("Você voltou ao Meu Acompanhamento.");
 }
 
+function openMobileMore(){
+  const sheet=$("mobileMoreSheet");
+  if(!sheet) return;
+  sheet.classList.remove("hidden");
+  sheet.setAttribute("aria-hidden","false");
+  document.body.classList.add("mobile-sheet-open");
+}
+
+function closeMobileMore(){
+  const sheet=$("mobileMoreSheet");
+  if(!sheet) return;
+  sheet.classList.add("hidden");
+  sheet.setAttribute("aria-hidden","true");
+  document.body.classList.remove("mobile-sheet-open");
+}
+
+function syncMobileDock(section){
+  const more=$("mobileMoreBtn");
+  if(!more) return;
+  const primary=new Set(["inicio","grupos","comerciais","estore"]);
+  more.classList.toggle("active",!primary.has(section));
+}
+
 changeAdminStore = async function(code){
   state.storeCode=code;
   await loadAll();
@@ -206,6 +229,8 @@ changeAdminStore = async function(code){
 
 setSection = function(section){
   __baseSetSection(section);
+  closeMobileMore();
+  syncMobileDock(section);
   if(section==="descontos") loadDiscounts();
   if(section==="comerciais") renderCommercialGroupCards();
   if(section==="admin" && state.role==="administrador"){
@@ -558,6 +583,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   if($("continueDailyWelcome")) $("continueDailyWelcome").onclick=closeDailyWelcomeFlow;
   if($("dailyWelcomeModal")) $("dailyWelcomeModal").addEventListener("click",e=>{if(e.target===$("dailyWelcomeModal")) closeDailyWelcomeFlow()});
   if($("supervisorChecklistLink")) $("supervisorChecklistLink").onclick=openSupervisorChecklist;
+  if($("mobileMoreBtn")) $("mobileMoreBtn").onclick=openMobileMore;
+  if($("closeMobileMore")) $("closeMobileMore").onclick=closeMobileMore;
+  if($("mobileMoreBackdrop")) $("mobileMoreBackdrop").onclick=closeMobileMore;
+  if($("mobileLogoutBtn")) $("mobileLogoutBtn").onclick=()=>{closeMobileMore();logout()};
   if($("closeSupervisorChecklist")) $("closeSupervisorChecklist").onclick=()=>closeSupervisorChecklist(false);
   if($("supervisorChecklistFrame")) $("supervisorChecklistFrame").onload=handleChecklistFrameLoad;
   if($("supervisorChecklistModal")) $("supervisorChecklistModal").addEventListener("click",e=>{if(e.target===$("supervisorChecklistModal")) closeSupervisorChecklist(false)});
