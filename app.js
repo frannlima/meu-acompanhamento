@@ -507,10 +507,10 @@ function buildGroupPanelHtml(){
       '<tr class="group-total-row"><td>Total</td><td>'+money(target,2)+'</td><td>'+money(sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+signedMoney(deviation,2)+'</td><td>'+money(ly,2)+'</td><td>'+(evolution===null?"—":(evolution>=0?"▲ ":"▼ ")+pct(evolution))+'</td><td>'+num(targetPhysical)+'</td><td>'+num(salesPhysical)+'</td><td>'+pct(physicalAttainment)+'</td></tr>'+
     '</tbody></table></div>'+
     '<div class="group-share-insights">'+
-      '<div><strong>'+below+' grupos</strong><span>abaixo da meta financeira</span></div>'+
-      '<div><strong>'+(bestAtt?esc(GROUP_LABELS[bestAtt.group_code]||bestAtt.group_code):"—")+'</strong><span>maior atingimento '+(bestAtt?pct(bestAtt.attainment):"—")+'</span></div>'+
-      '<div><strong>'+(bestEvolution?esc(GROUP_LABELS[bestEvolution.group_code]||bestEvolution.group_code):"—")+'</strong><span>melhor evolução vs LY '+(bestEvolution?pct(bestEvolution.evolution_vs_ly):"—")+'</span></div>'+
-      '<div><strong>'+(worst.length?worst.map(g=>esc(GROUP_LABELS[g.group_code]||g.group_code)).join(" e "):"—")+'</strong><span>maiores desvios em valor</span></div>'+
+      '<div class="insight-card insight-attention"><span class="insight-icon" aria-hidden="true">◎</span><div class="insight-copy"><strong>'+below+' grupos</strong><span>abaixo da meta financeira</span></div></div>'+
+      '<div class="insight-card insight-highlight"><span class="insight-icon" aria-hidden="true">▥</span><div class="insight-copy"><strong>'+(bestAtt?esc(GROUP_LABELS[bestAtt.group_code]||bestAtt.group_code):"—")+'</strong><span>maior atingimento '+(bestAtt?pct(bestAtt.attainment):"—")+'</span></div></div>'+
+      '<div class="insight-card insight-positive"><span class="insight-icon" aria-hidden="true">↗</span><div class="insight-copy"><strong>'+(bestEvolution?esc(GROUP_LABELS[bestEvolution.group_code]||bestEvolution.group_code):"—")+'</strong><span>melhor evolução vs LY '+(bestEvolution?pct(bestEvolution.evolution_vs_ly):"—")+'</span></div></div>'+
+      '<div class="insight-card insight-risk"><span class="insight-icon" aria-hidden="true">!</span><div class="insight-copy"><strong>'+(worst.length?worst.map(g=>esc(GROUP_LABELS[g.group_code]||g.group_code)).join(" e "):"—")+'</strong><span>maiores desvios em valor</span></div></div>'+
     '</div>'+
     '<div class="group-share-footer"><span>RIACHUELO</span><b>Moda que inspira o Brasil</b></div>';
 }
