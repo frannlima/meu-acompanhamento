@@ -48,8 +48,12 @@ function updateIdentity(person=state.user){
   if($("identityGreeting")) $("identityGreeting").textContent=greet.toUpperCase();
   if($("identityName")) $("identityName").textContent=personDisplayName(person);
   if($("identityWelcome")) $("identityWelcome").textContent="Seja bem-vindo ao seu acompanhamento de vendas.";
-  if($("identityRole")) $("identityRole").textContent=jobDisplayName(person.job_title||roleLabel(state.role));
-  if($("identityStore")) $("identityStore").textContent=cleanStoreName(person.store_name,person.store_code||state.storeCode);
+  const job=jobDisplayName(person.job_title||roleLabel(state.role));
+  const store=cleanStoreName(person.store_name,person.store_code||state.storeCode);
+  if($("identityRole")) $("identityRole").textContent=job;
+  if($("identityStore")) $("identityStore").textContent=store;
+  if($("mobileGreetingName")) $("mobileGreetingName").textContent=greet+", "+personDisplayName(person)+"!";
+  if($("mobileGreetingMeta")) $("mobileGreetingMeta").textContent=job+" • "+store;
 }
 
 async function refreshAdminStoreCatalog(){
