@@ -489,7 +489,7 @@ function buildGroupPanelHtml(){
     : '<span class="group-kpi-note '+(intervalGrowth>=0?"positive":"negative")+'">'+(intervalGrowth>=0?"▲ evolução ":"▼ involução ")+pct(intervalGrowth)+' • '+signedMoney(intervalDelta,2)+'/h</span>';
 
   return '<div class="group-share-header">'+
-      '<div class="group-share-brand"><img src="./assets/riachuelo-logo.svg" alt="Riachuelo"></div>'+
+      '<div class="group-share-brand"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></div>'+
       '<div class="group-share-title"><h3>DESEMPENHO POR GRUPO DE VENDA</h3><p>Parcial hora a hora • Loja '+esc(state.storeCode)+' • '+dateLabel+' • Atualizado às '+updated+'</p></div>'+
       '<div class="group-share-slogan">MODA QUE<br>INSPIRA O BRASIL</div>'+
     '</div>'+
@@ -673,7 +673,7 @@ function buildRegionalPanelHtml(){
     .slice(0,3);
 
   return '<div class="regional-share-header">'+
-      '<div class="regional-share-brand"><img src="./assets/riachuelo-logo.svg" alt="Riachuelo"></div>'+
+      '<div class="regional-share-brand"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></div>'+
       '<div class="regional-share-title"><span>CE+PI • PARCIAL HORA A HORA</span><h3>CONSOLIDADO REGIONAL</h3><p>'+dateLabel+' • Atualização mais recente às '+latestUpdate+'</p></div>'+
       '<div class="regional-share-slogan">MODA QUE<br>INSPIRA O BRASIL</div>'+
     '</div>'+
