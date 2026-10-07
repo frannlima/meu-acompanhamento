@@ -7,8 +7,8 @@
   <meta name="description" content="Meu Acompanhamento — acompanhamento comercial CE+PI">
   <title>Meu Acompanhamento</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./assets/riachuelo-logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="./styles.css?v=8">
+  <link rel="icon" href="./assets/riachuelo-logo-vertical.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css?v=9">\n  <link rel="stylesheet" href="./enhancements-v9.css?v=1">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -17,7 +17,7 @@
     <div class="login-hero">
       <div class="login-overlay"></div>
       <div class="login-hero-content">
-        <div class="logo-plate"><img src="./assets/riachuelo-logo.svg" alt="Riachuelo"></div>
+        <div class="logo-plate"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></div>
         <span class="eyebrow light">GESTÃO COMERCIAL • CE+PI</span>
         <h1>Meu<br>Acompanhamento</h1>
         <p>Meta, venda, ritmo, projeção e oportunidades da operação na palma da mão.</p>
@@ -42,20 +42,23 @@
   <div id="appShell" class="app-shell hidden">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-logo"><img src="./assets/riachuelo-logo.svg" alt="Riachuelo"></div>
+        <div class="brand-logo"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></div>
         <strong>Meu<br>Acompanhamento</strong>
       </div>
-      <div class="identity">
-        <small>ACESSO IDENTIFICADO</small>
+      <div class="identity identity-welcome">
+        <small id="identityGreeting">BOM DIA</small>
         <strong id="identityName">—</strong>
+        <span id="identityWelcome">Seja bem-vindo ao seu acompanhamento de vendas.</span>
         <span id="identityRole">—</span>
+        <span id="identityStore">—</span>
       </div>
       <nav id="nav" class="nav">
         <button data-section="inicio" class="nav-item active"><span>⌂</span>Visão Geral</button>
         <button data-section="grupos" class="nav-item"><span>◫</span>Mundo / DCOs</button>
         <button data-section="comerciais" class="nav-item"><span>◎</span>Comerciais</button>
+        <button data-section="descontos" class="nav-item"><span>%</span>Painel de Descontos</button>
+        <button data-section="estore" class="nav-item"><span>▣</span>eStore CE+PI</button>
         <button data-section="regional" class="nav-item admin-only hidden"><span>▦</span>Consolidado Regional</button>
-        <button data-section="historico" class="nav-item"><span>◷</span>Histórico de Inputs</button>
         <button data-section="admin" class="nav-item admin-only hidden"><span>⚙</span>Administração</button>
       </nav>
       <div class="sidebar-bottom">
@@ -65,7 +68,7 @@
 
     <main class="main">
       <header class="mobile-header">
-        <img src="./assets/riachuelo-logo.svg" alt="Riachuelo">
+        <img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo">
         <strong>Meu Acompanhamento</strong>
       </header>
 
@@ -81,11 +84,15 @@
             <h1>Visão Geral</h1>
             <p>Resultado real da operação, ritmo e projeção para o fechamento.</p>
           </div>
-          <div class="section-actions">
-            <span id="dateBadge" class="badge outline"></span>
-            <span id="updateBadge" class="badge soft">Hoje</span>
-            <button id="resetDayBtn" class="btn danger reset-capable hidden">↺ Zerar acompanhamento</button>
-            <button id="pasteBtn" class="btn accent">＋ Colar venda da web</button>
+          <div class="section-actions hero-actions">
+            <div class="hero-context">
+              <span id="dateBadge" class="badge outline"></span>
+              <span id="updateBadge" class="badge soft">Hoje</span>
+            </div>
+            <div class="hero-primary-actions">
+              <button id="resetDayBtn" class="btn danger reset-capable hidden">↺ Zerar acompanhamento</button>
+              <button id="pasteBtn" class="btn accent">＋ Colar venda da web</button>
+            </div>
           </div>
         </div>
 
@@ -107,10 +114,10 @@
           <div class="card-head group-panel-app-head">
             <div>
               <span class="eyebrow">PARCIAL HORA A HORA</span>
-              <h2>Resultado de todos os grupos</h2>
-              <p>Painel geral da loja para acompanhar e compartilhar a parcial de vendas.</p>
+              <h2>Desempenho por grupo de venda</h2>
+              <p>Resumo principal da parcial hora a hora, sempre visível na tela inicial.</p>
             </div>
-            <button id="openGroupPanelHome" class="btn primary">Abrir painel para compartilhar</button>
+            <button id="shareGroupPanelHome" class="btn primary">Compartilhar painel</button>
           </div>
           <div class="group-share-scroll">
             <div id="homeGroupSharePanel" class="group-share-panel"></div>
@@ -133,8 +140,7 @@
         <div class="section-head">
           <div><span class="eyebrow">LEITURA OPERACIONAL</span><h1>Mundo / Grupos / DCOs</h1><p>Da visão macro até o DCO que está impulsionando ou retraindo a entrega.</p></div>
           <div class="section-actions">
-            <button id="openGroupPanel" class="btn secondary">▣ Painel por grupos</button>
-            <button class="btn accent open-paste">＋ Novo input</button>
+            <button class="btn accent open-paste">＋ Colar venda da web</button>
           </div>
         </div>
         <div id="worldVisualSummary" class="visual-summary"></div>
@@ -143,20 +149,6 @@
           <div id="worldSwitcher" class="world-switcher"></div>
         </div>
         <div id="worldKpis" class="kpi-grid compact"></div>
-
-        <section class="card group-panel-shell">
-          <div class="card-head group-panel-app-head">
-            <div>
-              <span class="eyebrow">PARCIAL HORA A HORA</span>
-              <h2>Desempenho por grupo de venda</h2>
-              <p>Visão geral da loja pronta para acompanhamento e print.</p>
-            </div>
-            <button id="openGroupPanelInline" class="btn primary">Abrir para print</button>
-          </div>
-          <div class="group-share-scroll">
-            <div id="groupSharePanel" class="group-share-panel"></div>
-          </div>
-        </section>
 
         <div id="groupContent" class="group-stack"></div>
       </section>
@@ -172,7 +164,13 @@
           <button id="refreshCommercials" class="btn secondary">Atualizar</button>
         </div>
 
-        <div id="commercialVisualSummary" class="visual-summary"></div>
+        <div class="card commercial-groups-shell">
+          <div class="card-head">
+            <div><span class="eyebrow">VISÃO DO DIA POR GRUPO</span><h2>Desempenho geral dos grupos</h2></div>
+            <span class="badge soft">Último input</span>
+          </div>
+          <div id="commercialGroupCards" class="commercial-group-cards"></div>
+        </div>
         <div id="commercialKpis" class="kpi-grid compact"></div>
         <div id="commercialEmpty" class="card empty-box hidden"></div>
         <div id="commercialGrid" class="commercial-grid"></div>
@@ -198,19 +196,47 @@
         </section>
       </section>
 
-      <section id="section-historico" class="section">
+      <section id="section-descontos" class="section">
         <div class="section-head">
-          <div><span class="eyebrow">RASTREABILIDADE</span><h1>Histórico de Inputs</h1><p>Cada colagem salva um snapshot para comparação de ritmo.</p></div>
-          <button class="btn accent open-paste">＋ Novo input</button>
+          <div><span class="eyebrow">GESTÃO DO DIA</span><h1>Painel de Descontos</h1><p>Valor financeiro, incidência e participação dos descontos sobre a venda da loja.</p></div>
+          <button id="refreshDiscounts" class="btn secondary">Atualizar</button>
         </div>
-        <div id="historyVisualSummary" class="visual-summary"></div>
+        <div id="discountKpis" class="kpi-grid compact"></div>
+        <div class="discount-layout">
+          <section class="card">
+            <div class="card-head"><div><span class="eyebrow">MUNDOS</span><h2>Participação dos descontos</h2></div></div>
+            <div id="discountWorldChart" class="discount-bars"></div>
+          </section>
+          <section class="card">
+            <div class="card-head"><div><span class="eyebrow">GRUPOS</span><h2>% desconto sobre venda</h2></div></div>
+            <div id="discountGroupChart" class="discount-bars"></div>
+          </section>
+        </div>
         <section class="card">
+          <div class="card-head"><div><span class="eyebrow">MAIOR INCIDÊNCIA</span><h2>DCOs que mais pressionam o desconto</h2></div><span class="badge soft">Último input</span></div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Horário</th><th>Venda acumulada</th><th>Venda do intervalo</th><th>Venda física</th><th>Linhas válidas</th><th>Excluídas</th></tr></thead>
-              <tbody id="historyTable"></tbody>
+              <thead><tr><th>DCO</th><th>Grupo</th><th>Venda</th><th>Desconto</th><th>% sobre venda</th><th>Participação no desconto</th></tr></thead>
+              <tbody id="discountDcoTable"></tbody>
             </table>
           </div>
+        </section>
+        <div id="discountInsight" class="discount-insight"></div>
+      </section>
+
+      <section id="section-estore" class="section">
+        <div class="section-head">
+          <div><span class="eyebrow">ECOSSISTEMA CE+PI</span><h1>eStore CE+PI</h1><p>Acesso ao acompanhamento e ao Hora a Hora do eStore sem duplicar a base oficial.</p></div>
+          <a class="btn accent" href="https://frannlima.github.io/app-estore-cepi/" target="_blank" rel="noopener">Abrir eStore CE+PI</a>
+        </div>
+        <div class="estore-hub-grid">
+          <a class="estore-hub-card" href="https://frannlima.github.io/app-estore-cepi/" target="_blank" rel="noopener"><span>◷</span><strong>Hora a Hora eStore</strong><small>Alimente a venda da filial no app oficial.</small></a>
+          <a class="estore-hub-card" href="https://frannlima.github.io/app-estore-cepi/" target="_blank" rel="noopener"><span>🎯</span><strong>Meta e Pedidos do Dia</strong><small>Consulte meta financeira e desafio de pedidos.</small></a>
+          <a class="estore-hub-card" href="https://frannlima.github.io/app-estore-cepi/" target="_blank" rel="noopener"><span>▦</span><strong>Consolidado Regional</strong><small>Veja lojas ativas, zeradas, share e parciais.</small></a>
+        </div>
+        <section class="card estore-note">
+          <div class="card-head"><div><span class="eyebrow">INTEGRAÇÃO SEGURA</span><h2>Uma porta de entrada, uma única fonte oficial</h2></div></div>
+          <p>O Meu Acompanhamento direciona para o eStore CE+PI, mantendo o Hora a Hora e os dados oficiais sem criar uma segunda base de lançamento.</p>
         </section>
       </section>
 
@@ -222,7 +248,7 @@
         <div id="adminVisualSummary" class="visual-summary"></div>
         <div id="adminTabs" class="admin-tabs">
           <button class="admin-tab active" data-admin-tab="metas">🎯 Metas / LY</button>
-          <button class="admin-tab" data-admin-tab="escalas">👥 Escalas / Produtividade</button>
+          <button class="admin-tab" data-admin-tab="escalas">👥 HC / Produtividade</button>
           <button class="admin-tab" data-admin-tab="comerciais">◎ Comerciais</button>
           <button class="admin-tab" data-admin-tab="estrutura">▦ Grupo / DCO</button>
           <button class="admin-tab" data-admin-tab="acessos">🔐 Acessos</button>
@@ -231,6 +257,14 @@
 
         <div id="adminPanel-metas" class="admin-panel active">
           <div id="adminMetaKpis" class="kpi-grid compact"></div>
+          <section class="card target-import-card">
+            <div class="card-head">
+              <div><span class="eyebrow">IMPORTAÇÃO MENSAL</span><h2>Carregar Meta do Mês / DCOs</h2></div>
+              <label class="btn primary file-action">Selecionar arquivo<input id="monthlyTargetFile" type="file" accept=".xlsx,.xls,.csv" hidden></label>
+            </div>
+            <p class="modal-hint">Use o mesmo modelo de metas por DCO enviado no início da construção do app. A importação atualiza Meta Fin., Meta Fís., LY financeiro e LY físico por loja, data e DCO.</p>
+            <div id="targetImportStatus" class="import-status">Nenhum arquivo importado nesta sessão.</div>
+          </section>
           <section class="card">
             <div class="card-head"><div><span class="eyebrow">META E REFERÊNCIA</span><h2>Parâmetros do dia</h2></div><span id="adminMetaStore" class="badge soft">Loja —</span></div>
             <div id="adminMetaGroups" class="table-wrap"></div>
@@ -238,58 +272,24 @@
         </div>
 
         <div id="adminPanel-escalas" class="admin-panel">
-          <div id="scaleKpis" class="kpi-grid compact"></div>
+          <div id="productivityKpis" class="kpi-grid compact"></div>
           <section class="card">
             <div class="card-head">
-              <div><span class="eyebrow">ESCALAS / PRODUTIVIDADE</span><h2 id="scaleFormTitle">Adicionar escala</h2></div>
-              <button id="newScaleBtn" class="btn secondary small">＋ Nova escala</button>
+              <div><span class="eyebrow">EQUIPE DO DIA</span><h2>HC disponível por grupo</h2></div>
+              <span class="badge soft" id="hcDateLabel">Hoje</span>
             </div>
-            <div class="scale-form-grid">
-              <label class="field"><span>Data</span><input id="scaleDate" type="date"></label>
-              <label class="field"><span>Grupo</span>
-                <select id="scaleGroup">
-                  <option value="feminino_moda">Feminino Moda</option>
-                  <option value="masculino_moda">Masculino Moda</option>
-                  <option value="infantil_moda">Infantil Moda</option>
-                  <option value="moda_casa">Moda Casa</option>
-                  <option value="cba">CBA</option>
-                  <option value="beleza">Beleza</option>
-                  <option value="relogios">Relógios</option>
-                  <option value="lpg">LPG</option>
-                  <option value="basket">Basket</option>
-                </select>
-              </label>
-              <label class="field"><span>Turno</span><input id="scaleShift" type="text" placeholder="Ex.: Abertura"></label>
-              <label class="field"><span>Entrada</span><input id="scaleStart" type="time"></label>
-              <label class="field"><span>Saída</span><input id="scaleEnd" type="time"></label>
-              <label class="field"><span>HC planejado</span><input id="scalePlannedHc" type="number" min="0" value="0"></label>
-              <label class="field"><span>HC real</span><input id="scaleActualHc" type="number" min="0" value="0"></label>
-              <label class="field"><span>Meta da escala</span><input id="scaleTarget" type="number" min="0" step="0.01" value="0"></label>
-              <label class="field wide"><span>Observação</span><input id="scaleNotes" type="text" placeholder="Opcional"></label>
-            </div>
-            <div id="scaleFeedback" class="form-error hidden"></div>
-            <div class="modal-actions">
-              <button id="cancelScaleEdit" class="btn secondary hidden">Cancelar edição</button>
-              <button id="saveScaleBtn" class="btn primary">Salvar escala</button>
-            </div>
+            <p class="modal-hint">Informe somente quantos colaboradores estão disponíveis/escalados no dia. A produtividade física é calculada automaticamente com a venda do último input.</p>
+            <div id="hcInputsGrid" class="hc-inputs-grid"></div>
+            <div id="hcFeedback" class="form-error hidden"></div>
+            <div class="modal-actions"><button id="saveDailyHCBtn" class="btn primary">Salvar HC do dia</button></div>
           </section>
-
           <section class="card">
-            <div class="card-head"><div><span class="eyebrow">PRODUTIVIDADE</span><h2>Resultado por grupo x HC</h2></div></div>
+            <div class="card-head"><div><span class="eyebrow">PRODUTIVIDADE FÍSICA</span><h2>Peças por colaborador</h2></div><span class="badge soft">Venda física ÷ HC</span></div>
+            <div id="productivityBars" class="productivity-bars"></div>
             <div class="table-wrap">
               <table>
-                <thead><tr><th>Grupo</th><th>HC Plan.</th><th>HC Real</th><th>Meta Escala</th><th>Venda Atual</th><th>R$/HC</th><th>Peças/HC</th><th>Meta/HC</th></tr></thead>
+                <thead><tr><th>Grupo</th><th>HC disponível</th><th>Venda física</th><th>Peças/HC</th><th>Venda financeira</th><th>R$/HC</th></tr></thead>
                 <tbody id="productivityTable"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="card">
-            <div class="card-head"><div><span class="eyebrow">CADASTROS DO DIA</span><h2>Escalas lançadas</h2></div></div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>Grupo</th><th>Turno</th><th>Horário</th><th>HC Plan.</th><th>HC Real</th><th>Meta</th><th>Ação</th></tr></thead>
-                <tbody id="scaleTable"></tbody>
               </table>
             </div>
           </section>
@@ -382,13 +382,7 @@
           </section>
         </div>
 
-        <section class="card admin-rules-card">
-          <div class="card-head"><div><span class="eyebrow">REGRAS FIXAS</span><h2>Escopo do aplicativo</h2></div></div>
-          <div class="rule-row"><span>Filiais excluídas</span><strong>109 e 519</strong></div>
-          <div class="rule-row"><span>Eletrônicos excluídos</span><strong>DCOs 530, 531, 532 e 552</strong></div>
-          <div class="rule-row"><span>Relógios preservados</span><strong>DCOs 550 e 551</strong></div>
-          <div class="rule-row"><span>Banco</span><strong>Supabase exclusivo do Meu Acompanhamento</strong></div>
-        </section>
+
       </section>
     </main>
 
@@ -396,7 +390,8 @@
       <button data-section="inicio" class="dock-item active"><span>⌂</span>Início</button>
       <button data-section="grupos" class="dock-item"><span>◫</span>Mundo</button>
       <button data-section="comerciais" class="dock-item"><span>◎</span>Comercial</button>
-      <button data-section="historico" class="dock-item"><span>◷</span>Inputs</button>
+      <button data-section="descontos" class="dock-item"><span>%</span>Descontos</button>
+      <button data-section="estore" class="dock-item"><span>▣</span>eStore</button>
       <button data-section="regional" class="dock-item admin-only hidden"><span>▦</span>Regional</button>
       <button data-section="admin" class="dock-item admin-only hidden"><span>⚙</span>ADM</button>
     </nav>
@@ -427,6 +422,32 @@
   </div>
 
 
+
+
+  <div id="dailyWelcomeModal" class="overlay hidden">
+    <div class="modal october-modal">
+      <button id="closeDailyWelcome" class="welcome-close" aria-label="Fechar">×</button>
+      <div class="october-top">
+        <div class="october-logo"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></div>
+        <span>OUTUBRO ROSA</span>
+      </div>
+      <div class="october-ribbon">🎀</div>
+      <span class="eyebrow">SEU ACOLHIMENTO DE HOJE</span>
+      <h2 id="dailyWelcomeTitle">Bom dia!</h2>
+      <p>Neste Outubro Rosa, o autocuidado merece prioridade. Observe seu corpo, mantenha seus cuidados preventivos em dia e procure orientação profissional quando necessário.</p>
+      <div class="embrace-card">
+        <strong>♡ Você não precisa caminhar sozinho.</strong>
+        <span>Conte com o canal interno Abraçamos Você e os serviços de autocuidado disponíveis neste mês.</span>
+        <a href="https://abracamosvoce.com.br/inicioautocuidado" target="_blank" rel="noopener" class="btn october-btn">Conhecer o Abraçamos Você</a>
+      </div>
+      <div id="supervisorWelcomeBlock" class="supervisor-welcome hidden">
+        <h3>Você já planejou sua rotina na loja hoje?</h3>
+        <p>Acesse o checklist do supervisor e garanta uma operação ainda mais eficiente.</p>
+        <a href="https://rotina-super-ria-ce-pi.franlimabreu.chatgpt.site/" target="_blank" rel="noopener" class="btn accent">Vamos conferir?</a>
+      </div>
+      <button id="continueDailyWelcome" class="btn secondary full">Continuar para o acompanhamento</button>
+    </div>
+  </div>
 
   <div id="resetDayModal" class="overlay hidden">
     <div class="modal reset-modal">
@@ -499,6 +520,6 @@
     </div>
   </div>
 
-  <script src="./app.js?v=8" defer></script>
+  <script src="./app.js?v=9" defer></script>\n  <script src="./enhancements-v9.js?v=1" defer></script>
 </body>
 </html>
