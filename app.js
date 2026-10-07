@@ -1406,4 +1406,4 @@ async function boot(){
     $("matricula").value=""; $("storeCode").value="";
   }
 }
-boot();
+window.addEventListener("DOMContentLoaded",()=>boot());
