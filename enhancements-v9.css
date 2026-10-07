@@ -1112,3 +1112,396 @@ input,select,textarea{font-size:16px}
   .checklist-embed-head .btn{width:100%}
   .checklist-embed-footer span{font-size:8px;line-height:1.35}
 }
+
+
+/* v19 — mobile nativo: sem sobreposicao, sem cortes, navegacao 5 itens */
+.mobile-more-sheet{display:none}
+
+@media(max-width:900px){
+  #appShell{
+    width:100%;
+    max-width:100vw;
+    overflow-x:clip;
+  }
+
+  /* App bar compacto: logo horizontal, sem placa ampliada */
+  .mobile-header{
+    min-height:50px!important;
+    height:auto!important;
+    margin:0 -12px 8px!important;
+    padding:max(6px,env(safe-area-inset-top)) 12px 7px!important;
+    gap:10px!important;
+    align-items:center!important;
+  }
+  .mobile-header>img{
+    width:86px!important;
+    height:28px!important;
+    flex:0 0 86px!important;
+    padding:0!important;
+    margin:0!important;
+    object-fit:contain!important;
+    object-position:left center!important;
+    transform:none!important;
+    background:transparent!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+  }
+  .mobile-greeting{
+    flex:1 1 auto!important;
+    min-width:0!important;
+  }
+  .mobile-greeting strong{
+    font-size:13px!important;
+    line-height:1.15!important;
+  }
+  .mobile-greeting span{
+    margin-top:2px!important;
+    font-size:8px!important;
+    line-height:1.25!important;
+  }
+
+  /* Visão administrativa compacta, sem ocupar a primeira dobra */
+  .admin-store-bar{
+    display:grid!important;
+    grid-template-columns:minmax(0,.8fr) minmax(150px,1.2fr)!important;
+    align-items:center!important;
+    gap:10px!important;
+    min-height:64px!important;
+    margin:0 0 9px!important;
+    padding:9px 10px!important;
+    border-radius:15px!important;
+    box-shadow:0 4px 14px rgba(23,63,53,.05)!important;
+  }
+  .admin-store-bar>div{min-width:0}
+  .admin-store-bar .eyebrow{font-size:6.8px!important}
+  .admin-store-bar strong{
+    margin-top:2px!important;
+    font-size:12.5px!important;
+    line-height:1.15!important;
+  }
+  .admin-store-bar select{
+    width:100%!important;
+    min-width:0!important;
+    min-height:42px!important;
+    height:42px!important;
+    padding:0 10px!important;
+    border-radius:11px!important;
+    font-size:14px!important;
+    background:#fff!important;
+  }
+
+  /* No celular o topo vira um card de dashboard, não um banner de site */
+  .section>.section-head{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    align-items:start!important;
+    gap:10px!important;
+    min-height:0!important;
+    padding:15px!important;
+    margin:0 0 10px!important;
+    border-radius:18px!important;
+    background-image:linear-gradient(135deg,#173F35 0%,#244E43 100%)!important;
+    background-position:center!important;
+    box-shadow:0 8px 22px rgba(23,63,53,.13)!important;
+  }
+  .section>.section-head>div:first-child{min-width:0}
+  .section>.section-head .eyebrow{font-size:7.5px!important}
+  .section>.section-head h1{
+    margin:3px 0 4px!important;
+    font-size:27px!important;
+    line-height:1!important;
+  }
+  .section>.section-head p{
+    max-width:none!important;
+    margin:0!important;
+    font-size:9.5px!important;
+    line-height:1.35!important;
+  }
+  .hero-actions{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+    align-items:stretch!important;
+    width:100%!important;
+  }
+  .hero-context{
+    width:100%!important;
+    min-height:30px!important;
+    justify-content:flex-start!important;
+    gap:6px!important;
+  }
+  .hero-context .badge{
+    min-height:30px!important;
+    padding:5px 9px!important;
+    font-size:8px!important;
+  }
+  .hero-context .badge.soft{display:none!important}
+  .hero-primary-actions{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:7px!important;
+  }
+  .hero-primary-actions .btn{
+    width:100%!important;
+    min-height:44px!important;
+    border-radius:12px!important;
+    font-size:11px!important;
+  }
+
+  /* Resumos sempre enquadrados — nunca carrossel cortado */
+  .visual-summary{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0 0 10px!important;
+    padding:0!important;
+    overflow:visible!important;
+    scroll-snap-type:none!important;
+  }
+  .visual-card{
+    display:grid!important;
+    grid-template-columns:54px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:8px!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:92px!important;
+    flex:initial!important;
+    padding:10px!important;
+    border-radius:15px!important;
+    overflow:hidden!important;
+    scroll-snap-align:none!important;
+  }
+  .visual-donut{
+    width:54px!important;
+    height:54px!important;
+    flex:0 0 54px!important;
+  }
+  .visual-donut:after{inset:6px!important}
+  .visual-donut>div{max-width:43px!important}
+  .visual-donut strong{font-size:10px!important}
+  .visual-donut span{font-size:5.3px!important}
+  .visual-copy{
+    min-width:0!important;
+    width:100%!important;
+  }
+  .visual-copy b{
+    font-size:11px!important;
+    line-height:1.15!important;
+    overflow-wrap:anywhere!important;
+  }
+  .visual-copy span{
+    margin-top:3px!important;
+    font-size:7.5px!important;
+    line-height:1.3!important;
+    overflow-wrap:anywhere!important;
+  }
+
+  .kpi-grid,.kpi-grid.compact,
+  .pace-grid,.admin-grid,.hc-inputs-grid{
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .kpi{
+    min-width:0!important;
+    overflow:hidden!important;
+  }
+  .kpi span,.kpi strong,.kpi small{
+    max-width:100%!important;
+    overflow-wrap:anywhere!important;
+  }
+
+  /* Painel de grupos ocupa somente a largura útil */
+  .home-group-panel,
+  .home-group-panel .group-share-scroll,
+  .home-group-panel .group-share-panel,
+  .home-group-panel .group-share-table-wrap{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+  .home-group-panel{
+    overflow:hidden!important;
+  }
+  .home-group-panel .group-share-scroll{
+    margin-left:0!important;
+    margin-right:0!important;
+    overflow:visible!important;
+  }
+
+  /* Barra inferior nativa: máximo de 5 destinos */
+  .mobile-dock{
+    min-height:64px!important;
+    height:64px!important;
+    left:8px!important;
+    right:8px!important;
+    padding:5px!important;
+    gap:3px!important;
+    border-radius:19px!important;
+    overflow:hidden!important;
+  }
+  .dock-item{
+    min-width:0!important;
+    min-height:54px!important;
+    height:54px!important;
+    padding:4px 2px!important;
+    border-radius:13px!important;
+    font-size:7.5px!important;
+    line-height:1!important;
+  }
+  .dock-item span{
+    font-size:16px!important;
+    line-height:1!important;
+  }
+  #mobileMoreBtn span{
+    font-size:15px!important;
+    font-weight:900;
+    letter-spacing:1px;
+  }
+
+  /* Bottom sheet "Mais" */
+  .mobile-more-sheet:not(.hidden){
+    display:block!important;
+    position:fixed;
+    inset:0;
+    z-index:190;
+  }
+  .mobile-more-backdrop{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    border:0;
+    background:rgba(8,31,25,.52);
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+  }
+  .mobile-more-panel{
+    position:absolute;
+    left:8px;
+    right:8px;
+    bottom:calc(8px + env(safe-area-inset-bottom));
+    padding:8px 14px 16px;
+    border:1px solid rgba(23,63,53,.08);
+    border-radius:24px;
+    background:#FFFEFA;
+    box-shadow:0 24px 70px rgba(8,31,25,.28);
+  }
+  .mobile-more-handle{
+    width:42px;
+    height:4px;
+    margin:1px auto 10px;
+    border-radius:999px;
+    background:#D6D2C4;
+  }
+  .mobile-more-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:11px;
+  }
+  .mobile-more-head h2{
+    margin:2px 0 0;
+    font-family:"Bricolage Grotesque";
+    font-size:20px;
+  }
+  .mobile-more-close{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:50%;
+    background:#ECE9E1;
+    color:var(--fg);
+    font-size:24px;
+    line-height:1;
+  }
+  .mobile-more-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+  .mobile-more-item{
+    min-width:0;
+    min-height:92px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:15px;
+    background:#F8F6F0;
+    color:var(--fg);
+    text-align:left;
+  }
+  .mobile-more-item>span{
+    display:block;
+    margin-bottom:8px;
+    color:var(--primary2);
+    font-size:20px;
+    font-weight:800;
+  }
+  .mobile-more-item b,
+  .mobile-more-item small{display:block}
+  .mobile-more-item b{font-size:12px}
+  .mobile-more-item small{
+    margin-top:3px;
+    color:var(--muted-fg);
+    font-size:8px;
+    line-height:1.3;
+  }
+  .mobile-more-item.danger-more>span,
+  .mobile-more-item.danger-more b{color:var(--error)}
+  body.mobile-sheet-open{overflow:hidden!important}
+}
+
+@media(max-width:430px){
+  .mobile-header{
+    margin-left:-9px!important;
+    margin-right:-9px!important;
+  }
+  .mobile-header>img{
+    width:80px!important;
+    flex-basis:80px!important;
+  }
+  .admin-store-bar{
+    grid-template-columns:minmax(0,.78fr) minmax(145px,1.22fr)!important;
+    gap:8px!important;
+    padding:8px 9px!important;
+  }
+  .admin-store-bar strong{font-size:11.5px!important}
+  .admin-store-bar select{font-size:13px!important}
+  .section>.section-head{padding:14px!important}
+  .section>.section-head h1{font-size:25px!important}
+  .visual-summary{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .visual-card{
+    grid-template-columns:48px minmax(0,1fr)!important;
+    gap:7px!important;
+    min-height:88px!important;
+    padding:9px!important;
+  }
+  .visual-donut{
+    width:48px!important;
+    height:48px!important;
+  }
+  .visual-donut strong{font-size:9px!important}
+  .visual-copy b{font-size:10.5px!important}
+  .visual-copy span{font-size:7px!important}
+}
+
+@media(max-width:360px){
+  .visual-summary{grid-template-columns:1fr!important}
+  .visual-card{
+    grid-template-columns:56px minmax(0,1fr)!important;
+    min-height:82px!important;
+  }
+  .visual-donut{
+    width:56px!important;
+    height:56px!important;
+  }
+  .mobile-more-grid{grid-template-columns:1fr!important}
+}
