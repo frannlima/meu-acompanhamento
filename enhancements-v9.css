@@ -201,3 +201,11 @@
   .prod-bar{grid-template-columns:105px 1fr 55px}
   .discount-insight{grid-template-columns:1fr}
 }
+
+.mobile-greeting{display:none}
+@media(max-width:900px){
+  .mobile-header{display:flex;align-items:center;gap:10px;padding:8px 2px 10px}
+  .mobile-greeting{display:flex;min-width:0;flex-direction:column}
+  .mobile-greeting strong{font-family:"Bricolage Grotesque";font-size:13px;color:#173F35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mobile-greeting span{font-size:7.5px;color:#6F7C77;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+}
