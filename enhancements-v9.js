@@ -125,24 +125,63 @@ function closeDailyWelcomeFlow(){
   enterMainApp();
 }
 
+function closeSupervisorChecklist(showMessage=false){
+  const modal=$("supervisorChecklistModal");
+  const frame=$("supervisorChecklistFrame");
+  if(modal) modal.classList.add("hidden");
+  if(frame){
+    frame.dataset.phase="";
+    frame.dataset.openedAt="";
+    frame.src="about:blank";
+  }
+  enterMainApp();
+  if(showMessage) toast("Checklist concluído. Você voltou ao Meu Acompanhamento.");
+}
+
 function openSupervisorChecklist(event){
   if(event) event.preventDefault();
-  const link=$("supervisorChecklistLink");
-  const url=link?.href||"https://rotina-super-ria-ce-pi.franlimabreu.chatgpt.site/";
+  const url=$("supervisorChecklistLink")?.href||"https://rotina-super-ria-ce-pi.franlimabreu.chatgpt.site/";
   localStorage.setItem(dailyWelcomeKey(),"1");
   enterMainApp();
 
+  const modal=$("supervisorChecklistModal");
+  const frame=$("supervisorChecklistFrame");
+  if(!modal||!frame){
+    const child=window.open(url,"_blank","noopener,noreferrer");
+    if(!child) toast("O navegador bloqueou a abertura do checklist.",true);
+    return;
+  }
+
+  frame.dataset.phase="initial";
+  frame.dataset.openedAt=String(Date.now());
+  frame.src=url;
+  modal.classList.remove("hidden");
+}
+
+function handleChecklistFrameLoad(){
+  const frame=$("supervisorChecklistFrame");
+  if(!frame || !frame.dataset.phase) return;
+  const openedAt=Number(frame.dataset.openedAt||0);
+
+  if(frame.dataset.phase==="initial"){
+    frame.dataset.phase="ready";
+    return;
+  }
+
+  // A navegação posterior ao carregamento inicial normalmente ocorre
+  // ao concluir o checklist. Fechamos o conteúdo externo antes que um
+  // eventual destino de Excel substitua a experiência do app.
+  if(frame.dataset.phase==="ready" && Date.now()-openedAt>1800){
+    closeSupervisorChecklist(true);
+  }
+}
+
+function openChecklistExternalFallback(){
   sessionStorage.setItem("ma_checklist_open","1");
   sessionStorage.setItem("ma_checklist_open_at",String(Date.now()));
-
-  // Abre fora do contexto do PWA: o Meu Acompanhamento permanece aberto
-  // e não pode ser substituído pelo arquivo Excel da página externa.
-  const child=window.open(url,"_blank","noopener,noreferrer");
-  if(!child){
-    sessionStorage.removeItem("ma_checklist_open");
-    sessionStorage.removeItem("ma_checklist_open_at");
-    toast("O navegador bloqueou a abertura do checklist. Libere pop-ups para este app.",true);
-  }
+  const modal=$("supervisorChecklistModal");
+  if(modal) modal.classList.add("hidden");
+  enterMainApp();
 }
 
 function restoreAfterChecklist(){
@@ -152,7 +191,7 @@ function restoreAfterChecklist(){
   sessionStorage.removeItem("ma_checklist_open");
   sessionStorage.removeItem("ma_checklist_open_at");
   enterMainApp();
-  toast("Checklist finalizado. Você voltou ao Meu Acompanhamento.");
+  toast("Você voltou ao Meu Acompanhamento.");
 }
 
 changeAdminStore = async function(code){
@@ -519,6 +558,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   if($("continueDailyWelcome")) $("continueDailyWelcome").onclick=closeDailyWelcomeFlow;
   if($("dailyWelcomeModal")) $("dailyWelcomeModal").addEventListener("click",e=>{if(e.target===$("dailyWelcomeModal")) closeDailyWelcomeFlow()});
   if($("supervisorChecklistLink")) $("supervisorChecklistLink").onclick=openSupervisorChecklist;
+  if($("closeSupervisorChecklist")) $("closeSupervisorChecklist").onclick=()=>closeSupervisorChecklist(false);
+  if($("supervisorChecklistFrame")) $("supervisorChecklistFrame").onload=handleChecklistFrameLoad;
+  if($("supervisorChecklistModal")) $("supervisorChecklistModal").addEventListener("click",e=>{if(e.target===$("supervisorChecklistModal")) closeSupervisorChecklist(false)});
+  if($("openChecklistExternal")) $("openChecklistExternal").addEventListener("click",openChecklistExternalFallback);
   if($("refreshDiscounts")) $("refreshDiscounts").onclick=loadDiscounts;
   if($("saveDailyHCBtn")) $("saveDailyHCBtn").onclick=saveDailyHC;
   if($("monthlyTargetFile")) $("monthlyTargetFile").onchange=e=>importMonthlyTargets(e.target.files?.[0]);
