@@ -1022,3 +1022,93 @@ input,select,textarea{font-size:16px}
     bottom:calc(6px + env(safe-area-inset-bottom))!important;
   }
 }
+
+
+/* v18 — checklist integrado ao app */
+.checklist-embed-modal{
+  width:min(1180px,96vw)!important;
+  height:min(900px,92vh);
+  max-height:92vh!important;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  overflow:hidden!important;
+}
+.checklist-embed-head{
+  flex:0 0 auto;
+  align-items:center;
+}
+.checklist-embed-head p{
+  margin:5px 0 0;
+  color:var(--muted-fg);
+  font-size:10px;
+  line-height:1.45;
+}
+.checklist-frame-shell{
+  position:relative;
+  flex:1 1 auto;
+  min-height:420px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:#fff;
+}
+.checklist-frame-shell iframe{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:420px;
+  border:0;
+  background:#fff;
+}
+.checklist-embed-footer{
+  flex:0 0 auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  color:var(--muted-fg);
+  font-size:9px;
+}
+
+@media(max-width:900px){
+  .checklist-embed-modal{
+    width:100%!important;
+    height:92dvh!important;
+    max-height:92dvh!important;
+    padding:14px!important;
+    border-radius:22px 22px 14px 14px!important;
+  }
+  .checklist-embed-head{
+    align-items:flex-start;
+  }
+  .checklist-embed-head>div{min-width:0}
+  .checklist-embed-head h2{margin-bottom:4px!important}
+  .checklist-frame-shell{
+    min-height:0;
+    border-radius:14px;
+  }
+  .checklist-frame-shell iframe{
+    min-height:0;
+    height:100%;
+  }
+  .checklist-embed-footer{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .checklist-embed-footer .btn{width:100%}
+}
+
+@media(max-width:520px){
+  .checklist-embed-modal{
+    height:94dvh!important;
+    max-height:94dvh!important;
+  }
+  .checklist-embed-head{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+  .checklist-embed-head .btn{width:100%}
+  .checklist-embed-footer span{font-size:8px;line-height:1.35}
+}
