@@ -13,7 +13,8 @@ const state = {
   world:"feminino", section:"inicio", day:null, detail:null, groupSummary:null, history:[], regional:[],
   commercial:null, dcoCatalog:[], commercialPhotoData:"",
   editingCommercialId:null, commercialSelectedDcos:new Set(),
-  scales:{scales:[],productivity:[]}, editingScaleId:null, adminTab:"metas"
+  scales:{scales:[],productivity:[]}, editingScaleId:null, adminTab:"metas",
+  user:null, discounts:null, productivity:null
 };
 
 const $ = (id) => document.getElementById(id);
@@ -141,17 +142,19 @@ async function doLogin(matricula, storeCode, save=true){
   state.logged=true; state.matricula=m; state.storeCode=s;
   state.employeeName=person.first_name||person.full_name||"Colaborador";
   state.role=person.app_role||"colaborador";
+  state.user=person;
   if(save) localStorage.setItem("meu_acompanhamento_session",JSON.stringify({matricula:m,storeCode:s}));
   $("loginScreen").classList.add("hidden");
   $("appShell").classList.remove("hidden");
   $("identityName").textContent=state.employeeName;
-  $("identityRole").textContent=roleLabel(state.role)+" • Loja "+state.storeCode;
+  if($("identityRole")) $("identityRole").textContent=person.job_title||roleLabel(state.role);
+  if($("identityStore")) $("identityStore").textContent=person.store_name||("Loja "+state.storeCode);
   document.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
   $("adminStoreBar").classList.toggle("hidden",state.role!=="administrador");
   document.querySelectorAll(".reset-capable").forEach(el=>el.classList.toggle("hidden",!["administrador","gerente","supervisor"].includes(state.role)));
   buildAdminStoreSelect();
   await loadAll();
-  if(state.role==="supervisor") $("checklistModal").classList.remove("hidden");
+  if(typeof window.afterMeuAcompanhamentoLogin==="function") await window.afterMeuAcompanhamentoLogin(person);
   else showWorldModal();
 }
 
@@ -177,7 +180,7 @@ function buildAdminStoreSelect(){
 
 async function changeAdminStore(code){
   state.storeCode=code;
-  $("identityRole").textContent=roleLabel(state.role)+" • Loja "+state.storeCode;
+  if($("identityStore")) $("identityStore").textContent="Loja "+state.storeCode;
   await loadAll();
   setSection("inicio");
 }
@@ -1345,7 +1348,7 @@ function bind(){
   $("resetDayBtn").onclick=openResetDay; $("cancelResetDay").onclick=closeResetDay; $("confirmResetDay").onclick=confirmResetDay;
   $("resetDayModal").addEventListener("click",e=>{if(e.target===$("resetDayModal")) closeResetDay()});
   $("pasteArea").addEventListener("input",updatePastePreview); $("confirmPaste").onclick=confirmPaste;
-  $("finishChecklist").onclick=()=>{$("checklistModal").classList.add("hidden");showWorldModal()};
+  if($("finishChecklist")) $("finishChecklist").onclick=()=>{$("checklistModal").classList.add("hidden");showWorldModal()};
   $("logoutBtn").onclick=logout; $("adminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
   $("refreshRegional").onclick=loadRegional;
   $("openRegionalPanel").onclick=openRegionalPanel;
@@ -1353,9 +1356,9 @@ function bind(){
   $("shareRegionalPanel").onclick=shareRegionalPanel;
   $("regionalPanelModal").addEventListener("click",e=>{if(e.target===$("regionalPanelModal")) closeRegionalPanel()});
   $("refreshCommercials").onclick=loadCommercials;
-  $("openGroupPanel").onclick=openGroupPanel;
-  $("openGroupPanelInline").onclick=openGroupPanel;
-  $("openGroupPanelHome").onclick=openGroupPanel;
+  if($("openGroupPanel")) $("openGroupPanel").onclick=openGroupPanel;
+  if($("openGroupPanelInline")) $("openGroupPanelInline").onclick=openGroupPanel;
+  if($("openGroupPanelHome")) $("openGroupPanelHome").onclick=openGroupPanel;
   $("closeGroupPanel").onclick=closeGroupPanel;
   $("shareGroupPanel").onclick=shareGroupPanelSummary;
   $("groupPanelModal").addEventListener("click",e=>{if(e.target===$("groupPanelModal")) closeGroupPanel()});
@@ -1365,10 +1368,10 @@ function bind(){
   $("newCommercialBtn").onclick=resetCommercialForm;
   $("cancelCommercialEdit").onclick=resetCommercialForm;
   document.querySelectorAll(".admin-tab").forEach(el=>el.onclick=()=>setAdminTab(el.dataset.adminTab));
-  $("newScaleBtn").onclick=resetScaleForm;
-  $("cancelScaleEdit").onclick=resetScaleForm;
-  $("saveScaleBtn").onclick=saveScale;
-  $("scaleDate").onchange=loadScales;
+  if($("newScaleBtn")) $("newScaleBtn").onclick=resetScaleForm;
+  if($("cancelScaleEdit")) $("cancelScaleEdit").onclick=resetScaleForm;
+  if($("saveScaleBtn")) $("saveScaleBtn").onclick=saveScale;
+  if($("scaleDate")) $("scaleDate").onchange=loadScales;
   $("adminResetDayBtn").onclick=openResetDay;
   $("commercialPhoto").onchange=e=>{
     const file=e.target.files?.[0];
