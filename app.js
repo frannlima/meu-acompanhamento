@@ -454,6 +454,10 @@ function buildGroupPanelHtml(){
     const metaFis=Number(g.target_physical||0);
     const vendaFis=Number(g.sales_physical||0);
     const atingFis=metaFis?vendaFis/metaFis*100:0;
+    const groupInterval=Number(g.interval_sales_financial||0);
+    const groupRate=d.has_input&&intervalMinutes>0?groupInterval/(intervalMinutes/60):0;
+    const groupProjection=d.has_input&&groupRate>0?venda+groupRate*remaining:0;
+    const groupProjectionAtt=meta&&groupProjection?groupProjection/meta*100:0;
 
     return '<tr>'+
       '<td class="group-name-cell">'+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</td>'+
@@ -466,6 +470,7 @@ function buildGroupPanelHtml(){
       '<td>'+num(metaFis)+'</td>'+
       '<td>'+num(vendaFis)+'</td>'+
       '<td class="'+performanceClass(atingFis,100,70)+'">'+pct(atingFis)+'</td>'+
+      '<td class="projection-cell '+performanceClass(groupProjectionAtt,100,90)+'">'+(groupProjection?money(groupProjection,2):"—")+'<small>'+(groupProjection?pct(groupProjectionAtt):"Aguardando ritmo")+'</small></td>'+
     '</tr>';
   }).join("");
 
@@ -502,9 +507,9 @@ function buildGroupPanelHtml(){
       '<div class="group-kpi deviation"><span>Desvio total</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+signedMoney(deviation,2)+'</strong><small>'+pct(attainment-100)+' em relação à meta</small></div>'+
     '</div>'+
     '<div class="group-share-table-wrap"><table class="group-share-table"><thead><tr>'+
-      '<th>Grupo de venda</th><th>Meta Fin.</th><th>Venda Fin.</th><th>% Meta</th><th>Desvio</th><th>Venda LY</th><th>Evolução / Involução vs LY</th><th>Meta Fís.</th><th>Venda Fís.</th><th>% Meta Fís.</th>'+
+      '<th>Grupo de venda</th><th>Meta Fin.</th><th>Venda Fin.</th><th>% Meta</th><th>Desvio</th><th>Venda LY</th><th>Evolução / Involução vs LY</th><th>Meta Fís.</th><th>Venda Fís.</th><th>% Meta Fís.</th><th>Projeção do dia</th>'+
     '</tr></thead><tbody>'+rows+
-      '<tr class="group-total-row"><td>Total</td><td>'+money(target,2)+'</td><td>'+money(sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+signedMoney(deviation,2)+'</td><td>'+money(ly,2)+'</td><td>'+(evolution===null?"—":(evolution>=0?"▲ ":"▼ ")+pct(evolution))+'</td><td>'+num(targetPhysical)+'</td><td>'+num(salesPhysical)+'</td><td>'+pct(physicalAttainment)+'</td></tr>'+
+      '<tr class="group-total-row"><td>Total</td><td>'+money(target,2)+'</td><td>'+money(sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+signedMoney(deviation,2)+'</td><td>'+money(ly,2)+'</td><td>'+(evolution===null?"—":(evolution>=0?"▲ ":"▼ ")+pct(evolution))+'</td><td>'+num(targetPhysical)+'</td><td>'+num(salesPhysical)+'</td><td>'+pct(physicalAttainment)+'</td><td>'+(projection?money(projection,2):"—")+'</td></tr>'+
     '</tbody></table></div>'+
     '<div class="group-share-insights">'+
       '<div class="insight-card insight-attention"><span class="insight-icon" aria-hidden="true">◎</span><div class="insight-copy"><strong>'+below+' grupos</strong><span>abaixo da meta financeira</span></div></div>'+
