@@ -270,115 +270,150 @@
     });
   }
 
-  async function createCommercialShareImage(r){
-    const dcos=Array.isArray(r.dcos)?r.dcos:[];
-    const target=Number(r.target_financial||0), sale=Number(r.sales_financial||0);
-    const attainment=target?sale/target*100:0;
-    const deviation=Number(r.deviation||0);
-    const evolution=r.evolution_vs_ly===null||r.evolution_vs_ly===undefined?null:Number(r.evolution_vs_ly);
-    const interval=Number(r.interval_sales_financial||0);
-    const cols=2, chipRows=Math.max(1,Math.ceil(dcos.length/cols));
-    const width=1080, baseHeight=790, chipH=58, height=Math.max(1080,baseHeight+chipRows*chipH);
-    const canvas=document.createElement("canvas"); canvas.width=width; canvas.height=height;
+  async function createCommercialsShareImage(){
+    const rows=Array.isArray(state.commercial?.commercials)?state.commercial.commercials:[];
+    if(!rows.length) throw new Error("Não há comerciais carregados.");
+
+    const width=1080;
+    const rowH=172;
+    const headerH=330;
+    const footerH=90;
+    const height=Math.max(1080,headerH+rows.length*rowH+footerH);
+    const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext("2d");
-    const C={green:"#173F35",green2:"#466964",cream:"#F7F4ED",white:"#FFFFFF",orange:"#DE7C00",red:"#AE535C",line:"#DAD9D6",muted:"#6F7C77",good:"#2E6B58"};
+    const C={green:"#173F35",green2:"#466964",cream:"#F7F4ED",white:"#FFFFFF",orange:"#DE7C00",red:"#AE535C",line:"#DAD9D6",muted:"#6F7C77",good:"#2E6B58",soft:"#EEF2EF"};
+
     ctx.fillStyle=C.cream;ctx.fillRect(0,0,width,height);
     ctx.fillStyle=C.green;ctx.fillRect(0,0,width,220);
 
     try{
       const logo=await loadShareImage("./assets/riachuelo-logo.svg");
-      drawRounded(ctx,60,52,230,76,18,C.white);
-      ctx.drawImage(logo,82,73,186,34);
+      drawRounded(ctx,54,48,230,76,18,C.white);
+      ctx.drawImage(logo,78,70,182,34);
     }catch(_){}
-    ctx.fillStyle=C.white;ctx.font="800 30px Arial";ctx.textAlign="right";
-    ctx.fillText("PERFORMANCE COMERCIAL",1010,82);
+
+    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 31px Arial";
+    ctx.fillText("PERFORMANCE COMERCIAL",1026,76);
     ctx.font="600 18px Arial";ctx.fillStyle="#D6D2C4";
-    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1010,118);
-    ctx.font="700 15px Arial";ctx.fillText("Moda que inspira o Brasil",1010,158);
+    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1026,114);
+    ctx.font="700 15px Arial";ctx.fillText("Moda que inspira o Brasil",1026,152);
 
-    let avatarOk=false;
-    if(r.photo_url){
-      try{
-        const img=await loadShareImage(r.photo_url);
-        ctx.save();ctx.beginPath();ctx.arc(130,288,70,0,Math.PI*2);ctx.clip();
-        const s=Math.min(img.width,img.height),sx=(img.width-s)/2,sy=(img.height-s)/2;
-        ctx.drawImage(img,sx,sy,s,s,60,218,140,140);ctx.restore();avatarOk=true;
-      }catch(_){}
-    }
-    if(!avatarOk){
-      ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(130,288,70,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle=C.white;ctx.font="800 34px Arial";ctx.textAlign="center";
-      ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),130,300);
-    }
-
-    ctx.textAlign="left";ctx.fillStyle=C.green;ctx.font="800 37px Arial";
-    ctx.fillText(String(r.commercial_name||"Comercial"),235,276);
-    ctx.font="700 16px Arial";ctx.fillStyle=C.green2;
-    ctx.fillText(dcos.length+" DCOs sob responsabilidade",235,310);
-    ctx.font="600 15px Arial";ctx.fillStyle=C.muted;
-    ctx.fillText("Parcial atual • acompanhamento individual",235,340);
+    const totalTarget=rows.reduce((s,r)=>s+Number(r.target_financial||0),0);
+    const totalSale=rows.reduce((s,r)=>s+Number(r.sales_financial||0),0);
+    const totalDev=totalSale-totalTarget;
+    const totalAtt=totalTarget?totalSale/totalTarget*100:0;
+    const totalDcos=new Set(rows.flatMap(r=>(r.dcos||[]).map(d=>String(d.dco_code)))).size;
 
     const kpis=[
-      ["META",money(target,2),C.green],
-      ["VENDA",money(sale,2),C.green],
-      ["ATINGIMENTO",pct(attainment),attainment>=100?C.good:attainment>=90?C.orange:C.red],
-      ["DESVIO",signedMoney(deviation,2),deviation>=0?C.good:C.red],
-      ["VS LY",evolution===null?"—":pct(evolution),evolution===null?C.muted:evolution>=0?C.good:C.red],
-      ["ÚLTIMO INPUT",signedMoney(interval,2),interval>=0?C.good:C.red]
+      ["META ATRIBUÍDA",money(totalTarget,2),C.green],
+      ["VENDA",money(totalSale,2),C.green],
+      ["ATINGIMENTO",pct(totalAtt),totalAtt>=100?C.good:totalAtt>=90?C.orange:C.red],
+      ["DESVIO",signedMoney(totalDev,2),totalDev>=0?C.good:C.red],
+      ["COMERCIAIS",String(rows.length),C.green],
+      ["DCOs ATRIBUÍDOS",String(totalDcos),C.green2]
     ];
-    const gap=14, cardW=(width-120-gap*2)/3, cardH=126, top=400;
+    const gap=10,kw=(width-108-gap*5)/6;
     kpis.forEach((k,i)=>{
-      const row=Math.floor(i/3),col=i%3,x=60+col*(cardW+gap),y=top+row*(cardH+gap);
-      drawRounded(ctx,x,y,cardW,cardH,18,C.white,C.line);
-      ctx.fillStyle=C.muted;ctx.font="800 13px Arial";ctx.fillText(k[0],x+18,y+30);
-      ctx.fillStyle=k[2];ctx.font="800 24px Arial";ctx.fillText(k[1],x+18,y+76);
+      const x=54+i*(kw+gap),y=240;
+      drawRounded(ctx,x,y,kw,74,14,C.white,C.line);
+      ctx.textAlign="left";ctx.fillStyle=C.muted;ctx.font="800 10px Arial";ctx.fillText(k[0],x+12,y+24);
+      ctx.fillStyle=k[2];ctx.font="800 17px Arial";ctx.fillText(k[1],x+12,y+53);
     });
 
-    let y=top+2*(cardH+gap)+28;
-    ctx.fillStyle=C.green;ctx.font="800 22px Arial";ctx.fillText("DCOs DE RESPONSABILIDADE",60,y);
-    y+=26;ctx.fillStyle=C.muted;ctx.font="600 14px Arial";ctx.fillText("Código • departamento",60,y);
-    y+=26;
-    const chipW=(width-120-gap)/2;
-    dcos.forEach((d,i)=>{
-      const row=Math.floor(i/2),col=i%2,x=60+col*(chipW+gap),cy=y+row*chipH;
-      drawRounded(ctx,x,cy,chipW,46,12,C.white,C.line);
-      ctx.fillStyle=C.orange;ctx.font="800 14px Arial";ctx.fillText(String(d.dco_code),x+14,cy+28);
-      ctx.fillStyle=C.green;ctx.font="700 14px Arial";
-      const name=String(d.dco_name||premiumDcoName(d));
-      ctx.fillText(name.length>40?name.slice(0,38)+"…":name,x+64,cy+28);
-    });
+    let y=338;
+    for(const r of rows){
+      const target=Number(r.target_financial||0),sale=Number(r.sales_financial||0);
+      const att=target?sale/target*100:0;
+      const dev=sale-target;
+      const dcos=Array.isArray(r.dcos)?r.dcos:[];
+      drawRounded(ctx,54,y,972,rowH-14,18,C.white,C.line);
 
-    ctx.fillStyle=C.green2;ctx.font="700 13px Arial";ctx.fillText("MEU ACOMPANHAMENTO",60,height-34);
-    ctx.textAlign="right";ctx.fillText("Simples é incrível.",width-60,height-34);
+      let avatarOk=false;
+      if(r.photo_url){
+        try{
+          const img=await loadShareImage(r.photo_url);
+          ctx.save();ctx.beginPath();ctx.arc(112,y+71,48,0,Math.PI*2);ctx.clip();
+          const s=Math.min(img.width,img.height),sx=(img.width-s)/2,sy=(img.height-s)/2;
+          ctx.drawImage(img,sx,sy,s,s,64,y+23,96,96);ctx.restore();avatarOk=true;
+        }catch(_){}
+      }
+      if(!avatarOk){
+        ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(112,y+71,48,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 24px Arial";
+        ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),112,y+80);
+      }
+
+      ctx.textAlign="left";ctx.fillStyle=C.green;ctx.font="800 23px Arial";
+      ctx.fillText(String(r.commercial_name||"Comercial"),182,y+42);
+      ctx.fillStyle=C.muted;ctx.font="700 12px Arial";
+      ctx.fillText(dcos.length+" DCOs • "+dcos.map(d=>d.dco_code).join(" • "),182,y+66);
+
+      const cols=[
+        ["META",money(target,2),C.green],
+        ["VENDA",money(sale,2),C.green],
+        ["ATING.",pct(att),att>=100?C.good:att>=90?C.orange:C.red],
+        ["DESVIO",signedMoney(dev,2),dev>=0?C.good:C.red]
+      ];
+      const cx=[182,405,620,790];
+      cols.forEach((k,i)=>{
+        ctx.fillStyle=C.muted;ctx.font="800 10px Arial";ctx.fillText(k[0],cx[i],y+102);
+        ctx.fillStyle=k[2];ctx.font="800 16px Arial";ctx.fillText(k[1],cx[i],y+128);
+      });
+
+      const barX=182,barY=y+143,barW=790,barH=7;
+      drawRounded(ctx,barX,barY,barW,barH,4,"#E7E5DE");
+      drawRounded(ctx,barX,barY,Math.max(2,Math.min(barW,barW*att/100)),barH,4,att>=100?C.good:att>=90?C.orange:C.red);
+
+      y+=rowH;
+    }
+
+    ctx.fillStyle=C.green2;ctx.font="700 13px Arial";ctx.textAlign="left";
+    ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",54,height-34);
+    ctx.textAlign="right";ctx.fillText("Ninguém faz nada sozinho.",1026,height-34);
+
     return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),"image/png",1));
   }
 
-  async function shareCommercialCard(id){
-    const r=(state.commercial?.commercials||[]).find(x=>String(x.commercial_id)===String(id));
-    if(!r) return toast("Comercial não encontrado.",true);
-    const btn=document.querySelector('[data-share-commercial="'+CSS.escape(String(id))+'"]');
+  async function shareCommercialsCard(){
+    const btn=$("shareCommercialsCard");
     const old=btn?.innerHTML;
-    if(btn){btn.disabled=true;btn.textContent="Gerando..."}
+    if(btn){btn.disabled=true;btn.textContent="Gerando card..."}
     try{
-      const blob=await createCommercialShareImage(r);
-      const clean=String(r.commercial_name||"comercial").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g,"_");
-      const file=new File([blob],"Performance_"+clean+"_"+localDate()+".png",{type:"image/png"});
-      const txt="Performance Comercial • "+r.commercial_name+" • Loja "+state.storeCode;
+      const blob=await createCommercialsShareImage();
+      const file=new File([blob],"Performance_Comerciais_Loja_"+state.storeCode+"_"+localDate()+".png",{type:"image/png"});
+      const txt="Performance Comercial • Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({title:"Performance Comercial",text:txt,files:[file]});
       }else{
         const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-        toast("Card do comercial gerado.");
+        toast("Card geral dos comerciais gerado.");
       }
-    }catch(e){if(e?.name!=="AbortError") toast(e.message||"Não foi possível compartilhar o card.",true)}
-    finally{if(btn){btn.disabled=false;btn.innerHTML=old||"Compartilhar card"}}
+    }catch(e){
+      if(e?.name!=="AbortError") toast(e.message||"Não foi possível compartilhar o card.",true);
+    }finally{
+      if(btn){btn.disabled=false;btn.innerHTML=old||"↗ Compartilhar card geral"}
+    }
   }
 
-  window.shareCommercialCard=shareCommercialCard;
+  window.shareCommercialsCard=shareCommercialsCard;
 
   function augmentCommercialCards(){
     const payload=state.commercial||{};
     const rows=Array.isArray(payload.commercials)?payload.commercials:[];
+    let shareAll=$("shareCommercialsCard");
+    if(!shareAll){
+      const refresh=$("refreshCommercials");
+      if(refresh){
+        shareAll=document.createElement("button");
+        shareAll.id="shareCommercialsCard";
+        shareAll.className="btn primary";
+        shareAll.type="button";
+        shareAll.innerHTML="↗ Compartilhar card geral";
+        refresh.parentNode.insertBefore(shareAll,refresh);
+      }
+    }
+    if(shareAll) shareAll.onclick=shareCommercialsCard;
+
     const grid=$("commercialGrid");
     if(grid){
       const cards=grid.querySelectorAll(".commercial-card");
@@ -388,12 +423,6 @@
         const dcos=Array.isArray(r.dcos)?r.dcos:[];
         card.querySelector(".commercial-card-actions")?.remove();
         card.querySelector(".commercial-dco-resizable")?.remove();
-
-        const actions=document.createElement("div");
-        actions.className="commercial-card-actions";
-        actions.innerHTML='<button type="button" class="commercial-share-btn" data-share-commercial="'+esc(r.commercial_id||"")+'">↗ Compartilhar card</button>';
-        const top=card.querySelector(".commercial-card-top");
-        if(top) top.insertAdjacentElement("afterend",actions); else card.prepend(actions);
 
         const block=document.createElement("section");
         block.className="commercial-dco-resizable is-collapsed";
@@ -406,7 +435,6 @@
         const detr=card.querySelector(".commercial-detractors");
         if(detr) card.insertBefore(block,detr); else card.appendChild(block);
 
-        actions.querySelector(".commercial-share-btn").onclick=()=>shareCommercialCard(r.commercial_id);
         const handle=block.querySelector(".commercial-dco-resize-handle");
         handle.onclick=()=>{
           const expanded=block.classList.toggle("is-expanded");
