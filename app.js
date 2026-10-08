@@ -62,23 +62,55 @@ function parsePt(value){
   return Number.isFinite(n)?n:0;
 }
 
+function splitSalesPasteLine(raw){
+  const clean=String(raw||"").replace(/\r/g,"").trim();
+  if(!clean) return [];
+
+  // Formato original copiado da Web: TAB entre as 14 colunas.
+  if(clean.includes("\t")){
+    const cols=clean.split("\t");
+    while(cols.length<14) cols.push("");
+    if(cols.length===14) return cols;
+  }
+
+  // Alguns navegadores/terminais convertem TAB em espaços ao copiar.
+  // A linha tem: Grupo + Departamento/DCO + 12 campos numéricos.
+  const n="[+-]?[0-9][0-9.]*[,]?[0-9]*";
+  const re=new RegExp(
+    "^([^\\s]+)\\s+(.+)\\s+"+
+    Array.from({length:12},()=>("(" + n + ")")).join("\\s+")+
+    "$"
+  );
+  const m=clean.match(re);
+  return m ? m.slice(1) : [];
+}
+
 function parsePaste(text){
   const rawLines=String(text||"").split(/\r?\n/).filter(line=>line.trim().length);
   const rows=[]; let invalid=0, excluded=0, sales=0, physical=0;
+
   for(const raw of rawLines){
-    const firstText=raw.split("\t")[0].trim();
-    if(/^grupo$/i.test(firstText) || /^TOTAL\s+(GRUPO|FILIAL)/i.test(firstText)) continue;
-    const cols=raw.replace(/\r$/,"").split("\t");
-    while(cols.length<14) cols.push("");
+    const clean=raw.replace(/\r/g,"").trim();
+    const lower=clean.toLowerCase();
+
+    // Ignora cabeçalho e totais, independentemente de TAB ou espaço.
+    if(/^total\s+(grupo|filial)/i.test(clean)) continue;
+    if(lower.includes("grupo") && (lower.includes("depart") || lower.includes("departamento"))) continue;
+
+    const cols=splitSalesPasteLine(clean);
     if(cols.length!==14){invalid++;continue;}
+
     const dcoMatch=String(cols[1]||"").trim().match(/^(\d+)/);
     if(!dcoMatch){invalid++;continue;}
+
     const dco=Number(dcoMatch[1]);
     if(EXCLUDED_DCO.has(dco)){excluded++;continue;}
+
     rows.push(cols);
     sales+=parsePt(cols[5]);
     physical+=parsePt(cols[7]);
   }
+
   return {rows,invalid,excluded,sales,physical};
 }
 
