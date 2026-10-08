@@ -381,14 +381,60 @@ function renderDashboard(){
   $("paceTitle").textContent=!has?"Aguardando o primeiro input da venda":currentPerHour>=needed?"A operação está no ritmo necessário":"A operação precisa acelerar para a meta";
   $("paceBadge").className="badge "+(!has?"outline":currentPerHour>=needed?"good":"warn");
   $("paceBadge").textContent=!has?"Sem input":currentPerHour>=needed?"No ritmo":"Atenção";
-  $("paceGrid").innerHTML=[
-    ["Meta do dia",target?money(target,2):"—",""],
-    ["Venda atual",has?money(sale,2):"—",""],
-    ["R$/h necessário",needed?money(needed,2):"—",""],
-    ["R$/h atual",currentPerHour?money(currentPerHour,2):"—",currentPerHour>=needed?"positive":"negative"],
-    ["Projeção",projection?money(projection,2):"—",projection?(projDev>=0?"positive":"negative"):""],
-    ["Vs ritmo anterior",firstInput?"1º input":intervalGrowth===null?"—":pct(intervalGrowth),intervalGrowth===null?"":intervalGrowth>=0?"positive":"negative"]
-  ].map(x=>'<div><span>'+x[0]+'</span><strong class="'+x[2]+'">'+x[1]+'</strong></div>').join("");
+  const saleProgress=target?Math.max(0,Math.min(100,attainment)):0;
+  const projectionTone=!projection?"neutral":projectionAttainment>=100?"good":projectionAttainment>=90?"warn":"bad";
+  const paceTone=!has?"neutral":currentPerHour>=needed?"good":"bad";
+  const remainingValue=Math.max(0,target-sale);
+  const remainingPieces=Math.max(0,targetPhysical-physical);
+  const remHours=Math.max(0,Math.floor(remaining));
+  const remMinutes=Math.max(0,Math.round((remaining-remHours)*60));
+  const remainingLabel=remaining>0?(String(remHours).padStart(2,"0")+"h "+String(remMinutes).padStart(2,"0")+"min"):"Encerrado";
+  const currentVsNeeded=currentPerHour&&needed?((currentPerHour/needed)-1)*100:null;
+  const paceFocus=!has
+    ?"Faça o primeiro input para iniciar a leitura do ritmo."
+    :currentPerHour>=needed
+      ?"Mantenha o ritmo e acompanhe a projeção até o fechamento."
+      :"Priorize conversão e acelere o ritmo para reduzir o saldo da meta.";
+
+  $("paceGrid").innerHTML=
+    '<article class="pace-feature pace-feature-meta">'+
+      '<div class="pace-card-top"><span class="pace-icon">◎</span><div><span class="pace-label">META DO DIA</span><small>Meta financeira</small></div></div>'+
+      '<strong class="pace-value">'+(target?money(target,2):"—")+'</strong>'+
+      '<div class="pace-progress"><i style="width:'+(target?100:0)+'%"></i></div>'+
+      '<div class="pace-progress-copy"><span>'+num(targetPhysical)+' peças</span><b>100%</b></div>'+
+    '</article>'+
+    '<article class="pace-feature pace-feature-sale">'+
+      '<div class="pace-card-top"><span class="pace-icon">▣</span><div><span class="pace-label">VENDA ATUAL</span><small>Resultado até agora</small></div></div>'+
+      '<strong class="pace-value">'+(has?money(sale,2):"—")+'</strong>'+
+      '<div class="pace-progress"><i style="width:'+saleProgress.toFixed(1)+'%"></i></div>'+
+      '<div class="pace-progress-copy"><span>'+(has?pct(attainment)+" da meta":"Aguardando input")+'</span><b>'+num(physical)+' peças</b></div>'+
+    '</article>'+
+    '<article class="pace-feature pace-feature-projection pace-tone-'+projectionTone+'">'+
+      '<div class="pace-card-top"><span class="pace-icon">↗</span><div><span class="pace-label">PROJEÇÃO</span><small>Estimativa de fechamento</small></div></div>'+
+      '<strong class="pace-value">'+(projection?money(projection,2):"—")+'</strong>'+
+      '<div class="pace-projection-chip">'+(projection?pct(projectionAttainment)+" da meta":"Aguardando ritmo")+'</div>'+
+      '<small class="pace-feature-note">'+(projection?(projDev>=0?"Acima da meta em ":"Abaixo da meta em ")+money(Math.abs(projDev),2):"Será calculada após formar ritmo")+'</small>'+
+    '</article>'+
+    '<article class="pace-support pace-support-needed">'+
+      '<div class="pace-card-top"><span class="pace-icon">◔</span><div><span class="pace-label">R$/H NECESSÁRIO</span><small>Para atingir a meta</small></div></div>'+
+      '<strong class="pace-support-value">'+(needed?money(needed,2):"—")+'</strong>'+
+    '</article>'+
+    '<article class="pace-support pace-support-current pace-tone-'+paceTone+'">'+
+      '<div class="pace-card-top"><span class="pace-icon">◕</span><div><span class="pace-label">R$/H ATUAL</span><small>Resultado por hora</small></div></div>'+
+      '<strong class="pace-support-value">'+(currentPerHour?money(currentPerHour,2):"—")+'</strong>'+
+      '<div class="pace-status-chip">'+(currentVsNeeded===null?"Aguardando ritmo":(currentVsNeeded>=0?"↑ ":"↓ ")+pct(Math.abs(currentVsNeeded))+" vs necessário")+'</div>'+
+    '</article>'+
+    '<article class="pace-support pace-support-previous">'+
+      '<div class="pace-card-top"><span class="pace-icon">◷</span><div><span class="pace-label">VS RITMO ANTERIOR</span><small>Comparação com o último input</small></div></div>'+
+      '<strong class="pace-support-value '+(intervalGrowth===null?"":intervalGrowth>=0?"positive":"negative")+'">'+(firstInput?"1º input":intervalGrowth===null?"—":pct(intervalGrowth))+'</strong>'+
+      '<small class="pace-feature-note">'+(firstInput?"Sem comparação ainda":intervalGrowth===null?"Aguardando novo input":intervalGrowth>=0?"Ritmo evoluindo":"Ritmo retraindo")+'</small>'+
+    '</article>'+
+    '<div class="pace-footer">'+
+      '<div class="pace-footer-metric"><span>Falta para a meta</span><strong>'+money(remainingValue,2)+'</strong></div>'+
+      '<div class="pace-footer-metric"><span>Peças necessárias</span><strong>'+num(remainingPieces)+' peças</strong></div>'+
+      '<div class="pace-footer-metric"><span>Tempo restante</span><strong>'+remainingLabel+'</strong></div>'+
+      '<div class="pace-footer-focus"><span>FOCO DO MOMENTO</span><strong>'+paceFocus+'</strong></div>'+
+    '</div>';
 
   $("intervalBox").className=has?"interval-live":"empty-box";
   $("intervalBox").innerHTML=has?'<strong>'+money(interval,2)+'</strong><span>'+(firstInput?'venda acumulada desde a abertura':'venda do último intervalo')+'</span><small>'+(firstInput?'Período considerado: '+openingTime+' até '+localTime(d.captured_at):'Atualização '+localTime(d.captured_at))+'</small>':"Faça o primeiro input para iniciar o acompanhamento do ritmo.";
