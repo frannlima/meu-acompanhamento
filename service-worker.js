@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v27";
+const CACHE="meu-acompanhamento-v28";
 const ASSETS=[
   "./",
   "./index.html",
@@ -17,7 +17,8 @@ const ASSETS=[
   "./assets/profiles/gabi-castro.jpg",
   "./assets/profiles/gabriela.jpg",
   "./assets/profiles/josy-rodrigues.jpg",
-  "./assets/profiles/lennon-batista.jpg"
+  "./assets/profiles/lennon-batista.jpg",
+  "./assets/profiles/mariane-nogueira.jpg"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
