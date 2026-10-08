@@ -1185,3 +1185,40 @@
     max-height:300px;
   }
 }
+
+
+/* v32 — importação de venda robusta */
+.paste-modal{
+  width:min(980px,96vw)!important;
+}
+.paste-modal #pasteArea{
+  min-height:420px!important;
+  max-height:58vh!important;
+  overflow:auto!important;
+  resize:vertical!important;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important;
+  font-size:11px!important;
+  line-height:1.45!important;
+  white-space:pre!important;
+}
+.paste-warning{
+  white-space:pre-wrap;
+  max-height:160px;
+  overflow:auto;
+  background:#FFF5E6!important;
+  border-color:#E8B45B!important;
+  color:#7A4B00!important;
+}
+@media(max-width:900px){
+  .paste-modal{
+    width:100%!important;
+    max-width:100%!important;
+    max-height:94vh!important;
+    padding:16px!important;
+  }
+  .paste-modal #pasteArea{
+    min-height:320px!important;
+    max-height:48vh!important;
+    font-size:10px!important;
+  }
+}
