@@ -63,45 +63,89 @@ function parsePt(value){
 }
 
 function splitSalesPasteLine(raw){
-  const clean=String(raw||"").replace(/\r/g,"").trim();
+  const clean=String(raw||"")
+    .replace(/\u00a0/g," ")
+    .replace(/[\u2007\u202f]/g," ")
+    .replace(/\r/g,"")
+    .trim();
   if(!clean) return [];
 
-  // Formato original copiado da Web: TAB entre as 14 colunas.
+  const normalizeCols=(cols)=>{
+    const out=cols.map(v=>String(v??"").trim()).filter((v,i,a)=>!(v===""&&a.length>14));
+    return out.length===14?out:[];
+  };
+
+  // 1) Clipboard estruturado: TAB.
   if(clean.includes("\t")){
-    const cols=clean.split("\t");
-    while(cols.length<14) cols.push("");
+    const cols=clean.split("\t").map(v=>v.trim());
     if(cols.length===14) return cols;
   }
 
-  // Alguns navegadores/terminais convertem TAB em espaços ao copiar.
-  // A linha tem: Grupo + Departamento/DCO + 12 campos numéricos.
-  const n="[+-]?[0-9][0-9.]*[,]?[0-9]*";
-  const re=new RegExp(
-    "^([^\\s]+)\\s+(.+)\\s+"+
-    Array.from({length:12},()=>("(" + n + ")")).join("\\s+")+
-    "$"
-  );
-  const m=clean.match(re);
-  return m ? m.slice(1) : [];
+  // 2) CSV / ponto-e-vírgula / pipe, quando a origem mantém delimitadores.
+  for(const sep of [";","|"]){
+    if(clean.includes(sep)){
+      const cols=clean.split(sep).map(v=>v.trim());
+      if(cols.length===14) return cols;
+    }
+  }
+
+  // 3) Texto livre: lê a linha da direita para a esquerda.
+  // O relatório tem sempre 12 campos numéricos após "Grupo" + "DCO-Departamento".
+  // Assim, nomes com vários espaços continuam válidos.
+  const numericToken="[+-]?(?:R\\$\\s*)?(?:\\d{1,3}(?:\\.\\d{3})*|\\d+)(?:,\\d+)?%?";
+  const tailRe=new RegExp("("+numericToken+")\\s*$","i");
+  let rest=clean;
+  const nums=[];
+  for(let i=0;i<12;i++){
+    const m=rest.match(tailRe);
+    if(!m) break;
+    nums.unshift(m[1].replace(/^R\$\s*/i,"").replace(/%$/,"").trim());
+    rest=rest.slice(0,m.index).trim();
+  }
+  if(nums.length===12){
+    // Prefixo esperado: <grupo> <DCO>-<departamento>.
+    const prefix=rest.match(/^(\S+)\s+(.+)$/);
+    if(prefix){
+      const first=prefix[1].trim();
+      const second=prefix[2].trim();
+      if(/^\d+$/.test(first) && /^\d{3}\b/.test(second)) return [first,second,...nums];
+    }
+  }
+
+  // 4) Último fallback: múltiplos espaços como separador de coluna.
+  const wide=clean.split(/\s{2,}/).map(v=>v.trim()).filter(Boolean);
+  if(wide.length===14) return wide;
+
+  return [];
 }
 
-function parsePaste(text){
-  const rawLines=String(text||"").split(/\r?\n/).filter(line=>line.trim().length);
-  const rows=[]; let invalid=0, excluded=0, sales=0, physical=0;
+function normalizeSalesPaste(text){
+  const source=String(text||"")
+    .replace(/\u00a0/g," ")
+    .replace(/[\u2007\u202f]/g," ")
+    .replace(/\r/g,"");
+  const rawLines=source.split(/\n/).map(x=>x.trim()).filter(Boolean);
+  const rows=[];
+  const rejected=[];
+  let excluded=0,sales=0,physical=0;
 
-  for(const raw of rawLines){
-    const clean=raw.replace(/\r/g,"").trim();
+  for(const clean of rawLines){
     const lower=clean.toLowerCase();
 
-    // Ignora cabeçalho e totais, independentemente de TAB ou espaço.
-    if(/^total\s+(grupo|filial)/i.test(clean)) continue;
-    if(lower.includes("grupo") && (lower.includes("depart") || lower.includes("departamento"))) continue;
+    // Linhas de apoio do relatório não pertencem aos DCOs.
+    if(/^total\s+(grupo|filial)\b/i.test(clean)) continue;
+    if(/^(grupo|mundo|departamento|dco)\b/i.test(clean) && /(meta|venda|depart|f[ií]s|ly)/i.test(clean)) continue;
+    if(/^(meta|venda|desvio|proje[cç][aã]o|atingimento)\b/i.test(clean) && !/^\d+\s+\d{3}/.test(clean)) continue;
 
     const cols=splitSalesPasteLine(clean);
-    if(cols.length!==14){invalid++;continue;}
+    if(cols.length!==14){
+      // Só acusa erro se a linha realmente tiver aparência de um DCO.
+      if(/^\d+\s+(?:\t\s*)?\d{3}\b/.test(clean) || /^\d+\s+\d{3}[-–—]/.test(clean)) rejected.push(clean);
+      continue;
+    }
 
-    const dcoMatch=String(cols[1]||"").trim().match(/^(\d+)/);
-    if(!dcoMatch){invalid++;continue;}
+    const dcoMatch=String(cols[1]||"").trim().match(/^(\d{3})\b/);
+    if(!dcoMatch){rejected.push(clean);continue;}
 
     const dco=Number(dcoMatch[1]);
     if(EXCLUDED_DCO.has(dco)){excluded++;continue;}
@@ -111,9 +155,20 @@ function parsePaste(text){
     physical+=parsePt(cols[7]);
   }
 
-  return {rows,invalid,excluded,sales,physical};
+  return {
+    rows,
+    invalid:rejected.length,
+    rejected,
+    excluded,
+    sales,
+    physical,
+    normalizedTsv:rows.map(cols=>cols.join("\t")).join("\n")
+  };
 }
 
+function parsePaste(text){
+  return normalizeSalesPaste(text);
+}
 function showPaste(){
   $("pasteModal").classList.remove("hidden");
   $("pasteArea").focus();
@@ -131,7 +186,7 @@ function updatePastePreview(){
   $("previewExcluded").textContent=p.excluded;
   const fb=$("pasteFeedback");
   if(p.invalid>0){
-    fb.textContent=p.invalid+" linha(s) não puderam ser interpretadas nas 14 colunas.";
+    fb.textContent=p.invalid+" linha(s) de DCO não puderam ser interpretadas. O app já aceita TAB, espaços, ponto-e-vírgula e texto simples.";
     fb.className="form-error";
   } else {
     fb.classList.add("hidden");
@@ -146,7 +201,7 @@ async function confirmPaste(){
   const btn=$("confirmPaste"); btn.disabled=true; btn.textContent="Importando...";
   try{
     const result=await api("ingest",{
-      matricula:state.matricula,store_code:state.storeCode,captured_at:new Date().toISOString(),tsv:text
+      matricula:state.matricula,store_code:state.storeCode,captured_at:new Date().toISOString(),tsv:p.normalizedTsv
     });
     const r=Array.isArray(result)?result[0]:result;
     $("pasteFeedback").textContent="Importação concluída: "+(r?.rows_valid??p.rows.length)+" DCOs válidos.";
