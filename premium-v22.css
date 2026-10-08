@@ -647,3 +647,218 @@
   .dock-realistic-icon{width:31px!important;height:27px!important}
   .dock-realistic-icon svg{width:31px!important;height:27px!important}
 }
+
+
+/* v27 — DCOs por comercial + cobertura da meta */
+.commercial-dco-list{
+  margin-top:12px;
+  padding:12px 13px;
+  border-radius:14px;
+  background:#F8F6F0;
+  border:1px solid rgba(23,63,53,.08);
+}
+.commercial-dco-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:9px;
+}
+.commercial-dco-title span{
+  font-size:8px;
+  font-weight:900;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  color:#6F7C77;
+}
+.commercial-dco-title b{
+  font-size:8px;
+  color:var(--ria-green);
+}
+.commercial-dco-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.commercial-dco-chips>span{
+  display:inline-flex;
+  gap:4px;
+  align-items:center;
+  padding:6px 8px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid rgba(23,63,53,.1);
+  color:var(--ria-green);
+  font-size:8px;
+  line-height:1.1;
+}
+.commercial-dco-chips>span b{
+  color:var(--ria-orange);
+  font-weight:900;
+}
+.commercial-dco-chips em{
+  color:#7D8783;
+  font-size:8px;
+}
+
+.commercial-coverage-panel{
+  margin:0 0 12px;
+  padding:16px;
+  border-radius:18px;
+  background:linear-gradient(145deg,#FFFDF8,#F5F2EA);
+  border:1px solid rgba(23,63,53,.09);
+  box-shadow:0 8px 22px rgba(23,63,53,.05);
+}
+.commercial-coverage-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.commercial-coverage-head h3{
+  margin:4px 0 0;
+  color:var(--ria-green);
+  font-size:18px;
+  letter-spacing:-.02em;
+}
+.coverage-pill{
+  flex:0 0 auto;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:8px;
+  font-weight:900;
+}
+.coverage-pill.attention{
+  color:#8C2E28;
+  background:#F8E1DC;
+}
+.coverage-pill.ok{
+  color:#245646;
+  background:#E5F0EA;
+}
+.commercial-coverage-kpis{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+}
+.commercial-coverage-kpis>div{
+  padding:11px 12px;
+  border-radius:13px;
+  background:#fff;
+  border:1px solid rgba(23,63,53,.08);
+}
+.commercial-coverage-kpis>div.missing{
+  background:#FBEEEA;
+}
+.commercial-coverage-kpis span{
+  display:block;
+  font-size:7px;
+  font-weight:900;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:#72807A;
+}
+.commercial-coverage-kpis strong{
+  display:block;
+  margin-top:5px;
+  color:var(--ria-green);
+  font-size:15px;
+  letter-spacing:-.03em;
+}
+.commercial-coverage-kpis .missing strong{
+  color:#B4493A;
+}
+.commercial-coverage-kpis small{
+  display:block;
+  margin-top:4px;
+  color:#7B8782;
+  font-size:7px;
+}
+.coverage-bar{
+  height:8px;
+  margin:10px 0 12px;
+  border-radius:999px;
+  overflow:hidden;
+  background:#E6E3DA;
+}
+.coverage-bar i{
+  display:block;
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,#466964,#173F35);
+}
+.unassigned-dcos{
+  border-top:1px solid rgba(23,63,53,.08);
+  padding-top:10px;
+}
+.unassigned-dcos summary{
+  list-style:none;
+  cursor:pointer;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:var(--ria-green);
+  font-size:9px;
+  font-weight:900;
+}
+.unassigned-dcos summary::-webkit-details-marker{display:none}
+.unassigned-dco-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+  margin-top:8px;
+}
+.unassigned-dco-grid>div{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+  padding:8px 9px;
+  border-radius:10px;
+  background:#fff;
+  border:1px solid rgba(23,63,53,.08);
+}
+.unassigned-dco-grid span{
+  color:var(--ria-green);
+  font-size:8px;
+  line-height:1.2;
+}
+.unassigned-dco-grid span b{
+  color:var(--ria-orange);
+}
+.unassigned-dco-grid strong{
+  flex:0 0 auto;
+  color:#B4493A;
+  font-size:8px;
+}
+.all-assigned{
+  padding:10px 12px;
+  border-radius:11px;
+  background:#E7F1EB;
+  color:#245646;
+  font-size:9px;
+  font-weight:800;
+}
+
+@media(max-width:900px){
+  .commercial-coverage-panel{
+    padding:12px;
+    border-radius:16px;
+  }
+  .commercial-coverage-head h3{font-size:15px}
+  .commercial-coverage-kpis{
+    grid-template-columns:1fr 1fr;
+  }
+  .commercial-coverage-kpis>div.missing{
+    grid-column:1/-1;
+  }
+  .commercial-coverage-kpis strong{font-size:13px}
+  .unassigned-dco-grid{grid-template-columns:1fr}
+  .commercial-dco-list{padding:10px}
+  .commercial-dco-chips>span{
+    border-radius:10px;
+    padding:6px 7px;
+    font-size:7.5px;
+  }
+}
