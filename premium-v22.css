@@ -283,6 +283,7 @@
     width:82px!important;height:28px!important;object-fit:contain!important
   }
   #section-inicio>.section-head{
+    position:relative;
     min-height:150px!important;
     background:
       linear-gradient(90deg,rgba(23,63,53,.97),rgba(23,63,53,.83)),
@@ -422,4 +423,25 @@
   .premium-group-summary>div{border-right:0!important}
   .premium-group-summary>div:last-child{border-bottom:0!important}
   .visual-summary{grid-template-columns:1fr!important}
+}
+
+
+/* Perfis comerciais */
+.commercial-avatar{overflow:hidden}
+.commercial-avatar img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center 38%!important;
+  border-radius:inherit;
+  display:block;
+}
+@media(max-width:900px){
+  .commercial-avatar{
+    width:58px!important;
+    height:58px!important;
+    flex:0 0 58px!important;
+    border-radius:50%!important;
+    box-shadow:0 6px 16px rgba(23,63,53,.12);
+  }
 }
