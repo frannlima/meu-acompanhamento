@@ -92,7 +92,7 @@ function splitSalesPasteLine(raw){
   // 3) Texto livre: lê a linha da direita para a esquerda.
   // O relatório tem sempre 12 campos numéricos após "Grupo" + "DCO-Departamento".
   // Assim, nomes com vários espaços continuam válidos.
-  const numericToken="[+-]?(?:R\\$\\s*)?(?:\\d{1,3}(?:\\.\\d{3})*|\\d+)(?:,\\d+)?%?";
+  const numericToken="[+-]?(?:R\\$\\s*)?(?:\\d{1,3}(?:\\.\\d{3})*(?:,\\d+)?|\\d+(?:[.,]\\d+)?)%?";
   const tailRe=new RegExp("("+numericToken+")\\s*$","i");
   let rest=clean;
   const nums=[];
