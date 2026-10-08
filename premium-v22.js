@@ -251,6 +251,76 @@
       '</svg></span>';
   }
 
+
+  function augmentCommercialCards(){
+    const payload=state.commercial||{};
+    const rows=Array.isArray(payload.commercials)?payload.commercials:[];
+    const grid=$("commercialGrid");
+    if(grid){
+      const cards=grid.querySelectorAll(".commercial-card");
+      cards.forEach((card,idx)=>{
+        const r=rows[idx]; if(!r) return;
+        const dcos=Array.isArray(r.dcos)?r.dcos:[];
+        let block=card.querySelector(".commercial-dco-list");
+        if(block) block.remove();
+        block=document.createElement("div");
+        block.className="commercial-dco-list";
+        block.innerHTML=
+          '<div class="commercial-dco-title"><span>DCOs sob responsabilidade</span><b>'+dcos.length+' DCOs</b></div>'+
+          '<div class="commercial-dco-chips">'+
+          (dcos.length?dcos.map(d=>'<span><b>'+esc(d.dco_code)+'</b> '+esc(d.dco_name||premiumDcoName(d))+'</span>').join(""):'<em>Nenhum DCO atribuído.</em>')+
+          '</div>';
+        const detr=card.querySelector(".commercial-detractors");
+        if(detr) card.insertBefore(block,detr); else card.appendChild(block);
+      });
+    }
+
+    const assigned=new Set();
+    rows.forEach(r=>(r.dcos||[]).forEach(d=>assigned.add(Number(d.dco_code))));
+    const current=detailRows().filter(r=>Number(r.target_financial||0)>0);
+    const unassigned=current.filter(r=>!assigned.has(Number(r.dco_code)));
+    const totalMeta=current.reduce((a,r)=>a+Number(r.target_financial||0),0);
+    const assignedMeta=current.filter(r=>assigned.has(Number(r.dco_code))).reduce((a,r)=>a+Number(r.target_financial||0),0);
+    const missingMeta=unassigned.reduce((a,r)=>a+Number(r.target_financial||0),0);
+    const coverage=totalMeta?assignedMeta/totalMeta*100:0;
+
+    let panel=$("commercialCoveragePanel");
+    if(!panel){
+      panel=document.createElement("section");
+      panel.id="commercialCoveragePanel";
+      panel.className="commercial-coverage-panel";
+      const kp=$("commercialKpis");
+      if(kp?.parentNode) kp.parentNode.insertBefore(panel,kp.nextSibling);
+    }
+    if(panel){
+      panel.innerHTML=
+        '<div class="commercial-coverage-head">'+
+          '<div><span class="eyebrow">COBERTURA DOS DCOs</span><h3>Distribuição da meta por responsável</h3></div>'+
+          '<span class="coverage-pill '+(unassigned.length?"attention":"ok")+'">'+(unassigned.length?unassigned.length+" sem responsável":"100% atribuídos")+'</span>'+
+        '</div>'+
+        '<div class="commercial-coverage-kpis">'+
+          '<div><span>Meta geral</span><strong>'+money(totalMeta,2)+'</strong></div>'+
+          '<div><span>Meta atribuída</span><strong>'+money(assignedMeta,2)+'</strong><small>'+pct(coverage)+' da meta</small></div>'+
+          '<div class="missing"><span>Meta sem responsável</span><strong>'+money(missingMeta,2)+'</strong><small>'+unassigned.length+' DCOs</small></div>'+
+        '</div>'+
+        '<div class="coverage-bar"><i style="width:'+Math.max(0,Math.min(100,coverage))+'%"></i></div>'+
+        (unassigned.length?
+          '<details class="unassigned-dcos" open><summary><span>DCOs ainda sem responsável</span><b>'+unassigned.length+'</b></summary>'+
+          '<div class="unassigned-dco-grid">'+unassigned
+            .sort((a,b)=>Number(b.target_financial||0)-Number(a.target_financial||0))
+            .map(r=>'<div><span><b>'+esc(r.dco_code)+'</b> '+esc(premiumDcoName(r))+'</span><strong>'+money(Number(r.target_financial||0),2)+'</strong></div>')
+            .join("")+'</div></details>'
+          :
+          '<div class="all-assigned">✓ Todos os DCOs com meta estão atribuídos.</div>');
+    }
+  }
+
+  const baseRenderCommercialsPremium=window.renderCommercials;
+  window.renderCommercials=function(){
+    baseRenderCommercialsPremium();
+    augmentCommercialCards();
+  };
+
   function buildPremiumDock(){
     const dock=document.querySelector(".mobile-dock");
     if(!dock) return;
