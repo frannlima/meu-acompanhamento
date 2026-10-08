@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v23";
+const CACHE="meu-acompanhamento-v24";
 const ASSETS=[
   "./",
   "./index.html",
@@ -9,7 +9,15 @@ const ASSETS=[
   "./enhancements-v9.js?v=7",
   "./premium-v22.js?v=2",
   "./manifest.webmanifest",
-  "./assets/riachuelo-logo-vertical.svg"
+  "./assets/riachuelo-logo-vertical.svg",
+  "./assets/riachuelo-logo.svg",
+  "./assets/profiles/roberta-paiva.jpg",
+  "./assets/profiles/camila-barros.jpg",
+  "./assets/profiles/bianca-rodrigues.jpg",
+  "./assets/profiles/gabi-castro.jpg",
+  "./assets/profiles/gabriela.jpg",
+  "./assets/profiles/josy-rodrigues.jpg",
+  "./assets/profiles/lennon-batista.jpg"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
