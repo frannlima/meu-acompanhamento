@@ -1,11 +1,11 @@
-const CACHE="meu-acompanhamento-v31";
+const CACHE="meu-acompanhamento-v32";
 const ASSETS=[
   "./",
   "./index.html",
   "./styles.css?v=9",
   "./enhancements-v9.css?v=10",
-  "./premium-v22.css?v=5",
-  "./app.js?v=14",
+  "./premium-v22.css?v=6",
+  "./app.js?v=15",
   "./enhancements-v9.js?v=7",
   "./premium-v22.js?v=7",
   "./manifest.webmanifest",
