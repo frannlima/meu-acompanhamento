@@ -261,7 +261,7 @@
     main.appendChild(section);
     section.querySelectorAll("[data-more-section]").forEach(btn=>btn.onclick=()=>setSection(btn.dataset.moreSection));
     const install=$("premiumInstallApp"); if(install) install.onclick=requestInstallApp;
-    const logout=$("premiumLogout"); if(logout) logout.onclick=logout;
+    const logoutBtn=$("premiumLogout"); if(logoutBtn) logoutBtn.onclick=()=>window.logout();
   }
 
   function updateBrandCopy(){
