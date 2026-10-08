@@ -236,7 +236,11 @@
   }
 
   function ensureMoreSection(){
-    if($("section-mais")) return;
+    const existing=$("section-mais");
+    if(existing){
+      existing.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
+      return;
+    }
     const main=document.querySelector(".main");
     if(!main) return;
     const section=document.createElement("section");
