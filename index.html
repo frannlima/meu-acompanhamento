@@ -542,8 +542,8 @@
         <div><span class="eyebrow">NOVO SNAPSHOT</span><h2>Colar Venda da Web</h2></div>
         <button id="closePaste" class="btn ghost small">Fechar</button>
       </div>
-      <p class="modal-hint">Cole a venda como vier da origem: TAB, texto simples, espaços, ponto-e-vírgula ou pipe. O app identifica as 14 colunas automaticamente e ignora cabeçalhos, TOTAL GRUPO e TOTAL FILIAL.</p>
-      <textarea id="pasteArea" spellcheck="false" placeholder="Grupo&#9;Departamento&#9;Outras Vendas&#9;..."></textarea>
+      <p class="modal-hint">Cole a venda completa, mesmo com muitas linhas ou quebras visuais. O app aceita TAB, texto simples, espaços, ponto-e-vírgula e pipe, reconstrói linhas quebradas e ignora cabeçalhos, TOTAL GRUPO e TOTAL FILIAL.</p>
+      <textarea id="pasteArea" spellcheck="false" rows="18" maxlength="500000" placeholder="Cole aqui a venda completa. Pode colar até 1000 DCOs por vez."></textarea>
       <div class="validation-grid">
         <div><span>Linhas consideradas</span><strong id="previewRows">0</strong></div>
         <div><span>Venda financeira</span><strong id="previewSales">—</strong></div>
@@ -558,7 +558,7 @@
     </div>
   </div>
 
-  <script src="./app.js?v=14" defer></script>
+  <script src="./app.js?v=15" defer></script>
   <script src="./enhancements-v9.js?v=7" defer></script>
   <script src="./premium-v22.js?v=7" defer></script>
 </body>
