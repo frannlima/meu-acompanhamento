@@ -184,20 +184,30 @@
         '</article>';
       }).join("");
 
+      const physicalAtt=t.targetPhysical?t.physical/t.targetPhysical*100:0;
+      const attBar=Math.max(0,Math.min(100,attainment));
+      const projBar=Math.max(0,Math.min(100,projAtt));
       return '<section class="premium-group-card tone-'+tone+'">'+
         '<div class="premium-group-head">'+
-          '<div><span class="eyebrow">GRUPO</span><h2>'+esc(GROUP_LABELS[g]||g)+'</h2></div>'+
-          '<span class="premium-group-att '+(attainment>=100?"positive":attainment>=90?"warning":"negative")+'">'+pct(attainment)+'</span>'+
+          '<div><span class="eyebrow">GRUPO</span><h2>'+esc(GROUP_LABELS[g]||g)+'</h2><small>Resumo do resultado</small></div>'+
+          '<span class="premium-group-att '+(attainment>=100?"positive":attainment>=90?"warning":"negative")+'">'+pct(attainment)+' da meta</span>'+
         '</div>'+
-        '<div class="premium-group-summary">'+
-          '<div><span>Meta</span><strong>'+money(t.target,2)+'</strong></div>'+
-          '<div><span>Venda</span><strong>'+money(t.sale,2)+'</strong></div>'+
-          '<div><span>Desvio</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+signedMoney(deviation,2)+'</strong></div>'+
-          '<div><span>Venda física</span><strong>'+num(t.physical)+' peças</strong></div>'+
-          '<div><span>Meta física</span><strong>'+num(t.targetPhysical)+' peças</strong></div>'+
+        '<div class="group-primary-grid">'+
+          '<div class="group-primary-item meta"><span>Meta</span><strong>'+money(t.target,2)+'</strong></div>'+
+          '<div class="group-primary-item sale"><span>Venda</span><strong>'+money(t.sale,2)+'</strong></div>'+
+          '<div class="group-primary-item deviation"><span>Desvio</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+signedMoney(deviation,2)+'</strong></div>'+
+          '<div class="group-primary-item projection"><span>Projeção</span><strong>'+(projection?money(projection,2):"—")+'</strong><small>'+(projection?pct(projAtt)+" da meta":firstInput?"Formando ritmo":"Aguardando ritmo")+'</small></div>'+
+        '</div>'+
+        '<div class="group-progress-stack">'+
+          '<div class="group-progress-row"><div><span>Atingimento</span><b>'+pct(attainment)+'</b></div><div class="group-progress"><i style="width:'+attBar+'%"></i></div></div>'+
+          '<div class="group-progress-row projection-progress"><div><span>Projeção do dia</span><b>'+(projection?pct(projAtt):"—")+'</b></div><div class="group-progress"><i style="width:'+projBar+'%"></i></div></div>'+
+        '</div>'+
+        '<div class="group-secondary-grid">'+
           '<div><span>LY</span><strong>'+(t.ly?money(t.ly,2):"—")+'</strong></div>'+
-          '<div><span>Evolução vs LY</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong></div>'+
-          '<div class="projection-summary"><span>Projeção do dia</span><strong>'+(projection?money(projection,2):"—")+'</strong><small>'+(projection?pct(projAtt)+" da meta":firstInput?"Formando ritmo":"Aguardando ritmo")+'</small></div>'+
+          '<div><span>Evol. vs LY</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong></div>'+
+          '<div><span>Meta física</span><strong>'+num(t.targetPhysical)+' peças</strong></div>'+
+          '<div><span>Venda física</span><strong>'+num(t.physical)+' peças</strong></div>'+
+          '<div><span>% meta física</span><strong>'+pct(physicalAtt)+'</strong></div>'+
         '</div>'+
         '<details class="premium-group-dcos">'+
           '<summary><span>Ver DCOs do grupo</span><b>'+items.length+' DCOs</b></summary>'+
@@ -208,19 +218,37 @@
   };
 
   function storeIcon(){
-    return '<span class="dock-icon dock-store-icon"><span class="store-awning"></span><span class="store-door"></span><img src="./assets/riachuelo-logo.svg" alt=""></span>';
+    return '<span class="dock-icon dock-realistic-icon"><svg viewBox="0 0 64 54" aria-hidden="true">'+
+      '<defs><linearGradient id="storeWall" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF8E8"/><stop offset="1" stop-color="#D9C69E"/></linearGradient><linearGradient id="storeRoof" x1="0" x2="1"><stop stop-color="#F0E0B7"/><stop offset="1" stop-color="#C9A868"/></linearGradient><filter id="storeShadow"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".28"/></filter></defs>'+
+      '<g filter="url(#storeShadow)"><path d="M9 17h46v29H9z" fill="url(#storeWall)" stroke="#F8F0DC"/><path d="M7 15l5-8h40l5 8z" fill="url(#storeRoof)" stroke="#F7E7C5"/><path d="M9 17h46v8H9z" fill="#173F35"/><path d="M15 17h8v8h-8zm16 0h8v8h-8zm16 0h8v8h-8z" fill="#DE7C00"/><rect x="27" y="29" width="11" height="17" rx="1.5" fill="#F9F5EA" stroke="#8BA39A"/></g>'+
+      '<rect x="16" y="9.5" width="32" height="5" rx="2.5" fill="#F7F4ED"/><text x="32" y="13.2" text-anchor="middle" font-size="4.4" font-weight="800" fill="#173F35">RIACHUELO</text>'+
+      '</svg></span>';
   }
   function worldsIcon(){
-    return '<span class="dock-icon"><svg viewBox="0 0 64 52" aria-hidden="true"><path d="M31 8c0-4 5-6 8-3 3 3 1 7-3 9l-3 2" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M7 28l25-12 25 12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 29h40l-7 16H19z" fill="currentColor" opacity=".18"/><path d="M12 29h40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></span>';
+    return '<span class="dock-icon dock-realistic-icon"><svg viewBox="0 0 64 54" aria-hidden="true">'+
+      '<defs><linearGradient id="hangerG" x1="0" x2="1"><stop stop-color="#FFF"/><stop offset=".55" stop-color="#E7E3D8"/><stop offset="1" stop-color="#B9B9B4"/></linearGradient><filter id="hShadow"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-opacity=".25"/></filter></defs>'+
+      '<g fill="none" stroke="url(#hangerG)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" filter="url(#hShadow)"><path d="M31 15c0-4 4-7 8-4 4 3 2 8-2 10l-4 2"/><path d="M8 39l24-16 24 16"/><path d="M8 39h48"/></g>'+
+      '</svg></span>';
   }
   function commercialIcon(){
-    return '<span class="dock-icon"><svg viewBox="0 0 64 52" aria-hidden="true"><rect x="8" y="30" width="9" height="15" rx="2" fill="currentColor" opacity=".65"/><rect x="25" y="22" width="9" height="23" rx="2" fill="currentColor" opacity=".82"/><rect x="42" y="13" width="9" height="32" rx="2" fill="currentColor"/><path d="M8 22c12-1 21-5 31-14l7 1" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M42 5l8 4-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+    return '<span class="dock-icon dock-realistic-icon"><svg viewBox="0 0 64 54" aria-hidden="true">'+
+      '<defs><linearGradient id="bar1" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#C8D8D1"/><stop offset="1" stop-color="#FFF"/></linearGradient><linearGradient id="bar2" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#466964"/><stop offset="1" stop-color="#9DB7AE"/></linearGradient><linearGradient id="bar3" x1="0" y1="1" x2="0" y2="0"><stop stop-color="#DE7C00"/><stop offset="1" stop-color="#F4B453"/></linearGradient><filter id="bShadow"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-opacity=".28"/></filter></defs>'+
+      '<g filter="url(#bShadow)"><rect x="8" y="31" width="10" height="14" rx="2" fill="url(#bar1)"/><rect x="27" y="23" width="10" height="22" rx="2" fill="url(#bar2)"/><rect x="46" y="13" width="10" height="32" rx="2" fill="url(#bar3)"/><path d="M8 23c13-2 25-6 38-17" fill="none" stroke="#F7F4ED" stroke-width="3" stroke-linecap="round"/><path d="M43 6h8v8" fill="none" stroke="#F7F4ED" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>'+
+      '</svg></span>';
   }
   function estoreIcon(){
-    return '<span class="dock-icon dock-bag-icon"><span class="bag-handle"></span><span class="bag-body"><img src="./assets/riachuelo-logo.svg" alt=""></span><span class="bag-pointer">↗</span></span>';
+    return '<span class="dock-icon dock-realistic-icon"><svg viewBox="0 0 64 54" aria-hidden="true">'+
+      '<defs><linearGradient id="bagG" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFE3A3"/><stop offset=".55" stop-color="#DCA85C"/><stop offset="1" stop-color="#9F6E2F"/></linearGradient><filter id="bagShadow"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".3"/></filter></defs>'+
+      '<g filter="url(#bagShadow)"><path d="M13 19h38l-3 29H16z" fill="url(#bagG)" stroke="#FBE3B4"/><path d="M23 20c0-8 3-12 9-12s9 4 9 12" fill="none" stroke="#DE7C00" stroke-width="3"/></g>'+
+      '<rect x="20" y="27" width="24" height="7" rx="3.5" fill="#F7F4ED"/><text x="32" y="31.8" text-anchor="middle" font-size="4.4" font-weight="800" fill="#173F35">RIACHUELO</text>'+
+      '<circle cx="49" cy="42" r="8" fill="#173F35" stroke="#FFF" stroke-width="1.5"/><path d="M46 44l6-6m-4 0h4v4" fill="none" stroke="#FFF" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>'+
+      '</svg></span>';
   }
   function moreIcon(){
-    return '<span class="dock-icon dock-more-icon"><i></i><i></i><i></i><i></i></span>';
+    return '<span class="dock-icon dock-realistic-icon"><svg viewBox="0 0 64 54" aria-hidden="true">'+
+      '<defs><linearGradient id="sqG" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF"/><stop offset="1" stop-color="#D7D6D2"/></linearGradient><filter id="sqShadow"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-opacity=".25"/></filter></defs>'+
+      '<g filter="url(#sqShadow)"><rect x="11" y="8" width="16" height="16" rx="4" fill="url(#sqG)"/><rect x="37" y="8" width="16" height="16" rx="4" fill="url(#sqG)"/><rect x="11" y="30" width="16" height="16" rx="4" fill="url(#sqG)"/><rect x="37" y="30" width="16" height="16" rx="4" fill="#DE7C00"/></g>'+
+      '</svg></span>';
   }
 
   function buildPremiumDock(){
