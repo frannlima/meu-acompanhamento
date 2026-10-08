@@ -259,6 +259,7 @@
         '<div><span>MODA QUE INSPIRA O BRASIL</span><h2>Simples é incrível.</h2><p>Ninguém faz nada sozinho • Talento é conquista • Vontade de crescer</p></div>'+
       '</div>';
     main.appendChild(section);
+    section.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
     section.querySelectorAll("[data-more-section]").forEach(btn=>btn.onclick=()=>setSection(btn.dataset.moreSection));
     const install=$("premiumInstallApp"); if(install) install.onclick=requestInstallApp;
     const logoutBtn=$("premiumLogout"); if(logoutBtn) logoutBtn.onclick=()=>window.logout();
