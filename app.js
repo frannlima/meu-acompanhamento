@@ -43,15 +43,47 @@ async function api(action, payload={}){
   return body.data;
 }
 
+// Cada menu é uma tela independente: manter a tela e o ponto de leitura
+// ao navegar, retornar do checklist ou reabrir o PWA na mesma sessão.
+const navigationScrollPositions = new Map();
+let navigationScrollFrame = 0;
+function navigationSessionKey(){
+  return "ma_secao_"+state.matricula+"_"+state.storeCode;
+}
+function getSavedSection(){
+  try{
+    const saved=sessionStorage.getItem(navigationSessionKey());
+    if(!saved || !$("section-"+saved)) return null;
+    if(["regional","admin"].includes(saved) && state.role!=="administrador") return null;
+    return saved;
+  }catch(_){ return null; }
+}
 function setSection(section){
+  const target=$("section-"+section);
+  if(!target) return; // Não apagar a tela atual ao receber uma rota inválida.
+  const previous=state.section;
+  const changed=previous!==section;
+  if(changed) navigationScrollPositions.set(previous,window.scrollY||document.documentElement.scrollTop||0);
   state.section=section;
   document.querySelectorAll(".section").forEach(el=>el.classList.toggle("active",el.id==="section-"+section));
   document.querySelectorAll("[data-section]").forEach(el=>el.classList.toggle("active",el.dataset.section===section));
+  if(state.logged){
+    try{sessionStorage.setItem(navigationSessionKey(),section)}catch(_){}
+  }
   if(section==="regional" && state.role==="administrador") loadRegional();
   if(section==="comerciais") loadCommercials();
   if(section==="historico") renderHistory();
   if(section==="admin" && state.role==="administrador") loadAdmin();
-  window.scrollTo({top:0,behavior:"smooth"});
+  // A rolagem suave anterior atravessava a troca de telas e dava a impressão
+  // de retorno ao Início. Restaurar diretamente a posição de cada menu.
+  if(changed){
+    if(navigationScrollFrame) cancelAnimationFrame(navigationScrollFrame);
+    navigationScrollFrame=requestAnimationFrame(()=>{
+      navigationScrollFrame=0;
+      if(state.section!==section) return;
+      window.scrollTo({top:navigationScrollPositions.get(section)||0,behavior:"instant"});
+    });
+  }
 }
 
 function parsePt(value){
@@ -309,6 +341,10 @@ async function doLogin(matricula, storeCode, save=true){
   document.querySelectorAll(".reset-capable").forEach(el=>el.classList.toggle("hidden",!["administrador","gerente","supervisor"].includes(state.role)));
   buildAdminStoreSelect();
   await loadAll();
+  // Após uma atualização/reabertura do PWA, voltar ao último menu utilizado,
+  // sem obrigar o usuário a passar novamente pela tela Início.
+  const restoredSection=getSavedSection();
+  if(restoredSection) setSection(restoredSection);
   if(typeof window.afterMeuAcompanhamentoLogin==="function") await window.afterMeuAcompanhamentoLogin(person);
   else showWorldModal();
 }
@@ -337,7 +373,7 @@ async function changeAdminStore(code){
   state.storeCode=code;
   if($("identityStore")) $("identityStore").textContent="Loja "+state.storeCode;
   await loadAll();
-  setSection("inicio");
+  setSection(state.section);
 }
 
 async function loadAll(){
@@ -1551,6 +1587,9 @@ async function confirmResetDay(){
 
 function logout(){
   localStorage.removeItem("meu_acompanhamento_session");
+  try{sessionStorage.removeItem(navigationSessionKey())}catch(_){}
+  navigationScrollPositions.clear();
+  state.section="inicio";
   state.logged=false; $("appShell").classList.add("hidden"); $("loginScreen").classList.remove("hidden");
 }
 
