@@ -1128,8 +1128,14 @@ async function loadCommercials(){
 function renderCommercials(){
   const payload=state.commercial||{};
   const rows=Array.isArray(payload.commercials)?payload.commercials:[];
+  const commercialTargetValue=r=>{
+    const direct=Number(r?.target_financial||0);
+    if(direct>0) return direct;
+    const dcos=Array.isArray(r?.dcos)?r.dcos:[];
+    return dcos.reduce((sum,d)=>sum+Number(d.target_financial||d.meta_financial||d.target||0),0);
+  };
   const total=rows.reduce((a,r)=>{
-    a.target+=Number(r.target_financial||0);
+    a.target+=commercialTargetValue(r);
     a.sale+=Number(r.sales_financial||0);
     a.interval+=Number(r.interval_sales_financial||0);
     return a;
@@ -1161,10 +1167,10 @@ function renderCommercials(){
 
   empty.classList.add("hidden");
   grid.innerHTML=rows.map(r=>{
-    const target=Number(r.target_financial||0);
+    const target=commercialTargetValue(r);
     const sale=Number(r.sales_financial||0);
     const attainment=target?sale/target*100:0;
-    const deviation=Number(r.deviation||0);
+    const deviation=sale-target;
     const evolution=r.evolution_vs_ly===null||r.evolution_vs_ly===undefined?null:Number(r.evolution_vs_ly);
     const interval=Number(r.interval_sales_financial||0);
     const dcos=Array.isArray(r.dcos)?r.dcos:[];
