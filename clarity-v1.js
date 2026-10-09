@@ -668,14 +668,30 @@
   function renderWorldHeaderClarity(){
     const all=detailRows();
     const rows=all.filter(r=>state.world==="todos" || r.world_code===state.world || (state.world==="beleza_relogios" && ["beleza","relogios"].includes(r.group_code)));
-    const total=rows.reduce((a,r)=>{
-      a.meta+=Number(r.target_financial||0);
-      a.venda+=Number(r.sales_financial||0);
-      a.aa+=Number(r.ly_financial||0);
-      return a;
-    },{meta:0,venda:0,aa:0});
+
+    // REGRA ÚNICA DE TOTAL LOJA:
+    // quando "Todos" estiver selecionado, usar sempre o consolidado oficial do dia.
+    // Não somar apenas os DCOs presentes no último input, pois isso reduz a meta
+    // quando algum DCO ainda não teve venda/linha na parcial.
+    let total;
+    if(state.world==="todos"){
+      const d=state.day||{};
+      total={
+        meta:Number(d.target_financial||0),
+        venda:Number(d.sales_financial||0),
+        aa:Number(d.ly_financial||0)
+      };
+    }else{
+      total=rows.reduce((a,r)=>{
+        a.meta+=Number(r.target_financial||0);
+        a.venda+=Number(r.sales_financial||0);
+        a.aa+=Number(r.ly_financial||0);
+        return a;
+      },{meta:0,venda:0,aa:0});
+    }
+
     const ating=total.meta?total.venda/total.meta*100:0;
-    const ev=total.aa&&rows.length?((total.venda/total.aa)-1)*100:null;
+    const ev=total.aa&&((state.world==="todos"&&state.day?.has_input)||rows.length)?((total.venda/total.aa)-1)*100:null;
     const dev=total.venda-total.meta;
     const box=$("worldKpis");
     if(box){
