@@ -369,7 +369,7 @@
   function vibrateSalesAlert(){
     const prefs=getSalesAlertPrefs();
     if(!prefs.vibration||!navigator.vibrate) return;
-    try{navigator.vibrate([90,55,130])}catch(_){}
+    try{navigator.vibrate([350,120,350,120,600])}catch(_){}
   }
 
   function ensureSalesAlertBanner(){
