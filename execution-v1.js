@@ -321,10 +321,206 @@
     setTimeout(()=>{ if(typeof setAdminTab==="function") setAdminTab(tab); },80);
   }
 
+  const SALES_ALERT_PREF_KEY="meu_acompanhamento_sales_alerts_v1";
+  let salesAlertTimer=null;
+  let salesAlertBusy=false;
+  let salesAlertAudioCtx=null;
+
+  function getSalesAlertPrefs(){
+    try{
+      return Object.assign({enabled:true,sound:true,vibration:true,system:true},JSON.parse(localStorage.getItem(SALES_ALERT_PREF_KEY)||"{}"));
+    }catch(_){
+      return {enabled:true,sound:true,vibration:true,system:true};
+    }
+  }
+
+  function saveSalesAlertPrefs(prefs){
+    localStorage.setItem(SALES_ALERT_PREF_KEY,JSON.stringify(prefs));
+  }
+
+  function salesAlertLastKey(){
+    return "meu_acompanhamento_last_sale_alert_"+String(state.storeCode||"")+"_"+localDate();
+  }
+
+  function playSalesAlertSound(){
+    const prefs=getSalesAlertPrefs();
+    if(!prefs.sound) return;
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext;
+      if(!AC) return;
+      salesAlertAudioCtx=salesAlertAudioCtx||new AC();
+      const ctx=salesAlertAudioCtx;
+      if(ctx.state==="suspended") ctx.resume().catch(()=>{});
+      const now=ctx.currentTime;
+      [660,880].forEach((freq,i)=>{
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        osc.type="sine";
+        osc.frequency.value=freq;
+        gain.gain.setValueAtTime(0.0001,now+i*.12);
+        gain.gain.exponentialRampToValueAtTime(.12,now+i*.12+.018);
+        gain.gain.exponentialRampToValueAtTime(0.0001,now+i*.12+.12);
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.start(now+i*.12);osc.stop(now+i*.12+.13);
+      });
+    }catch(_){}
+  }
+
+  function vibrateSalesAlert(){
+    const prefs=getSalesAlertPrefs();
+    if(!prefs.vibration||!navigator.vibrate) return;
+    try{navigator.vibrate([90,55,130])}catch(_){}
+  }
+
+  function ensureSalesAlertBanner(){
+    let banner=$("salesUpdateAlert");
+    if(banner) return banner;
+    banner=document.createElement("button");
+    banner.id="salesUpdateAlert";
+    banner.type="button";
+    banner.className="sales-update-alert hidden";
+    banner.innerHTML='<span class="sales-alert-icon">📊</span><span><b>Nova parcial disponível</b><small>Toque para atualizar o acompanhamento</small></span><i>›</i>';
+    banner.onclick=async()=>{
+      banner.classList.add("hidden");
+      if(typeof loadAll==="function") await loadAll();
+      if(typeof setSection==="function") setSection("inicio");
+    };
+    const shell=$("appShell");
+    if(shell) shell.appendChild(banner);
+    else document.body.appendChild(banner);
+    return banner;
+  }
+
+  function showSalesUpdateBanner(day){
+    const banner=ensureSalesAlertBanner();
+    const sale=Number(day?.sales_financial||0),meta=Number(day?.target_financial||0);
+    const att=meta?sale/meta*100:0;
+    const small=banner.querySelector("small");
+    if(small) small.textContent="Loja "+state.storeCode+" • "+money(sale,2)+" • "+pct(att)+" da meta";
+    banner.classList.remove("hidden");
+    clearTimeout(banner.__hideTimer);
+    banner.__hideTimer=setTimeout(()=>banner.classList.add("hidden"),10000);
+  }
+
+  async function showSystemSalesNotification(day,test=false){
+    const prefs=getSalesAlertPrefs();
+    if(!prefs.system||!("Notification" in window)) return;
+    if(Notification.permission!=="granted") return;
+    const sale=Number(day?.sales_financial||0),meta=Number(day?.target_financial||0);
+    const att=meta?sale/meta*100:0;
+    const title=test?"Teste • Nova parcial":"Nova parcial • Loja "+state.storeCode;
+    const body=test
+      ?"Som, vibração e alerta estão ativos."
+      :"Venda "+money(sale,2)+" • "+pct(att)+" da meta";
+    try{
+      const reg=await navigator.serviceWorker?.ready;
+      if(reg?.showNotification){
+        await reg.showNotification(title,{
+          body,
+          icon:"./assets/riachuelo-logo-vertical.svg",
+          badge:"./assets/riachuelo-logo-vertical.svg",
+          tag:"sales-update-"+state.storeCode,
+          renotify:true,
+          data:{url:"./"}
+        });
+      }else{
+        new Notification(title,{body,icon:"./assets/riachuelo-logo-vertical.svg",tag:"sales-update-"+state.storeCode});
+      }
+    }catch(_){}
+  }
+
+  async function triggerSalesAlert(day,{test=false}={}){
+    const prefs=getSalesAlertPrefs();
+    if(!prefs.enabled&&!test) return;
+    playSalesAlertSound();
+    vibrateSalesAlert();
+    showSalesUpdateBanner(day||state.day||{});
+    await showSystemSalesNotification(day||state.day||{},test);
+    if(test) toast("Teste de alerta enviado.");
+  }
+
+  async function enableAndTestSalesAlerts(){
+    const prefs=getSalesAlertPrefs();
+    prefs.enabled=true;saveSalesAlertPrefs(prefs);
+
+    if("Notification" in window && Notification.permission==="default"){
+      try{await Notification.requestPermission()}catch(_){}
+    }
+    playSalesAlertSound(); // gesto do usuário libera áudio no mobile quando suportado
+    await triggerSalesAlert(state.day||{}, {test:true});
+  }
+
+  function openSalesAlertSettings(){
+    const p=getSalesAlertPrefs();
+    const notifStatus=!("Notification" in window)?"não suportada":Notification.permission;
+    openModal(
+      '<div class="execution-modal-head"><span class="eyebrow">ALERTAS DE VENDA</span><h2>Nova parcial</h2><p>Receba um aviso quando uma nova atualização de venda entrar no acompanhamento.</p></div>'+
+      '<div class="sales-alert-settings">'+
+        '<label><input id="salesAlertEnabled" type="checkbox" '+(p.enabled?"checked":"")+'> <span><b>Alertas ativos</b><small>Detectar nova parcial automaticamente</small></span></label>'+
+        '<label><input id="salesAlertSound" type="checkbox" '+(p.sound?"checked":"")+'> <span><b>Som</b><small>Toque curto de nova mensagem</small></span></label>'+
+        '<label><input id="salesAlertVibration" type="checkbox" '+(p.vibration?"checked":"")+'> <span><b>Vibração</b><small>Quando o aparelho/navegador permitir</small></span></label>'+
+        '<label><input id="salesAlertSystem" type="checkbox" '+(p.system?"checked":"")+'> <span><b>Notificação do aparelho</b><small>Permissão atual: '+esc(notifStatus)+'</small></span></label>'+
+      '</div>'+
+      '<div class="execution-modal-actions"><button id="salesAlertSaveBtn" class="btn secondary">Salvar</button><button id="salesAlertTestBtn" class="btn primary">Ativar e testar agora</button></div>'
+    );
+    $("salesAlertSaveBtn").onclick=()=>{
+      saveSalesAlertPrefs({
+        enabled:$("salesAlertEnabled").checked,
+        sound:$("salesAlertSound").checked,
+        vibration:$("salesAlertVibration").checked,
+        system:$("salesAlertSystem").checked
+      });
+      toast("Preferências de alerta salvas.");
+      closeModal();
+    };
+    $("salesAlertTestBtn").onclick=async()=>{
+      saveSalesAlertPrefs({
+        enabled:$("salesAlertEnabled").checked,
+        sound:$("salesAlertSound").checked,
+        vibration:$("salesAlertVibration").checked,
+        system:$("salesAlertSystem").checked
+      });
+      await enableAndTestSalesAlerts();
+    };
+  }
+
+  async function checkForNewSalesUpdate(){
+    if(!state.logged||salesAlertBusy||!getSalesAlertPrefs().enabled) return;
+    salesAlertBusy=true;
+    try{
+      const day=await api("dashboard",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode});
+      const stamp=String(day?.captured_at||"");
+      if(!stamp) return;
+      const key=salesAlertLastKey();
+      const last=localStorage.getItem(key);
+
+      if(!last){
+        localStorage.setItem(key,stamp);
+        return;
+      }
+      if(last===stamp) return;
+
+      localStorage.setItem(key,stamp);
+      await triggerSalesAlert(day);
+      if(typeof loadAll==="function") await loadAll();
+    }catch(_){
+      // monitor silencioso; falha temporária não interfere no uso do app.
+    }finally{
+      salesAlertBusy=false;
+    }
+  }
+
+  function startSalesAlertMonitor(){
+    clearInterval(salesAlertTimer);
+    salesAlertTimer=setInterval(checkForNewSalesUpdate,60000);
+    setTimeout(checkForNewSalesUpdate,3500);
+  }
+
   function ensureMoreTools(){
     const more=$("section-mais");
     if(!more) return;
     moreButton("moreAnnouncementsBtn","!","Informações importantes","Avisos, campanhas e direcionamentos",openAnnouncementsCenter,false);
+    moreButton("moreSalesAlertsBtn","🔔","Alertas de nova parcial","Som, vibração e notificação quando a venda atualizar",openSalesAlertSettings,false);
     moreButton("moreChatBtn","💬","Chat entre lojas","Tire dúvidas sobre uso e navegação do app",openChat,false);
 
     if(state.role==="administrador"){
@@ -338,7 +534,7 @@
     const list=more.querySelector(".premium-more-list");
     const preferred=[
       "moreUpdateSalesBtn","moreMonthlyTargetBtn","moreCommercialAdminBtn","moreAnnouncementAdminBtn",
-      "moreCollaboratorsBtn","moreVisibilityBtn","moreAnnouncementsBtn","moreChatBtn",
+      "moreCollaboratorsBtn","moreVisibilityBtn","moreAnnouncementsBtn","moreSalesAlertsBtn","moreChatBtn",
       "moreResetDayBtn","premiumInstallApp","premiumLogout"
     ];
     preferred.forEach(id=>{const el=$(id);if(el&&el.parentNode===list) list.appendChild(el)});
@@ -497,8 +693,15 @@
 
   document.addEventListener("DOMContentLoaded",()=>{
     ensureModal();
+    ensureSalesAlertBanner();
+    startSalesAlertMonitor();
     setTimeout(()=>{refreshExecutionUi();refreshAnnouncements();},350);
   });
 
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible") setTimeout(checkForNewSalesUpdate,500);
+  });
+
   window.refreshExecutionUi=refreshExecutionUi;
+  window.testSalesUpdateAlert=enableAndTestSalesAlerts;
 })();
