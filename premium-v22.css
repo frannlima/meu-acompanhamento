@@ -1222,3 +1222,65 @@
     font-size:10px!important;
   }
 }
+
+
+/* Performance Comercial — evolução em donut conforme modelo aprovado */
+.commercial-performance-card .commercial-card-top{
+  align-items:center;
+}
+.commercial-performance-card .evolution-donut{
+  --ring:#DAD9D6;
+  --track:#F2ECE4;
+  background:
+    conic-gradient(var(--ring) calc(var(--p,0)*1%),var(--track) 0)!important;
+  box-shadow:inset 0 0 0 1px rgba(23,63,53,.05);
+}
+.commercial-performance-card .evolution-donut.evo-positive{
+  --ring:#DE7C00;
+  --track:#FDE7CB;
+}
+.commercial-performance-card .evolution-donut.evo-negative{
+  --ring:#E03C31;
+  --track:#F9D8D5;
+}
+.commercial-performance-card .evolution-donut.evo-neutral{
+  --ring:#DAD9D6;
+  --track:#F2F0EA;
+}
+.commercial-performance-card .evolution-donut>div{
+  background:#fff!important;
+}
+.commercial-performance-card .evolution-donut strong{
+  color:var(--ring)!important;
+}
+.commercial-performance-card .evolution-donut span{
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  font-weight:800!important;
+}
+.commercial-performance-metrics{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+.commercial-performance-metrics>div{
+  min-width:0;
+}
+.commercial-performance-metrics strong{
+  white-space:nowrap;
+}
+
+@media(max-width:900px){
+  .commercial-performance-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .commercial-performance-card .evolution-donut{
+    width:64px!important;
+    height:64px!important;
+    flex-basis:64px!important;
+  }
+  .commercial-performance-card .evolution-donut strong{
+    font-size:12px!important;
+  }
+  .commercial-performance-card .evolution-donut span{
+    font-size:5.5px!important;
+  }
+}
