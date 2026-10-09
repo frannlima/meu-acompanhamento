@@ -387,7 +387,7 @@ function renderHomeVisualSummary(metrics){
   box.innerHTML=
     visualDonut("Atingimento",has?attainment:0,has?pct(attainment):"—",has?"Meta financeira do dia":"Aguardando input",has?(attainment>=100?"good":attainment>=90?"warn":"bad"):"neutral")+
     visualDonut("Projeção",projection?projectionAttainment:0,projection?pct(projectionAttainment):"—",projection?"Projeção de fechamento":"Disponível após formar ritmo",projection?(projectionAttainment>=100?"good":projectionAttainment>=90?"warn":"bad"):"neutral")+
-    visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Aguardando venda":(evolution>=0?"Evolução":"Involução"),evolution===null?"neutral":evolution>=0?"good":"bad")+
+    visualDonut("Evolução vs A.A.",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Aguardando venda":(evolution>=0?"Evolução":"Involução"),evolution===null?"neutral":evolution>=0?"good":"bad")+
     visualDonut("Vs hora anterior",intervalGrowth===null?0:intervalGrowth,intervalGrowth===null?"—":pct(intervalGrowth),intervalGrowth===null?"Disponível após o 2º input":(intervalGrowth>=0?"Ritmo evoluindo":"Ritmo retraindo"),intervalGrowth===null?"neutral":intervalGrowth>=0?"good":"bad")+
     visualDonut("Ritmo necessário",pacePct||0,has?pct(pacePct||0):"—",has?"R$/h atual x necessário":"Aguardando acompanhamento",has?(pacePct>=100?"good":pacePct>=85?"warn":"bad"):"neutral");
 }
@@ -398,7 +398,7 @@ function renderWorldVisual(metrics){
   box.innerHTML=
     visualDonut("% Meta",attainment,hasRows?pct(attainment):"—","Atingimento do mundo",hasRows?(attainment>=100?"good":attainment>=90?"warn":"bad"):"neutral")+
     visualDonut("Meta física",physicalAttainment,hasRows?pct(physicalAttainment):"—","Peças x meta física",hasRows?(physicalAttainment>=100?"good":physicalAttainment>=90?"warn":"bad"):"neutral")+
-    visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Sem referência":"Resultado do mundo vs LY",evolution===null?"neutral":evolution>=0?"good":"bad")+
+    visualDonut("Evolução vs A.A.",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Sem referência":"Resultado do mundo vs LY",evolution===null?"neutral":evolution>=0?"good":"bad")+
     visualDonut("Último input",intervalPct,hasRows?pct(intervalPct):"—","Quanto do alvo veio no último input",hasRows?(intervalPct>=10?"good":intervalPct>=5?"warn":"bad"):"neutral");
 }
 
@@ -412,7 +412,7 @@ function renderCommercialVisual(rows,total){
   const attainment=total.target?total.sale/total.target*100:0;
   box.innerHTML=
     visualDonut("Atingimento",attainment,pct(attainment),"Meta dos comerciais atribuídos",attainment>=100?"good":attainment>=90?"warn":"bad")+
-    visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Sem referência":"Evolução / involução comercial",evolution===null?"neutral":evolution>=0?"good":"bad")+
+    visualDonut("Evolução vs A.A.",evolution===null?0:evolution,evolution===null?"—":pct(evolution),evolution===null?"Sem referência":"Evolução / involução comercial",evolution===null?"neutral":evolution>=0?"good":"bad")+
     visualDonut("Último input",intervalPct,pct(intervalPct),"Incremento do input sobre a meta",intervalPct>=10?"good":intervalPct>=5?"warn":"bad")+
     visualDonut("Cobertura DCO",coverage,pct(coverage),dcos.length+" DCO(s) com responsável",coverage>=90?"good":coverage>=70?"warn":"bad");
 }
@@ -430,7 +430,7 @@ function renderHistoryVisual(){
   box.innerHTML=
     visualDonut("Inputs hoje",cadence,String(inputCount),inputCount?"Snapshots registrados":"Nenhum snapshot","primary")+
     visualDonut("Atingimento",attainment,has?pct(attainment):"—","Posição atual do dia",has?(attainment>=100?"good":attainment>=90?"warn":"bad"):"neutral")+
-    visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":pct(evolution),"Comparação acumulada",evolution===null?"neutral":evolution>=0?"good":"bad")+
+    visualDonut("Evolução vs A.A.",evolution===null?0:evolution,evolution===null?"—":pct(evolution),"Comparação acumulada",evolution===null?"neutral":evolution>=0?"good":"bad")+
     visualDonut("Vs hora anterior",intervalGrowth===null?0:intervalGrowth,intervalGrowth===null?"—":pct(intervalGrowth),"Evolução / retração do ritmo",intervalGrowth===null?"neutral":intervalGrowth>=0?"good":"bad");
 }
 
@@ -486,7 +486,7 @@ function renderDashboard(){
     kpi("Venda física",has?num(physical)+" peças":"—","Meta física "+num(targetPhysical),has&&physical>=targetPhysical?"positive":""),
     kpi("Desvio total",has?(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2):"—",has?(deviation>=0?"Acima da meta":"Saldo para a meta"):"Será calculado no 1º input",has?(deviation>=0?"positive":"negative"):""),
     kpi("Projeção do dia",projection?money(projection,2):"—",projection?(projDev>=0?"+ ":"- ")+money(Math.abs(projDev),2)+" projetado":"Aguardando ritmo",projection?(projDev>=0?"positive":"negative"):""),
-    kpi(evolution!==null&&evolution<0?"Involução vs LY":"Evolução vs LY",evolution!==null?pct(evolution):"—",evolution!==null?"Venda LY "+money(ly,2):"Disponível após o input",evolution!==null?(evolution>=0?"positive":"negative"):""),
+    kpi(evolution!==null&&evolution<0?"Involução vs LY":"Evolução vs Ano Anterior",evolution!==null?pct(evolution):"—",evolution!==null?"Venda A.A. "+money(ly,2):"Disponível após o input",evolution!==null?(evolution>=0?"positive":"negative"):""),
     kpi("Último intervalo",has?money(interval,2):"—",firstInput?"Desde a abertura às "+openingTime:(intervalGrowth===null?"Aguardando comparação":pct(intervalGrowth)+" vs ritmo anterior"),intervalGrowth===null?"":intervalGrowth>=0?"positive":"negative"),
     kpi("R$/h necessário",needed?money(needed,2):"—","Para alcançar a meta até 22h","warning"),
     kpi("R$/h atual",currentPerHour?money(currentPerHour,2):"—",currentPerHour&&needed?pct((currentPerHour/needed-1)*100)+" vs necessário":"Aguardando 2º input",currentPerHour?(currentPerHour>=needed?"positive":"negative"):""),
@@ -603,7 +603,7 @@ function renderGroups(){
       const sale=Number(r.sales_financial||0),target=Number(r.target_financial||0),a=target?sale/target*100:0,dev=sale-target,ly=Number(r.ly_financial||0),ev=ly?((sale/ly)-1)*100:null,delta=Number(r.interval_sales_financial||0);
       return '<tr><td>'+esc(r.dco_code)+'</td><td>'+esc(String(r.department||"").replace(/^\d+\s*-?\s*/,""))+'</td><td>'+money(target,2)+'</td><td class="'+(a>=100?"cell-good":a>=90?"cell-warn":"cell-bad")+'">'+money(sale,2)+'</td><td class="'+(a>=100?"cell-good":a>=90?"cell-warn":"cell-bad")+'">'+pct(a)+'</td><td class="'+(dev>=0?"positive":"negative")+'">'+(dev>=0?"+ ":"- ")+money(Math.abs(dev),2)+'</td><td>'+num(r.sales_physical)+'</td><td>'+(ly?money(ly,2):"—")+'</td><td class="'+(ev===null?"":ev>=0?"positive":"negative")+'">'+(ev===null?"—":pct(ev))+'</td><td class="'+(delta>=0?"positive":"negative")+'">'+(delta>=0?"+ ":"- ")+money(Math.abs(delta),2)+'</td></tr>';
     }).join("");
-    return '<section class="group-card"><div class="group-card-head"><div><span class="eyebrow">GRUPO</span><h2>'+esc(GROUP_LABELS[g]||g)+'</h2></div><div class="group-summary"><div><span>Venda</span><strong>'+money(t.sale,2)+'</strong></div><div><span>% Meta</span><strong class="'+(attainment>=100?"positive":attainment>=90?"warning":"negative")+'">'+pct(attainment)+'</strong></div><div><span>Desvio</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</strong></div></div></div><div class="table-wrap"><table><thead><tr><th>DCO</th><th>Departamento</th><th>Meta</th><th>Venda</th><th>% Meta</th><th>Desvio</th><th>Física</th><th>LY</th><th>Evol.</th><th>Vs Input</th></tr></thead><tbody>'+trs+'<tr class="total-row"><td colspan="2">TOTAL • '+esc(GROUP_LABELS[g]||g)+'</td><td>'+money(t.target,2)+'</td><td>'+money(t.sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</td><td>'+num(t.physical)+'</td><td>'+(t.ly?money(t.ly,2):"—")+'</td><td>—</td><td>—</td></tr></tbody></table></div></section>';
+    return '<section class="group-card"><div class="group-card-head"><div><span class="eyebrow">GRUPO</span><h2>'+esc(GROUP_LABELS[g]||g)+'</h2></div><div class="group-summary"><div><span>Venda</span><strong>'+money(t.sale,2)+'</strong></div><div><span>% Meta</span><strong class="'+(attainment>=100?"positive":attainment>=90?"warning":"negative")+'">'+pct(attainment)+'</strong></div><div><span>Desvio</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</strong></div></div></div><div class="table-wrap"><table><thead><tr><th>DCO</th><th>Departamento</th><th>Meta</th><th>Venda</th><th>% Meta</th><th>Desvio</th><th>Física</th><th>Venda A.A.</th><th>Evol.</th><th>Vs Input</th></tr></thead><tbody>'+trs+'<tr class="total-row"><td colspan="2">TOTAL • '+esc(GROUP_LABELS[g]||g)+'</td><td>'+money(t.target,2)+'</td><td>'+money(t.sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</td><td>'+num(t.physical)+'</td><td>'+(t.ly?money(t.ly,2):"—")+'</td><td>—</td><td>—</td></tr></tbody></table></div></section>';
   }).join("");
 }
 
@@ -703,12 +703,12 @@ function buildGroupPanelHtml(){
       '<div class="group-kpi"><span>Meta do dia</span><strong>'+money(target,2)+'</strong><small>Meta física '+num(targetPhysical)+' peças</small></div>'+
       '<div class="group-kpi"><span>Venda atual</span><strong>'+money(sale,2)+'</strong><small>'+pct(attainment)+' da meta</small></div>'+
       '<div class="group-kpi projection"><span>Projeção de venda</span><strong>'+(projection?money(projection,2):"—")+'</strong><small>'+(projection?pct(projectionAttainment)+' de atingimento':"Aguardando 2º input")+'</small>'+projectionStatus+'</div>'+
-      '<div class="group-kpi"><span>Evolução vs LY</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong>'+lyStatus+'</div>'+
+      '<div class="group-kpi"><span>Evolução vs Ano Anterior</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong>'+lyStatus+'</div>'+
       '<div class="group-kpi"><span>Evolução vs hora anterior</span><strong class="'+(intervalGrowth===null?"":intervalGrowth>=0?"positive":"negative")+'">'+(intervalGrowth===null?"—":pct(intervalGrowth))+'</strong>'+hourStatus+'</div>'+
       '<div class="group-kpi deviation"><span>Desvio total</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+signedMoney(deviation,2)+'</strong><small>'+pct(attainment-100)+' em relação à meta</small></div>'+
     '</div>'+
     '<div class="group-share-table-wrap"><table class="group-share-table"><thead><tr>'+
-      '<th>Grupo de venda</th><th>Meta Fin.</th><th>Venda Fin.</th><th>% Meta</th><th>Desvio</th><th>Venda LY</th><th>Evolução / Involução vs LY</th><th>Meta Fís.</th><th>Venda Fís.</th><th>% Meta Fís.</th><th>Projeção do dia</th>'+
+      '<th>Grupo de venda</th><th>Meta Fin.</th><th>Venda Fin.</th><th>% Meta</th><th>Desvio</th><th>Venda A.A.</th><th>Evolução / Involução vs LY</th><th>Meta Fís.</th><th>Venda Fís.</th><th>% Meta Fís.</th><th>Projeção do dia</th>'+
     '</tr></thead><tbody>'+rows+
       '<tr class="group-total-row"><td>Total</td><td>'+money(target,2)+'</td><td>'+money(sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+signedMoney(deviation,2)+'</td><td>'+money(ly,2)+'</td><td>'+(evolution===null?"—":(evolution>=0?"▲ ":"▼ ")+pct(evolution))+'</td><td>'+num(targetPhysical)+'</td><td>'+num(salesPhysical)+'</td><td>'+pct(physicalAttainment)+'</td><td>'+(projection?money(projection,2):"—")+'</td></tr>'+
     '</tbody></table></div>'+
@@ -752,7 +752,7 @@ async function shareGroupPanelSummary(){
     '🎯 Meta: '+money(target,2)+'\n'+
     '💰 Venda: '+money(sale,2)+' • '+pct(attainment)+'\n'+
     '↕️ Desvio: '+signedMoney(deviation,2)+'\n'+
-    '📈 Vs LY: '+(evolution===null?'—':pct(evolution))+'\n'+
+    '📈 Evolução vs A.A.: '+(evolution===null?'—':pct(evolution))+'\n'+
     '🕐 Vs hora anterior: '+(intervalGrowth===null?'—':pct(intervalGrowth))+'\n\n'+
     'Painel completo disponível no Meu Acompanhamento.';
 
@@ -803,7 +803,7 @@ function renderRegional(){
   if($("regionalVisualSummary")) $("regionalVisualSummary").innerHTML=
     visualDonut("Atingimento regional",att,pct(att),"Venda regional x meta",att>=100?"good":att>=90?"warn":"bad")+
     visualDonut("Lojas atualizadas",activePct,pct(activePct),total.inputs+" de "+rows.length+" lojas",activePct>=90?"good":activePct>=70?"warn":"bad")+
-    visualDonut("Vs LY",regionalEvolution===null?0:regionalEvolution,regionalEvolution===null?"—":pct(regionalEvolution),"Evolução / involução regional",regionalEvolution===null?"neutral":regionalEvolution>=0?"good":"bad")+
+    visualDonut("Evolução vs A.A.",regionalEvolution===null?0:regionalEvolution,regionalEvolution===null?"—":pct(regionalEvolution),"Evolução / involução regional",regionalEvolution===null?"neutral":regionalEvolution>=0?"good":"bad")+
     visualDonut("Vs hora anterior",regionalHourEvolution===null?0:regionalHourEvolution,regionalHourEvolution===null?"—":pct(regionalHourEvolution),"Ritmo regional entre parciais",regionalHourEvolution===null?"neutral":regionalHourEvolution>=0?"good":"bad");
   $("regionalKpis").innerHTML=[
     kpi("Meta regional",money(total.meta,2),rows.length+" lojas"),
@@ -887,12 +887,12 @@ function buildRegionalPanelHtml(){
       '<div><span>Meta regional</span><strong>'+money(total.meta,2)+'</strong><small>'+rows.length+' lojas</small></div>'+
       '<div><span>Venda regional</span><strong>'+money(total.sale,2)+'</strong><small>'+pct(attainment)+' da meta</small></div>'+
       '<div><span>Desvio regional</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+signedMoney(deviation,2)+'</strong><small>Meta x realizado</small></div>'+
-      '<div><span>Vs LY</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong><small>'+(evolution===null?"Sem referência":evolution>=0?"Evolução":"Involução")+'</small></div>'+
+      '<div><span>Evolução vs A.A.</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong><small>'+(evolution===null?"Sem referência":evolution>=0?"Evolução":"Involução")+'</small></div>'+
       '<div><span>Vs hora anterior</span><strong class="'+(hourEvolution===null?"":hourEvolution>=0?"positive":"negative")+'">'+(hourEvolution===null?"—":pct(hourEvolution))+'</strong><small>Ritmo entre parciais</small></div>'+
       '<div><span>Lojas atualizadas</span><strong>'+total.inputs+'/'+rows.length+'</strong><small>'+pct(activePct)+' com input</small></div>'+
     '</div>'+
     '<div class="regional-share-table-wrap"><table class="regional-share-table"><thead><tr>'+
-      '<th>Loja</th><th>Meta Dia</th><th>Venda Atual</th><th>% Ating.</th><th>Desvio</th><th>Venda Fís.</th><th>Venda LY</th><th>Vs LY</th><th>Venda último input</th><th>Vs hora anterior</th><th>Atualização</th>'+
+      '<th>Loja</th><th>Meta Dia</th><th>Venda Atual</th><th>% Ating.</th><th>Desvio</th><th>Venda Fís.</th><th>Venda A.A.</th><th>Evolução vs A.A.</th><th>Venda último input</th><th>Vs hora anterior</th><th>Atualização</th>'+
     '</tr></thead><tbody>'+tableRows+
       '<tr class="group-total-row"><td>CE+PI</td><td>'+money(total.meta,2)+'</td><td>'+money(total.sale,2)+'</td><td>'+pct(attainment)+'</td><td>'+signedMoney(deviation,2)+'</td><td>'+num(total.physical)+'</td><td>'+money(total.ly,2)+'</td><td>'+(evolution===null?"—":pct(evolution))+'</td><td>'+money(total.interval,2)+'</td><td>'+(hourEvolution===null?"—":pct(hourEvolution))+'</td><td>'+latestUpdate+'</td></tr>'+
     '</tbody></table></div>'+
@@ -965,7 +965,7 @@ async function createRegionalPanelImage(){
     ["META REGIONAL",money(total.meta,0),"Meta do dia"],
     ["VENDA REGIONAL",money(total.sale,0),pct(att)+" da meta"],
     ["DESVIO",signedMoney(dev,0),dev>=0?"Acima da meta":"Saldo para meta"],
-    ["VS LY",ev===null?"—":pct(ev),ev===null?"Sem referência":ev>=0?"Evolução":"Involução"],
+    ["EVOLUÇÃO VS A.A.",ev===null?"—":pct(ev),ev===null?"Sem referência":ev>=0?"Evolução":"Involução"],
     ["VS HORA ANTERIOR",hourEv===null?"—":pct(hourEv),"Ritmo regional"],
     ["LOJAS ATUALIZADAS",total.inputs+"/"+rows.length,pct(rows.length?total.inputs/rows.length*100:0)+" com input"]
   ];
@@ -975,7 +975,7 @@ async function createRegionalPanelImage(){
     ctx.fillStyle=C.soft; ctx.strokeStyle=C.line; ctx.lineWidth=1;
     ctx.beginPath(); ctx.roundRect(x,cardY,cardW,cardH,14); ctx.fill(); ctx.stroke();
     ctx.fillStyle=C.green2; ctx.font="700 12px Arial"; ctx.fillText(c[0],x+16,cardY+26);
-    ctx.fillStyle=(c[0]==="DESVIO"&&dev<0)||(c[0]==="VS LY"&&ev!==null&&ev<0)||(c[0]==="VS HORA ANTERIOR"&&hourEv!==null&&hourEv<0)?C.red:C.ink;
+    ctx.fillStyle=(c[0]==="DESVIO"&&dev<0)||(c[0]==="EVOLUÇÃO VS A.A."&&ev!==null&&ev<0)||(c[0]==="VS HORA ANTERIOR"&&hourEv!==null&&hourEv<0)?C.red:C.ink;
     ctx.font="800 24px Arial"; ctx.fillText(c[1],x+16,cardY+60);
     ctx.fillStyle=C.muted; ctx.font="400 12px Arial"; ctx.fillText(c[2],x+16,cardY+84);
   });
@@ -987,8 +987,8 @@ async function createRegionalPanelImage(){
     {k:"att",label:"% Ating.",w:112},
     {k:"dev",label:"Desvio",w:175},
     {k:"physical",label:"Venda Fís.",w:110},
-    {k:"ly",label:"Venda LY",w:170},
-    {k:"ev",label:"Vs LY",w:110},
+    {k:"ly",label:"Venda A.A.",w:170},
+    {k:"ev",label:"Evolução vs A.A.",w:110},
     {k:"interval",label:"Último Input",w:170},
     {k:"hour",label:"Vs Hora Ant.",w:125},
     {k:"update",label:"Atualização",w:110}
@@ -1076,7 +1076,7 @@ async function shareRegionalPanel(){
   const hourEv=total.previousInterval?((total.interval/total.previousInterval)-1)*100:null;
   const textMsg='📊 *CONSOLIDADO REGIONAL | HORA A HORA*\nCE+PI • '+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+
     '\n\n🎯 Meta: '+money(total.meta,2)+'\n💰 Venda: '+money(total.sale,2)+' • '+pct(att)+
-    '\n↕️ Desvio: '+signedMoney(dev,2)+'\n📈 Vs LY: '+(ev===null?'—':pct(ev))+
+    '\n↕️ Desvio: '+signedMoney(dev,2)+'\n📈 Evolução vs A.A.: '+(ev===null?'—':pct(ev))+
     '\n🕐 Vs hora anterior: '+(hourEv===null?'—':pct(hourEv))+'\n🏬 Lojas atualizadas: '+total.inputs+'/'+rows.length;
 
   const btn=$("shareRegionalPanel");
@@ -1198,7 +1198,7 @@ function renderCommercials(){
         '<div><span>Meta</span><strong>'+money(target,2)+'</strong></div>'+
         '<div><span>Venda</span><strong>'+money(sale,2)+'</strong></div>'+
         '<div><span>Desvio</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</strong></div>'+
-        '<div><span>Vs LY</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong></div>'+
+        '<div><span>Evolução vs A.A.</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong></div>'+
         '<div><span>Último input</span><strong class="'+(interval>=0?"positive":"negative")+'">'+(interval>=0?"+ ":"- ")+money(Math.abs(interval),2)+'</strong></div>'+
         '<div><span>DCOs</span><strong>'+num(dcos.length)+'</strong></div>'+
       '</div>'+
@@ -1368,11 +1368,11 @@ function renderAdminMeta(){
   $("adminMetaKpis").innerHTML=[
     kpi("Meta financeira",money(target,2),"Meta do dia"),
     kpi("Meta física",num(physical)+" peças","Meta do dia"),
-    kpi("Venda LY",money(ly,2),"Referência ano anterior"),
+    kpi("Venda A.A.",money(ly,2),"Referência ano anterior"),
     kpi("Abertura",d.opening_time||"10:00","Base do cálculo do ritmo")
   ].join("");
   const groups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
-  $("adminMetaGroups").innerHTML='<table><thead><tr><th>Grupo</th><th>Meta Fin.</th><th>Meta Fís.</th><th>Venda LY</th></tr></thead><tbody>'+
+  $("adminMetaGroups").innerHTML='<table><thead><tr><th>Grupo</th><th>Meta Fin.</th><th>Meta Fís.</th><th>Venda A.A.</th></tr></thead><tbody>'+
     GROUP_ORDER.map(code=>{
       const g=groups.find(x=>x.group_code===code);
       if(!g) return "";
