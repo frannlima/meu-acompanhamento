@@ -177,14 +177,25 @@
     }
     if(!box) return;
     const all=typeof detailRows==="function"?detailRows():[];
-    const rows=all.filter(r=>state.world==="todos"||r.world_code===state.world||(state.world==="beleza_relogios"&&["beleza","relogios"].includes(r.group_code)));
-    const worst=[...rows].sort((a,b)=>Number(a.deviation||0)-Number(b.deviation||0)).slice(0,3);
+    const rows=all
+      .filter(r=>state.world==="todos"||r.world_code===state.world||(state.world==="beleza_relogios"&&["beleza","relogios"].includes(r.group_code)))
+      .map(r=>{
+        const meta=Number(r.target_financial||r.meta_financial||r.target||0);
+        const venda=Number(r.sales_financial||r.venda_financial||r.sales||0);
+        const desvio=venda-meta;
+        return {...r,__action_meta:meta,__action_venda:venda,__action_desvio:desvio};
+      })
+      .filter(r=>r.__action_meta>0);
+    const worst=[...rows].sort((a,b)=>a.__action_desvio-b.__action_desvio).slice(0,3);
     box.innerHTML=
       '<div class="menu-action-title"><span>🎯</span><div><b>Onde agir agora</b><small>Prioridades com maior impacto no resultado</small></div></div>'+
       '<div class="menu-action-items">'+
-      (worst.length?worst.map(r=>
-        '<div><span><b>'+esc(r.dco_code)+'</b> '+esc(String(r.department||"").replace(/^\d+\s*-?\s*/,""))+'</span><strong class="negative">'+signedMoney(Number(r.deviation||0),2)+'</strong></div>'
-      ).join(""):'<div class="empty">Atualize a venda para visualizar as prioridades.</div>')+
+      (worst.length?worst.map(r=>{
+        const dept=String(r.department||"")
+          .replace(/^\d+\s*-?\s*/,"")
+          .replace(/Calçados Femininos/gi,"Calçados Feminino");
+        return '<div><span><b>'+esc(r.dco_code)+'</b> '+esc(dept)+'</span><strong class="'+(r.__action_desvio>=0?"positive":"negative")+'">'+signedMoney(r.__action_desvio,2)+'</strong></div>';
+      }).join(""):'<div class="empty">Atualize a venda para visualizar as prioridades.</div>')+
       '</div>';
   }
 
