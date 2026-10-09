@@ -969,3 +969,24 @@ html,body{
     padding-right:16px!important;
   }
 }
+
+
+/* v54 — isolamento das telas e correção de login sobreposto.
+   O login mobile usa display:block!important; .hidden sozinho tinha
+   especificidade insuficiente e deixava a tela de acesso visível em TODOS os menus. */
+#loginScreen.hidden,
+#appShell.hidden,
+#dailyWelcomeModal.hidden,
+#worldModal.hidden,
+#supervisorChecklistModal.hidden {
+  display:none!important;
+}
+
+/* Somente a tela escolhida deve estar no fluxo visual.
+   Aplica-se apenas às seções diretas, sem afetar os cards internos. */
+#appShell .main > .section:not(.active) {
+  display:none!important;
+}
+#appShell .main > .section.active {
+  display:block!important;
+}
