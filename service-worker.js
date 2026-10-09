@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v53";
+const CACHE="meu-acompanhamento-v54";
 const ASSETS=[
   "./",
   "./index.html",
@@ -9,8 +9,8 @@ const ASSETS=[
   "./mobile-experience-v1.css?v=1",
   "./responsive-device-v1.css?v=1",
   "./execution-v1.css?v=7",
-  "./app.js?v=20",
-  "./enhancements-v9.js?v=7",
+  "./app.js?v=21",
+  "./enhancements-v9.js?v=8",
   "./premium-v22.js?v=9",
   "./clarity-v1.js?v=13",
   "./mobile-experience-v1.js?v=2",
@@ -43,8 +43,9 @@ self.addEventListener("notificationclick",event=>{
     const all=await self.clients.matchAll({type:"window",includeUncontrolled:true});
     for(const client of all){
       if("focus" in client){
+        // Reaproveitar a tela aberta: navigate("./") recarregava o PWA e
+        // descartava a aba em que o usuário estava trabalhando.
         await client.focus();
-        if("navigate" in client) await client.navigate("./");
         return;
       }
     }
