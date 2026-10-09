@@ -144,13 +144,24 @@
         '<div id="clarityCurveChart" class="clarity-curve-chart"></div>'+
         '<div id="clarityCurveHourTable" class="clarity-hour-wrap"></div>'+
       '</section>'+
-      '<section class="clarity-journey card">'+
-        '<div class="clarity-card-head"><div><span class="eyebrow">ROTINA DO DIA</span><h2>Acompanhe em 3 passos</h2><p>Uma sequência simples para manter a operação atualizada.</p></div></div>'+
-        '<div class="clarity-journey-steps">'+
-          '<button type="button" id="clarityPasteShortcut"><b>1</b><span><strong>Atualizar parcial</strong><small>Cole a venda da Web quando houver uma nova leitura.</small></span><i>›</i></button>'+
-          '<button type="button" data-clarity-section="grupos"><b>2</b><span><strong>Analisar resultado</strong><small>Veja grupos, DCOs, evolução e desvios.</small></span><i>›</i></button>'+
-          '<button type="button" id="clarityShareShortcut"><b>3</b><span><strong>Compartilhar Hora a Hora</strong><small>Envie o card consolidado da loja para o time.</small></span><i>›</i></button>'+
-        '</div>'+
+      '<section class="clarity-routine-grid">'+
+        '<section class="clarity-journey card">'+
+          '<div class="clarity-card-head"><div><span class="eyebrow">ROTINA DO DIA</span><h2>Acompanhe em 3 passos</h2><p>Uma sequência simples para manter a operação atualizada.</p></div></div>'+
+          '<div class="clarity-journey-steps">'+
+            '<button type="button" id="clarityPasteShortcut"><b>1</b><span><strong>Atualizar parcial</strong><small>Cole a venda da Web quando houver uma nova leitura.</small></span><i>›</i></button>'+
+            '<button type="button" data-clarity-section="grupos"><b>2</b><span><strong>Analisar resultado</strong><small>Veja grupos, DCOs, evolução e desvios.</small></span><i>›</i></button>'+
+            '<button type="button" id="clarityShareShortcut"><b>3</b><span><strong>Compartilhar Hora a Hora</strong><small>Envie o card consolidado da loja para o time.</small></span><i>›</i></button>'+
+          '</div>'+
+        '</section>'+
+        '<section id="claritySupervisorChecklist" class="clarity-supervisor-checklist card hidden">'+
+          '<div class="clarity-checklist-head">'+
+            '<div><span class="eyebrow">PREPARO DA OPERAÇÃO</span><h2>Checklist do supervisor</h2><p>Marque os pontos validados na abertura.</p></div>'+
+            '<div class="clarity-checklist-score"><strong id="clarityChecklistPct">0%</strong><span id="clarityChecklistStatus">em preparo</span></div>'+
+          '</div>'+
+          '<div class="clarity-checklist-progress"><i id="clarityChecklistBar"></i></div>'+
+          '<div id="clarityChecklistItems" class="clarity-checklist-items"></div>'+
+          '<div class="clarity-checklist-footer"><span id="clarityChecklistDone">0 de 8 concluídos</span><small id="clarityChecklistDate"></small></div>'+
+        '</section>'+
       '</section>'+
       '<section class="clarity-actions">'+
         '<button type="button" data-clarity-section="comerciais"><b>◎</b><span>Comerciais</span><small>Meta e performance da equipe</small></button>'+
@@ -162,6 +173,72 @@
     $("clarityShareShortcut").onclick=shareDailyCard;
     document.querySelectorAll("[data-clarity-section]").forEach(btn=>btn.onclick=()=>setSection(btn.dataset.claritySection));
     $("clarityShareDaily").onclick=shareDailyCard;
+    renderSupervisorChecklist();
+  }
+
+
+  const clarityChecklistLabels=[
+    ["meta","Meta e curva do dia validadas"],
+    ["hc","HC do dia e posicionamento do time definidos"],
+    ["comerciais","Comerciais alinhados com meta e foco do dia"],
+    ["estore","Meta eStore distribuída para o HC disponível"],
+    ["ruptura","Ruptura, reposição e prioridades operacionais checadas"],
+    ["omni","Omni, Locker, Retira e SLAs revisados"],
+    ["lpr","LPR, recebimento e pendências da abertura conferidos"],
+    ["comunicacao","Time comunicado sobre prioridades e direcionamentos"]
+  ];
+
+  function clarityChecklistKey(){
+    return "ma_checklist_supervisor_"+localDate()+"_"+String(state.matricula||"")+"_"+String(state.storeCode||"");
+  }
+
+  function readClarityChecklist(){
+    try{
+      const raw=JSON.parse(localStorage.getItem(clarityChecklistKey())||"{}");
+      return raw&&typeof raw==="object"?raw:{};
+    }catch(_){ return {}; }
+  }
+
+  function writeClarityChecklist(data){
+    try{ localStorage.setItem(clarityChecklistKey(),JSON.stringify(data)); }catch(_){}
+  }
+
+  function renderSupervisorChecklist(){
+    const card=$("claritySupervisorChecklist");
+    if(!card) return;
+    const allowed=["supervisor","gerente","administrador"].includes(String(state.role||"").toLowerCase());
+    card.classList.toggle("hidden",!allowed);
+    if(!allowed) return;
+
+    const saved=readClarityChecklist();
+    const total=clarityChecklistLabels.length;
+    const done=clarityChecklistLabels.filter(([id])=>!!saved[id]).length;
+    const pct=Math.round(done/total*100);
+    const items=$("clarityChecklistItems");
+    if(items){
+      items.innerHTML=clarityChecklistLabels.map(([id,label])=>
+        '<label class="clarity-check-item '+(saved[id]?"checked":"")+'">'+
+          '<input type="checkbox" data-clarity-check="'+id+'" '+(saved[id]?"checked":"")+'>'+
+          '<span class="clarity-check-box">✓</span>'+
+          '<span class="clarity-check-label">'+esc(label)+'</span>'+
+        '</label>'
+      ).join("");
+      items.querySelectorAll("[data-clarity-check]").forEach(input=>{
+        input.onchange=()=>{
+          const next=readClarityChecklist();
+          next[input.dataset.clarityCheck]=input.checked;
+          next.updated_at=new Date().toISOString();
+          writeClarityChecklist(next);
+          renderSupervisorChecklist();
+        };
+      });
+    }
+    if($("clarityChecklistPct")) $("clarityChecklistPct").textContent=pct+"%";
+    if($("clarityChecklistStatus")) $("clarityChecklistStatus").textContent=pct===100?"concluído":pct>=75?"quase pronto":pct>0?"em andamento":"em preparo";
+    if($("clarityChecklistBar")) $("clarityChecklistBar").style.width=pct+"%";
+    if($("clarityChecklistDone")) $("clarityChecklistDone").textContent=done+" de "+total+" concluídos";
+    if($("clarityChecklistDate")) $("clarityChecklistDate").textContent=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
+    card.classList.toggle("is-complete",pct===100);
   }
 
   function renderExecutive(){
