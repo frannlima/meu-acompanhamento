@@ -22,6 +22,95 @@
     }));
   }
 
+
+  function groupPerformanceColors(code){
+    const map={
+      feminino:"#E03C31",
+      masculino:"#2F6FB0",
+      infantil:"#E0A900",
+      casa:"#2E6B58",
+      beleza:"#E68699",
+      relogios:"#76232F",
+      cba:"#A7ACA9",
+      lpg:"#D37C32",
+      basket:"#466964"
+    };
+    return map[code]||"#466964";
+  }
+
+  function renderGroupHourlyChart(){
+    const card=$("groupHourlyPerformanceCard");
+    if(!card) return;
+    const rows=Array.isArray(state.groupHourlyHistory)?state.groupHourlyHistory:[];
+    if(!rows.length){
+      card.innerHTML=
+        '<div class="group-hourly-head"><div><span class="eyebrow">DESEMPENHO POR GRUPO</span><h2>Venda por hora até o último input</h2><p>Atualize a venda para formar a leitura do ritmo dos grupos ao longo do dia.</p></div></div>'+
+        '<div class="group-hourly-empty">Aguardando os primeiros inputs do dia.</div>';
+      return;
+    }
+
+    const byTime=new Map(),totals=new Map();
+    rows.forEach(r=>{
+      const t=String(r.captured_at||"");
+      if(!byTime.has(t)) byTime.set(t,new Map());
+      const code=String(r.group_code||"outros");
+      byTime.get(t).set(code,Number(r.sales_financial||0));
+      totals.set(code,Math.max(Number(totals.get(code)||0),Number(r.sales_financial||0)));
+    });
+
+    const times=[...byTime.keys()].sort((a,b)=>new Date(a)-new Date(b));
+    const series=[...totals.entries()]
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,6)
+      .map(([code])=>({
+        code,
+        name:GROUP_LABELS[code]||code,
+        color:groupPerformanceColors(code),
+        values:times.map(t=>Number(byTime.get(t).get(code)||0))
+      }));
+
+    const W=920,H=280,p={l:58,r:18,t:24,b:48};
+    const innerW=W-p.l-p.r,innerH=H-p.t-p.b;
+    const maxVal=Math.max(1,...series.flatMap(s=>s.values));
+    const x=i=>p.l+(times.length<=1?innerW/2:i/(times.length-1)*innerW);
+    const y=v=>p.t+innerH-(v/maxVal)*innerH;
+    const grid=[0,.25,.5,.75,1].map(fr=>{
+      const yy=p.t+innerH-innerH*fr;
+      return '<line x1="'+p.l+'" x2="'+(W-p.r)+'" y1="'+yy+'" y2="'+yy+'" stroke="#E7E4DB" stroke-width="1"/>'+
+        '<text x="'+(p.l-8)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10" fill="#7A8580">'+
+        Math.round(maxVal*fr/1000)+'k</text>';
+    }).join("");
+
+    const showIdx=times.length<=6
+      ? times.map((_,i)=>i)
+      : [0,Math.round((times.length-1)*.25),Math.round((times.length-1)*.5),Math.round((times.length-1)*.75),times.length-1];
+    const ticks=[...new Set(showIdx)].map(i=>
+      '<text x="'+x(i)+'" y="'+(H-16)+'" text-anchor="middle" font-size="10" fill="#6F7C77">'+localTime(times[i])+'</text>'
+    ).join("");
+
+    const lines=series.map(s=>{
+      const pts=s.values.map((v,i)=>x(i)+","+y(v)).join(" ");
+      const dots=s.values.map((v,i)=>'<circle cx="'+x(i)+'" cy="'+y(v)+'" r="'+(i===s.values.length-1?5:3.5)+'" fill="'+s.color+'"/>').join("");
+      return '<polyline fill="none" stroke="'+s.color+'" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="'+pts+'"/>'+dots;
+    }).join("");
+
+    const lastRanking=series.map(s=>({name:s.name,value:s.values.at(-1)||0,color:s.color})).sort((a,b)=>b.value-a.value);
+    const recovery=series.map(s=>{
+      const n=s.values.length;
+      const delta=n>=2?s.values[n-1]-s.values[n-2]:0;
+      return {name:s.name,delta,color:s.color};
+    }).sort((a,b)=>b.delta-a.delta)[0];
+
+    card.innerHTML=
+      '<div class="group-hourly-head"><div><span class="eyebrow">DESEMPENHO POR GRUPO</span><h2>Desempenho por grupo por hora</h2><p>Venda acumulada até o último input • leitura da evolução do dia.</p></div><span class="group-hourly-last">Até '+localTime(times.at(-1))+'</span></div>'+
+      '<div class="group-hourly-chart"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Gráfico de desempenho por grupo por hora">'+grid+lines+ticks+'</svg></div>'+
+      '<div class="group-hourly-legend">'+series.map(s=>'<span><i style="background:'+s.color+'"></i>'+esc(s.name)+'</span>').join("")+'</div>'+
+      '<div class="group-hourly-insights">'+
+        '<div><span>🏆 Líder no último input</span><strong>'+esc(lastRanking[0]?.name||"—")+'</strong></div>'+
+        '<div><span>↗ Maior recuperação</span><strong>'+esc(recovery?.name||"—")+(recovery&&recovery.delta?(" • +"+money(recovery.delta,0)):"")+'</strong></div>'+
+      '</div>';
+  }
+
   function commercialRows(){
     return Array.isArray(state.commercial?.commercials)?state.commercial.commercials:[];
   }
@@ -48,6 +137,15 @@
       const curve=home.querySelector(".clarity-curve");
       if(curve) curve.insertAdjacentElement("beforebegin",card);
       else home.appendChild(card);
+    }
+
+    if(!$("groupHourlyPerformanceCard")){
+      const chart=document.createElement("section");
+      chart.id="groupHourlyPerformanceCard";
+      chart.className="group-hourly-performance card";
+      const priority=$("mobilePriorityCard");
+      if(priority) priority.insertAdjacentElement("afterend",chart);
+      else home.appendChild(chart);
     }
 
     if(!$("mobileSquadCard")){
@@ -126,6 +224,8 @@
         if(typeof renderGroups==="function") renderGroups();
       });
     }
+
+    renderGroupHourlyChart();
 
     const summary=$("mobileHomeGroupSummary");
     if(summary){
