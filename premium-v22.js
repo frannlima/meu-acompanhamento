@@ -274,12 +274,12 @@
     const rows=Array.isArray(state.commercial?.commercials)?state.commercial.commercials:[];
     if(!rows.length) throw new Error("Não há comerciais carregados.");
 
-    // Card em alta resolução para leitura nítida no WhatsApp/zoom.
-    const width=1800;
-    const rowH=188;
-    const headerH=360;
-    const footerH=84;
-    const height=Math.max(1400,headerH+rows.length*rowH+footerH);
+    // Card em alta resolução, mantendo o mesmo layout visual da proposta aprovada.
+    const width=1600;
+    const rowH=170;
+    const headerH=350;
+    const footerH=70;
+    const height=Math.max(1200,headerH+rows.length*rowH+footerH);
     const canvas=document.createElement("canvas");
     canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext("2d");
@@ -287,57 +287,85 @@
     ctx.imageSmoothingQuality="high";
 
     const C={
-      green:"#173F35",green2:"#466964",cream:"#F7F4ED",white:"#FFFFFF",
-      orange:"#DE7C00",orangeSoft:"#FFF0DD",
-      red:"#E03C31",redSoft:"#FCE8E6",
-      line:"#DAD9D6",muted:"#6F7C77",good:"#2E6B58",goodSoft:"#E4F1EB",
-      track:"#E7E5DE",shadow:"rgba(23,63,53,.08)"
+      green:"#173F35",
+      green2:"#466964",
+      cream:"#F7F4ED",
+      white:"#FFFFFF",
+      orange:"#DE7C00",
+      orangeSoft:"#FDE7CB",
+      red:"#E03C31",
+      redSoft:"#F9D8D5",
+      line:"#DAD9D6",
+      muted:"#6F7C77",
+      good:"#173F35",
+      soft:"#EEF2EF"
     };
 
-    const donut=(cx,cy,radius,thickness,value)=>{
-      const abs=Math.min(100,Math.abs(Number(value||0)));
-      const start=-Math.PI/2;
-      const end=start+(Math.PI*2*abs/100);
-      const positive=Number(value||0)>=0;
-      const fg=positive?C.orange:C.red;
-      const bg=positive?"#F7E2C6":"#F7D4D0";
+    const rr=(x,y,w,h,r,fill,stroke=null)=>{
+      ctx.beginPath();ctx.roundRect(x,y,w,h,r);
+      if(fill){ctx.fillStyle=fill;ctx.fill();}
+      if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke();}
+    };
 
+    const drawFitText=(text,x,y,maxW,fontSize,weight="800",color=C.green)=>{
+      ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.fillStyle=color;
+      let size=fontSize;
+      do{
+        ctx.font=weight+" "+size+"px Arial";
+        if(ctx.measureText(text).width<=maxW||size<=14) break;
+        size-=1;
+      }while(size>14);
+      ctx.fillText(text,x,y);
+    };
+
+    const drawDonut=(cx,cy,radius,value)=>{
+      const v=Number.isFinite(value)?value:null;
+      const ringColor=v===null?C.line:(v>=0?C.orange:C.red);
+      const softColor=v===null?C.soft:(v>=0?C.orangeSoft:C.redSoft);
+      const mag=v===null?0:Math.max(0,Math.min(100,Math.abs(v)));
+      const start=-Math.PI/2;
+      const end=start+Math.PI*2*(mag/100);
+
+      ctx.save();
+      ctx.lineWidth=18;
       ctx.lineCap="butt";
-      ctx.lineWidth=thickness;
-      ctx.strokeStyle=bg;
+      ctx.strokeStyle=softColor;
       ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.stroke();
 
-      if(abs>0){
-        ctx.strokeStyle=fg;
-        ctx.beginPath();ctx.arc(cx,cy,radius,start,end,false);ctx.stroke();
+      if(mag>0){
+        ctx.strokeStyle=ringColor;
+        ctx.beginPath();ctx.arc(cx,cy,radius,start,end);ctx.stroke();
       }
+      ctx.restore();
 
       ctx.textAlign="center";ctx.textBaseline="middle";
-      ctx.fillStyle=fg;
-      ctx.font="800 29px Arial";
-      const txt=(positive?"+":"")+pct(Number(value||0));
-      ctx.fillText(txt,cx,cy-4);
+      ctx.fillStyle=ringColor;
+      ctx.font="800 25px Arial";
+      ctx.fillText(v===null?"—":(v>0?"+":"")+pct(v),cx,cy-3);
       ctx.fillStyle=C.muted;
-      ctx.font="800 12px Arial";
-      ctx.fillText("EVOLUÇÃO",cx,cy+28);
-      ctx.textBaseline="alphabetic";
+      ctx.font="800 10px Arial";
+      ctx.fillText("EVOLUÇÃO",cx,cy+24);
     };
 
+    // Fundo
     ctx.fillStyle=C.cream;ctx.fillRect(0,0,width,height);
-    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,205);
 
+    // Header
+    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,210);
     try{
       const logo=await loadShareImage("./assets/riachuelo-logo.svg");
-      drawRounded(ctx,60,45,330,90,22,C.white);
-      ctx.drawImage(logo,94,72,262,42);
-    }catch(_){}
+      ctx.drawImage(logo,72,54,420,78);
+    }catch(_){
+      ctx.fillStyle=C.white;ctx.font="800 56px Arial";ctx.textAlign="left";
+      ctx.fillText("RIACHUELO",72,110);
+    }
 
-    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 42px Arial";
-    ctx.fillText("PERFORMANCE COMERCIAL",1718,69);
+    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 46px Arial";
+    ctx.fillText("PERFORMANCE COMERCIAL",1510,73);
     ctx.font="600 22px Arial";ctx.fillStyle="#D6D2C4";
-    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1718,108);
+    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1510,112);
     ctx.font="700 18px Arial";
-    ctx.fillText("Moda que inspira o Brasil",1718,146);
+    ctx.fillText("Moda que inspira o Brasil",1510,148);
 
     const totalTarget=rows.reduce((s,r)=>s+Number(r.target_financial||0),0);
     const totalSale=rows.reduce((s,r)=>s+Number(r.sales_financial||0),0);
@@ -353,92 +381,83 @@
       ["COMERCIAIS",String(rows.length),C.green],
       ["DCOs ATRIBUÍDOS",String(totalDcos),C.green2]
     ];
-
-    const kx=60,ky=232,kgap=18,kw=(width-120-kgap*5)/6,kh=94;
+    const gap=14,kw=(width-112-gap*5)/6;
     kpis.forEach((k,i)=>{
-      const x=kx+i*(kw+kgap);
-      drawRounded(ctx,x,ky,kw,kh,16,C.white,C.line);
-      ctx.textAlign="left";ctx.fillStyle=C.muted;ctx.font="800 13px Arial";
-      ctx.fillText(k[0],x+16,ky+29);
-      ctx.fillStyle=k[2];ctx.font="800 23px Arial";
-      ctx.fillText(k[1],x+16,ky+66);
+      const x=56+i*(kw+gap),y=232;
+      rr(x,y,kw,88,16,C.white,C.line);
+      ctx.textAlign="left";ctx.fillStyle=C.muted;ctx.font="800 12px Arial";
+      ctx.fillText(k[0],x+15,y+28);
+      ctx.fillStyle=k[2];ctx.font="800 22px Arial";
+      ctx.fillText(k[1],x+15,y+62);
     });
 
-    let y=350;
+    let y=344;
     for(const r of rows){
       const target=Number(r.target_financial||0);
       const sale=Number(r.sales_financial||0);
       const att=target?sale/target*100:0;
       const dev=sale-target;
-      const evolution=(r.evolution_vs_ly===null||r.evolution_vs_ly===undefined)?0:Number(r.evolution_vs_ly||0);
+      const evolution=(r.evolution_vs_ly===null||r.evolution_vs_ly===undefined)?null:Number(r.evolution_vs_ly);
       const dcos=Array.isArray(r.dcos)?r.dcos:[];
-
-      drawRounded(ctx,58,y,1684,rowH-14,20,C.white,C.line);
+      rr(56,y,1488,rowH-14,20,C.white,C.line);
 
       // Foto
       let avatarOk=false;
       if(r.photo_url){
         try{
           const img=await loadShareImage(r.photo_url);
-          ctx.save();
-          ctx.beginPath();ctx.arc(126,y+82,58,0,Math.PI*2);ctx.clip();
+          ctx.save();ctx.beginPath();ctx.arc(120,y+74,52,0,Math.PI*2);ctx.clip();
           const s=Math.min(img.width,img.height),sx=(img.width-s)/2,sy=(img.height-s)/2;
-          ctx.drawImage(img,sx,sy,s,s,68,y+24,116,116);
-          ctx.restore();avatarOk=true;
+          ctx.drawImage(img,sx,sy,s,s,68,y+22,104,104);ctx.restore();avatarOk=true;
         }catch(_){}
       }
       if(!avatarOk){
-        ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(126,y+82,58,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 28px Arial";
-        ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),126,y+92);
+        ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(120,y+74,52,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 26px Arial";
+        ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),120,y+83);
       }
 
-      // Nome e DCOs
-      ctx.textAlign="left";ctx.fillStyle=C.green;ctx.font="800 27px Arial";
-      ctx.fillText(String(r.commercial_name||"Comercial"),218,y+42);
-
+      // Nome + DCOs
+      drawFitText(String(r.commercial_name||"Comercial"),205,y+42,900,26,"800",C.green);
+      ctx.fillStyle=C.muted;ctx.font="700 13px Arial";ctx.textAlign="left";
       const dcoText=dcos.length+" DCOs • "+dcos.map(d=>d.dco_code).join(" • ");
-      ctx.fillStyle=C.muted;ctx.font="700 13px Arial";
-      const maxDcoW=1080;
-      let shown=dcoText;
-      while(ctx.measureText(shown).width>maxDcoW && shown.length>4) shown=shown.slice(0,-4);
-      if(shown!==dcoText) shown=shown.replace(/[ •]+$/,"")+"…";
-      ctx.fillText(shown,218,y+69);
+      const clipped=dcoText.length>125?dcoText.slice(0,122)+"...":dcoText;
+      ctx.fillText(clipped,205,y+68);
 
       // Métricas
-      const metricX=[218,560,865,1142];
-      const metric=[
+      const cols=[
         ["META",money(target,2),C.green],
         ["VENDA",money(sale,2),C.green],
         ["ATING.",pct(att),att>=100?C.good:att>=90?C.orange:C.red],
         ["DESVIO",signedMoney(dev,2),dev>=0?C.good:C.red]
       ];
-      metric.forEach((m,i)=>{
-        ctx.fillStyle=C.muted;ctx.font="800 11px Arial";
-        ctx.fillText(m[0],metricX[i],y+104);
-        ctx.fillStyle=m[2];ctx.font="800 20px Arial";
-        ctx.fillText(m[1],metricX[i],y+133);
+      const cx=[205,525,805,1040];
+      cols.forEach((k,i)=>{
+        ctx.fillStyle=C.muted;ctx.font="800 11px Arial";ctx.fillText(k[0],cx[i],y+105);
+        ctx.fillStyle=k[2];ctx.font="800 18px Arial";ctx.fillText(k[1],cx[i],y+133);
       });
 
       // Barra de atingimento
-      const barX=218,barY=y+151,barW=1080,barH=10;
-      drawRounded(ctx,barX,barY,barW,barH,5,C.track);
-      const barColor=att>=100?C.good:att>=90?C.orange:C.red;
-      const filled=Math.max(3,Math.min(barW,barW*Math.max(0,att)/100));
-      drawRounded(ctx,barX,barY,filled,barH,5,barColor);
+      const barX=205,barY=y+145,barW=970,barH=8;
+      drawRounded(ctx,barX,barY,barW,barH,4,"#E7E5DE");
+      drawRounded(
+        ctx,barX,barY,
+        Math.max(3,Math.min(barW,barW*att/100)),
+        barH,4,
+        att>=100?C.good:att>=90?C.orange:C.red
+      );
 
-      // Divisor + gráfico de evolução
+      // Separador + evolução
       ctx.strokeStyle=C.line;ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(1342,y+24);ctx.lineTo(1342,y+150);ctx.stroke();
-      donut(1542,y+87,57,18,evolution);
+      ctx.beginPath();ctx.moveTo(1210,y+20);ctx.lineTo(1210,y+rowH-32);ctx.stroke();
+      drawDonut(1372,y+77,49,evolution);
 
       y+=rowH;
     }
 
-    ctx.fillStyle=C.green2;ctx.font="700 15px Arial";ctx.textAlign="left";
-    ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",60,height-32);
-    ctx.textAlign="right";
-    ctx.fillText("Ninguém faz nada sozinho.",1740,height-32);
+    ctx.fillStyle=C.green2;ctx.font="700 14px Arial";ctx.textAlign="left";
+    ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",56,height-28);
+    ctx.textAlign="right";ctx.fillText("Ninguém faz nada sozinho.",1544,height-28);
 
     return await new Promise((resolve,reject)=>canvas.toBlob(
       b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),
