@@ -1290,10 +1290,14 @@ function renderAdminCommercials(){
     const dcos=Array.isArray(r.dcos)?r.dcos:[];
     const initials=String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase();
     const photo=r.photo_url?'<img src="'+esc(r.photo_url)+'" alt="'+esc(r.commercial_name)+'">':'<span>'+esc(initials)+'</span>';
-    return '<article class="admin-commercial-row">'+
+    const autoBadge=r.auto_registered?'<em class="auto-commercial-badge">Base de colaboradores</em>':'';
+    const dcoStatus=dcos.length
+      ? num(dcos.length)+' DCO(s) • '+dcos.map(d=>d.dco_code).join(", ")
+      : 'DCOs ainda não atribuídos';
+    return '<article class="admin-commercial-row '+(dcos.length?'':'needs-dco')+'">'+
       '<div class="commercial-avatar small-avatar">'+photo+'</div>'+
-      '<div class="admin-commercial-info"><strong>'+esc(r.commercial_name)+'</strong><span>'+num(dcos.length)+' DCO(s) • '+dcos.map(d=>d.dco_code).join(", ")+'</span></div>'+
-      '<button class="btn secondary small edit-commercial-btn" data-commercial-id="'+esc(r.commercial_id)+'">Editar cadastro</button>'+
+      '<div class="admin-commercial-info"><div><strong>'+esc(r.commercial_name)+'</strong>'+autoBadge+'</div><span>'+dcoStatus+'</span></div>'+
+      '<button class="btn secondary small edit-commercial-btn" data-commercial-id="'+esc(r.commercial_id)+'">'+(dcos.length?'Editar DCOs':'Atribuir DCOs')+'</button>'+
     '</article>';
   }).join("");
   box.querySelectorAll(".edit-commercial-btn").forEach(btn=>btn.onclick=()=>editCommercial(btn.dataset.commercialId));
