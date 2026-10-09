@@ -19,19 +19,25 @@
   <link rel="stylesheet" href="./clarity-v1.css?v=3">
   <link rel="stylesheet" href="./mobile-experience-v1.css?v=1">
   <link rel="stylesheet" href="./responsive-device-v1.css?v=1">
-  <link rel="stylesheet" href="./execution-v1.css?v=5">
+  <link rel="stylesheet" href="./execution-v1.css?v=6">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
 
-  <section id="loginScreen" class="login-screen">
+  <section id="loginScreen" class="login-screen login-premium">
     <div class="login-hero">
       <div class="login-overlay"></div>
       <div class="login-hero-content">
-        <div class="logo-plate"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></div>
-        <span class="eyebrow light">GESTÃO COMERCIAL • CE+PI</span>
-        <h1>Meu<br>Acompanhamento</h1>
-        <p>Meta, venda, ritmo, projeção e oportunidades da operação na palma da mão.</p>
+        <div class="login-brand-line">
+          <img class="login-logo-horizontal" src="./assets/riachuelo-logo.svg" alt="Riachuelo">
+          <span class="login-brand-divider"></span>
+          <span class="eyebrow light">GESTÃO<br>COMERCIAL<br>CE+PI</span>
+        </div>
+        <div class="login-title-block">
+          <h1>Meu <span>Acompanhamento</span></h1>
+          <i class="login-accent-line"></i>
+          <p>Meta, venda, ritmo, projeção e oportunidades da operação na palma da mão.</p>
+        </div>
       </div>
     </div>
     <div class="login-pane">
@@ -39,12 +45,23 @@
         <span class="eyebrow">ACESSO À SUA LOJA</span>
         <h2>Entre no acompanhamento do dia</h2>
         <p>A matrícula identifica você. A loja confirma sua operação de origem.</p>
+
         <label for="matricula">Matrícula</label>
-        <input id="matricula" inputmode="numeric" autocomplete="username" placeholder="Ex.: 2457695" required>
+        <div class="login-input-shell">
+          <span class="login-field-icon" aria-hidden="true">♙</span>
+          <input id="matricula" inputmode="numeric" autocomplete="username" placeholder="Ex.: 2457695" required>
+        </div>
+
         <label for="storeCode">Número da loja</label>
-        <input id="storeCode" inputmode="numeric" maxlength="3" placeholder="Ex.: 108" required>
+        <div class="login-input-shell">
+          <span class="login-field-icon store" aria-hidden="true">▤</span>
+          <input id="storeCode" inputmode="numeric" maxlength="3" placeholder="Ex.: 108" required>
+        </div>
+
         <div id="loginError" class="form-error hidden"></div>
-        <button id="loginBtn" class="btn primary full" type="submit">Entrar na minha loja</button>
+        <button id="loginBtn" class="btn primary full login-enter-btn" type="submit">
+          <span>Entrar no app</span><b aria-hidden="true">→</b>
+        </button>
         <div class="login-rule">🔒 Acesso operacional vinculado à matrícula e filial. Administração regional somente para perfil autorizado.</div>
       </form>
     </div>
