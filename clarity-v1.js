@@ -304,55 +304,130 @@
 
   async function createDailyCardBlob(){
     const d=state.day||{},groups=groupRows();
-    const width=1500,rowH=76,headerH=300,height=headerH+(groups.length+1)*rowH+110;
+    const curve=curveForStore();
+    const tp=timeParts(d.captured_at||null);
+    const expectedPct=expectedPctAt(curve,tp.h,tp.m,"fin");
+    const width=2048,rowH=78,headerH=290,footerH=95;
+    const height=headerH+(groups.length+1)*rowH+footerH;
     const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext("2d");
-    const C={green:"#173F35",soft:"#466964",cream:"#F7F4ED",white:"#FFFFFF",line:"#DAD9D6",red:"#B6454B",good:"#2E6B58",orange:"#DE7C00",muted:"#6F7C77"};
+    const C={green:"#173F35",soft:"#466964",cream:"#F7F4ED",white:"#FFFFFF",line:"#DAD9D6",red:"#B6454B",good:"#2E6B58",orange:"#DE7C00",muted:"#6F7C77",pink:"#E68699"};
+
     ctx.fillStyle=C.cream;ctx.fillRect(0,0,width,height);
-    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,210);
-    ctx.fillStyle=C.white;ctx.font="800 42px Arial";ctx.fillText("RIACHUELO",48,72);
-    ctx.font="800 34px Arial";ctx.fillText("HORA A HORA | RESULTADO DO DIA",48,130);
+    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,212);
+
+    try{
+      const logo=await new Promise((resolve,reject)=>{
+        const img=new Image();img.onload=()=>resolve(img);img.onerror=reject;img.src="./assets/riachuelo-logo.svg";
+      });
+      ctx.fillStyle=C.white;ctx.roundRect(56,40,310,88,18);ctx.fill();
+      ctx.drawImage(logo,82,64,258,40);
+    }catch(_){
+      ctx.fillStyle=C.white;ctx.font="800 42px Arial";ctx.fillText("RIACHUELO",58,82);
+    }
+
+    ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 42px Arial";
+    ctx.fillText("HORA A HORA | RESULTADO DO DIA",width/2,82);
     ctx.font="600 18px Arial";ctx.fillStyle="#D6D2C4";
-    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+" • "+(d.captured_at?"Atualizado "+localTime(d.captured_at):"Sem input"),48,168);
+    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+" • "+(d.captured_at?"Atualizado "+localTime(d.captured_at):"Sem input"),width/2,122);
+    ctx.textAlign="right";ctx.font="700 15px Arial";ctx.fillStyle=C.white;
+    ctx.fillText("Moda que inspira o Brasil",width-58,82);
 
     const cols=[
-      {x:48,w:260,label:"GRUPO"},
-      {x:308,w:190,label:"META"},
-      {x:498,w:190,label:"VENDA"},
-      {x:688,w:150,label:"ATING."},
-      {x:838,w:210,label:"VENDA A.A."},
-      {x:1048,w:150,label:"EV."},
-      {x:1198,w:254,label:"DESVIO"}
+      {x:44,w:250,label:"GRUPO",align:"left"},
+      {x:294,w:205,label:"META"},
+      {x:499,w:205,label:"VENDA"},
+      {x:704,w:150,label:"ATING."},
+      {x:854,w:210,label:"VENDA A.A."},
+      {x:1064,w:160,label:"EVOLUÇÃO"},
+      {x:1224,w:210,label:"DESVIO"},
+      {x:1434,w:225,label:"PROJEÇÃO"},
+      {x:1659,w:345,label:"VENDA FÍSICA"}
     ];
-    ctx.fillStyle=C.white;ctx.fillRect(48,232,1404,54);
-    ctx.fillStyle=C.muted;ctx.font="800 15px Arial";
-    cols.forEach(c=>ctx.fillText(c.label,c.x+12,265));
 
-    const drawRow=(y,name,meta,venda,ating,aa,ev,dev,total=false)=>{
-      ctx.fillStyle=total?"#EAF1ED":C.white;ctx.fillRect(48,y,1404,rowH-4);
-      ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(48,y+rowH-4);ctx.lineTo(1452,y+rowH-4);ctx.stroke();
-      const vals=[name,money(meta,2),money(venda,2),pct(ating),money(aa,2),ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev),signedMoney(dev,2)];
+    ctx.fillStyle=C.white;ctx.fillRect(44,232,width-88,54);
+    ctx.fillStyle=C.muted;ctx.font="800 14px Arial";
+    cols.forEach(col=>{
+      ctx.textAlign=col.align==="left"?"left":"center";
+      ctx.fillText(col.label,col.align==="left"?col.x+12:col.x+col.w/2,265);
+    });
+
+    const drawRow=(y,name,meta,venda,ating,aa,ev,dev,proj,physical,total=false)=>{
+      ctx.fillStyle=total?"#E7EFEA":C.white;ctx.fillRect(44,y,width-88,rowH-4);
+      ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(44,y+rowH-4);ctx.lineTo(width-44,y+rowH-4);ctx.stroke();
+
+      const vals=[
+        name,money(meta,2),money(venda,2),pct(ating),aa?money(aa,2):"—",
+        ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev),
+        signedMoney(dev,2),
+        proj?money(proj,2):"—",
+        num(physical)+" peças"
+      ];
+
       vals.forEach((v,i)=>{
-        ctx.fillStyle=i===5?(ev===null?C.muted:ev>=0?C.good:C.red):i===6?(dev>=0?C.good:C.red):i===3?(ating>=100?C.good:ating>=90?C.orange:C.red):C.green;
-        ctx.font=(total?"800 ":"700 ")+(i===0?18:16)+"px Arial";
-        ctx.fillText(v,cols[i].x+12,y+45);
+        const col=cols[i];
+        ctx.textAlign=col.align==="left"?"left":"center";
+        let color=C.green;
+        if(i===3) color=ating>=100?C.good:ating>=90?C.orange:C.red;
+        if(i===5) color=ev===null?C.muted:ev>=0?C.good:C.red;
+        if(i===6) color=dev>=0?C.good:C.red;
+        if(i===7) color=!proj?C.muted:proj>=meta?C.good:C.red;
+        ctx.fillStyle=color;
+        ctx.font=(total?"800 ":"700 ")+(i===0?17:15)+"px Arial";
+        ctx.fillText(v,col.align==="left"?col.x+12:col.x+col.w/2,y+46);
       });
     };
 
     let y=292;
     for(const g of groups){
       const meta=Number(g.target_financial||0),venda=Number(g.sales_financial||0),aa=Number(g.ly_financial||0);
-      const ating=meta?venda/meta*100:0,ev=aa&&d.has_input?((venda/aa)-1)*100:null,dev=venda-meta;
-      drawRow(y,GROUP_LABELS[g.group_code]||g.group_code,meta,venda,ating,aa,ev,dev,false);y+=rowH;
+      const ating=meta?venda/meta*100:0;
+      const ev=aa&&d.has_input?((venda/aa)-1)*100:null;
+      const dev=venda-meta;
+      const proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
+      const physical=Number(g.sales_physical||0);
+      drawRow(y,GROUP_LABELS[g.group_code]||g.group_code,meta,venda,ating,aa,ev,dev,proj,physical,false);
+      y+=rowH;
     }
-    const meta=Number(d.target_financial||0),venda=Number(d.sales_financial||0),aa=Number(d.ly_financial||0);
-    const ating=meta?venda/meta*100:0,ev=aa&&d.has_input?((venda/aa)-1)*100:null,dev=venda-meta;
-    drawRow(y,"TOTAL LOJA",meta,venda,ating,aa,ev,dev,true);
 
-    ctx.fillStyle=C.soft;ctx.font="700 16px Arial";ctx.fillText("MEU ACOMPANHAMENTO",48,height-38);
-    ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",1452,height-38);
+    const meta=Number(d.target_financial||groups.reduce((s,g)=>s+Number(g.target_financial||0),0));
+    const venda=Number(d.sales_financial||groups.reduce((s,g)=>s+Number(g.sales_financial||0),0));
+    const aa=Number(d.ly_financial||groups.reduce((s,g)=>s+Number(g.ly_financial||0),0));
+    const physical=Number(d.sales_physical||groups.reduce((s,g)=>s+Number(g.sales_physical||0),0));
+    const ating=meta?venda/meta*100:0;
+    const ev=aa&&d.has_input?((venda/aa)-1)*100:null;
+    const dev=venda-meta;
+    const proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
+    drawRow(y,"TOTAL LOJA",meta,venda,ating,aa,ev,dev,proj,physical,true);
+
+    ctx.textAlign="left";ctx.fillStyle=C.soft;ctx.font="700 15px Arial";
+    ctx.fillText("MEU ACOMPANHAMENTO",48,height-36);
+    ctx.textAlign="right";ctx.fillText("Riachuelo • Moda que inspira o Brasil",width-48,height-36);
 
     return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),"image/png",1));
+  }
+
+  function buildDailyShareSummary(){
+    const d=state.day||{},groups=groupRows();
+    const curve=curveForStore(),tp=timeParts(d.captured_at||null),expectedPct=expectedPctAt(curve,tp.h,tp.m,"fin");
+    const meta=Number(d.target_financial||0),venda=Number(d.sales_financial||0),aa=Number(d.ly_financial||0);
+    const physical=Number(d.sales_physical||0),att=meta?venda/meta*100:0,dev=venda-meta;
+    const ev=aa&&d.has_input?((venda/aa)-1)*100:null,proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
+    const ranked=[...groups].map(g=>({name:GROUP_LABELS[g.group_code]||g.group_code,dev:Number(g.sales_financial||0)-Number(g.target_financial||0),att:Number(g.target_financial||0)?Number(g.sales_financial||0)/Number(g.target_financial||0)*100:0})).sort((a,b)=>b.att-a.att);
+    const best=ranked.slice(0,3).map(x=>x.name+" "+pct(x.att)).join(" • ");
+    const gaps=[...ranked].sort((a,b)=>a.dev-b.dev).slice(0,3).map(x=>x.name+" "+signedMoney(x.dev,0)).join(" • ");
+    return '📊 *HORA A HORA | LOJA '+state.storeCode+'*\n'+
+      'Atualizado '+(d.captured_at?localTime(d.captured_at):"—")+'\n\n'+
+      '🎯 *Meta:* '+money(meta,2)+'\n'+
+      '💰 *Venda:* '+money(venda,2)+' • '+pct(att)+'\n'+
+      '↕️ *Desvio:* '+signedMoney(dev,2)+'\n'+
+      '📅 *Venda Ano Anterior:* '+(aa?money(aa,2):"—")+'\n'+
+      '📈 *Evolução:* '+(ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev))+'\n'+
+      '🔭 *Projeção:* '+(proj?money(proj,2):"—")+'\n'+
+      '🛍️ *Venda física:* '+num(physical)+' peças\n\n'+
+      '🏆 *Maiores atingimentos:* '+(best||"—")+'\n'+
+      '⚠️ *Maiores desvios:* '+(gaps||"—")+'\n\n'+
+      '_Moda que inspira o Brasil_';
   }
 
   async function shareDailyCard(){
@@ -361,17 +436,17 @@
     try{
       const blob=await createDailyCardBlob();
       const file=new File([blob],"Hora_a_Hora_Loja_"+state.storeCode+"_"+localDate()+".png",{type:"image/png"});
+      const textMsg=buildDailyShareSummary();
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({title:"Hora a Hora • Resultado do Dia",files:[file]});
+        await navigator.share({title:"Hora a Hora • Resultado do Dia",text:textMsg,files:[file]});
       }else{
         const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-        toast("Card do Hora a Hora gerado.");
+        if(navigator.clipboard) await navigator.clipboard.writeText(textMsg).catch(()=>{});
+        toast("Card gerado e resumo copiado.");
       }
     }catch(e){if(e?.name!=="AbortError") toast(e.message||"Não foi possível compartilhar.",true);}
     finally{if(btn){btn.disabled=false;btn.textContent=old||"Compartilhar card";}}
   }
-
-
 
   function renderOperationalTools(){
     const home=$("section-inicio");
