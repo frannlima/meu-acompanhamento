@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v48";
+const CACHE="meu-acompanhamento-v49";
 const ASSETS=[
   "./",
   "./index.html",
@@ -8,14 +8,14 @@ const ASSETS=[
   "./clarity-v1.css?v=3",
   "./mobile-experience-v1.css?v=1",
   "./responsive-device-v1.css?v=1",
-  "./execution-v1.css?v=4",
+  "./execution-v1.css?v=5",
   "./app.js?v=20",
   "./enhancements-v9.js?v=7",
   "./premium-v22.js?v=9",
   "./clarity-v1.js?v=13",
   "./mobile-experience-v1.js?v=1",
   "./responsive-device-v1.js?v=1",
-  "./execution-v1.js?v=2",
+  "./execution-v1.js?v=3",
   "./manifest.webmanifest",
   "./assets/riachuelo-logo-vertical.svg",
   "./assets/riachuelo-logo.svg",
@@ -35,4 +35,19 @@ self.addEventListener("fetch",e=>{
   const u=new URL(e.request.url);
   if(e.request.method!=="GET"||u.origin!==self.location.origin) return;
   e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request)));
+});
+
+self.addEventListener("notificationclick",event=>{
+  event.notification.close();
+  event.waitUntil((async()=>{
+    const all=await self.clients.matchAll({type:"window",includeUncontrolled:true});
+    for(const client of all){
+      if("focus" in client){
+        await client.focus();
+        if("navigate" in client) await client.navigate("./");
+        return;
+      }
+    }
+    if(self.clients.openWindow) await self.clients.openWindow("./");
+  })());
 });
