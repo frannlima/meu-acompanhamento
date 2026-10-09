@@ -198,3 +198,28 @@ html.device-phone .execution-identity-hero{
 html.device-tablet .execution-identity-hero{
   margin-top:max(10px,var(--safe-top))!important;
 }
+
+
+/* Comerciais identificados automaticamente pela base de colaboradores */
+.auto-commercial-badge{
+  display:inline-flex;
+  align-items:center;
+  margin-left:7px;
+  padding:3px 7px;
+  border-radius:999px;
+  background:#E4F1EB;
+  color:#173F35;
+  font-size:6.5px;
+  font-style:normal;
+  font-weight:900;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+.admin-commercial-row.needs-dco{
+  border:1px solid rgba(222,124,0,.28)!important;
+  background:linear-gradient(145deg,#FFF8EF,#FFFFFF)!important;
+}
+.admin-commercial-row.needs-dco .admin-commercial-info>span{
+  color:#A45C00!important;
+  font-weight:800;
+}
