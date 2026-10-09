@@ -317,6 +317,46 @@
     renderCurve();
   }
 
+
+  function renderWorldHeaderClarity(){
+    const all=detailRows();
+    const rows=all.filter(r=>r.world_code===state.world || (state.world==="beleza_relogios" && ["beleza","relogios"].includes(r.group_code)));
+    const total=rows.reduce((a,r)=>{
+      a.meta+=Number(r.target_financial||0);
+      a.venda+=Number(r.sales_financial||0);
+      a.aa+=Number(r.ly_financial||0);
+      return a;
+    },{meta:0,venda:0,aa:0});
+    const ating=total.meta?total.venda/total.meta*100:0;
+    const ev=total.aa&&rows.length?((total.venda/total.aa)-1)*100:null;
+    const dev=total.venda-total.meta;
+    const box=$("worldKpis");
+    if(box){
+      const items=[
+        ["Meta",rows.length?money(total.meta,2):"—",""],
+        ["Venda",rows.length?money(total.venda,2):"—",ating>=100?"positive":ating>=90?"warning":"negative"],
+        ["Atingimento",rows.length?pct(ating):"—",ating>=100?"positive":ating>=90?"warning":"negative"],
+        ["Venda A.A.",total.aa?money(total.aa,2):"—",""],
+        ["Evolução",ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev),ev===null?"":tone(ev)],
+        ["Desvio",rows.length?signedMoney(dev,2):"—",rows.length?tone(dev):""]
+      ];
+      box.innerHTML=items.map(x=>kpi(x[0],x[1],"",x[2])).join("");
+    }
+    const visual=$("worldVisualSummary"); if(visual) visual.style.display="none";
+    document.querySelectorAll("#groupContent table thead th").forEach(th=>{
+      const t=th.textContent.trim();
+      if(t==="LY") th.textContent="Venda A.A.";
+      if(t==="% Meta") th.textContent="Ating.";
+      if(t==="Evol.") th.textContent="Ev.";
+    });
+  }
+
+  const baseRenderGroupsClarity=window.renderGroups;
+  window.renderGroups=function(){
+    baseRenderGroupsClarity();
+    renderWorldHeaderClarity();
+  };
+
   const baseRenderDashboard=window.renderDashboard;
   window.renderDashboard=function(){
     baseRenderDashboard();
