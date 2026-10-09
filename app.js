@@ -1132,7 +1132,14 @@ function renderCommercials(){
     const direct=Number(r?.target_financial||0);
     if(direct>0) return direct;
     const dcos=Array.isArray(r?.dcos)?r.dcos:[];
-    return dcos.reduce((sum,d)=>sum+Number(d.target_financial||d.meta_financial||d.target||0),0);
+    const inline=dcos.reduce((sum,d)=>sum+Number(d.target_financial||d.meta_financial||d.target||0),0);
+    if(inline>0) return inline;
+
+    // Fallback oficial: busca a meta dos DCOs na base detalhada do dia.
+    const assigned=new Set(dcos.map(d=>Number(d.dco_code??d.code)).filter(Number.isFinite));
+    return detailRows()
+      .filter(row=>assigned.has(Number(row.dco_code)))
+      .reduce((sum,row)=>sum+Number(row.target_financial||0),0);
   };
   const total=rows.reduce((a,r)=>{
     a.target+=commercialTargetValue(r);
