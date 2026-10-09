@@ -118,17 +118,31 @@
     const aa=Number(d.ly_financial||0);
     const ev=aa&&d.has_input?((venda/aa)-1)*100:null;
     const desvio=venda-meta;
-    const rows=[
-      ["Meta",meta?money(meta,2):"—",""],
-      ["Venda",d.has_input?money(venda,2):"—",d.has_input?(ating>=100?"positive":ating>=90?"warning":"negative"):""],
-      ["Atingimento",d.has_input?pct(ating):"—",d.has_input?(ating>=100?"positive":ating>=90?"warning":"negative"):""],
-      ["Venda A.A.",aa?money(aa,2):"—",""],
-      ["Evolução",ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev),ev===null?"":tone(ev)],
-      ["Desvio",d.has_input?signedMoney(desvio,2):"—",d.has_input?tone(desvio):""]
-    ];
-    $("clarityExecutive").innerHTML=rows.map((r,i)=>
-      '<article class="clarity-kpi '+(i===1?"featured ":"")+(r[2]||"")+'"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></article>'
-    ).join("");
+    const curve=curveForStore();
+    const tp=timeParts(d.captured_at||null);
+    const expectedPct=expectedPctAt(curve,tp.h,tp.m,"fin");
+    const expectedNow=meta*expectedPct;
+    const gapCurve=venda-expectedNow;
+    const projection=expectedPct>0&&d.has_input?venda/expectedPct:0;
+    const projectionAtt=meta&&projection?projection/meta*100:0;
+
+    $("clarityExecutive").innerHTML=
+      '<article class="clarity-result-main">'+
+        '<div class="clarity-result-label">Venda do dia</div>'+
+        '<strong class="clarity-result-value">'+(d.has_input?money(venda,2):"Aguardando input")+'</strong>'+
+        '<div class="clarity-result-att '+(d.has_input?(ating>=100?"positive":ating>=90?"warning":"negative"):"")+'">'+(d.has_input?pct(ating)+" da meta":"Cole a primeira parcial")+'</div>'+
+        '<div class="clarity-progress"><i style="width:'+Math.max(0,Math.min(100,ating)).toFixed(1)+'%"></i></div>'+
+        '<div class="clarity-result-subgrid">'+
+          '<div><span>Meta do dia</span><b>'+money(meta,2)+'</b></div>'+
+          '<div><span>Desvio</span><b class="'+tone(desvio)+'">'+(d.has_input?signedMoney(desvio,2):"—")+'</b></div>'+
+          '<div><span>Projeção</span><b>'+(projection?money(projection,2):"—")+'</b><small>'+(projection?pct(projectionAtt)+" da meta":"")+'</small></div>'+
+        '</div>'+
+      '</article>'+
+      '<div class="clarity-signal-row">'+
+        '<article class="clarity-signal '+(ev===null?"":tone(ev))+'"><span>Vs A.A.</span><strong>'+(ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev))+'</strong><small>Venda A.A. '+(aa?money(aa,2):"—")+'</small></article>'+
+        '<article class="clarity-signal '+(d.has_input?tone(gapCurve):"")+'"><span>Ritmo atual</span><strong>'+(d.has_input?signedMoney(gapCurve,2):"—")+'</strong><small>vs esperado até agora</small></article>'+
+        '<article class="clarity-signal '+(d.has_input?tone(desvio):"")+'"><span>Saldo para meta</span><strong>'+(d.has_input?signedMoney(desvio,2):"—")+'</strong><small>posição do dia</small></article>'+
+      '</div>';
   }
 
   function renderGroupsPanel(){
@@ -309,8 +323,41 @@
     finally{if(btn){btn.disabled=false;btn.textContent=old||"Compartilhar card";}}
   }
 
+
+  function renderMenuDayMeta(){
+    const d=state.day||{};
+    const meta=Number(d.target_financial||0);
+    const sale=Number(d.sales_financial||0);
+    const att=meta?sale/meta*100:0;
+    const dev=sale-meta;
+    const dateLabel=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
+    const sections=["inicio","grupos","comerciais","descontos","estore","regional","admin","mais"];
+
+    sections.forEach(id=>{
+      const section=$("section-"+id);
+      if(!section) return;
+      let bar=section.querySelector(".menu-day-meta");
+      if(!bar){
+        bar=document.createElement("div");
+        bar.className="menu-day-meta";
+        const head=section.querySelector(":scope > .section-head, :scope > .premium-more-hero");
+        if(head) head.insertAdjacentElement("afterend",bar);
+        else section.prepend(bar);
+      }
+      bar.innerHTML=
+        '<div class="menu-day-meta-context"><span>'+dateLabel+' • Loja '+esc(state.storeCode)+'</span><b>Meta do dia</b></div>'+
+        '<strong>'+ (meta?money(meta,2):"Sem meta") +'</strong>'+
+        '<div class="menu-day-meta-mini">'+
+          '<span>Venda <b>'+(d.has_input?money(sale,2):"—")+'</b></span>'+
+          '<span>Ating. <b>'+(d.has_input?pct(att):"—")+'</b></span>'+
+          '<span class="'+(d.has_input?tone(dev):"")+'">Desvio <b>'+(d.has_input?signedMoney(dev,2):"—")+'</b></span>'+
+        '</div>';
+    });
+  }
+
   function renderClarity(){
     ensureHome();
+    renderMenuDayMeta();
     if(!$("clarityHome")) return;
     renderExecutive();
     renderGroupsPanel();
@@ -370,6 +417,7 @@
     if(title) title.textContent="Início";
     if(copy) copy.textContent="Resumo do dia, parcial por grupo e curva de venda em uma única tela.";
     renderClarity();
+    setTimeout(renderMenuDayMeta,250);
   });
 
   window.renderClarityHome=renderClarity;
