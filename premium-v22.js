@@ -274,29 +274,81 @@
     const rows=Array.isArray(state.commercial?.commercials)?state.commercial.commercials:[];
     if(!rows.length) throw new Error("Não há comerciais carregados.");
 
-    const width=1080;
-    const rowH=172;
-    const headerH=330;
-    const footerH=90;
-    const height=Math.max(1080,headerH+rows.length*rowH+footerH);
-    const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
+    // Painel em alta resolução, seguindo o modelo aprovado.
+    const width=1800;
+    const rowH=196;
+    const headerH=368;
+    const footerH=94;
+    const height=Math.max(1380,headerH+rows.length*rowH+footerH);
+    const canvas=document.createElement("canvas");
+    canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext("2d");
-    const C={green:"#173F35",green2:"#466964",cream:"#F7F4ED",white:"#FFFFFF",orange:"#DE7C00",red:"#AE535C",line:"#DAD9D6",muted:"#6F7C77",good:"#2E6B58",soft:"#EEF2EF"};
+    ctx.imageSmoothingEnabled=true;
+    ctx.imageSmoothingQuality="high";
+
+    const C={
+      green:"#173F35",green2:"#466964",cream:"#F7F4ED",white:"#FFFFFF",
+      orange:"#DE7C00",orangeSoft:"#FFF0DD",
+      red:"#E03C31",redSoft:"#FCE8E6",
+      line:"#DAD9D6",muted:"#6F7C77",good:"#2E6B58",goodSoft:"#E4F1EB",
+      rail:"#E7E5DE"
+    };
+
+    const round=(x,y,w,h,r,fill,stroke=null,lw=1.5)=>{
+      ctx.beginPath();ctx.roundRect(x,y,w,h,r);
+      if(fill){ctx.fillStyle=fill;ctx.fill()}
+      if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke()}
+    };
+
+    const drawDonut=(cx,cy,rOuter,rInner,value)=>{
+      const finite=Number.isFinite(value);
+      const positive=finite&&value>=0;
+      const color=positive?C.orange:C.red;
+      const soft=positive?C.orangeSoft:C.redSoft;
+      const magnitude=finite?Math.max(0.08,Math.min(1,Math.abs(value)/100)):0.08;
+
+      ctx.lineCap="round";
+      ctx.lineWidth=rOuter-rInner;
+      ctx.strokeStyle=soft;
+      ctx.beginPath();
+      ctx.arc(cx,cy,(rOuter+rInner)/2,0,Math.PI*2);
+      ctx.stroke();
+
+      ctx.strokeStyle=color;
+      ctx.beginPath();
+      ctx.arc(cx,cy,(rOuter+rInner)/2,-Math.PI/2,-Math.PI/2+Math.PI*2*magnitude);
+      ctx.stroke();
+      ctx.lineCap="butt";
+
+      ctx.textAlign="center";ctx.textBaseline="middle";
+      ctx.fillStyle=finite?color:C.muted;
+      ctx.font="900 29px Arial";
+      ctx.fillText(finite?((value>=0?"+":"")+pct(value)):"—",cx,cy-4);
+      ctx.fillStyle=C.muted;ctx.font="800 11px Arial";
+      ctx.fillText("EVOLUÇÃO",cx,cy+26);
+    };
 
     ctx.fillStyle=C.cream;ctx.fillRect(0,0,width,height);
-    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,220);
+    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,230);
+
+    // Elementos sutis no cabeçalho, como no modelo.
+    ctx.strokeStyle="rgba(255,255,255,.16)";ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(1110,45,210,0,Math.PI*2);ctx.stroke();
+    ctx.beginPath();ctx.arc(1230,20,310,0,Math.PI*2);ctx.stroke();
 
     try{
       const logo=await loadShareImage("./assets/riachuelo-logo.svg");
-      drawRounded(ctx,54,48,230,76,18,C.white);
-      ctx.drawImage(logo,78,70,182,34);
-    }catch(_){}
+      ctx.drawImage(logo,76,64,475,88);
+    }catch(_){
+      ctx.fillStyle=C.white;ctx.textAlign="left";ctx.font="800 66px Arial";
+      ctx.fillText("RIACHUELO",76,128);
+    }
 
-    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 31px Arial";
-    ctx.fillText("PERFORMANCE COMERCIAL",1026,76);
-    ctx.font="600 18px Arial";ctx.fillStyle="#D6D2C4";
-    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1026,114);
-    ctx.font="700 15px Arial";ctx.fillText("Moda que inspira o Brasil",1026,152);
+    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 48px Arial";
+    ctx.fillText("PERFORMANCE COMERCIAL",1715,84);
+    ctx.font="600 24px Arial";ctx.fillStyle="#D6D2C4";
+    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1715,128);
+    ctx.font="700 20px Arial";ctx.fillText("Moda que inspira o Brasil",1715,168);
 
     const totalTarget=rows.reduce((s,r)=>s+Number(r.target_financial||0),0);
     const totalSale=rows.reduce((s,r)=>s+Number(r.sales_financial||0),0);
@@ -312,41 +364,56 @@
       ["COMERCIAIS",String(rows.length),C.green],
       ["DCOs ATRIBUÍDOS",String(totalDcos),C.green2]
     ];
-    const gap=10,kw=(width-108-gap*5)/6;
+    const kGap=16,kX=68,kW=(width-136-kGap*5)/6,kY=250,kH=90;
     kpis.forEach((k,i)=>{
-      const x=54+i*(kw+gap),y=240;
-      drawRounded(ctx,x,y,kw,74,14,C.white,C.line);
-      ctx.textAlign="left";ctx.fillStyle=C.muted;ctx.font="800 10px Arial";ctx.fillText(k[0],x+12,y+24);
-      ctx.fillStyle=k[2];ctx.font="800 17px Arial";ctx.fillText(k[1],x+12,y+53);
+      const x=kX+i*(kW+kGap);
+      round(x,kY,kW,kH,18,C.white,C.line);
+      ctx.textAlign="left";ctx.textBaseline="alphabetic";
+      ctx.fillStyle=C.muted;ctx.font="800 12px Arial";ctx.fillText(k[0],x+18,kY+29);
+      ctx.fillStyle=k[2];ctx.font="900 23px Arial";ctx.fillText(k[1],x+18,kY+64);
     });
 
-    let y=338;
+    let y=368;
     for(const r of rows){
-      const target=Number(r.target_financial||0),sale=Number(r.sales_financial||0);
+      const target=Number(r.target_financial||0);
+      const sale=Number(r.sales_financial||0);
       const att=target?sale/target*100:0;
       const dev=sale-target;
       const dcos=Array.isArray(r.dcos)?r.dcos:[];
-      drawRounded(ctx,54,y,972,rowH-14,18,C.white,C.line);
+      const evolution=Number.isFinite(Number(r.evolution_vs_ly))?Number(r.evolution_vs_ly):null;
 
+      round(68,y,width-136,rowH-18,22,C.white,C.line);
+
+      // Avatar
       let avatarOk=false;
       if(r.photo_url){
         try{
           const img=await loadShareImage(r.photo_url);
-          ctx.save();ctx.beginPath();ctx.arc(112,y+71,48,0,Math.PI*2);ctx.clip();
+          ctx.save();ctx.beginPath();ctx.arc(150,y+82,62,0,Math.PI*2);ctx.clip();
           const s=Math.min(img.width,img.height),sx=(img.width-s)/2,sy=(img.height-s)/2;
-          ctx.drawImage(img,sx,sy,s,s,64,y+23,96,96);ctx.restore();avatarOk=true;
+          ctx.drawImage(img,sx,sy,s,s,88,y+20,124,124);
+          ctx.restore();avatarOk=true;
         }catch(_){}
       }
       if(!avatarOk){
-        ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(112,y+71,48,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 24px Arial";
-        ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),112,y+80);
+        ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(150,y+82,62,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 31px Arial";
+        ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),150,y+92);
       }
 
-      ctx.textAlign="left";ctx.fillStyle=C.green;ctx.font="800 23px Arial";
-      ctx.fillText(String(r.commercial_name||"Comercial"),182,y+42);
-      ctx.fillStyle=C.muted;ctx.font="700 12px Arial";
-      ctx.fillText(dcos.length+" DCOs • "+dcos.map(d=>d.dco_code).join(" • "),182,y+66);
+      const contentX=250;
+      const donutAreaX=1560;
+      ctx.textAlign="left";ctx.textBaseline="alphabetic";
+      ctx.fillStyle=C.green;ctx.font="900 28px Arial";
+      ctx.fillText(String(r.commercial_name||"Comercial"),contentX,y+45);
+
+      const dcoText=dcos.length+" DCOs • "+dcos.map(d=>d.dco_code).join(" • ");
+      ctx.fillStyle=C.muted;ctx.font="700 14px Arial";
+      const maxDcoW=donutAreaX-contentX-30;
+      let visibleDco=dcoText;
+      while(ctx.measureText(visibleDco).width>maxDcoW && visibleDco.length>8) visibleDco=visibleDco.slice(0,-4);
+      if(visibleDco!==dcoText) visibleDco=visibleDco.replace(/[ •]+$/,"")+"…";
+      ctx.fillText(visibleDco,contentX,y+72);
 
       const cols=[
         ["META",money(target,2),C.green],
@@ -354,24 +421,35 @@
         ["ATING.",pct(att),att>=100?C.good:att>=90?C.orange:C.red],
         ["DESVIO",signedMoney(dev,2),dev>=0?C.good:C.red]
       ];
-      const cx=[182,405,620,790];
+      const cx=[250,590,920,1225];
       cols.forEach((k,i)=>{
-        ctx.fillStyle=C.muted;ctx.font="800 10px Arial";ctx.fillText(k[0],cx[i],y+102);
-        ctx.fillStyle=k[2];ctx.font="800 16px Arial";ctx.fillText(k[1],cx[i],y+128);
+        ctx.fillStyle=C.muted;ctx.font="800 11px Arial";ctx.fillText(k[0],cx[i],y+110);
+        ctx.fillStyle=k[2];ctx.font="900 21px Arial";ctx.fillText(k[1],cx[i],y+140);
       });
 
-      const barX=182,barY=y+143,barW=790,barH=7;
-      drawRounded(ctx,barX,barY,barW,barH,4,"#E7E5DE");
-      drawRounded(ctx,barX,barY,Math.max(2,Math.min(barW,barW*att/100)),barH,4,att>=100?C.good:att>=90?C.orange:C.red);
+      // Barra de atingimento
+      const barX=250,barY=y+157,barW=1260,barH=9;
+      round(barX,barY,barW,barH,5,C.rail);
+      const fillW=Math.max(3,Math.min(barW,barW*Math.max(0,att)/100));
+      round(barX,barY,fillW,barH,5,att>=100?C.good:att>=90?C.orange:C.red);
+
+      // Divisor + gráfico de evolução à direita
+      ctx.strokeStyle=C.line;ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(donutAreaX-18,y+18);ctx.lineTo(donutAreaX-18,y+rowH-36);ctx.stroke();
+      drawDonut(1655,y+88,66,46,evolution);
 
       y+=rowH;
     }
 
-    ctx.fillStyle=C.green2;ctx.font="700 13px Arial";ctx.textAlign="left";
-    ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",54,height-34);
-    ctx.textAlign="right";ctx.fillText("Ninguém faz nada sozinho.",1026,height-34);
+    ctx.textBaseline="alphabetic";
+    ctx.fillStyle=C.green2;ctx.font="700 15px Arial";ctx.textAlign="left";
+    ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",68,height-38);
+    ctx.textAlign="right";ctx.fillText("Ninguém faz nada sozinho.",1732,height-38);
 
-    return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),"image/png",1));
+    return await new Promise((resolve,reject)=>canvas.toBlob(
+      b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),
+      "image/png",1
+    ));
   }
 
   async function shareCommercialsCard(){
