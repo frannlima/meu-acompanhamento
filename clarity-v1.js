@@ -62,6 +62,48 @@
   }
 
   function groupRows(){
+    // Prioriza a base detalhada do dia, que é a mesma referência das metas por DCO.
+    // Isso evita grupos com venda carregada e meta zerada no painel inicial.
+    const detail=detailRows();
+    if(detail.length){
+      const map=new Map();
+      for(const r of detail){
+        const code=r.group_code||"outros";
+        if(!map.has(code)){
+          map.set(code,{
+            group_code:code,
+            target_financial:0,
+            sales_financial:0,
+            target_physical:0,
+            sales_physical:0,
+            ly_financial:0,
+            interval_sales_financial:0
+          });
+        }
+        const g=map.get(code);
+        g.target_financial+=Number(r.target_financial||0);
+        g.sales_financial+=Number(r.sales_financial||0);
+        g.target_physical+=Number(r.target_physical||0);
+        g.sales_physical+=Number(r.sales_physical||0);
+        g.ly_financial+=Number(r.ly_financial||0);
+        g.interval_sales_financial+=Number(r.interval_sales_financial||0);
+      }
+      const arr=[...map.values()].map(g=>{
+        const meta=Number(g.target_financial||0);
+        const venda=Number(g.sales_financial||0);
+        const ly=Number(g.ly_financial||0);
+        return {
+          ...g,
+          attainment:meta?venda/meta*100:0,
+          deviation:venda-meta,
+          evolution_vs_ly:ly?((venda/ly)-1)*100:null
+        };
+      });
+      const ordered=GROUP_ORDER.map(code=>arr.find(g=>g.group_code===code)).filter(Boolean);
+      const extras=arr.filter(g=>!GROUP_ORDER.includes(g.group_code));
+      return [...ordered,...extras];
+    }
+
     const groups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
     return GROUP_ORDER.map(code=>groups.find(g=>g.group_code===code)).filter(Boolean);
   }
