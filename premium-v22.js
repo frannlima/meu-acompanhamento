@@ -274,12 +274,12 @@
     const rows=Array.isArray(state.commercial?.commercials)?state.commercial.commercials:[];
     if(!rows.length) throw new Error("Não há comerciais carregados.");
 
-    // Painel em alta resolução, seguindo o modelo aprovado.
+    // Card em alta resolução para leitura nítida no WhatsApp/zoom.
     const width=1800;
-    const rowH=196;
-    const headerH=368;
-    const footerH=94;
-    const height=Math.max(1380,headerH+rows.length*rowH+footerH);
+    const rowH=188;
+    const headerH=360;
+    const footerH=84;
+    const height=Math.max(1400,headerH+rows.length*rowH+footerH);
     const canvas=document.createElement("canvas");
     canvas.width=width;canvas.height=height;
     const ctx=canvas.getContext("2d");
@@ -291,64 +291,53 @@
       orange:"#DE7C00",orangeSoft:"#FFF0DD",
       red:"#E03C31",redSoft:"#FCE8E6",
       line:"#DAD9D6",muted:"#6F7C77",good:"#2E6B58",goodSoft:"#E4F1EB",
-      rail:"#E7E5DE"
+      track:"#E7E5DE",shadow:"rgba(23,63,53,.08)"
     };
 
-    const round=(x,y,w,h,r,fill,stroke=null,lw=1.5)=>{
-      ctx.beginPath();ctx.roundRect(x,y,w,h,r);
-      if(fill){ctx.fillStyle=fill;ctx.fill()}
-      if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw;ctx.stroke()}
-    };
+    const donut=(cx,cy,radius,thickness,value)=>{
+      const abs=Math.min(100,Math.abs(Number(value||0)));
+      const start=-Math.PI/2;
+      const end=start+(Math.PI*2*abs/100);
+      const positive=Number(value||0)>=0;
+      const fg=positive?C.orange:C.red;
+      const bg=positive?"#F7E2C6":"#F7D4D0";
 
-    const drawDonut=(cx,cy,rOuter,rInner,value)=>{
-      const finite=Number.isFinite(value);
-      const positive=finite&&value>=0;
-      const color=positive?C.orange:C.red;
-      const soft=positive?C.orangeSoft:C.redSoft;
-      const magnitude=finite?Math.max(0.08,Math.min(1,Math.abs(value)/100)):0.08;
-
-      ctx.lineCap="round";
-      ctx.lineWidth=rOuter-rInner;
-      ctx.strokeStyle=soft;
-      ctx.beginPath();
-      ctx.arc(cx,cy,(rOuter+rInner)/2,0,Math.PI*2);
-      ctx.stroke();
-
-      ctx.strokeStyle=color;
-      ctx.beginPath();
-      ctx.arc(cx,cy,(rOuter+rInner)/2,-Math.PI/2,-Math.PI/2+Math.PI*2*magnitude);
-      ctx.stroke();
       ctx.lineCap="butt";
+      ctx.lineWidth=thickness;
+      ctx.strokeStyle=bg;
+      ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.stroke();
+
+      if(abs>0){
+        ctx.strokeStyle=fg;
+        ctx.beginPath();ctx.arc(cx,cy,radius,start,end,false);ctx.stroke();
+      }
 
       ctx.textAlign="center";ctx.textBaseline="middle";
-      ctx.fillStyle=finite?color:C.muted;
-      ctx.font="900 29px Arial";
-      ctx.fillText(finite?((value>=0?"+":"")+pct(value)):"—",cx,cy-4);
-      ctx.fillStyle=C.muted;ctx.font="800 11px Arial";
-      ctx.fillText("EVOLUÇÃO",cx,cy+26);
+      ctx.fillStyle=fg;
+      ctx.font="800 29px Arial";
+      const txt=(positive?"+":"")+pct(Number(value||0));
+      ctx.fillText(txt,cx,cy-4);
+      ctx.fillStyle=C.muted;
+      ctx.font="800 12px Arial";
+      ctx.fillText("EVOLUÇÃO",cx,cy+28);
+      ctx.textBaseline="alphabetic";
     };
 
     ctx.fillStyle=C.cream;ctx.fillRect(0,0,width,height);
-    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,230);
-
-    // Elementos sutis no cabeçalho, como no modelo.
-    ctx.strokeStyle="rgba(255,255,255,.16)";ctx.lineWidth=2;
-    ctx.beginPath();ctx.arc(1110,45,210,0,Math.PI*2);ctx.stroke();
-    ctx.beginPath();ctx.arc(1230,20,310,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,205);
 
     try{
       const logo=await loadShareImage("./assets/riachuelo-logo.svg");
-      ctx.drawImage(logo,76,64,475,88);
-    }catch(_){
-      ctx.fillStyle=C.white;ctx.textAlign="left";ctx.font="800 66px Arial";
-      ctx.fillText("RIACHUELO",76,128);
-    }
+      drawRounded(ctx,60,45,330,90,22,C.white);
+      ctx.drawImage(logo,94,72,262,42);
+    }catch(_){}
 
-    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 48px Arial";
-    ctx.fillText("PERFORMANCE COMERCIAL",1715,84);
-    ctx.font="600 24px Arial";ctx.fillStyle="#D6D2C4";
-    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1715,128);
-    ctx.font="700 20px Arial";ctx.fillText("Moda que inspira o Brasil",1715,168);
+    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 42px Arial";
+    ctx.fillText("PERFORMANCE COMERCIAL",1718,69);
+    ctx.font="600 22px Arial";ctx.fillStyle="#D6D2C4";
+    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1718,108);
+    ctx.font="700 18px Arial";
+    ctx.fillText("Moda que inspira o Brasil",1718,146);
 
     const totalTarget=rows.reduce((s,r)=>s+Number(r.target_financial||0),0);
     const totalSale=rows.reduce((s,r)=>s+Number(r.sales_financial||0),0);
@@ -364,87 +353,92 @@
       ["COMERCIAIS",String(rows.length),C.green],
       ["DCOs ATRIBUÍDOS",String(totalDcos),C.green2]
     ];
-    const kGap=16,kX=68,kW=(width-136-kGap*5)/6,kY=250,kH=90;
+
+    const kx=60,ky=232,kgap=18,kw=(width-120-kgap*5)/6,kh=94;
     kpis.forEach((k,i)=>{
-      const x=kX+i*(kW+kGap);
-      round(x,kY,kW,kH,18,C.white,C.line);
-      ctx.textAlign="left";ctx.textBaseline="alphabetic";
-      ctx.fillStyle=C.muted;ctx.font="800 12px Arial";ctx.fillText(k[0],x+18,kY+29);
-      ctx.fillStyle=k[2];ctx.font="900 23px Arial";ctx.fillText(k[1],x+18,kY+64);
+      const x=kx+i*(kw+kgap);
+      drawRounded(ctx,x,ky,kw,kh,16,C.white,C.line);
+      ctx.textAlign="left";ctx.fillStyle=C.muted;ctx.font="800 13px Arial";
+      ctx.fillText(k[0],x+16,ky+29);
+      ctx.fillStyle=k[2];ctx.font="800 23px Arial";
+      ctx.fillText(k[1],x+16,ky+66);
     });
 
-    let y=368;
+    let y=350;
     for(const r of rows){
       const target=Number(r.target_financial||0);
       const sale=Number(r.sales_financial||0);
       const att=target?sale/target*100:0;
       const dev=sale-target;
+      const evolution=(r.evolution_vs_ly===null||r.evolution_vs_ly===undefined)?0:Number(r.evolution_vs_ly||0);
       const dcos=Array.isArray(r.dcos)?r.dcos:[];
-      const evolution=Number.isFinite(Number(r.evolution_vs_ly))?Number(r.evolution_vs_ly):null;
 
-      round(68,y,width-136,rowH-18,22,C.white,C.line);
+      drawRounded(ctx,58,y,1684,rowH-14,20,C.white,C.line);
 
-      // Avatar
+      // Foto
       let avatarOk=false;
       if(r.photo_url){
         try{
           const img=await loadShareImage(r.photo_url);
-          ctx.save();ctx.beginPath();ctx.arc(150,y+82,62,0,Math.PI*2);ctx.clip();
+          ctx.save();
+          ctx.beginPath();ctx.arc(126,y+82,58,0,Math.PI*2);ctx.clip();
           const s=Math.min(img.width,img.height),sx=(img.width-s)/2,sy=(img.height-s)/2;
-          ctx.drawImage(img,sx,sy,s,s,88,y+20,124,124);
+          ctx.drawImage(img,sx,sy,s,s,68,y+24,116,116);
           ctx.restore();avatarOk=true;
         }catch(_){}
       }
       if(!avatarOk){
-        ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(150,y+82,62,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 31px Arial";
-        ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),150,y+92);
+        ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(126,y+82,58,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 28px Arial";
+        ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),126,y+92);
       }
 
-      const contentX=250;
-      const donutAreaX=1560;
-      ctx.textAlign="left";ctx.textBaseline="alphabetic";
-      ctx.fillStyle=C.green;ctx.font="900 28px Arial";
-      ctx.fillText(String(r.commercial_name||"Comercial"),contentX,y+45);
+      // Nome e DCOs
+      ctx.textAlign="left";ctx.fillStyle=C.green;ctx.font="800 27px Arial";
+      ctx.fillText(String(r.commercial_name||"Comercial"),218,y+42);
 
       const dcoText=dcos.length+" DCOs • "+dcos.map(d=>d.dco_code).join(" • ");
-      ctx.fillStyle=C.muted;ctx.font="700 14px Arial";
-      const maxDcoW=donutAreaX-contentX-30;
-      let visibleDco=dcoText;
-      while(ctx.measureText(visibleDco).width>maxDcoW && visibleDco.length>8) visibleDco=visibleDco.slice(0,-4);
-      if(visibleDco!==dcoText) visibleDco=visibleDco.replace(/[ •]+$/,"")+"…";
-      ctx.fillText(visibleDco,contentX,y+72);
+      ctx.fillStyle=C.muted;ctx.font="700 13px Arial";
+      const maxDcoW=1080;
+      let shown=dcoText;
+      while(ctx.measureText(shown).width>maxDcoW && shown.length>4) shown=shown.slice(0,-4);
+      if(shown!==dcoText) shown=shown.replace(/[ •]+$/,"")+"…";
+      ctx.fillText(shown,218,y+69);
 
-      const cols=[
+      // Métricas
+      const metricX=[218,560,865,1142];
+      const metric=[
         ["META",money(target,2),C.green],
         ["VENDA",money(sale,2),C.green],
         ["ATING.",pct(att),att>=100?C.good:att>=90?C.orange:C.red],
         ["DESVIO",signedMoney(dev,2),dev>=0?C.good:C.red]
       ];
-      const cx=[250,590,920,1225];
-      cols.forEach((k,i)=>{
-        ctx.fillStyle=C.muted;ctx.font="800 11px Arial";ctx.fillText(k[0],cx[i],y+110);
-        ctx.fillStyle=k[2];ctx.font="900 21px Arial";ctx.fillText(k[1],cx[i],y+140);
+      metric.forEach((m,i)=>{
+        ctx.fillStyle=C.muted;ctx.font="800 11px Arial";
+        ctx.fillText(m[0],metricX[i],y+104);
+        ctx.fillStyle=m[2];ctx.font="800 20px Arial";
+        ctx.fillText(m[1],metricX[i],y+133);
       });
 
       // Barra de atingimento
-      const barX=250,barY=y+157,barW=1260,barH=9;
-      round(barX,barY,barW,barH,5,C.rail);
-      const fillW=Math.max(3,Math.min(barW,barW*Math.max(0,att)/100));
-      round(barX,barY,fillW,barH,5,att>=100?C.good:att>=90?C.orange:C.red);
+      const barX=218,barY=y+151,barW=1080,barH=10;
+      drawRounded(ctx,barX,barY,barW,barH,5,C.track);
+      const barColor=att>=100?C.good:att>=90?C.orange:C.red;
+      const filled=Math.max(3,Math.min(barW,barW*Math.max(0,att)/100));
+      drawRounded(ctx,barX,barY,filled,barH,5,barColor);
 
-      // Divisor + gráfico de evolução à direita
+      // Divisor + gráfico de evolução
       ctx.strokeStyle=C.line;ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(donutAreaX-18,y+18);ctx.lineTo(donutAreaX-18,y+rowH-36);ctx.stroke();
-      drawDonut(1655,y+88,66,46,evolution);
+      ctx.beginPath();ctx.moveTo(1342,y+24);ctx.lineTo(1342,y+150);ctx.stroke();
+      donut(1542,y+87,57,18,evolution);
 
       y+=rowH;
     }
 
-    ctx.textBaseline="alphabetic";
     ctx.fillStyle=C.green2;ctx.font="700 15px Arial";ctx.textAlign="left";
-    ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",68,height-38);
-    ctx.textAlign="right";ctx.fillText("Ninguém faz nada sozinho.",1732,height-38);
+    ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",60,height-32);
+    ctx.textAlign="right";
+    ctx.fillText("Ninguém faz nada sozinho.",1740,height-32);
 
     return await new Promise((resolve,reject)=>canvas.toBlob(
       b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),
