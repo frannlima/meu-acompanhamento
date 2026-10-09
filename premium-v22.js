@@ -49,7 +49,7 @@
     box.innerHTML=
       visualDonut("Atingimento",has?attainment:0,has?compactPct(attainment):"—",has?"Meta financeira do dia":"Aguardando input",has?(attainment>=100?"good":attainment>=90?"warn":"bad"):"neutral")+
       visualDonut("Projeção",projection?projectionAttainment:0,projection?compactPct(projectionAttainment):"—",projection?"Projeção de fechamento":"Disponível após formar ritmo",projection?(projectionAttainment>=100?"good":projectionAttainment>=90?"warn":"bad"):"neutral")+
-      visualDonut("Vs LY",evolution===null?0:evolution,evolution===null?"—":compactPct(evolution),evolution===null?"Aguardando venda":(evolution>=0?"Evolução":"Involução"),evolution===null?"neutral":evolution>=0?"good":"bad")+
+      visualDonut("Evolução vs A.A.",evolution===null?0:evolution,evolution===null?"—":compactPct(evolution),evolution===null?"Aguardando venda":(evolution>=0?"Evolução":"Involução"),evolution===null?"neutral":evolution>=0?"good":"bad")+
       visualDonut("Vs hora anterior",intervalGrowth===null?0:intervalGrowth,intervalGrowth===null?"—":compactPct(intervalGrowth),intervalGrowth===null?"Disponível após o 2º input":(intervalGrowth>=0?"Ritmo evoluindo":"Ritmo retraindo"),intervalGrowth===null?"neutral":intervalGrowth>=0?"good":"bad")+
       visualDonut("Ritmo necessário",pacePct||0,has?compactPct(pacePct||0):"—",has?"R$/h atual x necessário":"Aguardando acompanhamento",has?(pacePct>=100?"good":pacePct>=85?"warn":"bad"):"neutral");
   };
@@ -177,8 +177,8 @@
             '<div><span>Venda</span><strong>'+money(sale,2)+'</strong></div>'+
             '<div><span>Desvio</span><strong class="'+(dev>=0?"positive":"negative")+'">'+signedMoney(dev,2)+'</strong></div>'+
             '<div><span>Física</span><strong>'+num(r.sales_physical)+' peças</strong></div>'+
-            '<div><span>LY</span><strong>'+(ly?money(ly,2):"—")+'</strong></div>'+
-            '<div><span>Evol. vs LY</span><strong class="'+(ev===null?"":ev>=0?"positive":"negative")+'">'+(ev===null?"—":pct(ev))+'</strong></div>'+
+            '<div><span>Venda A.A.</span><strong>'+(ly?money(ly,2):"—")+'</strong></div>'+
+            '<div><span>Evol. vs Ano Anterior</span><strong class="'+(ev===null?"":ev>=0?"positive":"negative")+'">'+(ev===null?"—":pct(ev))+'</strong></div>'+
             '<div><span>Vs input</span><strong class="'+(delta>=0?"positive":"negative")+'">'+signedMoney(delta,2)+'</strong></div>'+
           '</div>'+
         '</article>';
@@ -203,8 +203,8 @@
           '<div class="group-progress-row projection-progress"><div><span>Projeção do dia</span><b>'+(projection?pct(projAtt):"—")+'</b></div><div class="group-progress"><i style="width:'+projBar+'%"></i></div></div>'+
         '</div>'+
         '<div class="group-secondary-grid">'+
-          '<div><span>LY</span><strong>'+(t.ly?money(t.ly,2):"—")+'</strong></div>'+
-          '<div><span>Evol. vs LY</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong></div>'+
+          '<div><span>Venda A.A.</span><strong>'+(t.ly?money(t.ly,2):"—")+'</strong></div>'+
+          '<div><span>Evol. vs Ano Anterior</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong></div>'+
           '<div><span>Meta física</span><strong>'+num(t.targetPhysical)+' peças</strong></div>'+
           '<div><span>Venda física</span><strong>'+num(t.physical)+' peças</strong></div>'+
           '<div><span>% meta física</span><strong>'+pct(physicalAtt)+'</strong></div>'+
