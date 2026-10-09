@@ -74,8 +74,10 @@ function dailyWelcomeKey(day=localDate()){
 function enterMainApp(){
   if($("dailyWelcomeModal")) $("dailyWelcomeModal").classList.add("hidden");
   if($("worldModal")) $("worldModal").classList.add("hidden");
-  setSection("inicio");
-  window.scrollTo({top:0,behavior:"auto"});
+  // Fechar acolhimento/checklist NÃO é uma navegação para Início.
+  // Preservar a tela atual, inclusive a posição de leitura do usuário.
+  const section=getSavedSection()||state.section||"inicio";
+  if(!$("section-"+section)?.classList.contains("active")) setSection(section);
 }
 
 window.afterMeuAcompanhamentoLogin = async function(person){
@@ -117,7 +119,7 @@ window.afterMeuAcompanhamentoLogin = async function(person){
   const sup=state.role==="supervisor" || /SUPERVISOR/i.test(String(person?.job_title||""));
   if($("dailyWelcomeTitle")) $("dailyWelcomeTitle").textContent=greetingByTime()+", "+personDisplayName(person)+"!";
   if($("supervisorWelcomeBlock")) $("supervisorWelcomeBlock").classList.toggle("hidden",!sup);
-  setSection("inicio");
+  setSection(getSavedSection()||state.section||"inicio");
   $("dailyWelcomeModal").classList.remove("hidden");
 };
 
