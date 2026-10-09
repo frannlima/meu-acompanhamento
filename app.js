@@ -380,13 +380,15 @@ async function loadAll(){
   $("workspaceLabel").textContent="WORKSPACE • LOJA "+state.storeCode;
   $("dateBadge").textContent=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
   try{
-    const [day,detail,groups,history]=await Promise.all([
+    const [day,detail,groups,history,groupHourlyHistory]=await Promise.all([
       api("dashboard",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
       api("detail",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
       api("groups",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
-      api("history",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode})
+      api("history",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
+      api("groupHourlyHistory",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode})
     ]);
     state.day=day; state.detail=detail; state.groupSummary=groups; state.history=Array.isArray(history)?history:[];
+    state.groupHourlyHistory=Array.isArray(groupHourlyHistory)?groupHourlyHistory:[];
     renderDashboard(); renderGroups(); renderGroupSharePanel(); renderHistory();
     if(state.section==="comerciais") await loadCommercials();
   }catch(e){
