@@ -1,0 +1,336 @@
+
+(function(){
+  "use strict";
+
+  const STREET_STORES=new Set(["084","113","146"]);
+  const SALES_CURVES={
+    SHOPPING:[
+      {h:10,label:"10h",fin:.040774719673802244,cup:.04531410916580845,pcs:.04294478527607362},
+      {h:11,label:"11h",fin:.07543323139653416,cup:.07312049433573635,pcs:.07668711656441718},
+      {h:12,label:"12h",fin:.0744138634046891,cup:.07621009268795058,pcs:.07464212678936605},
+      {h:13,label:"13h",fin:.0744138634046891,cup:.07415036045314109,pcs:.07464212678936605},
+      {h:14,label:"14h",fin:.08053007135575943,cup:.082389289392379,pcs:.08077709611451943},
+      {h:15,label:"15h",fin:.09072375127421,cup:.08959835221421215,pcs:.09100204498977506},
+      {h:16,label:"16h",fin:.09378185524974515,cup:.09268795056642637,pcs:.09611451942740287},
+      {h:17,label:"17h",fin:.09174311926605505,cup:.09474768280123584,pcs:.09100204498977506},
+      {h:18,label:"18h",fin:.09683995922528033,cup:.09886714727085479,pcs:.09713701431492842},
+      {h:19,label:"19h",fin:.10601427115188584,cup:.10401647785787847,pcs:.10531697341513294},
+      {h:20,label:"20h",fin:.10601427115188584,cup:.10298661174047374,pcs:.1032719836400818},
+      {h:21,label:"21h",fin:.06116207951070337,cup:.05973223480947477,pcs:.05930470347648262},
+      {h:22,label:"22h",fin:.00815494393476045,cup:.006179196704428424,pcs:.007157464212678937}
+    ],
+    RUA:[
+      {h:8,label:"08h",fin:.024096385542168672,cup:.029233870967741934,pcs:.025075225677031094},
+      {h:9,label:"09h",fin:.08835341365461848,cup:.0967741935483871,pcs:.0872617853560682},
+      {h:10,label:"10h",fin:.13052208835341364,cup:.1350806451612903,pcs:.13239719157472415},
+      {h:11,label:"11h",fin:.1475903614457831,cup:.14213709677419353,pcs:.1464393179538616},
+      {h:12,label:"12h",fin:.13855421686746988,cup:.13911290322580647,pcs:.14042126379137412},
+      {h:13,label:"13h",fin:.1255020080321285,cup:.11693548387096774,pcs:.119358074222668},
+      {h:14,label:"14h",fin:.1004016064257028,cup:.10483870967741936,pcs:.10230692076228685},
+      {h:15,label:"15h",fin:.10542168674698794,cup:.10181451612903225,pcs:.10832497492477433},
+      {h:16,label:"16h",fin:.08734939759036144,cup:.08165322580645161,pcs:.08625877632898696},
+      {h:17,label:"17h",fin:.048192771084337345,cup:.047379032258064516,pcs:.04714142427281846},
+      {h:18,label:"18h",fin:.004016064257028112,cup:.005040322580645161,pcs:.0050150451354062184}
+    ]
+  };
+
+  const curveForStore=()=>STREET_STORES.has(String(state.storeCode).padStart(3,"0"))?SALES_CURVES.RUA:SALES_CURVES.SHOPPING;
+  const formatForStore=()=>STREET_STORES.has(String(state.storeCode).padStart(3,"0"))?"Loja de rua • 08h–18h":"Shopping • 10h–22h";
+
+  function timeParts(iso){
+    const date=iso?new Date(iso):new Date();
+    const parts=new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Fortaleza",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(date);
+    return {
+      h:Number(parts.find(p=>p.type==="hour")?.value||0),
+      m:Number(parts.find(p=>p.type==="minute")?.value||0)
+    };
+  }
+
+  function expectedPctAt(curve,h,m,key="fin"){
+    let sum=0;
+    for(const row of curve){
+      if(h>row.h) sum+=Number(row[key]||0);
+      else if(h===row.h) sum+=Number(row[key]||0)*Math.max(0,Math.min(1,m/60));
+    }
+    if(h>curve[curve.length-1].h) return 1;
+    return Math.max(0,Math.min(1,sum));
+  }
+
+  function cumulativeCurve(curve,key="fin"){
+    let acc=0;
+    return curve.map(r=>({label:r.label,h:r.h,pct:(acc+=Number(r[key]||0))}));
+  }
+
+  function groupRows(){
+    const groups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
+    return GROUP_ORDER.map(code=>groups.find(g=>g.group_code===code)).filter(Boolean);
+  }
+
+  function tone(v,neutral=false){
+    if(neutral) return "";
+    return Number(v)>=0?"positive":"negative";
+  }
+
+  function ensureHome(){
+    const home=$("section-inicio");
+    if(!home||$("clarityHome")) return;
+    const head=home.querySelector(".section-head");
+    const shell=document.createElement("div");
+    shell.id="clarityHome";
+    shell.className="clarity-home";
+    shell.innerHTML=
+      '<section class="clarity-summary card">'+
+        '<div class="clarity-card-head"><div><span class="eyebrow">RESULTADO DA LOJA • HOJE</span><h2>Visão rápida do dia</h2></div>'+
+        '<button type="button" id="clarityPaste" class="btn accent">＋ Colar venda da Web</button></div>'+
+        '<div id="clarityExecutive" class="clarity-executive"></div>'+
+      '</section>'+
+      '<section class="clarity-groups card">'+
+        '<div class="clarity-card-head"><div><span class="eyebrow">HORA A HORA</span><h2>Resultado geral por grupo</h2><p>Leitura única para acompanhamento e compartilhamento da parcial.</p></div>'+
+        '<button type="button" id="clarityShareDaily" class="btn primary">Compartilhar card</button></div>'+
+        '<div id="clarityGroupsTable" class="clarity-table-wrap"></div>'+
+      '</section>'+
+      '<section class="clarity-curve card">'+
+        '<div class="clarity-card-head"><div><span class="eyebrow">CURVA DE VENDA</span><h2>Expectativa x ritmo do dia</h2><p id="clarityCurveContext"></p></div>'+
+        '<span id="clarityCurveStatus" class="badge soft">Curva histórica</span></div>'+
+        '<div id="clarityCurveKpis" class="clarity-curve-kpis"></div>'+
+        '<div id="clarityCurveChart" class="clarity-curve-chart"></div>'+
+        '<div id="clarityCurveHourTable" class="clarity-hour-wrap"></div>'+
+      '</section>'+
+      '<section class="clarity-actions">'+
+        '<button type="button" data-clarity-section="grupos"><b>▥</b><span>Mundos</span><small>Grupos e DCOs</small></button>'+
+        '<button type="button" data-clarity-section="comerciais"><b>◎</b><span>Comerciais</span><small>Equipe e responsáveis</small></button>'+
+        '<button type="button" id="clarityPasteShortcut"><b>＋</b><span>Colar venda</span><small>Novo snapshot</small></button>'+
+        '<button type="button" data-clarity-section="estore"><b>▣</b><span>eStore</span><small>Acesso integrado</small></button>'+
+      '</section>';
+    if(head?.nextSibling) home.insertBefore(shell,head.nextSibling); else home.appendChild(shell);
+
+    $("clarityPaste").onclick=showPaste;
+    $("clarityPasteShortcut").onclick=showPaste;
+    document.querySelectorAll("[data-clarity-section]").forEach(btn=>btn.onclick=()=>setSection(btn.dataset.claritySection));
+    $("clarityShareDaily").onclick=shareDailyCard;
+  }
+
+  function renderExecutive(){
+    const d=state.day||{};
+    const meta=Number(d.target_financial||0);
+    const venda=Number(d.sales_financial||0);
+    const ating=meta?venda/meta*100:0;
+    const aa=Number(d.ly_financial||0);
+    const ev=aa&&d.has_input?((venda/aa)-1)*100:null;
+    const desvio=venda-meta;
+    const rows=[
+      ["Meta",meta?money(meta,2):"—",""],
+      ["Venda",d.has_input?money(venda,2):"—",d.has_input?(ating>=100?"positive":ating>=90?"warning":"negative"):""],
+      ["Atingimento",d.has_input?pct(ating):"—",d.has_input?(ating>=100?"positive":ating>=90?"warning":"negative"):""],
+      ["Venda A.A.",aa?money(aa,2):"—",""],
+      ["Evolução",ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev),ev===null?"":tone(ev)],
+      ["Desvio",d.has_input?signedMoney(desvio,2):"—",d.has_input?tone(desvio):""]
+    ];
+    $("clarityExecutive").innerHTML=rows.map((r,i)=>
+      '<article class="clarity-kpi '+(i===1?"featured ":"")+(r[2]||"")+'"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></article>'
+    ).join("");
+  }
+
+  function renderGroupsPanel(){
+    const d=state.day||{};
+    const groups=groupRows();
+    const rows=groups.map(g=>{
+      const meta=Number(g.target_financial||0),venda=Number(g.sales_financial||0);
+      const ating=meta?venda/meta*100:0,aa=Number(g.ly_financial||0);
+      const ev=aa&&d.has_input?((venda/aa)-1)*100:null,dev=venda-meta;
+      return '<tr>'+
+        '<td><b>'+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</b></td>'+
+        '<td>'+money(meta,2)+'</td>'+
+        '<td>'+money(venda,2)+'</td>'+
+        '<td class="'+(ating>=100?"positive":ating>=90?"warning":"negative")+'">'+pct(ating)+'</td>'+
+        '<td>'+money(aa,2)+'</td>'+
+        '<td class="'+(ev===null?"":tone(ev))+'">'+(ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev))+'</td>'+
+        '<td class="'+tone(dev)+'">'+signedMoney(dev,2)+'</td>'+
+      '</tr>';
+    }).join("");
+
+    const meta=Number(d.target_financial||groups.reduce((a,g)=>a+Number(g.target_financial||0),0));
+    const venda=Number(d.sales_financial||groups.reduce((a,g)=>a+Number(g.sales_financial||0),0));
+    const aa=Number(d.ly_financial||groups.reduce((a,g)=>a+Number(g.ly_financial||0),0));
+    const ating=meta?venda/meta*100:0, ev=aa&&d.has_input?((venda/aa)-1)*100:null,dev=venda-meta;
+
+    $("clarityGroupsTable").innerHTML=
+      '<table class="clarity-table"><thead><tr><th>Grupo</th><th>Meta</th><th>Venda</th><th>Ating.</th><th>Venda A.A.</th><th>Ev.</th><th>Desvio</th></tr></thead>'+
+      '<tbody>'+rows+
+      '<tr class="clarity-total"><td>Total Loja</td><td>'+money(meta,2)+'</td><td>'+money(venda,2)+'</td><td>'+pct(ating)+'</td><td>'+money(aa,2)+'</td><td>'+(ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev))+'</td><td>'+signedMoney(dev,2)+'</td></tr>'+
+      '</tbody></table>';
+  }
+
+  function svgCurve(expected,actual,maxVal){
+    const W=920,H=270,p={l:54,r:18,t:20,b:40};
+    const innerW=W-p.l-p.r,innerH=H-p.t-p.b;
+    const allLabels=expected.map(x=>x.label);
+    const x=i=>p.l+(allLabels.length<=1?0:i/(allLabels.length-1))*innerW;
+    const y=v=>p.t+innerH-(maxVal?Math.max(0,v)/maxVal:0)*innerH;
+    const expPts=expected.map((d,i)=>x(i)+","+y(d.value)).join(" ");
+    const actualMapped=[];
+    for(const a of actual){
+      let idx=expected.findIndex(e=>e.h===a.h);
+      if(idx<0) idx=Math.max(0,Math.min(expected.length-1,a.h-expected[0].h));
+      actualMapped.push({idx,value:a.value});
+    }
+    const actPts=actualMapped.map(d=>x(d.idx)+","+y(d.value)).join(" ");
+    const grids=[0,.25,.5,.75,1].map(f=>{
+      const yy=p.t+innerH-innerH*f;
+      return '<line x1="'+p.l+'" x2="'+(W-p.r)+'" y1="'+yy+'" y2="'+yy+'" stroke="#E7E4DB" stroke-width="1"/>'+
+        '<text x="'+(p.l-8)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10" fill="#7A8580">'+Math.round(maxVal*f/1000)+'k</text>';
+    }).join("");
+    const ticks=expected.map((d,i)=>'<text x="'+x(i)+'" y="'+(H-13)+'" text-anchor="middle" font-size="10" fill="#6F7C77">'+d.label+'</text>').join("");
+    const circles=actualMapped.map(d=>'<circle cx="'+x(d.idx)+'" cy="'+y(d.value)+'" r="4.5" fill="#173F35"/>').join("");
+    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Curva de vendas">'+
+      grids+
+      '<polyline fill="none" stroke="#9BA7A3" stroke-width="3" stroke-dasharray="7 7" points="'+expPts+'"/>'+
+      (actPts?'<polyline fill="none" stroke="#173F35" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" points="'+actPts+'"/>'+circles:"")+
+      ticks+
+      '</svg>'+
+      '<div class="clarity-curve-legend"><span><i class="real"></i>Venda acumulada</span><span><i class="expected"></i>Meta acumulada pela curva</span></div>';
+  }
+
+  function renderCurve(){
+    const d=state.day||{};
+    const curve=curveForStore();
+    const target=Number(d.target_financial||0);
+    const targetPcs=Number(d.target_physical||0);
+    const sale=Number(d.sales_financial||0);
+    const salePcs=Number(d.sales_physical||0);
+    const tp=timeParts(d.captured_at||null);
+    const finPct=expectedPctAt(curve,tp.h,tp.m,"fin");
+    const pcsPct=expectedPctAt(curve,tp.h,tp.m,"pcs");
+    const cupPct=expectedPctAt(curve,tp.h,tp.m,"cup");
+    const expectedNow=target*finPct;
+    const expectedPcs=targetPcs*pcsPct;
+    const gap=sale-expectedNow;
+    const curveProjection=finPct>0&&d.has_input?sale/finPct:0;
+    const projDev=curveProjection-target;
+
+    $("clarityCurveContext").textContent=formatForStore()+" • distribuição baseada na curva histórica fornecida";
+    $("clarityCurveStatus").textContent=d.captured_at?"Leitura até "+localTime(d.captured_at):"Aguardando input";
+    $("clarityCurveKpis").innerHTML=[
+      ["Esperado até agora",target?money(expectedNow,2):"—",""],
+      ["Realizado",d.has_input?money(sale,2):"—",d.has_input?tone(gap):""],
+      ["Desvio vs curva",d.has_input?signedMoney(gap,2):"—",d.has_input?tone(gap):""],
+      ["Ating. esperado",target?pct(finPct*100):"—",""],
+      ["Projeção pela curva",curveProjection?money(curveProjection,2):"—",curveProjection?tone(projDev):""],
+      ["Peças esperado / real",targetPcs?(num(Math.round(expectedPcs))+" / "+num(salePcs)):"—",salePcs>=expectedPcs?"positive":"negative"]
+    ].map(r=>'<article class="clarity-mini-kpi '+r[2]+'"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></article>').join("");
+
+    const cum=cumulativeCurve(curve,"fin").map(r=>({label:r.label,h:r.h,value:target*r.pct}));
+    const hist=Array.isArray(state.history)?state.history:[];
+    const actual=hist.map(r=>{
+      const t=timeParts(r.captured_at);
+      return {h:t.h,value:Number(r.sales_financial||0)};
+    }).filter(r=>r.h>=curve[0].h&&r.h<=curve[curve.length-1].h);
+    const maxVal=Math.max(target||0,...cum.map(x=>x.value),...actual.map(x=>x.value),1);
+    $("clarityCurveChart").innerHTML=svgCurve(cum,actual,maxVal);
+
+    let accFin=0,accPcs=0;
+    $("clarityCurveHourTable").innerHTML=
+      '<details><summary>Ver distribuição hora a hora <b>'+formatForStore()+'</b></summary>'+
+      '<div class="clarity-table-wrap"><table class="clarity-table compact"><thead><tr><th>Hora</th><th>% Venda</th><th>Meta R$ hora</th><th>Acum. esperado</th><th>Peças hora</th><th>Acum. peças</th><th>Intensidade</th></tr></thead><tbody>'+
+      curve.map(r=>{
+        accFin+=r.fin;accPcs+=r.pcs;
+        const intensity=r.fin>=.10?"Pico":r.fin>=.085?"Alta":r.fin>=.06?"Média":"Baixa";
+        return '<tr><td><b>'+r.label+'</b></td><td>'+pct(r.fin*100)+'</td><td>'+money(target*r.fin,2)+'</td><td>'+money(target*accFin,2)+'</td><td>'+num(Math.round(targetPcs*r.pcs))+'</td><td>'+num(Math.round(targetPcs*accPcs))+'</td><td><span class="intensity i-'+intensity.toLowerCase().replace("é","e")+'">'+intensity+'</span></td></tr>';
+      }).join("")+
+      '</tbody></table></div></details>';
+  }
+
+  async function createDailyCardBlob(){
+    const d=state.day||{},groups=groupRows();
+    const width=1500,rowH=76,headerH=300,height=headerH+(groups.length+1)*rowH+110;
+    const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
+    const ctx=canvas.getContext("2d");
+    const C={green:"#173F35",soft:"#466964",cream:"#F7F4ED",white:"#FFFFFF",line:"#DAD9D6",red:"#B6454B",good:"#2E6B58",orange:"#DE7C00",muted:"#6F7C77"};
+    ctx.fillStyle=C.cream;ctx.fillRect(0,0,width,height);
+    ctx.fillStyle=C.green;ctx.fillRect(0,0,width,210);
+    ctx.fillStyle=C.white;ctx.font="800 42px Arial";ctx.fillText("RIACHUELO",48,72);
+    ctx.font="800 34px Arial";ctx.fillText("HORA A HORA | RESULTADO DO DIA",48,130);
+    ctx.font="600 18px Arial";ctx.fillStyle="#D6D2C4";
+    ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+" • "+(d.captured_at?"Atualizado "+localTime(d.captured_at):"Sem input"),48,168);
+
+    const cols=[
+      {x:48,w:260,label:"GRUPO"},
+      {x:308,w:190,label:"META"},
+      {x:498,w:190,label:"VENDA"},
+      {x:688,w:150,label:"ATING."},
+      {x:838,w:210,label:"VENDA A.A."},
+      {x:1048,w:150,label:"EV."},
+      {x:1198,w:254,label:"DESVIO"}
+    ];
+    ctx.fillStyle=C.white;ctx.fillRect(48,232,1404,54);
+    ctx.fillStyle=C.muted;ctx.font="800 15px Arial";
+    cols.forEach(c=>ctx.fillText(c.label,c.x+12,265));
+
+    const drawRow=(y,name,meta,venda,ating,aa,ev,dev,total=false)=>{
+      ctx.fillStyle=total?"#EAF1ED":C.white;ctx.fillRect(48,y,1404,rowH-4);
+      ctx.strokeStyle=C.line;ctx.beginPath();ctx.moveTo(48,y+rowH-4);ctx.lineTo(1452,y+rowH-4);ctx.stroke();
+      const vals=[name,money(meta,2),money(venda,2),pct(ating),money(aa,2),ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev),signedMoney(dev,2)];
+      vals.forEach((v,i)=>{
+        ctx.fillStyle=i===5?(ev===null?C.muted:ev>=0?C.good:C.red):i===6?(dev>=0?C.good:C.red):i===3?(ating>=100?C.good:ating>=90?C.orange:C.red):C.green;
+        ctx.font=(total?"800 ":"700 ")+(i===0?18:16)+"px Arial";
+        ctx.fillText(v,cols[i].x+12,y+45);
+      });
+    };
+
+    let y=292;
+    for(const g of groups){
+      const meta=Number(g.target_financial||0),venda=Number(g.sales_financial||0),aa=Number(g.ly_financial||0);
+      const ating=meta?venda/meta*100:0,ev=aa&&d.has_input?((venda/aa)-1)*100:null,dev=venda-meta;
+      drawRow(y,GROUP_LABELS[g.group_code]||g.group_code,meta,venda,ating,aa,ev,dev,false);y+=rowH;
+    }
+    const meta=Number(d.target_financial||0),venda=Number(d.sales_financial||0),aa=Number(d.ly_financial||0);
+    const ating=meta?venda/meta*100:0,ev=aa&&d.has_input?((venda/aa)-1)*100:null,dev=venda-meta;
+    drawRow(y,"TOTAL LOJA",meta,venda,ating,aa,ev,dev,true);
+
+    ctx.fillStyle=C.soft;ctx.font="700 16px Arial";ctx.fillText("MEU ACOMPANHAMENTO",48,height-38);
+    ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",1452,height-38);
+
+    return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),"image/png",1));
+  }
+
+  async function shareDailyCard(){
+    const btn=$("clarityShareDaily"),old=btn?.textContent;
+    if(btn){btn.disabled=true;btn.textContent="Gerando...";}
+    try{
+      const blob=await createDailyCardBlob();
+      const file=new File([blob],"Hora_a_Hora_Loja_"+state.storeCode+"_"+localDate()+".png",{type:"image/png"});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({title:"Hora a Hora • Resultado do Dia",files:[file]});
+      }else{
+        const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+        toast("Card do Hora a Hora gerado.");
+      }
+    }catch(e){if(e?.name!=="AbortError") toast(e.message||"Não foi possível compartilhar.",true);}
+    finally{if(btn){btn.disabled=false;btn.textContent=old||"Compartilhar card";}}
+  }
+
+  function renderClarity(){
+    ensureHome();
+    if(!$("clarityHome")) return;
+    renderExecutive();
+    renderGroupsPanel();
+    renderCurve();
+  }
+
+  const baseRenderDashboard=window.renderDashboard;
+  window.renderDashboard=function(){
+    baseRenderDashboard();
+    renderClarity();
+  };
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    ensureHome();
+    const title=document.querySelector("#section-inicio .section-head h1");
+    const copy=document.querySelector("#section-inicio .section-head p");
+    if(title) title.textContent="Início";
+    if(copy) copy.textContent="Resumo do dia, parcial por grupo e curva de venda em uma única tela.";
+    renderClarity();
+  });
+
+  window.renderClarityHome=renderClarity;
+})();
