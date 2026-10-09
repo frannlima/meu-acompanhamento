@@ -404,6 +404,12 @@
     renderWorldHeaderClarity();
   };
 
+  const baseSetSectionClarity=window.setSection;
+  window.setSection=function(section){
+    baseSetSectionClarity(section);
+    setTimeout(renderMenuDayMeta,0);
+  };
+
   const baseRenderDashboard=window.renderDashboard;
   window.renderDashboard=function(){
     baseRenderDashboard();
