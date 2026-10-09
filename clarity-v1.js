@@ -433,12 +433,14 @@
         hourEv
       };
     }).sort((a,b)=>b.att-a.att);
-    const best=ranked.slice(0,3).map(x=>x.name+" "+pct(x.att)).join(" • ");
+    const best=ranked.slice(0,3)
+      .map(x=>"• "+x.name+" "+pct(x.att))
+      .join("\n");
     const gaps=[...ranked]
       .sort((a,b)=>a.dev-b.dev)
       .slice(0,3)
       .map(x=>"🔻 "+x.name+" "+signedMoney(x.dev,0))
-      .join(" • ");
+      .join("\n");
 
     const hourComparable=ranked.filter(x=>x.hourEv!==null && Number.isFinite(x.hourEv));
     const hourGrowth=[...hourComparable]
@@ -446,18 +448,19 @@
       .sort((a,b)=>b.hourEv-a.hourEv)
       .slice(0,3)
       .map(x=>"🟢⬆️ "+x.name+" "+pct(x.hourEv))
-      .join(" • ");
+      .join("\n");
     const hourRetraction=[...hourComparable]
       .filter(x=>x.hourEv<0)
       .sort((a,b)=>a.hourEv-b.hourEv)
       .slice(0,3)
       .map(x=>"🔻 "+x.name+" "+pct(x.hourEv))
-      .join(" • ");
+      .join("\n");
     const hourBlock=hourComparable.length
-      ? '⏱️ *Movimento da última hora:*\n'+
-        '📈 *Mais cresceram:* '+(hourGrowth||"Sem crescimento na última hora")+'\n'+
-        '📉 *Mais retraíram:* '+(hourRetraction||"Sem retração na última hora")+'\n\n'
-      : '⏱️ *Movimento da última hora:* aguardando pelo menos 3 parciais para comparar o ritmo entre horas.\n\n';
+      ? '⏱️ *Movimento da última hora:*\n\n'+
+        '📈 *Mais cresceram:*\n'+(hourGrowth||"• Sem crescimento na última hora")+'\n\n'+
+        '📉 *Mais retraíram:*\n'+(hourRetraction||"• Sem retração na última hora")+'\n\n'
+      : '⏱️ *Movimento da última hora:*\n'+
+        '• Aguardando pelo menos 3 parciais para comparar o ritmo entre horas.\n\n';
 
     return '📊 *HORA A HORA | LOJA '+state.storeCode+'*\n'+
       'Atualizado '+(d.captured_at?localTime(d.captured_at):"—")+'\n\n'+
@@ -468,8 +471,8 @@
       '📈 *Evolução:* '+(ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev))+'\n'+
       '🔭 *Projeção:* '+(proj?money(proj,2):"—")+'\n'+
       '🛍️ *Venda física:* '+num(physical)+' peças\n\n'+
-      '🏆 *Maiores atingimentos:* '+(best||"—")+'\n'+
-      '🚨 *Maiores desvios:* '+(gaps||"—")+'\n\n'+
+      '🏆 *Maiores atingimentos:*\n'+(best||"—")+'\n\n'+
+      '🚨 *Maiores desvios:*\n'+(gaps||"—")+'\n\n\n'+
       hourBlock+
       '_Moda que inspira o Brasil_';
   }
