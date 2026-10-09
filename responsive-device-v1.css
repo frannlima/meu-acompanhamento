@@ -1,0 +1,236 @@
+
+/* Responsive Device System v1
+   Phone / Tablet / Desktop + iOS / Android adaptation */
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+  --content-max:1440px;
+}
+
+html,body{min-height:100%}
+body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+img,svg,canvas{max-width:100%}
+button,input,select,textarea{font:inherit}
+
+/* PHONE — Android + iPhone */
+html.device-phone .sidebar{display:none!important}
+html.device-phone .main{
+  margin-left:0!important;
+  width:100%!important;
+  max-width:none!important;
+  padding-left:max(12px,var(--safe-left))!important;
+  padding-right:max(12px,var(--safe-right))!important;
+  padding-bottom:calc(94px + var(--safe-bottom))!important;
+}
+html.device-phone .mobile-header{display:flex!important}
+html.device-phone .mobile-dock{display:grid!important}
+html.device-phone .section{width:100%!important;max-width:100%!important}
+html.device-phone .two-col,
+html.device-phone .discount-layout{grid-template-columns:1fr!important}
+html.device-phone .commercial-grid{grid-template-columns:1fr!important}
+html.device-phone .kpi-grid,
+html.device-phone .kpi-grid.compact{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.device-phone .clarity-curve-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.device-phone .clarity-signal-row{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html.device-phone .squad-card{grid-template-columns:1.15fr .85fr!important}
+html.device-phone .table-wrap,
+html.device-phone .clarity-table-wrap,
+html.device-phone .group-share-scroll{max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+html.device-phone .modal{
+  width:calc(100vw - 16px)!important;
+  max-width:none!important;
+  max-height:calc((var(--app-vh,1vh) * 100) - var(--safe-top) - var(--safe-bottom) - 14px)!important;
+  border-radius:20px!important;
+}
+html.device-phone .overlay{
+  padding:max(7px,var(--safe-top)) max(8px,var(--safe-right)) max(7px,var(--safe-bottom)) max(8px,var(--safe-left))!important;
+}
+html.device-phone .mobile-dock{
+  left:max(8px,var(--safe-left))!important;
+  right:max(8px,var(--safe-right))!important;
+  bottom:calc(7px + var(--safe-bottom))!important;
+}
+html.device-phone .mobile-update-fab{
+  right:max(18px,var(--safe-right))!important;
+  bottom:calc(88px + var(--safe-bottom))!important;
+}
+
+/* iPhone refinements */
+html.device-phone.platform-ios .mobile-header{
+  padding-top:calc(10px + var(--safe-top))!important;
+}
+html.device-phone.platform-ios .section-head:first-child{
+  scroll-margin-top:calc(64px + var(--safe-top));
+}
+html.device-phone.platform-ios input,
+html.device-phone.platform-ios textarea,
+html.device-phone.platform-ios select{
+  font-size:16px!important; /* prevents Safari zoom */
+}
+
+/* Narrow Android / small iPhone */
+@media(max-width:390px){
+  html.device-phone .main{padding-left:9px!important;padding-right:9px!important}
+  html.device-phone .section-head{margin-left:-9px!important;margin-right:-9px!important}
+  html.device-phone .mobile-header{margin-left:-9px!important;margin-right:-9px!important}
+  html.device-phone .clarity-signal-row{grid-template-columns:1fr!important}
+  html.device-phone .squad-card{grid-template-columns:1fr!important}
+  html.device-phone .squad-card img{max-width:190px!important;justify-self:center!important}
+  html.device-phone .commercial-mobile-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  html.device-phone .menu-day-meta-mini{grid-template-columns:1fr 1fr!important}
+  html.device-phone .menu-day-meta-mini>span:last-child{grid-column:1/-1}
+}
+
+/* Larger phones / landscape phones */
+html.device-phone.orientation-landscape .main{
+  padding-bottom:82px!important;
+}
+html.device-phone.orientation-landscape .mobile-header{min-height:50px!important}
+html.device-phone.orientation-landscape .section-head{padding-top:10px!important;padding-bottom:13px!important}
+html.device-phone.orientation-landscape .clarity-home{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+html.device-phone.orientation-landscape .clarity-summary,
+html.device-phone.orientation-landscape .app-action-card{grid-column:span 1}
+html.device-phone.orientation-landscape .clarity-groups,
+html.device-phone.orientation-landscape .clarity-curve,
+html.device-phone.orientation-landscape .squad-card{grid-column:1/-1}
+
+/* TABLET — iPad / Android tablets */
+html.device-tablet .sidebar{display:none!important}
+html.device-tablet .main{
+  margin-left:0!important;
+  width:100%!important;
+  max-width:1180px!important;
+  margin-inline:auto!important;
+  padding:
+    calc(10px + var(--safe-top))
+    max(22px,var(--safe-right))
+    calc(98px + var(--safe-bottom))
+    max(22px,var(--safe-left))!important;
+}
+html.device-tablet .mobile-header{
+  display:flex!important;
+  margin-left:calc(-1 * max(22px,var(--safe-left)))!important;
+  margin-right:calc(-1 * max(22px,var(--safe-right)))!important;
+  padding-left:max(24px,var(--safe-left))!important;
+  padding-right:max(24px,var(--safe-right))!important;
+  min-height:68px!important;
+}
+html.device-tablet .mobile-dock{
+  display:grid!important;
+  left:50%!important;
+  right:auto!important;
+  transform:translateX(-50%)!important;
+  width:min(620px,calc(100vw - 40px))!important;
+  bottom:calc(12px + var(--safe-bottom))!important;
+}
+html.device-tablet .mobile-update-fab{
+  display:flex!important;
+  right:max(28px,var(--safe-right))!important;
+  bottom:calc(102px + var(--safe-bottom))!important;
+}
+html.device-tablet .section-head{
+  border-radius:22px!important;
+  margin:0 0 14px!important;
+  padding:20px 22px!important;
+  background:linear-gradient(135deg,#173F35,#24594C)!important;
+  color:#fff!important;
+}
+html.device-tablet .section-head h1,
+html.device-tablet .section-head p,
+html.device-tablet .section-head .eyebrow{color:#fff!important}
+html.device-tablet .clarity-home{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+html.device-tablet .clarity-summary,
+html.device-tablet .app-action-card{grid-column:span 1}
+html.device-tablet .clarity-groups,
+html.device-tablet .clarity-curve,
+html.device-tablet .squad-card{grid-column:1/-1}
+html.device-tablet .clarity-journey{grid-column:1/-1}
+html.device-tablet .clarity-actions{grid-column:1/-1}
+html.device-tablet .commercial-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.device-tablet .kpi-grid,
+html.device-tablet .kpi-grid.compact{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html.device-tablet #commercialKpis{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+html.device-tablet .discount-layout{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.device-tablet .clarity-curve-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+html.device-tablet .squad-card{grid-template-columns:1.25fr .75fr!important}
+html.device-tablet .squad-card img{max-width:240px!important}
+html.device-tablet .paste-modal{width:min(920px,94vw)!important}
+html.device-tablet .paste-modal #pasteArea{min-height:360px!important}
+
+/* Tablet portrait keeps two-column hierarchy but compact cards */
+html.device-tablet.orientation-portrait .commercial-grid{grid-template-columns:1fr 1fr!important}
+html.device-tablet.orientation-portrait .clarity-result-subgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+
+/* Tablet landscape gets more desktop-like density */
+html.device-tablet.orientation-landscape .clarity-home{
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+}
+html.device-tablet.orientation-landscape .clarity-summary{grid-column:span 7}
+html.device-tablet.orientation-landscape .app-action-card{grid-column:span 5}
+html.device-tablet.orientation-landscape .clarity-groups,
+html.device-tablet.orientation-landscape .clarity-curve,
+html.device-tablet.orientation-landscape .squad-card,
+html.device-tablet.orientation-landscape .clarity-journey,
+html.device-tablet.orientation-landscape .clarity-actions{grid-column:1/-1}
+
+/* DESKTOP / NOTEBOOK */
+html.device-desktop .mobile-header,
+html.device-desktop .mobile-dock,
+html.device-desktop .mobile-update-fab{display:none!important}
+html.device-desktop .sidebar{display:flex!important}
+html.device-desktop .main{
+  margin-left:240px!important;
+  width:calc(100% - 240px)!important;
+  max-width:none!important;
+  padding:24px 28px 44px!important;
+}
+html.device-desktop .main>.section,
+html.device-desktop .admin-store-bar{
+  width:min(100%,var(--content-max));
+  margin-inline:auto;
+}
+html.device-desktop .clarity-home{
+  grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  gap:16px!important;
+}
+html.device-desktop .clarity-summary{grid-column:span 7}
+html.device-desktop .app-action-card{grid-column:span 5}
+html.device-desktop .clarity-groups{grid-column:1/-1}
+html.device-desktop .clarity-curve{grid-column:span 8}
+html.device-desktop .squad-card{grid-column:span 4}
+html.device-desktop .clarity-journey{grid-column:span 7}
+html.device-desktop .clarity-actions{grid-column:span 5}
+html.device-desktop .commercial-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+html.device-desktop .kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+html.device-desktop .kpi-grid.compact{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+html.device-desktop .clarity-curve-kpis{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+html.device-desktop .modal{max-width:min(1100px,92vw)!important}
+
+/* Very wide desktop */
+@media(min-width:1600px){
+  html.device-desktop .main{padding-left:40px!important;padding-right:40px!important}
+  html.device-desktop .commercial-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  html.device-desktop .clarity-home{gap:18px!important}
+}
+
+/* Accessibility and touch targets */
+html.device-phone button,
+html.device-tablet button,
+html.device-phone .estore-hub-card,
+html.device-tablet .estore-hub-card{
+  min-height:44px;
+}
+@media(hover:hover) and (pointer:fine){
+  button,.estore-hub-card,.commercial-card,.premium-group-card{transition:transform .16s ease,box-shadow .16s ease}
+  button:hover,.estore-hub-card:hover{transform:translateY(-1px)}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
