@@ -232,3 +232,84 @@ body{background:#F4F0E7!important}
 @media(min-width:901px){
   .mobile-update-fab{display:none!important}
 }
+
+
+/* Home desktop: direcionamento + desempenho por grupo lado a lado */
+.group-hourly-performance{
+  padding:16px!important;
+  background:linear-gradient(145deg,#FFFFFF,#FBF9F3)!important;
+  border:1px solid rgba(23,63,53,.08)!important;
+  min-width:0;
+}
+.group-hourly-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px
+}
+.group-hourly-head h2{margin:4px 0 2px;font-size:20px;color:#173F35;letter-spacing:-.03em}
+.group-hourly-head p{margin:0;font-size:8px;color:#75817C}
+.group-hourly-last{
+  flex:0 0 auto;padding:7px 9px;border-radius:999px;background:#F1EEE6;color:#466964;
+  font-size:7px;font-weight:900
+}
+.group-hourly-chart{width:100%;overflow:hidden}
+.group-hourly-chart svg{display:block;width:100%;height:auto}
+.group-hourly-legend{display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:4px}
+.group-hourly-legend span{display:flex;align-items:center;gap:5px;font-size:7px;color:#53655F;font-weight:800}
+.group-hourly-legend i{width:8px;height:8px;border-radius:50%}
+.group-hourly-insights{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.group-hourly-insights>div{
+  padding:9px 10px;border-radius:12px;background:#F6F3EC;border:1px solid rgba(23,63,53,.06)
+}
+.group-hourly-insights span,.group-hourly-insights strong{display:block}
+.group-hourly-insights span{font-size:6.8px;color:#74817C}
+.group-hourly-insights strong{font-size:9px;color:#173F35;margin-top:2px}
+.group-hourly-empty{
+  min-height:220px;display:grid;place-items:center;text-align:center;color:#78837F;
+  font-size:9px;border:1px dashed #DAD9D6;border-radius:14px;background:#FBFAF6
+}
+
+/* Pantone 138 C nos mini indicadores de Venda, Atingimento e Desvio */
+.menu-day-meta-mini>span{
+  background:#DE7C00!important;
+  color:#FFFFFF!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  box-shadow:0 4px 12px rgba(222,124,0,.18)!important;
+}
+.menu-day-meta-mini>span b,
+.menu-day-meta-mini>span.positive b,
+.menu-day-meta-mini>span.negative b,
+.menu-day-meta-mini>span.warning b{
+  color:#FFFFFF!important;
+}
+.menu-day-meta-mini>span.negative,
+.menu-day-meta-mini>span.positive,
+.menu-day-meta-mini>span.warning{
+  color:#FFFFFF!important;
+}
+
+@media(min-width:901px){
+  .clarity-home{
+    grid-template-columns:repeat(12,minmax(0,1fr))!important;
+  }
+  .clarity-summary{grid-column:1/-1!important}
+  .app-action-card{grid-column:span 4!important}
+  .group-hourly-performance{grid-column:span 8!important}
+  .clarity-groups{grid-column:1/-1!important}
+  .clarity-curve{grid-column:span 8!important}
+  .squad-card{grid-column:span 4!important}
+}
+
+@media(max-width:900px){
+  .group-hourly-performance{
+    padding:13px!important;
+    border-radius:18px!important;
+  }
+  .group-hourly-head h2{font-size:17px}
+  .group-hourly-head p{font-size:7px}
+  .group-hourly-chart{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .group-hourly-chart svg{min-width:620px}
+  .group-hourly-insights{grid-template-columns:1fr 1fr}
+  .group-hourly-empty{min-height:150px}
+}
+@media(max-width:390px){
+  .group-hourly-insights{grid-template-columns:1fr}
+}
