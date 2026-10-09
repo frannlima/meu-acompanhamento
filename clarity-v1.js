@@ -516,43 +516,19 @@
     const att=meta?venda/meta*100:0,dev=venda-meta;
     const proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
 
-    const ranked=[...groups].map(g=>{
-      const interval=Number(g.interval_sales_financial||0);
-      const prev=Number(g.previous_interval_sales_financial||0);
-      const hasPrev=!!g.has_previous_interval;
-      const hourEv=hasPrev&&prev!==0?((interval/prev)-1)*100:null;
-      return {
-        name:GROUP_LABELS[g.group_code]||g.group_code,
-        dev:Number(g.sales_financial||0)-Number(g.target_financial||0),
-        att:Number(g.target_financial||0)?Number(g.sales_financial||0)/Number(g.target_financial||0)*100:0,
-        hourEv
-      };
-    });
-
+    const ranked=[...groups].map(g=>({
+      name:GROUP_LABELS[g.group_code]||g.group_code,
+      dev:Number(g.sales_financial||0)-Number(g.target_financial||0),
+      att:Number(g.target_financial||0)?Number(g.sales_financial||0)/Number(g.target_financial||0)*100:0
+    }));
     const best=[...ranked].sort((a,b)=>b.att-a.att)[0]||null;
-    const pressures=[...ranked].sort((a,b)=>a.dev-b.dev).slice(0,3);
-    const pressureNames=pressures.map(x=>x.name).join(", ");
-
-    const comparable=ranked.filter(x=>x.hourEv!==null&&Number.isFinite(x.hourEv));
-    const growth=[...comparable].filter(x=>x.hourEv>0).sort((a,b)=>b.hourEv-a.hourEv).slice(0,3);
-    const retract=[...comparable].filter(x=>x.hourEv<0).sort((a,b)=>a.hourEv-b.hourEv).slice(0,3);
-
-    let movement="Aguardando novas parciais";
-    if(comparable.length){
-      const parts=[];
-      if(growth.length) parts.push("alta em "+growth.map(x=>x.name).join(", "));
-      if(retract.length) parts.push("retração em "+retract.map(x=>x.name).join(", "));
-      movement=parts.length?parts.join(" | "):"sem variação relevante";
-    }
+    const pressures=[...ranked].sort((a,b)=>a.dev-b.dev).slice(0,3).map(x=>x.name).join(", ");
 
     return '📊 *HORA A HORA | LOJA '+state.storeCode+'*\n'+
       'Venda: *'+money(venda,2)+'* | *'+pct(att)+' da meta*\n'+
       'Projeção: *'+(proj?money(proj,2):"—")+'* | Desvio: *'+signedMoney(dev,2)+'*\n\n'+
       '🏆 *Destaque:* '+(best?best.name+' *'+pct(best.att)+'*':"—")+'\n'+
-      '🔻 *Maiores pressões:* '+(pressureNames||"—")+'\n\n'+
-      '⏱️ *Última hora:* '+movement+'.\n\n'+
-      '🎯 *Direcionamento:* concentrar o time nos grupos com maior desvio e acompanhar a recuperação na próxima parcial.\n\n'+
-      '_Moda que inspira o Brasil_';
+      '🔻 *Maiores pressões:* '+(pressures||"—");
   }
 
   async function shareDailyCard(){
