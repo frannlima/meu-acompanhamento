@@ -380,11 +380,20 @@
       {x:2198,w:314,label:"VENDA FÍSICA"}
     ];
 
-    rr(42,246,width-84,66,18,C.white,C.line);
-    ctx.fillStyle=C.green2;ctx.font="800 18px Arial";ctx.textBaseline="middle";
-    cols.forEach(col=>{
+    // Cabeçalho dos indicadores em laranja Pantone Riachuelo.
+    rr(42,246,width-84,66,18,C.orange);
+    ctx.fillStyle=C.white;ctx.font="800 18px Arial";ctx.textBaseline="middle";
+    cols.forEach((col,i)=>{
       ctx.textAlign=col.align==="left"?"left":"center";
       ctx.fillText(col.label,col.align==="left"?col.x+18:col.x+col.w/2,279);
+      if(i>0){
+        ctx.strokeStyle="rgba(255,255,255,.34)";
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(col.x,257);
+        ctx.lineTo(col.x,301);
+        ctx.stroke();
+      }
     });
 
     const rowValues=[];
@@ -408,9 +417,9 @@
       ctx.fillText(base[1],cols[2].x+cols[2].w/2,y+46);
 
       // Atingimento com semáforo visual
-      const attFg=ating>=100?C.good:ating>=90?C.orange:C.red;
-      const attBg=ating>=100?C.goodBg:ating>=90?C.orangeBg:C.redBg;
-      drawPill(cols[3].x+cols[3].w/2,y+46,142,52,pct(ating),attFg,attBg,total?"800 23px Arial":"800 21px Arial");
+      const attFg=ating>=100?C.white:ating>=90?C.green:C.white;
+      const attBg=ating>=100?C.good:ating>=90?C.orange:C.red;
+      drawPill(cols[3].x+cols[3].w/2,y+46,148,54,pct(ating),attFg,attBg,total?"800 24px Arial":"800 22px Arial");
 
       // Ano anterior
       ctx.fillStyle=C.green;ctx.font=(total?"800 ":"700 ")+"21px Arial";
@@ -425,8 +434,8 @@
       }
 
       // Desvio em destaque
-      const devFg=dev>=0?C.good:C.red,devBg=dev>=0?C.goodBg:C.redBg;
-      drawPill(cols[6].x+cols[6].w/2,y+46,260,52,signedMoney(dev,2),devFg,devBg,total?"800 22px Arial":"800 20px Arial");
+      const devFg=C.white,devBg=dev>=0?C.good:C.red;
+      drawPill(cols[6].x+cols[6].w/2,y+46,270,54,signedMoney(dev,2),devFg,devBg,total?"800 23px Arial":"800 21px Arial");
 
       // Projeção condicionada à meta
       if(proj){
