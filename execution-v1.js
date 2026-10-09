@@ -187,7 +187,10 @@
     $("executionModalBody").innerHTML=html;
     $("executionModal").classList.remove("hidden");
   }
-  function closeModal(){ $("executionModal")?.classList.add("hidden"); }
+  function closeModal(){
+    $("executionModal")?.classList.add("hidden");
+    if(chatPollTimer){clearInterval(chatPollTimer);chatPollTimer=null;}
+  }
   window.closeExecutionModal=closeModal;
 
   async function refreshAnnouncements(){
@@ -331,6 +334,14 @@
       moreButton("moreCollaboratorsBtn","👥","Atualizar Banco de Colaboradores","Importar base geral de colaboradores",openCollaboratorImport,true);
       moreButton("moreVisibilityBtn","◉","Visibilidade de Perfis","Definir menus disponíveis por perfil",openVisibilityAdmin,true);
     }
+
+    const list=more.querySelector(".premium-more-list");
+    const preferred=[
+      "moreUpdateSalesBtn","moreMonthlyTargetBtn","moreCommercialAdminBtn","moreAnnouncementAdminBtn",
+      "moreCollaboratorsBtn","moreVisibilityBtn","moreAnnouncementsBtn","moreChatBtn",
+      "moreResetDayBtn","premiumInstallApp","premiumLogout"
+    ];
+    preferred.forEach(id=>{const el=$(id);if(el&&el.parentNode===list) list.appendChild(el)});
   }
 
   function openCollaboratorImport(){
@@ -392,6 +403,7 @@
     }catch(_){}
   }
 
+  let chatPollTimer=null;
   async function openChat(){
     openModal(
       '<div class="execution-modal-head"><span class="eyebrow">CONEXÃO ENTRE LOJAS</span><h2>Chat de apoio</h2><p>Tire dúvidas de navegação e compartilhe orientações sobre o app.</p></div>'+
@@ -400,6 +412,8 @@
     );
     await loadChat();
     $("chatSendBtn").onclick=sendChat;
+    clearInterval(chatPollTimer);
+    chatPollTimer=setInterval(()=>{if(!$("executionModal")?.classList.contains("hidden") && $("chatMessages")) loadChat();},12000);
   }
 
   async function loadChat(){
