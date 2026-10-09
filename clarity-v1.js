@@ -80,8 +80,8 @@
     shell.className="clarity-home";
     shell.innerHTML=
       '<section class="clarity-summary card">'+
-        '<div class="clarity-card-head"><div><span class="eyebrow">RESULTADO DA LOJA • HOJE</span><h2>Visão rápida do dia</h2></div>'+
-        '<button type="button" id="clarityPaste" class="btn accent">＋ Colar venda da Web</button></div>'+
+        '<div class="clarity-card-head"><div><span class="eyebrow">RESULTADO DA LOJA • HOJE</span><h2>Seu acompanhamento do dia</h2><p>Veja onde estamos, o que exige atenção e qual deve ser o próximo passo.</p></div>'+
+        '<span class="badge soft clarity-status-badge">Acompanhamento em tempo real</span></div>'+
         '<div id="clarityExecutive" class="clarity-executive"></div>'+
       '</section>'+
       '<section class="clarity-groups card">'+
@@ -96,16 +96,22 @@
         '<div id="clarityCurveChart" class="clarity-curve-chart"></div>'+
         '<div id="clarityCurveHourTable" class="clarity-hour-wrap"></div>'+
       '</section>'+
+      '<section class="clarity-journey card">'+
+        '<div class="clarity-card-head"><div><span class="eyebrow">ROTINA DO DIA</span><h2>Acompanhe em 3 passos</h2><p>Uma sequência simples para manter a operação atualizada.</p></div></div>'+
+        '<div class="clarity-journey-steps">'+
+          '<button type="button" id="clarityPasteShortcut"><b>1</b><span><strong>Atualizar parcial</strong><small>Cole a venda da Web quando houver uma nova leitura.</small></span><i>›</i></button>'+
+          '<button type="button" data-clarity-section="grupos"><b>2</b><span><strong>Analisar resultado</strong><small>Veja grupos, DCOs, evolução e desvios.</small></span><i>›</i></button>'+
+          '<button type="button" id="clarityShareShortcut"><b>3</b><span><strong>Compartilhar Hora a Hora</strong><small>Envie o card consolidado da loja para o time.</small></span><i>›</i></button>'+
+        '</div>'+
+      '</section>'+
       '<section class="clarity-actions">'+
-        '<button type="button" data-clarity-section="grupos"><b>▥</b><span>Mundos</span><small>Grupos e DCOs</small></button>'+
-        '<button type="button" data-clarity-section="comerciais"><b>◎</b><span>Comerciais</span><small>Equipe e responsáveis</small></button>'+
-        '<button type="button" id="clarityPasteShortcut"><b>＋</b><span>Colar venda</span><small>Novo snapshot</small></button>'+
+        '<button type="button" data-clarity-section="comerciais"><b>◎</b><span>Comerciais</span><small>Meta e performance da equipe</small></button>'+
         '<button type="button" data-clarity-section="estore"><b>▣</b><span>eStore</span><small>Acesso integrado</small></button>'+
       '</section>';
     if(head?.nextSibling) home.insertBefore(shell,head.nextSibling); else home.appendChild(shell);
 
-    $("clarityPaste").onclick=showPaste;
     $("clarityPasteShortcut").onclick=showPaste;
+    $("clarityShareShortcut").onclick=shareDailyCard;
     document.querySelectorAll("[data-clarity-section]").forEach(btn=>btn.onclick=()=>setSection(btn.dataset.claritySection));
     $("clarityShareDaily").onclick=shareDailyCard;
   }
@@ -324,6 +330,39 @@
   }
 
 
+
+  function renderOperationalTools(){
+    const home=$("section-inicio");
+    if(home){
+      const topPaste=$("pasteBtn");
+      const topReset=$("resetDayBtn");
+      if(topPaste) topPaste.classList.add("clarity-hide-home-action");
+      if(topReset) topReset.classList.add("clarity-hide-home-action");
+    }
+
+    const more=$("section-mais");
+    if(!more) return;
+    const list=more.querySelector(".premium-more-list");
+    if(!list) return;
+
+    if(!$("moreUpdateSalesBtn")){
+      const b=document.createElement("button");
+      b.id="moreUpdateSalesBtn";
+      b.innerHTML='<span class="more-icon">＋</span><div><strong>Atualizar venda do dia</strong><small>Colar nova parcial da Web</small></div><b>›</b>';
+      b.onclick=showPaste;
+      list.prepend(b);
+    }
+
+    if(!$("moreResetDayBtn") && ["administrador","gerente","supervisor"].includes(state.role)){
+      const b=document.createElement("button");
+      b.id="moreResetDayBtn";
+      b.className="danger-tool";
+      b.innerHTML='<span class="more-icon">↺</span><div><strong>Zerar acompanhamento</strong><small>Use somente para reiniciar o dia quando necessário</small></div><b>›</b>';
+      b.onclick=()=>{ if($("resetDayBtn")) $("resetDayBtn").click(); };
+      list.appendChild(b);
+    }
+  }
+
   function renderMenuDayMeta(){
     const d=state.day||{};
     const meta=Number(d.target_financial||0);
@@ -358,6 +397,7 @@
   function renderClarity(){
     ensureHome();
     renderMenuDayMeta();
+    renderOperationalTools();
     if(!$("clarityHome")) return;
     renderExecutive();
     renderGroupsPanel();
@@ -398,6 +438,41 @@
     });
   }
 
+
+  function enhanceCommercialCards(){
+    const rows=Array.isArray(state.commercial?.commercials)?state.commercial.commercials:[];
+    const cards=[...document.querySelectorAll("#commercialGrid .commercial-card")];
+    cards.forEach((card,idx)=>{
+      const r=rows[idx];
+      if(!r) return;
+      const dcos=Array.isArray(r.dcos)?r.dcos:[];
+      const direct=Number(r.target_financial||0);
+      const target=direct>0?direct:dcos.reduce((s,d)=>s+Number(d.target_financial||d.meta_financial||d.target||0),0);
+      const sale=Number(r.sales_financial||0);
+      const att=target?sale/target*100:0;
+      const dev=sale-target;
+      let banner=card.querySelector(".commercial-mobile-summary");
+      if(!banner){
+        banner=document.createElement("div");
+        banner.className="commercial-mobile-summary";
+        const top=card.querySelector(".commercial-card-top");
+        if(top) top.insertAdjacentElement("afterend",banner); else card.prepend(banner);
+      }
+      banner.innerHTML=
+        '<div><span>Meta</span><strong>'+money(target,2)+'</strong></div>'+
+        '<div><span>Venda</span><strong>'+money(sale,2)+'</strong></div>'+
+        '<div><span>Ating.</span><strong class="'+(att>=100?"positive":att>=90?"warning":"negative")+'">'+pct(att)+'</strong></div>'+
+        '<div><span>Desvio</span><strong class="'+tone(dev)+'">'+signedMoney(dev,2)+'</strong></div>';
+    });
+  }
+
+  const baseRenderCommercialsClarity=window.renderCommercials;
+  window.renderCommercials=function(){
+    baseRenderCommercialsClarity();
+    enhanceCommercialCards();
+    renderMenuDayMeta();
+  };
+
   const baseRenderGroupsClarity=window.renderGroups;
   window.renderGroups=function(){
     baseRenderGroupsClarity();
@@ -407,7 +482,7 @@
   const baseSetSectionClarity=window.setSection;
   window.setSection=function(section){
     baseSetSectionClarity(section);
-    setTimeout(renderMenuDayMeta,0);
+    setTimeout(()=>{renderMenuDayMeta();renderOperationalTools();enhanceCommercialCards();},0);
   };
 
   const baseRenderDashboard=window.renderDashboard;
