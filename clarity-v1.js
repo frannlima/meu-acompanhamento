@@ -77,7 +77,9 @@
             target_physical:0,
             sales_physical:0,
             ly_financial:0,
-            interval_sales_financial:0
+            interval_sales_financial:0,
+            previous_interval_sales_financial:0,
+            has_previous_interval:false
           });
         }
         const g=map.get(code);
@@ -87,6 +89,10 @@
         g.sales_physical+=Number(r.sales_physical||0);
         g.ly_financial+=Number(r.ly_financial||0);
         g.interval_sales_financial+=Number(r.interval_sales_financial||0);
+        if(r.previous_interval_sales_financial!==null && r.previous_interval_sales_financial!==undefined){
+          g.previous_interval_sales_financial+=Number(r.previous_interval_sales_financial||0);
+          g.has_previous_interval=true;
+        }
       }
       const arr=[...map.values()].map(g=>{
         const meta=Number(g.target_financial||0);
@@ -413,9 +419,46 @@
     const meta=Number(d.target_financial||0),venda=Number(d.sales_financial||0),aa=Number(d.ly_financial||0);
     const physical=Number(d.sales_physical||0),att=meta?venda/meta*100:0,dev=venda-meta;
     const ev=aa&&d.has_input?((venda/aa)-1)*100:null,proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
-    const ranked=[...groups].map(g=>({name:GROUP_LABELS[g.group_code]||g.group_code,dev:Number(g.sales_financial||0)-Number(g.target_financial||0),att:Number(g.target_financial||0)?Number(g.sales_financial||0)/Number(g.target_financial||0)*100:0})).sort((a,b)=>b.att-a.att);
+    const ranked=[...groups].map(g=>{
+      const interval=Number(g.interval_sales_financial||0);
+      const prev=Number(g.previous_interval_sales_financial||0);
+      const hasPrev=!!g.has_previous_interval;
+      const hourEv=hasPrev && prev!==0 ? ((interval/prev)-1)*100 : null;
+      return {
+        name:GROUP_LABELS[g.group_code]||g.group_code,
+        dev:Number(g.sales_financial||0)-Number(g.target_financial||0),
+        att:Number(g.target_financial||0)?Number(g.sales_financial||0)/Number(g.target_financial||0)*100:0,
+        interval,
+        prevInterval:prev,
+        hourEv
+      };
+    }).sort((a,b)=>b.att-a.att);
     const best=ranked.slice(0,3).map(x=>x.name+" "+pct(x.att)).join(" • ");
-    const gaps=[...ranked].sort((a,b)=>a.dev-b.dev).slice(0,3).map(x=>x.name+" "+signedMoney(x.dev,0)).join(" • ");
+    const gaps=[...ranked]
+      .sort((a,b)=>a.dev-b.dev)
+      .slice(0,3)
+      .map(x=>"🔻 "+x.name+" "+signedMoney(x.dev,0))
+      .join(" • ");
+
+    const hourComparable=ranked.filter(x=>x.hourEv!==null && Number.isFinite(x.hourEv));
+    const hourGrowth=[...hourComparable]
+      .filter(x=>x.hourEv>0)
+      .sort((a,b)=>b.hourEv-a.hourEv)
+      .slice(0,3)
+      .map(x=>"🟢⬆️ "+x.name+" "+pct(x.hourEv))
+      .join(" • ");
+    const hourRetraction=[...hourComparable]
+      .filter(x=>x.hourEv<0)
+      .sort((a,b)=>a.hourEv-b.hourEv)
+      .slice(0,3)
+      .map(x=>"🔻 "+x.name+" "+pct(x.hourEv))
+      .join(" • ");
+    const hourBlock=hourComparable.length
+      ? '⏱️ *Movimento da última hora:*\n'+
+        '📈 *Mais cresceram:* '+(hourGrowth||"Sem crescimento na última hora")+'\n'+
+        '📉 *Mais retraíram:* '+(hourRetraction||"Sem retração na última hora")+'\n\n'
+      : '⏱️ *Movimento da última hora:* aguardando pelo menos 3 parciais para comparar o ritmo entre horas.\n\n';
+
     return '📊 *HORA A HORA | LOJA '+state.storeCode+'*\n'+
       'Atualizado '+(d.captured_at?localTime(d.captured_at):"—")+'\n\n'+
       '🎯 *Meta:* '+money(meta,2)+'\n'+
@@ -426,7 +469,8 @@
       '🔭 *Projeção:* '+(proj?money(proj,2):"—")+'\n'+
       '🛍️ *Venda física:* '+num(physical)+' peças\n\n'+
       '🏆 *Maiores atingimentos:* '+(best||"—")+'\n'+
-      '⚠️ *Maiores desvios:* '+(gaps||"—")+'\n\n'+
+      '🚨 *Maiores desvios:* '+(gaps||"—")+'\n\n'+
+      hourBlock+
       '_Moda que inspira o Brasil_';
   }
 
