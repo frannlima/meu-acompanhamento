@@ -1187,20 +1187,19 @@ function renderCommercials(){
     const photo=r.photo_url
       ? '<img src="'+esc(r.photo_url)+'" alt="'+esc(r.commercial_name)+'">'
       : '<span>'+esc(initials)+'</span>';
-    const circle=Math.max(0,Math.min(100,attainment));
+    const evolutionPct=evolution===null?0:Math.max(0,Math.min(100,Math.abs(evolution)));
+    const evolutionClass=evolution===null?"evo-neutral":evolution>=0?"evo-positive":"evo-negative";
 
-    return '<article class="commercial-card">'+
+    return '<article class="commercial-card commercial-performance-card">'+
       '<div class="commercial-card-top">'+
         '<div class="commercial-person"><div class="commercial-avatar">'+photo+'</div><div><span class="eyebrow">RESPONSÁVEL COMERCIAL</span><h2>'+esc(r.commercial_name)+'</h2><small>'+esc(worlds.join(" • ")||"DCOs atribuídos")+'</small></div></div>'+
-        '<div class="commercial-donut" style="--p:'+circle+'"><div><strong>'+pct(attainment)+'</strong><span>meta</span></div></div>'+
+        '<div class="commercial-donut evolution-donut '+evolutionClass+'" style="--p:'+evolutionPct+'"><div><strong>'+(evolution===null?"—":(evolution>0?"+":"")+pct(evolution))+'</strong><span>evolução</span></div></div>'+
       '</div>'+
-      '<div class="commercial-metrics">'+
+      '<div class="commercial-metrics commercial-performance-metrics">'+
         '<div><span>Meta</span><strong>'+money(target,2)+'</strong></div>'+
         '<div><span>Venda</span><strong>'+money(sale,2)+'</strong></div>'+
+        '<div><span>Ating.</span><strong class="'+(attainment>=100?"positive":attainment>=90?"warning":"negative")+'">'+pct(attainment)+'</strong></div>'+
         '<div><span>Desvio</span><strong class="'+(deviation>=0?"positive":"negative")+'">'+(deviation>=0?"+ ":"- ")+money(Math.abs(deviation),2)+'</strong></div>'+
-        '<div><span>Evolução vs A.A.</span><strong class="'+(evolution===null?"":evolution>=0?"positive":"negative")+'">'+(evolution===null?"—":pct(evolution))+'</strong></div>'+
-        '<div><span>Último input</span><strong class="'+(interval>=0?"positive":"negative")+'">'+(interval>=0?"+ ":"- ")+money(Math.abs(interval),2)+'</strong></div>'+
-        '<div><span>DCOs</span><strong>'+num(dcos.length)+'</strong></div>'+
       '</div>'+
       '<div class="commercial-detractors"><span class="eyebrow">DCOs QUE MAIS PRESSIONAM O RESULTADO</span>'+
         (detractors.length?detractors.map(d=>
