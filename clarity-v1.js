@@ -524,7 +524,7 @@
 
   function renderWorldHeaderClarity(){
     const all=detailRows();
-    const rows=all.filter(r=>r.world_code===state.world || (state.world==="beleza_relogios" && ["beleza","relogios"].includes(r.group_code)));
+    const rows=all.filter(r=>state.world==="todos" || r.world_code===state.world || (state.world==="beleza_relogios" && ["beleza","relogios"].includes(r.group_code)));
     const total=rows.reduce((a,r)=>{
       a.meta+=Number(r.target_financial||0);
       a.venda+=Number(r.sales_financial||0);
