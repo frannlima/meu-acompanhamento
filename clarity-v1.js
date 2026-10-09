@@ -491,22 +491,28 @@
       ctx.fillStyle=C.muted;ctx.font="600 15px Arial";ctx.fillText(b.sub,b.x+24,sy+116);
     });
 
-    const pressures=[...rowValues]
-      .filter(r=>r.name!=="TOTAL LOJA")
-      .sort((a,b)=>a.dev-b.dev)
-      .slice(0,3)
-      .map(r=>r.name)
-      .join(", ");
-    rr(1970,sy+28,500,118,20,C.redBg);
-    ctx.fillStyle=C.muted;ctx.font="700 16px Arial";ctx.fillText("Maiores pressões no resultado",1994,sy+55);
-    ctx.fillStyle=C.red;ctx.font="800 22px Arial";
-    const words=(pressures||"Aguardando venda").split(" ");
-    let line="",ly=sy+88;
-    for(const word of words){
-      const test=line?line+" "+word:word;
-      if(ctx.measureText(test).width>440){ctx.fillText(line,1994,ly);line=word;ly+=27}else line=test;
-    }
-    if(line) ctx.fillText(line,1994,ly);
+    // Direcionamento visual por grupos: legenda fixa e consistente em todo o Hora a Hora.
+    // Cores solicitadas: Feminino vermelho, Masculino azul, Infantil amarelo,
+    // Casa verde, Beleza rosa e CBA branco.
+    const impactGroups=[
+      {label:"Feminino",color:"#D71920"},
+      {label:"Masculino",color:"#246BCE"},
+      {label:"Infantil",color:"#F4C542"},
+      {label:"Casa",color:"#2E7D32"},
+      {label:"Beleza",color:"#E75480"},
+      {label:"CBA",color:"#FFFFFF",stroke:"#9AA39F"}
+    ];
+    rr(1970,sy+28,500,118,20,C.white,C.line);
+    ctx.fillStyle=C.green;ctx.font="800 16px Arial";ctx.textAlign="left";
+    ctx.fillText("Mude o jogo nos grupos de maior impacto",1994,sy+53);
+    ctx.fillText("na venda/hora",1994,sy+74);
+    impactGroups.forEach((g,i)=>{
+      const col=i%3,row=Math.floor(i/3),gx=1994+col*154,gy=sy+96+row*22;
+      ctx.beginPath();ctx.arc(gx,gy,6,0,Math.PI*2);
+      ctx.fillStyle=g.color;ctx.fill();
+      if(g.stroke){ctx.strokeStyle=g.stroke;ctx.lineWidth=1.5;ctx.stroke();}
+      ctx.fillStyle=C.green2;ctx.font="700 13px Arial";ctx.fillText(g.label,gx+12,gy+4);
+    });
 
     ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillStyle=C.green2;ctx.font="700 16px Arial";
     ctx.fillText("MEU ACOMPANHAMENTO",48,height-34);
