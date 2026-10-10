@@ -329,6 +329,10 @@ async function doLogin(matricula, storeCode, save=true){
   state.logged=true; state.matricula=m; state.storeCode=s;
   state.employeeName=person.first_name||person.full_name||"Colaborador";
   state.role=person.app_role||"colaborador";
+  // Proprietário/administrador do app: manter cargo operacional na identificação,
+  // mas garantir privilégios administrativos e acesso a todas as filiais.
+  const ownerName=String(person.full_name||"").trim().toUpperCase();
+  if(ownerName==="FRANCIMAR LIMA DE ABREU") state.role="administrador";
   state.user=person;
   if(save) localStorage.setItem("meu_acompanhamento_session",JSON.stringify({matricula:m,storeCode:s}));
   $("loginScreen").classList.add("hidden");
