@@ -77,6 +77,19 @@
     wrap.classList.toggle("hidden",!show);
     if(!show) return;
 
+    const key=activeSection();
+
+    // Na Home, o seletor fica sempre visível logo abaixo da identificação.
+    if(key==="inicio"){
+      const identity=document.getElementById("adaptiveHomeIdentity");
+      if(identity){
+        identity.insertAdjacentElement("afterend",wrap);
+      }else if(wrap.parentElement!==head){
+        head.prepend(wrap);
+      }
+      return;
+    }
+
     if(head.classList.contains("premium-more-hero")){
       if(wrap.parentElement!==head) head.appendChild(wrap);
       return;
