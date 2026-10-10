@@ -1632,3 +1632,115 @@ html.device-phone #section-inicio [data-slogan]{
   opacity:.72!important;
   cursor:wait!important;
 }
+
+
+/* v3.5 — Riachuelo navigation icon system */
+:root{
+  --ria-green:#173F35;
+  --ria-green-mid:#2E6B5B;
+  --ria-cream:#D6D2C4;
+  --ria-gray:#EDEDEA;
+  --ria-orange:#DE7C00;
+}
+.ria-brand-logo{
+  background:#F7F4ED!important;
+  border:1px solid rgba(214,210,196,.25)!important;
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+.ria-brand-logo img{
+  width:84%!important;
+  height:84%!important;
+  object-fit:contain!important;
+}
+.ria-nav .nav-item{
+  gap:11px!important;
+  min-height:46px!important;
+  padding:9px 11px!important;
+  color:#F4F1E9!important;
+}
+.ria-nav .nav-item.active{
+  background:linear-gradient(90deg,rgba(214,210,196,.16),rgba(255,255,255,.08))!important;
+  border-color:rgba(214,210,196,.20)!important;
+  box-shadow:inset 3px 0 0 var(--ria-orange),0 8px 18px rgba(0,0,0,.08)!important;
+}
+.ria-nav .nav-item:hover{
+  background:rgba(255,255,255,.08)!important;
+}
+.nav-icon{
+  width:27px!important;
+  min-width:27px!important;
+  height:27px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:9px;
+  background:rgba(255,255,255,.05);
+  color:var(--ria-cream);
+  transition:.18s ease;
+}
+.nav-icon svg{
+  width:19px;
+  height:19px;
+  overflow:visible;
+}
+.nav-icon svg *{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.65;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.nav-icon svg .accent{stroke:var(--ria-orange)}
+.nav-icon svg .accent-fill{
+  fill:var(--ria-orange);
+  stroke:var(--ria-orange);
+}
+.nav-item.active .nav-icon{
+  background:rgba(222,124,0,.12);
+  color:#F7F4ED;
+  box-shadow:0 0 0 1px rgba(222,124,0,.16);
+}
+.nav-label{
+  min-width:0;
+  font-size:10.5px;
+  font-weight:800;
+  letter-spacing:.005em;
+}
+
+/* Mobile dock inherits same icon language */
+.ria-mobile-dock .dock-item{
+  gap:3px!important;
+}
+.ria-mobile-dock .dock-item .nav-icon{
+  width:31px!important;
+  min-width:31px!important;
+  height:31px!important;
+  border-radius:10px!important;
+  background:transparent;
+}
+.ria-mobile-dock .dock-item .nav-icon svg{
+  width:22px!important;
+  height:22px!important;
+}
+.ria-mobile-dock .dock-item.active .nav-icon{
+  background:rgba(222,124,0,.14)!important;
+}
+.ria-mobile-dock .dock-item.active{
+  box-shadow:inset 0 -3px 0 var(--ria-orange)!important;
+}
+.dock-label{
+  font-size:8px;
+  font-weight:800;
+}
+
+/* "Mais" sheet */
+.mobile-more-item .nav-icon{
+  width:34px!important;
+  min-width:34px!important;
+  height:34px!important;
+  background:#F3F0E8!important;
+  color:var(--ria-green)!important;
+}
+.mobile-more-item .nav-icon svg{
+  width:21px!important;
+  height:21px!important;
+}
