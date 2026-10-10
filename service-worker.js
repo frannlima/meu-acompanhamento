@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v60";
+const CACHE="meu-acompanhamento-v61";
 const ASSETS=[
   "./",
   "./index.html",
