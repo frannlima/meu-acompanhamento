@@ -1417,13 +1417,28 @@ function selectVisibleCommercialDcos(){
 }
 
 async function saveCommercial(){
-  const name=$("commercialName").value.trim();
+  const name=String($("commercialName")?.value||"").trim();
+  if(!(state.commercialSelectedDcos instanceof Set)) state.commercialSelectedDcos=new Set();
   const codes=[...state.commercialSelectedDcos];
   const feedback=$("commercialSaveFeedback");
-  if(!name){feedback.textContent="Informe o nome do comercial.";feedback.className="form-error";return}
-  if(!codes.length){feedback.textContent="Selecione ao menos um DCO.";feedback.className="form-error";return}
+  if(!name){
+    feedback.textContent="Informe o nome do comercial.";
+    feedback.className="form-error";
+    feedback.classList.remove("hidden");
+    toast("Informe o nome do comercial.",true);
+    return;
+  }
+  if(!codes.length){
+    feedback.textContent="Selecione ao menos um DCO.";
+    feedback.className="form-error";
+    feedback.classList.remove("hidden");
+    toast("Selecione ao menos um DCO.",true);
+    return;
+  }
 
-  const btn=$("saveCommercialBtn"); btn.disabled=true; btn.textContent="Salvando...";
+  const btn=$("saveCommercialBtn");
+  const wasEditing=!!state.editingCommercialId;
+  if(btn){btn.disabled=true;btn.textContent="Salvando...";}
   try{
     const result=await api("saveCommercial",{
       matricula:state.matricula,
@@ -1442,10 +1457,15 @@ async function saveCommercial(){
   }catch(e){
     feedback.textContent=e.message; feedback.className="form-error"; toast(e.message,true);
   }finally{
-    btn.disabled=false;
-    btn.textContent=state.editingCommercialId?"Salvar alterações":"Salvar comercial";
+    if(btn){
+      btn.disabled=false;
+      btn.textContent=wasEditing?"Salvar alterações":"Salvar comercial";
+    }
   }
 }
+
+window.saveCommercial=saveCommercial;
+window.resetCommercialForm=resetCommercialForm;
 
 function setAdminTab(tab){
   const key=String(tab||"").trim();
@@ -1863,9 +1883,9 @@ function bind(){
   $("groupPanelModal").addEventListener("click",e=>{if(e.target===$("groupPanelModal")) closeGroupPanel()});
   $("commercialWorldFilter").onchange=renderCommercialDcos;
   $("selectAllCommercialDcos").onclick=selectVisibleCommercialDcos;
-  $("saveCommercialBtn").onclick=saveCommercial;
+  if($("saveCommercialBtn")) $("saveCommercialBtn").onclick=saveCommercial;
   $("newCommercialBtn").onclick=resetCommercialForm;
-  $("cancelCommercialEdit").onclick=resetCommercialForm;
+  if($("cancelCommercialEdit")) $("cancelCommercialEdit").onclick=resetCommercialForm;
   document.querySelectorAll(".admin-tab").forEach(el=>{
     el.type="button";
     el.onclick=e=>{
