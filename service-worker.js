@@ -1,10 +1,11 @@
-const CACHE="meu-acompanhamento-v82";
+const CACHE="meu-acompanhamento-v84";
 const ASSETS=[
   "./",
   "./index.html",
   "./styles.css?v=9",
   "./enhancements-v9.css?v=10",
   "./premium-v22.css?v=8",
+  "./estore-live-v1.css?v=1",
   "./clarity-v1.css?v=4",
   "./mobile-experience-v1.css?v=3",
   "./responsive-device-v1.css?v=1",
@@ -18,6 +19,7 @@ const ASSETS=[
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=4",
   "./adaptive-header-v2.js?v=10",
+  "./estore-live-v1.js?v=1",
   "./manifest.webmanifest",
   "./assets/riachuelo-logo-vertical.svg",
   "./assets/riachuelo-logo.svg",
