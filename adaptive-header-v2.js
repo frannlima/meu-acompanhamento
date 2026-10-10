@@ -118,7 +118,7 @@
     const storeLabel=store && store!=="—" ? store : "";
 
     chip.innerHTML=
-      '<span class="adaptive-home-avatar">'+safeName.charAt(0).toUpperCase()+'</span>'+
+      '<span class="adaptive-home-avatar"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></span>'+
       '<span class="adaptive-home-person">'+
         '<small>'+greetingForNow()+',</small>'+
         '<strong>'+safeName+'</strong>'+
