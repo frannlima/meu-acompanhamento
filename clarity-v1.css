@@ -648,3 +648,22 @@
   }
   .clarity-routine-grid > .clarity-journey{order:2}
 }
+
+
+/* Mobile checklist direct placement */
+@media(max-width:900px){
+  #clarityHome > #claritySupervisorChecklist{
+    display:block;
+    width:100%;
+    max-width:100%;
+    margin:0;
+    box-sizing:border-box;
+  }
+  #clarityHome > #claritySupervisorChecklist.hidden{
+    display:none!important;
+  }
+  #clarityHome > #claritySupervisorChecklist .clarity-checklist-items{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+}
