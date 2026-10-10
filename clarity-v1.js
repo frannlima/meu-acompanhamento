@@ -710,12 +710,30 @@
     });
   }
 
+  function positionSupervisorChecklist(){
+    const card=$("claritySupervisorChecklist");
+    const home=$("clarityHome");
+    if(!card||!home) return;
+
+    const summary=home.querySelector(".clarity-summary");
+    const routine=home.querySelector(".clarity-routine-grid");
+    const isPhone=window.matchMedia("(max-width: 900px)").matches;
+
+    if(isPhone && summary){
+      summary.insertAdjacentElement("afterend",card);
+    }else if(routine && card.parentElement!==routine){
+      routine.appendChild(card);
+    }
+  }
+
   function renderClarity(){
     ensureHome();
     renderMenuDayMeta();
     renderOperationalTools();
     if(!$("clarityHome")) return;
     renderExecutive();
+    renderSupervisorChecklist();
+    positionSupervisorChecklist();
     renderGroupsPanel();
     renderCurve();
   }
@@ -845,6 +863,9 @@
     baseRenderDashboard();
     renderClarity();
   };
+
+  window.addEventListener("resize",positionSupervisorChecklist,{passive:true});
+  window.addEventListener("orientationchange",()=>setTimeout(positionSupervisorChecklist,120),{passive:true});
 
   document.addEventListener("DOMContentLoaded",()=>{
     ensureHome();
