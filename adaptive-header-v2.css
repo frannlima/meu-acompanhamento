@@ -1283,3 +1283,56 @@ html.device-desktop #section-mais.active > .premium-more-hero{
   margin-left:auto!important;
   margin-right:auto!important;
 }
+
+
+/* v2.9 — force admin selector on home */
+#section-inicio .adaptive-store-context:not(.hidden){
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative!important;
+  z-index:6!important;
+}
+
+html.device-phone #section-inicio .adaptive-store-context:not(.hidden){
+  width:calc(100% - 4px)!important;
+  max-width:none!important;
+  margin:0 auto 2px!important;
+  grid-template-columns:1fr!important;
+  gap:5px!important;
+  padding:8px!important;
+  background:rgba(255,255,255,.11)!important;
+  border:1px solid rgba(255,255,255,.18)!important;
+  border-radius:14px!important;
+}
+
+html.device-phone #section-inicio .adaptive-store-label{
+  display:block!important;
+  font-size:6px!important;
+  color:#D6D2C4!important;
+  letter-spacing:.12em!important;
+}
+
+html.device-phone #section-inicio #adminStoreSelect{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:100%!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:0 34px 0 12px!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  color:#173F35!important;
+  border:0!important;
+  font-size:11px!important;
+  font-weight:800!important;
+  appearance:auto!important;
+  -webkit-appearance:menulist!important;
+}
+
+html.device-tablet #section-inicio .adaptive-store-context:not(.hidden),
+html.device-desktop #section-inicio .adaptive-store-context:not(.hidden){
+  width:min(92%,980px)!important;
+  margin:0 auto 6px!important;
+}
