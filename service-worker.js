@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v68";
+const CACHE="meu-acompanhamento-v69";
 const ASSETS=[
   "./",
   "./index.html",
@@ -6,7 +6,7 @@ const ASSETS=[
   "./enhancements-v9.css?v=10",
   "./premium-v22.css?v=6",
   "./clarity-v1.css?v=4",
-  "./mobile-experience-v1.css?v=2",
+  "./mobile-experience-v1.css?v=3",
   "./responsive-device-v1.css?v=1",
   "./execution-v1.css?v=8",
   "./adaptive-header-v2.css?v=17",
