@@ -581,7 +581,7 @@
     ];
     rr(1970,sy+28,500,118,20,C.white,C.line);
     ctx.fillStyle=C.green;ctx.font="800 16px Arial";ctx.textAlign="left";
-    ctx.fillText("Mude o jogo nos grupos de maior impacto",1994,sy+53);
+    ctx.fillText("Mude o jogo nos grupos de maior impacto na venda /hora",1994,sy+53);
     ctx.fillText("na venda/hora",1994,sy+74);
     impactGroups.forEach((g,i)=>{
       const col=i%3,row=Math.floor(i/3),gx=1994+col*154,gy=sy+96+row*22;
