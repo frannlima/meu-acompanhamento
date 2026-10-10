@@ -1450,6 +1450,140 @@ function renderAdminMeta(){
     }).join("")+'</tbody></table>';
 }
 
+function hourLabelFromIso(iso){
+  if(!iso) return "—";
+  return new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Fortaleza",hour:"2-digit",hour12:false}).format(new Date(iso))+":00";
+}
+
+function buildHourlyInputSeries(rows){
+  const ordered=[...(rows||[])].sort((a,b)=>new Date(a.captured_at)-new Date(b.captured_at));
+  const byHour=new Map();
+  let prevSale=0;
+  let prevPhysical=0;
+  ordered.forEach((r,idx)=>{
+    const sale=Number(r.sales_financial||0);
+    const physical=Number(r.sales_physical||0);
+    const interval=idx===0?sale:sale-prevSale;
+    const physicalInterval=idx===0?physical:physical-prevPhysical;
+    prevSale=sale; prevPhysical=physical;
+    const h=hourLabelFromIso(r.captured_at);
+    if(!byHour.has(h)) byHour.set(h,{hour:h,sales:0,physical:0,lastSale:sale,lastPhysical:physical,lastAt:r.captured_at});
+    const item=byHour.get(h);
+    item.sales+=interval;
+    item.physical+=physicalInterval;
+    item.lastSale=sale;
+    item.lastPhysical=physical;
+    item.lastAt=r.captured_at;
+  });
+  const arr=[...byHour.values()];
+  let cumulative=0;
+  arr.forEach((x,i)=>{
+    cumulative+=x.sales;
+    x.cumulative=cumulative;
+    x.previous=i?arr[i-1].sales:null;
+    x.growth=x.previous===null||x.previous===0?null:((x.sales/x.previous)-1)*100;
+  });
+  return arr;
+}
+
+function renderInputPerformanceDashboard(){
+  const box=$("inputPerformanceDashboard");
+  if(!box) return;
+  const rows=Array.isArray(state.history)?state.history:[];
+  const hourly=buildHourlyInputSeries(rows);
+  const d=state.day||{};
+  const finalSale=rows.length?Number(rows[rows.length-1].sales_financial||0):Number(d.sales_financial||0);
+  const finalPhysical=rows.length?Number(rows[rows.length-1].sales_physical||0):Number(d.sales_physical||0);
+  const target=Number(d.target_financial||0);
+  const attainment=target?finalSale/target*100:0;
+  const best=hourly.length?[...hourly].sort((a,b)=>b.sales-a.sales)[0]:null;
+  const latest=hourly.length?hourly[hourly.length-1]:null;
+  const maxSale=Math.max(1,...hourly.map(x=>Math.max(0,x.sales)));
+  const positiveHours=hourly.filter(x=>x.sales>0);
+  const participation=hourly.map(x=>({...x,share:finalSale?x.sales/finalSale*100:0}));
+  const topShare=[...participation].sort((a,b)=>b.share-a.share).slice(0,5);
+
+  const bars=hourly.map(x=>{
+    const h=Math.max(3,Math.round(Math.max(0,x.sales)/maxSale*100));
+    const isPeak=best&&x.hour===best.hour;
+    return '<div class="hour-bar-item '+(isPeak?"peak":"")+'">'+
+      '<div class="hour-bar-value">'+compactMoney(Math.max(0,x.sales))+'</div>'+
+      '<div class="hour-bar-track"><i style="height:'+h+'%"></i></div>'+
+      '<span>'+esc(x.hour.replace(":00","h"))+'</span>'+
+    '</div>';
+  }).join("");
+
+  const growthBars=hourly.map(x=>{
+    const g=x.growth;
+    const magnitude=g===null?0:Math.min(100,Math.abs(g));
+    const cls=g===null?"neutral":g>=0?"up":"down";
+    return '<div class="growth-item '+cls+'">'+
+      '<b>'+(g===null?"—":(g>=0?"+":"")+pct(g))+'</b>'+
+      '<div class="growth-axis"><i style="height:'+Math.max(4,magnitude)+'%"></i></div>'+
+      '<span>'+esc(x.hour.replace(":00","h"))+'</span>'+
+    '</div>';
+  }).join("");
+
+  const maxCum=Math.max(1,...hourly.map(x=>x.cumulative));
+  const linePoints=hourly.map((x,i)=>{
+    const px=hourly.length<=1?50:(i/(hourly.length-1))*100;
+    const py=100-(x.cumulative/maxCum*100);
+    return px+","+py;
+  }).join(" ");
+
+  const shareRows=topShare.map((x,i)=>
+    '<div class="share-rank"><span>'+String(i+1).padStart(2,"0")+'</span><b>'+esc(x.hour)+'</b><div><i style="width:'+Math.min(100,Math.max(0,x.share))+'%"></i></div><strong>'+pct(x.share)+'</strong></div>'
+  ).join("");
+
+  const latestRows=rows.slice(-6).reverse().map((r,idx)=>{
+    const absoluteIndex=rows.length-1-idx;
+    const previous=absoluteIndex>0?Number(rows[absoluteIndex-1].sales_financial||0):0;
+    const interval=Number(r.sales_financial||0)-previous;
+    return '<tr><td>'+localTime(r.captured_at)+'</td><td>'+money(r.sales_financial,2)+'</td><td class="'+(interval>=0?"positive":"negative")+'">'+signedMoney(interval,2)+'</td><td>'+num(r.sales_physical)+'</td><td>'+num(r.rows_valid)+'</td></tr>';
+  }).join("");
+
+  box.innerHTML=
+    '<section class="input-dash-hero">'+
+      '<div><span class="eyebrow">PERFORMANCE HORA A HORA</span><h2>Dashboard de comportamento de vendas</h2><p>Leitura dinâmica dos snapshots do dia • Loja '+esc(state.storeCode)+'</p></div>'+
+      '<span class="input-dash-updated">'+(d.captured_at?"Atualizado "+localTime(d.captured_at):"Aguardando primeiro input")+'</span>'+
+    '</section>'+
+    '<section class="input-dash-kpis">'+
+      '<article class="input-kpi main"><span>Venda do dia</span><strong>'+money(finalSale,2)+'</strong><small>'+(target?pct(attainment)+" da meta":"Meta não carregada")+'</small></article>'+
+      '<article class="input-kpi"><span>Melhor hora</span><strong>'+(best?esc(best.hour):"—")+'</strong><small class="positive">'+(best?money(best.sales,2):"Aguardando")+'</small></article>'+
+      '<article class="input-kpi"><span>Vs hora anterior</span><strong class="'+(latest?.growth>=0?"positive":"negative")+'">'+(latest?.growth===null||latest?.growth===undefined?"—":(latest.growth>=0?"+":"")+pct(latest.growth))+'</strong><small>'+(latest?money(latest.sales,2):"Sem leitura")+'</small></article>'+
+      '<article class="input-kpi"><span>Venda física</span><strong>'+num(finalPhysical)+'</strong><small>'+positiveHours.length+' horas com venda</small></article>'+
+      '<article class="input-kpi"><span>Snapshots</span><strong>'+num(rows.length)+'</strong><small>'+num(rows.at(-1)?.rows_valid||0)+' linhas válidas</small></article>'+
+      '<article class="input-kpi accent"><span>Atingimento</span><strong>'+pct(attainment)+'</strong><small>Meta '+money(target,0)+'</small></article>'+
+    '</section>'+
+    '<section class="input-dash-main card">'+
+      '<div class="input-dash-title"><div><span class="eyebrow">COMPORTAMENTO DO DIA</span><h3>Venda por hora</h3><p>Barras = venda incremental da hora • Linha = venda acumulada</p></div><span class="peak-chip">Pico '+(best?best.hour:"—")+'</span></div>'+
+      '<div class="hourly-combo">'+
+        '<div class="hourly-bars">'+(bars||'<div class="input-empty">Aguardando inputs para formar o gráfico.</div>')+'</div>'+
+        (hourly.length>1?'<svg class="hourly-line" viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="'+linePoints+'" fill="none" vector-effect="non-scaling-stroke"/></svg>':"")+
+      '</div>'+
+    '</section>'+
+    '<section class="input-dash-grid">'+
+      '<article class="card input-growth-card"><div class="input-dash-title"><div><span class="eyebrow">RITMO</span><h3>Crescimento / retração por hora</h3><p>Variação do valor vendido em cada hora versus a hora anterior.</p></div></div><div class="growth-chart">'+(growthBars||'<div class="input-empty">Aguardando histórico.</div>')+'</div></article>'+
+      '<article class="card input-share-card"><div class="input-dash-title"><div><span class="eyebrow">REPRESENTATIVIDADE</span><h3>Participação na venda do dia</h3><p>Quanto cada hora contribuiu para o acumulado.</p></div></div><div class="share-list">'+(shareRows||'<div class="input-empty">Aguardando histórico.</div>')+'</div></article>'+
+    '</section>'+
+    '<section class="card input-insights">'+
+      '<div class="input-dash-title"><div><span class="eyebrow">LEITURAS DO DIA</span><h3>Principais destaques</h3></div></div>'+
+      '<div class="input-insight-grid">'+
+        '<div><span>🏆 Pico de venda</span><strong>'+(best?best.hour:"—")+'</strong><small>'+(best?money(best.sales,2)+" • "+pct(best.share||0):"Aguardando")+'</small></div>'+
+        '<div><span>↗ Maior crescimento</span><strong>'+(()=>{
+          const g=[...hourly].filter(x=>x.growth!==null).sort((a,b)=>b.growth-a.growth)[0];
+          return g?((g.growth>=0?"+":"")+pct(g.growth)):"—";
+        })()+'</strong><small>vs hora anterior</small></div>'+
+        '<div><span>↘ Maior retração</span><strong class="negative">'+(()=>{
+          const g=[...hourly].filter(x=>x.growth!==null).sort((a,b)=>a.growth-b.growth)[0];
+          return g?((g.growth>=0?"+":"")+pct(g.growth)):"—";
+        })()+'</strong><small>vs hora anterior</small></div>'+
+        '<div><span>◎ Total acumulado</span><strong>'+money(finalSale,2)+'</strong><small>'+num(finalPhysical)+' peças • '+num(rows.length)+' snapshots</small></div>'+
+      '</div>'+
+    '</section>'+
+    '<section class="card input-latest"><div class="input-dash-title"><div><span class="eyebrow">ÚLTIMOS SNAPSHOTS</span><h3>Registros mais recentes</h3></div></div><div class="table-wrap"><table><thead><tr><th>Horário</th><th>Venda acumulada</th><th>Intervalo</th><th>Venda física</th><th>Linhas válidas</th></tr></thead><tbody>'+latestRows+'</tbody></table></div></section>';
+}
+
 function renderAdminInputs(){
   const target=$("adminHistoryTable");
   if(!target) return;
@@ -1459,6 +1593,7 @@ function renderAdminInputs(){
     const sale=Number(r.sales_financial||0), interval=sale-prev; prev=sale;
     return '<tr><td>'+localTime(r.captured_at)+'</td><td>'+money(sale,2)+'</td><td class="'+(interval>=0?"positive":"negative")+'">'+signedMoney(interval,2)+'</td><td>'+num(r.sales_physical)+'</td><td>'+num(r.rows_valid)+'</td><td>'+num(r.rows_excluded)+'</td></tr>';
   }).join(""):'<tr><td colspan="6" style="text-align:center;padding:28px;color:#6F7C77">Nenhum input ativo hoje.</td></tr>';
+  renderInputPerformanceDashboard();
 }
 
 function renderAdminStructure(){
