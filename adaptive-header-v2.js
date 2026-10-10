@@ -46,11 +46,14 @@
   }
 
   function isAdmin(){
-    try{
-      return String(state.role||"").toLowerCase()==="administrador";
-    }catch(_){
-      return false;
-    }
+    const adminBar=document.getElementById("adminStoreBar");
+    if(adminBar && !adminBar.classList.contains("hidden")) return true;
+
+    const adminVisible=document.querySelector(".admin-only:not(.hidden)");
+    if(adminVisible) return true;
+
+    const roleText=(document.getElementById("identityRole")?.textContent||"").toLowerCase();
+    return roleText.includes("administr");
   }
 
   function ensureAdaptiveStoreContext(){
@@ -167,6 +170,17 @@
     placeStoreContext();
   }
 
+  function forceStoreSelectorSync(){
+    let tries=0;
+    const timer=setInterval(()=>{
+      tries++;
+      syncContext();
+      if((isAdmin() && document.getElementById("adaptiveStoreContext") && !document.getElementById("adaptiveStoreContext").classList.contains("hidden")) || tries>=20){
+        clearInterval(timer);
+      }
+    },250);
+  }
+
   function syncCondensed(){
     const y=window.scrollY||document.documentElement.scrollTop||0;
     document.documentElement.classList.toggle("header-condensed",y>96);
@@ -182,6 +196,7 @@
   }
 
   document.addEventListener("DOMContentLoaded",()=>{
+    forceStoreSelectorSync();
     syncContext();
     syncCondensed();
 
