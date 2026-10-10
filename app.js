@@ -1448,14 +1448,32 @@ async function saveCommercial(){
 }
 
 function setAdminTab(tab){
-  state.adminTab=tab;
-  document.querySelectorAll(".admin-tab").forEach(el=>el.classList.toggle("active",el.dataset.adminTab===tab));
-  document.querySelectorAll(".admin-panel").forEach(el=>el.classList.toggle("active",el.id==="adminPanel-"+tab));
-  if(tab==="comerciais") loadCommercials();
-  if(tab==="escalas") loadScales();
-  if(tab==="estrutura") ensureCommercialCatalog();
-  if(tab==="metas") renderAdminMeta();
-  if(tab==="inputs") renderAdminInputs();
+  const key=String(tab||"").trim();
+  const panel=$("adminPanel-"+key);
+  if(!panel) return;
+
+  state.adminTab=key;
+  document.querySelectorAll(".admin-tab").forEach(el=>el.classList.toggle("active",el.dataset.adminTab===key));
+  document.querySelectorAll(".admin-panel").forEach(el=>el.classList.toggle("active",el.id==="adminPanel-"+key));
+
+  // Abre o painel imediatamente. As cargas assíncronas acontecem depois,
+  // para o botão nunca parecer travado no mobile.
+  requestAnimationFrame(()=>{
+    if(state.section==="admin"){
+      panel.scrollIntoView({block:"start",behavior:"instant"});
+    }
+  });
+
+  if(key==="comerciais"){
+    Promise.resolve(loadCommercials()).catch(e=>{
+      toast(e?.message||"Não foi possível carregar os comerciais.",true);
+    });
+    return;
+  }
+  if(key==="escalas"){ Promise.resolve(loadScales()).catch(()=>{}); return; }
+  if(key==="estrutura"){ Promise.resolve(ensureCommercialCatalog()).catch(()=>{}); return; }
+  if(key==="metas"){ renderAdminMeta(); return; }
+  if(key==="inputs"){ renderAdminInputs(); return; }
 }
 
 async function loadAdmin(){
@@ -1808,7 +1826,21 @@ document.addEventListener("change",e=>{
 });
 document.documentElement.dataset.storeSwitchDelegated="1";
 
+let adminTabsCaptureBound=false;
+function bindAdminTabsCapture(){
+  if(adminTabsCaptureBound) return;
+  adminTabsCaptureBound=true;
+  document.addEventListener("click",e=>{
+    const btn=e.target?.closest?.(".admin-tab");
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setAdminTab(btn.dataset.adminTab);
+  },true);
+}
+
 function bind(){
+  bindAdminTabsCapture();
   $("loginForm").addEventListener("submit",async e=>{
     e.preventDefault(); const btn=$("loginBtn"),err=$("loginError");
     err.classList.add("hidden"); btn.disabled=true; btn.textContent="Validando acesso...";
@@ -1846,7 +1878,7 @@ function bind(){
   $("saveCommercialBtn").onclick=saveCommercial;
   $("newCommercialBtn").onclick=resetCommercialForm;
   $("cancelCommercialEdit").onclick=resetCommercialForm;
-  document.querySelectorAll(".admin-tab").forEach(el=>el.onclick=()=>setAdminTab(el.dataset.adminTab));
+  document.querySelectorAll(".admin-tab").forEach(el=>el.onclick=null);
   if($("newScaleBtn")) $("newScaleBtn").onclick=resetScaleForm;
   if($("cancelScaleEdit")) $("cancelScaleEdit").onclick=resetScaleForm;
   if($("saveScaleBtn")) $("saveScaleBtn").onclick=saveScale;
