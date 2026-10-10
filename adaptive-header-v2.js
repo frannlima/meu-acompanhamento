@@ -17,6 +17,10 @@
     return active?.id?.replace("section-","")||"inicio";
   }
 
+  function removeLegacyIdentity(){
+    document.querySelectorAll("#executionIdentityHero,.execution-identity-hero").forEach(el=>el.remove());
+  }
+
   function getActiveHead(){
     return document.querySelector(".section.active > .section-head, .section.active > .premium-more-hero");
   }
@@ -24,7 +28,6 @@
   function ensureAdaptiveStoreContext(){
     const select=document.getElementById("adminStoreSelect");
     if(!select) return null;
-
     let wrap=document.getElementById("adaptiveStoreContext");
     if(!wrap){
       wrap=document.createElement("div");
@@ -39,15 +42,15 @@
   function placeStoreContext(){
     const wrap=ensureAdaptiveStoreContext();
     const head=getActiveHead();
-    if(!wrap||!head) return;
+    const adminBar=document.getElementById("adminStoreBar");
+    if(!wrap||!head||!adminBar) return;
 
-    const key=activeSection();
-    const shouldShow=!!document.getElementById("adminStoreBar") && !document.getElementById("adminStoreBar").classList.contains("hidden");
+    const shouldShow=!adminBar.classList.contains("hidden");
     wrap.classList.toggle("hidden",!shouldShow);
     if(!shouldShow) return;
 
     if(head.classList.contains("premium-more-hero")){
-      head.appendChild(wrap);
+      if(wrap.parentElement!==head) head.appendChild(wrap);
       return;
     }
 
@@ -57,12 +60,12 @@
       actions.className="section-actions adaptive-actions";
       head.appendChild(actions);
     }
-    actions.prepend(wrap);
-
-    document.body.dataset.activeSection=key;
+    if(wrap.parentElement!==actions) actions.prepend(wrap);
   }
 
   function syncContext(){
+    removeLegacyIdentity();
+
     const key=activeSection();
     document.body.dataset.activeSection=key;
 
@@ -74,15 +77,12 @@
       mobileMeta.textContent=store?("Loja "+store+" • Meu Acompanhamento"):"Meu Acompanhamento";
     }
 
-    const hero=document.getElementById("executionIdentityHero");
-    if(hero) hero.classList.toggle("adaptive-hide-identity",key!=="inicio");
-
     placeStoreContext();
   }
 
   function syncCondensed(){
     const y=window.scrollY||document.documentElement.scrollTop||0;
-    document.documentElement.classList.toggle("header-condensed",y>110);
+    document.documentElement.classList.toggle("header-condensed",y>96);
   }
 
   let raf=0;
@@ -100,12 +100,12 @@
 
     const app=document.getElementById("appShell")||document.body;
     const observer=new MutationObserver(()=>schedule());
-    observer.observe(app,{subtree:true,attributes:true,attributeFilter:["class"],childList:true});
-
-    const original=document.getElementById("adminStoreSelect");
-    if(original){
-      original.addEventListener("change",()=>setTimeout(schedule,0));
-    }
+    observer.observe(app,{
+      subtree:true,
+      childList:true,
+      attributes:true,
+      attributeFilter:["class"]
+    });
   });
 
   window.addEventListener("scroll",syncCondensed,{passive:true});
