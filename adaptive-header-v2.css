@@ -1826,19 +1826,34 @@ html.device-phone #section-inicio [data-slogan]{
 
 @media(max-width:900px){
   #section-comerciais .commercial-performance-card .commercial-card-top{
-    grid-template-columns:minmax(0,1fr) 78px!important;
-    gap:10px!important;
+    grid-template-columns:minmax(0,1fr) 96px!important;
+    gap:8px!important;
+  }
+  #section-comerciais .commercial-performance-card .commercial-person,
+  #section-comerciais .commercial-performance-card .commercial-person>div{
+    min-width:0!important;
+  }
+  #section-comerciais .commercial-performance-card .commercial-person h2{
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+    line-height:1.18!important;
+    font-size:14px!important;
+  }
+  #section-comerciais .commercial-performance-card .commercial-rank-side{
+    gap:6px!important;
+    max-width:96px!important;
+    justify-content:flex-end!important;
   }
   #section-comerciais .commercial-performance-card .evolution-donut{
-    width:72px!important;
-    height:72px!important;
-    min-width:72px!important;
-    max-width:72px!important;
-    flex-basis:72px!important;
+    width:56px!important;
+    height:56px!important;
+    min-width:56px!important;
+    max-width:56px!important;
+    flex-basis:56px!important;
   }
   #section-comerciais .commercial-performance-card .evolution-donut:after,
   #section-comerciais .commercial-performance-card .evolution-donut>div{
-    inset:9px!important;
+    inset:6px!important;
   }
   #section-comerciais .commercial-performance-card .evolution-donut strong{
     font-size:11px!important;
@@ -1851,18 +1866,21 @@ html.device-phone #section-inicio [data-slogan]{
 
 @media(max-width:380px){
   #section-comerciais .commercial-performance-card .commercial-card-top{
-    grid-template-columns:minmax(0,1fr) 70px!important;
+    grid-template-columns:minmax(0,1fr) 90px!important;
+  }
+  #section-comerciais .commercial-performance-card .commercial-rank-side{
+    max-width:90px!important;
   }
   #section-comerciais .commercial-performance-card .evolution-donut{
-    width:66px!important;
-    height:66px!important;
-    min-width:66px!important;
-    max-width:66px!important;
-    flex-basis:66px!important;
+    width:52px!important;
+    height:52px!important;
+    min-width:52px!important;
+    max-width:52px!important;
+    flex-basis:52px!important;
   }
   #section-comerciais .commercial-performance-card .evolution-donut:after,
   #section-comerciais .commercial-performance-card .evolution-donut>div{
-    inset:8px!important;
+    inset:6px!important;
   }
   #section-comerciais .commercial-performance-card .evolution-donut strong{
     font-size:10px!important;
