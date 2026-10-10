@@ -1594,3 +1594,21 @@ html.device-phone #section-inicio [data-slogan]{
   .input-insight-grid strong{font-size:15px}
   .share-rank{grid-template-columns:26px 42px minmax(0,1fr) 42px}
 }
+
+
+/* v3.3 — admin tabs click safety */
+#section-admin .admin-tabs{
+  position:relative!important;
+  z-index:120!important;
+  pointer-events:auto!important;
+}
+#section-admin .admin-tab{
+  position:relative!important;
+  z-index:121!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#section-admin .admin-panel{
+  position:relative;
+  z-index:1;
+}
