@@ -719,39 +719,62 @@
     const all=detailRows();
     const rows=all.filter(r=>state.world==="todos" || r.world_code===state.world || (state.world==="beleza_relogios" && ["beleza","relogios"].includes(r.group_code)));
 
-    // REGRA ÚNICA DE TOTAL LOJA:
-    // quando "Todos" estiver selecionado, usar sempre o consolidado oficial do dia.
-    // Não somar apenas os DCOs presentes no último input, pois isso reduz a meta
-    // quando algum DCO ainda não teve venda/linha na parcial.
+    // A meta do mundo existe antes do primeiro input.
+    // Para evitar cartões vazios na abertura do dia, a referência de meta vem
+    // do resumo oficial por grupos; venda continua vindo da parcial quando houver.
+    const summaryGroups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
+    const worldGroupMap={
+      feminino:["feminino_moda"],
+      masculino:["masculino_moda"],
+      infantil:["infantil_moda"],
+      casa:["moda_casa"],
+      beleza_relogios:["beleza","relogios"],
+      cba:["cba"],
+      lpg:["lpg"],
+      basket:["basket"]
+    };
+    const summaryRows=state.world==="todos"
+      ? summaryGroups
+      : summaryGroups.filter(g=>(worldGroupMap[state.world]||[state.world]).includes(g.group_code));
+
     let total;
     if(state.world==="todos"){
       const d=state.day||{};
       total={
-        meta:Number(d.target_financial||0),
+        meta:Number(d.target_financial||summaryRows.reduce((s,g)=>s+Number(g.target_financial||0),0)),
         venda:Number(d.sales_financial||0),
-        aa:Number(d.ly_financial||0)
+        aa:Number(d.ly_financial||summaryRows.reduce((s,g)=>s+Number(g.ly_financial||0),0))
       };
     }else{
-      total=rows.reduce((a,r)=>{
+      const source=summaryRows.length?summaryRows:rows;
+      total=source.reduce((a,r)=>{
         a.meta+=Number(r.target_financial||0);
         a.venda+=Number(r.sales_financial||0);
         a.aa+=Number(r.ly_financial||0);
         return a;
       },{meta:0,venda:0,aa:0});
+
+      // Quando ainda não houve input, o resumo por grupos traz venda zerada,
+      // mas a meta e o A.A. já devem aparecer.
+      if(rows.length){
+        total.venda=rows.reduce((s,r)=>s+Number(r.sales_financial||0),0);
+      }
     }
 
-    const ating=total.meta?total.venda/total.meta*100:0;
-    const ev=total.aa&&((state.world==="todos"&&state.day?.has_input)||rows.length)?((total.venda/total.aa)-1)*100:null;
+    const hasMeta=total.meta>0;
+    const hasInput=!!state.day?.has_input;
+    const ating=hasMeta?total.venda/total.meta*100:0;
+    const ev=total.aa&&hasInput?((total.venda/total.aa)-1)*100:null;
     const dev=total.venda-total.meta;
     const box=$("worldKpis");
     if(box){
       const items=[
-        ["Meta",rows.length?money(total.meta,2):"—",""],
-        ["Venda",rows.length?money(total.venda,2):"—",ating>=100?"positive":ating>=90?"warning":"negative"],
-        ["Atingimento",rows.length?pct(ating):"—",ating>=100?"positive":ating>=90?"warning":"negative"],
+        ["Meta",hasMeta?money(total.meta,2):"—",""],
+        ["Venda",hasInput?money(total.venda,2):"—",hasInput?(ating>=100?"positive":ating>=90?"warning":"negative"):""],
+        ["Atingimento",hasInput?pct(ating):"—",hasInput?(ating>=100?"positive":ating>=90?"warning":"negative"):""],
         ["Venda A.A.",total.aa?money(total.aa,2):"—",""],
         ["Evolução",ev===null?"—":(ev>=0?"▲ ":"▼ ")+pct(ev),ev===null?"":tone(ev)],
-        ["Desvio",rows.length?signedMoney(dev,2):"—",rows.length?tone(dev):""]
+        ["Desvio",hasInput?signedMoney(dev,2):"—",hasInput?tone(dev):""]
       ];
       box.innerHTML=items.map(x=>kpi(x[0],x[1],"",x[2])).join("");
     }
