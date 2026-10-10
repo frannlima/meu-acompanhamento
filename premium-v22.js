@@ -271,7 +271,7 @@
   }
 
   async function createCommercialsShareImage(){
-    const rows=Array.isArray(state.commercial?.commercials)?state.commercial.commercials:[];
+    const rows=rankCommercialRows(Array.isArray(state.commercial?.commercials)?[...state.commercial.commercials]:[]);
     if(!rows.length) throw new Error("Não há comerciais carregados.");
 
     // Card em alta resolução, mantendo o mesmo layout visual da proposta aprovada.
@@ -367,7 +367,7 @@
     ctx.font="700 18px Arial";
     ctx.fillText("Moda que inspira o Brasil",1510,148);
 
-    const totalTarget=rows.reduce((s,r)=>s+Number(r.target_financial||0),0);
+    const totalTarget=rows.reduce((s,r)=>s+commercialTargetValue(r),0);
     const totalSale=rows.reduce((s,r)=>s+Number(r.sales_financial||0),0);
     const totalDev=totalSale-totalTarget;
     const totalAtt=totalTarget?totalSale/totalTarget*100:0;
@@ -392,8 +392,8 @@
     });
 
     let y=344;
-    for(const r of rows){
-      const target=Number(r.target_financial||0);
+    for(const [rankIndex,r] of rows.entries()){
+      const target=commercialTargetValue(r);
       const sale=Number(r.sales_financial||0);
       const att=target?sale/target*100:0;
       const dev=sale-target;
@@ -451,6 +451,17 @@
       ctx.strokeStyle=C.line;ctx.lineWidth=1;
       ctx.beginPath();ctx.moveTo(1210,y+20);ctx.lineTo(1210,y+rowH-32);ctx.stroke();
       drawDonut(1372,y+77,49,evolution);
+
+      // Posição no ranking por % de atingimento, em laranja ao lado do donut.
+      ctx.beginPath();
+      ctx.fillStyle=C.orange;
+      ctx.arc(1492,y+77,40,0,Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle=C.white;
+      ctx.textAlign="center";
+      ctx.textBaseline="middle";
+      ctx.font="800 31px Arial";
+      ctx.fillText((rankIndex+1)+"º",1492,y+79);
 
       y+=rowH;
     }
