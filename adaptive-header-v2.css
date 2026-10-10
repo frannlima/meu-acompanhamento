@@ -1397,3 +1397,37 @@ html.device-tablet .home-admin-store{
 html.device-desktop .home-admin-store{
   width:min(86%,980px)!important;
 }
+
+
+/* v3.1 — slogan spacing fix */
+#section-inicio>.section-head{
+  padding-bottom:28px!important;
+}
+
+#section-inicio>.section-head::after{
+  bottom:-34px!important;
+}
+
+#section-inicio .brand-slogan,
+#section-inicio .home-slogan,
+#section-inicio .section-slogan,
+#section-inicio [data-slogan]{
+  position:static!important;
+  display:block!important;
+  margin-top:14px!important;
+  margin-bottom:0!important;
+  line-height:1.25!important;
+  clear:both!important;
+}
+
+html.device-phone #section-inicio>.section-head{
+  padding-bottom:32px!important;
+}
+
+html.device-phone #section-inicio .brand-slogan,
+html.device-phone #section-inicio .home-slogan,
+html.device-phone #section-inicio .section-slogan,
+html.device-phone #section-inicio [data-slogan]{
+  margin-top:16px!important;
+  font-size:7px!important;
+}
