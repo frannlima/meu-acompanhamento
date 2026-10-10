@@ -1460,7 +1460,7 @@ function setAdminTab(tab){
   // para o botão nunca parecer travado no mobile.
   requestAnimationFrame(()=>{
     if(state.section==="admin"){
-      panel.scrollIntoView({block:"start",behavior:"instant"});
+      panel.scrollIntoView({block:"start",behavior:"auto"});
     }
   });
 
@@ -1475,6 +1475,8 @@ function setAdminTab(tab){
   if(key==="metas"){ renderAdminMeta(); return; }
   if(key==="inputs"){ renderAdminInputs(); return; }
 }
+
+window.setAdminTab=setAdminTab;
 
 async function loadAdmin(){
   if(state.role!=="administrador") return;
@@ -1826,21 +1828,7 @@ document.addEventListener("change",e=>{
 });
 document.documentElement.dataset.storeSwitchDelegated="1";
 
-let adminTabsCaptureBound=false;
-function bindAdminTabsCapture(){
-  if(adminTabsCaptureBound) return;
-  adminTabsCaptureBound=true;
-  document.addEventListener("click",e=>{
-    const btn=e.target?.closest?.(".admin-tab");
-    if(!btn) return;
-    e.preventDefault();
-    e.stopPropagation();
-    setAdminTab(btn.dataset.adminTab);
-  },true);
-}
-
 function bind(){
-  bindAdminTabsCapture();
   $("loginForm").addEventListener("submit",async e=>{
     e.preventDefault(); const btn=$("loginBtn"),err=$("loginError");
     err.classList.add("hidden"); btn.disabled=true; btn.textContent="Validando acesso...";
@@ -1878,7 +1866,13 @@ function bind(){
   $("saveCommercialBtn").onclick=saveCommercial;
   $("newCommercialBtn").onclick=resetCommercialForm;
   $("cancelCommercialEdit").onclick=resetCommercialForm;
-  document.querySelectorAll(".admin-tab").forEach(el=>el.onclick=null);
+  document.querySelectorAll(".admin-tab").forEach(el=>{
+    el.type="button";
+    el.onclick=e=>{
+      e.preventDefault();
+      setAdminTab(el.dataset.adminTab);
+    };
+  });
   if($("newScaleBtn")) $("newScaleBtn").onclick=resetScaleForm;
   if($("cancelScaleEdit")) $("cancelScaleEdit").onclick=resetScaleForm;
   if($("saveScaleBtn")) $("saveScaleBtn").onclick=saveScale;
