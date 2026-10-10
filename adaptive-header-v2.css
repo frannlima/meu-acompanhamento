@@ -1210,3 +1210,76 @@ html.device-desktop .adaptive-store-context:not(.hidden){
   visibility:visible!important;
   opacity:1!important;
 }
+
+
+/* v2.8 — centered menu hero cards + home store selector */
+@media(max-width:900px){
+  html.device-phone .section.active > .section-head,
+  html.device-phone #section-mais.active > .premium-more-hero{
+    position:relative!important;
+    left:50%!important;
+    transform:translateX(-50%)!important;
+    width:calc(100vw - 24px)!important;
+    max-width:calc(100vw - 24px)!important;
+    margin:0 0 12px!important;
+    box-sizing:border-box!important;
+    border-radius:24px!important;
+    overflow:hidden!important;
+  }
+
+  html.device-phone #section-inicio > .section-head{
+    width:calc(100vw - 24px)!important;
+    max-width:calc(100vw - 24px)!important;
+    margin:0 0 12px!important;
+    border-radius:24px!important;
+  }
+
+  html.device-phone #section-grupos > .section-head,
+  html.device-phone #section-comerciais > .section-head,
+  html.device-phone #section-descontos > .section-head,
+  html.device-phone #section-estore > .section-head,
+  html.device-phone #section-regional > .section-head,
+  html.device-phone #section-admin > .section-head{
+    padding-left:16px!important;
+    padding-right:16px!important;
+  }
+
+  html.device-phone #section-inicio .adaptive-store-context:not(.hidden){
+    display:grid!important;
+    grid-template-columns:auto minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:8px!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:8px 9px!important;
+    border-radius:14px!important;
+    background:rgba(255,255,255,.10)!important;
+    border:1px solid rgba(255,255,255,.16)!important;
+    box-sizing:border-box!important;
+  }
+
+  html.device-phone #section-inicio .adaptive-store-context select{
+    width:100%!important;
+    min-width:0!important;
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+}
+
+/* Tablet / iPad */
+html.device-tablet .section.active > .section-head,
+html.device-tablet #section-mais.active > .premium-more-hero{
+  width:min(100%,1100px)!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+
+/* Desktop */
+html.device-desktop .section.active > .section-head,
+html.device-desktop #section-mais.active > .premium-more-hero{
+  width:min(100%,1440px)!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
