@@ -1307,11 +1307,15 @@
   white-space:nowrap;
 }
 @media(max-width:600px){
-  .commercial-performance-card .commercial-rank-side{gap:6px;}
+  .commercial-performance-card .commercial-rank-side{
+    gap:6px;
+    align-items:center;
+  }
   .commercial-performance-card .commercial-rank-badge{
-    flex-basis:38px;
-    width:38px;
-    height:38px;
-    font-size:14px;
+    flex-basis:30px;
+    width:30px;
+    height:30px;
+    font-size:11px;
+    line-height:1;
   }
 }
