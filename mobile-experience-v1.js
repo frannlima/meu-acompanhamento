@@ -202,7 +202,7 @@
       const worst=groups.slice(0,3);
       priority.innerHTML=
         '<div class="app-action-head">'+
-          '<div><span class="eyebrow">DIRECIONAMENTO PARA AGIR AGORA</span><h2>'+(worst.length?"Mude o jogo nos pontos de maior impacto":"Aguardando primeira leitura")+'</h2></div>'+
+          '<div><span class="eyebrow">DIRECIONAMENTO PARA AGIR AGORA</span><h2>'+(worst.length?"Mude o jogo nos grupos de maior impacto na venda /hora":"Aguardando primeira leitura")+'</h2></div>'+
           '<span class="action-target">◎</span>'+
         '</div>'+
         '<div class="action-list">'+
