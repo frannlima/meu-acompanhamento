@@ -1,0 +1,381 @@
+/* Adaptive Header System v2 — phone/iPhone/tablet/desktop */
+:root{
+  --ah-green:#173F35;
+  --ah-green-2:#1F584A;
+  --ah-cream:#F7F4ED;
+  --ah-orange:#DE7C00;
+  --ah-safe-top:env(safe-area-inset-top,0px);
+  --ah-safe-bottom:env(safe-area-inset-bottom,0px);
+  --ah-safe-left:env(safe-area-inset-left,0px);
+  --ah-safe-right:env(safe-area-inset-right,0px);
+}
+
+html{scroll-padding-top:84px}
+body{overflow-x:hidden}
+
+/* Base: compact, contextual section header */
+.section>.section-head{
+  position:relative;
+  overflow:hidden;
+}
+.section>.section-head::after{
+  content:"";
+  position:absolute;
+  inset:auto -8% -55% 45%;
+  height:130px;
+  background:radial-gradient(circle,rgba(222,124,0,.14),transparent 64%);
+  pointer-events:none;
+}
+.section>.section-head>div:first-child,
+.section>.section-head>.section-actions,
+.section>.section-head>button{position:relative;z-index:1}
+
+/* Admin store selector becomes a compact context row instead of a large repeated card */
+.admin-store-bar{
+  border-radius:16px!important;
+  box-shadow:0 6px 18px rgba(23,63,53,.05)!important;
+}
+.admin-store-bar>div{min-width:0}
+.admin-store-bar strong{white-space:nowrap}
+.admin-store-bar select{min-width:0}
+
+/* PHONE — Android + iPhone */
+html.device-phone .main{
+  padding-left:max(10px,var(--ah-safe-left))!important;
+  padding-right:max(10px,var(--ah-safe-right))!important;
+  padding-top:0!important;
+}
+
+html.device-phone .mobile-header{
+  position:sticky!important;
+  top:0!important;
+  z-index:95!important;
+  min-height:58px!important;
+  height:auto!important;
+  margin-left:calc(-1 * max(10px,var(--ah-safe-left)))!important;
+  margin-right:calc(-1 * max(10px,var(--ah-safe-right)))!important;
+  padding:
+    calc(8px + var(--ah-safe-top))
+    max(14px,var(--ah-safe-right))
+    8px
+    max(14px,var(--ah-safe-left))!important;
+  gap:10px!important;
+  background:linear-gradient(135deg,#173F35,#205A4B)!important;
+  box-shadow:0 6px 16px rgba(23,63,53,.14)!important;
+  transition:min-height .2s ease,padding .2s ease,box-shadow .2s ease;
+}
+html.device-phone .mobile-header>img{
+  width:94px!important;
+  max-height:26px!important;
+  object-fit:contain!important;
+  flex:0 0 auto;
+}
+html.device-phone .mobile-greeting{
+  min-width:0!important;
+  margin-left:auto!important;
+  text-align:right!important;
+}
+html.device-phone .mobile-greeting strong{
+  display:block!important;
+  max-width:180px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:9px!important;
+  line-height:1.2!important;
+}
+html.device-phone .mobile-greeting span{
+  display:block!important;
+  max-width:180px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font-size:6.5px!important;
+  line-height:1.2!important;
+  margin-top:2px!important;
+}
+
+/* On scroll the global header collapses */
+html.device-phone.header-condensed .mobile-header{
+  min-height:46px!important;
+  padding-top:calc(5px + var(--ah-safe-top))!important;
+  padding-bottom:5px!important;
+  box-shadow:0 5px 15px rgba(23,63,53,.18)!important;
+}
+html.device-phone.header-condensed .mobile-header>img{width:78px!important}
+html.device-phone.header-condensed .mobile-greeting span{display:none!important}
+
+/* Compact store selector */
+html.device-phone .admin-store-bar{
+  margin:8px 0 8px!important;
+  padding:8px 9px!important;
+  min-height:54px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,.8fr) minmax(150px,1.2fr)!important;
+  gap:8px!important;
+  align-items:center!important;
+  background:#fff!important;
+}
+html.device-phone .admin-store-bar .eyebrow{
+  font-size:5.8px!important;
+  letter-spacing:.12em!important;
+}
+html.device-phone .admin-store-bar strong{
+  display:block!important;
+  margin-top:2px!important;
+  font-size:8.5px!important;
+}
+html.device-phone .admin-store-bar select{
+  width:100%!important;
+  min-height:38px!important;
+  padding:0 32px 0 10px!important;
+  border-radius:12px!important;
+  font-size:11px!important;
+  background-color:#fff!important;
+}
+
+/* Menu header: one clear identity block */
+html.device-phone .section>.section-head{
+  margin:0 -10px 10px!important;
+  padding:18px 16px 17px!important;
+  min-height:118px!important;
+  border-radius:0 0 24px 24px!important;
+  background:linear-gradient(135deg,#173F35 0%,#1F584A 75%,#285F51 100%)!important;
+  box-shadow:0 10px 24px rgba(23,63,53,.12)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  gap:8px!important;
+}
+html.device-phone .section>.section-head .eyebrow{
+  display:block!important;
+  margin-bottom:3px!important;
+  color:#D6D2C4!important;
+  font-size:6px!important;
+  letter-spacing:.13em!important;
+}
+html.device-phone .section>.section-head h1{
+  margin:0!important;
+  color:#fff!important;
+  font-size:28px!important;
+  line-height:1.02!important;
+  letter-spacing:-.04em!important;
+}
+html.device-phone .section>.section-head p{
+  margin:5px 0 0!important;
+  max-width:330px!important;
+  color:rgba(255,255,255,.80)!important;
+  font-size:8.8px!important;
+  line-height:1.42!important;
+}
+html.device-phone .section>.section-head .section-actions{
+  width:100%!important;
+  margin:0!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:7px!important;
+}
+html.device-phone .section>.section-head .section-actions>.btn,
+html.device-phone .section>.section-head>button.btn{
+  min-height:36px!important;
+  padding:0 12px!important;
+  border-radius:11px!important;
+  font-size:8px!important;
+}
+html.device-phone .section>.section-head .hero-context{
+  display:flex!important;
+  gap:6px!important;
+  flex-wrap:wrap!important;
+}
+html.device-phone .section>.section-head .badge{
+  min-height:28px!important;
+  padding:0 9px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  font-size:7px!important;
+}
+
+/* Home can be slightly more expressive, other menus stay lean */
+html.device-phone body[data-active-section="inicio"] .section#section-inicio>.section-head{
+  min-height:132px!important;
+}
+html.device-phone body:not([data-active-section="inicio"]) .section.active>.section-head{
+  min-height:108px!important;
+  padding-top:15px!important;
+  padding-bottom:15px!important;
+}
+
+/* Avoid duplicate emphasis: hide secondary descriptive blocks immediately after headers when empty */
+html.device-phone .section.active>.section-head + .visual-summary:empty{display:none!important}
+
+/* Small Android / iPhone SE */
+@media(max-width:380px){
+  html.device-phone .section>.section-head h1{font-size:25px!important}
+  html.device-phone .section>.section-head p{font-size:8px!important}
+  html.device-phone .admin-store-bar{
+    grid-template-columns:1fr!important;
+    min-height:auto!important;
+  }
+  html.device-phone .admin-store-bar>div{display:none!important}
+  html.device-phone .mobile-greeting strong{max-width:130px!important}
+}
+
+/* iPhone-specific safe area / Safari */
+html.device-phone.platform-ios .mobile-header{
+  padding-top:calc(8px + var(--ah-safe-top))!important;
+}
+html.device-phone.platform-ios .mobile-dock{
+  padding-bottom:max(4px,var(--ah-safe-bottom))!important;
+}
+html.device-phone.platform-ios .section>.section-head{
+  -webkit-transform:translateZ(0);
+}
+html.device-phone.platform-ios select,
+html.device-phone.platform-ios input,
+html.device-phone.platform-ios textarea{font-size:16px!important}
+
+/* Android-specific density */
+html.device-phone.platform-android .section>.section-head{
+  border-radius:0 0 22px 22px!important;
+}
+html.device-phone.platform-android .mobile-header{
+  min-height:56px!important;
+}
+html.device-phone.platform-android .mobile-dock{
+  bottom:max(7px,var(--ah-safe-bottom))!important;
+}
+
+/* TABLET */
+html.device-tablet .main{
+  max-width:1240px!important;
+  padding-left:max(20px,var(--ah-safe-left))!important;
+  padding-right:max(20px,var(--ah-safe-right))!important;
+}
+html.device-tablet .mobile-header{
+  position:sticky!important;
+  top:0!important;
+  z-index:90!important;
+  min-height:64px!important;
+  border-radius:0 0 18px 18px!important;
+  box-shadow:0 8px 20px rgba(23,63,53,.10)!important;
+}
+html.device-tablet .admin-store-bar{
+  margin:10px 0 12px!important;
+  padding:10px 14px!important;
+  min-height:62px!important;
+  display:grid!important;
+  grid-template-columns:minmax(180px,.7fr) minmax(280px,1.3fr)!important;
+  gap:16px!important;
+}
+html.device-tablet .section>.section-head{
+  min-height:132px!important;
+  padding:22px 24px!important;
+  margin:0 0 14px!important;
+  border-radius:22px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:18px!important;
+  background:linear-gradient(135deg,#173F35,#24594C)!important;
+}
+html.device-tablet .section>.section-head h1{
+  font-size:34px!important;
+  margin:0 0 6px!important;
+}
+html.device-tablet .section>.section-head p{
+  max-width:650px!important;
+  font-size:11px!important;
+  line-height:1.45!important;
+}
+html.device-tablet .section>.section-head .section-actions{
+  justify-self:end!important;
+  align-self:center!important;
+}
+html.device-tablet.header-condensed .mobile-header{
+  min-height:52px!important;
+}
+
+/* DESKTOP */
+html.device-desktop .main{
+  padding-top:22px!important;
+}
+html.device-desktop .admin-store-bar{
+  min-height:64px!important;
+  padding:10px 14px!important;
+  margin:0 auto 14px!important;
+  display:grid!important;
+  grid-template-columns:minmax(220px,.7fr) minmax(320px,1.3fr)!important;
+  gap:18px!important;
+  max-width:1440px!important;
+  align-items:center!important;
+}
+html.device-desktop .section>.section-head{
+  min-height:116px!important;
+  padding:20px 24px!important;
+  margin-bottom:16px!important;
+  border-radius:20px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:24px!important;
+  align-items:center!important;
+  background:linear-gradient(135deg,#173F35,#24594C)!important;
+  color:#fff!important;
+  box-shadow:0 10px 24px rgba(23,63,53,.10)!important;
+}
+html.device-desktop .section>.section-head h1{
+  margin:0 0 5px!important;
+  color:#fff!important;
+  font-size:36px!important;
+  letter-spacing:-.04em!important;
+}
+html.device-desktop .section>.section-head p{
+  margin:0!important;
+  max-width:760px!important;
+  color:rgba(255,255,255,.78)!important;
+  font-size:11px!important;
+  line-height:1.45!important;
+}
+html.device-desktop .section>.section-head .eyebrow{color:#D6D2C4!important}
+html.device-desktop .section>.section-head .section-actions{
+  justify-self:end!important;
+  align-self:center!important;
+}
+html.device-desktop .section>.section-head .btn{
+  min-height:40px!important;
+  border-radius:11px!important;
+}
+html.device-desktop .section>.section-head .badge{
+  background:rgba(255,255,255,.09)!important;
+  color:#fff!important;
+  border-color:rgba(255,255,255,.18)!important;
+}
+
+/* Notebook / compact desktop */
+@media(min-width:901px) and (max-width:1250px){
+  html.device-desktop .main{padding-left:20px!important;padding-right:20px!important}
+  html.device-desktop .section>.section-head{min-height:108px!important;padding:18px 20px!important}
+  html.device-desktop .section>.section-head h1{font-size:31px!important}
+}
+
+/* Landscape phone: use width efficiently */
+html.device-phone.orientation-landscape .section>.section-head{
+  min-height:92px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+}
+html.device-phone.orientation-landscape .section>.section-head .section-actions{
+  width:auto!important;
+  justify-self:end!important;
+}
+html.device-phone.orientation-landscape .admin-store-bar{
+  grid-template-columns:minmax(0,.7fr) minmax(220px,1.3fr)!important;
+}
+
+/* Keep controls reachable and content readable */
+@media(max-width:900px){
+  .card,.app-menu-guide,.menu-action-now{max-width:100%!important}
+  table{font-variant-numeric:tabular-nums}
+  button,select,.nav-item{touch-action:manipulation}
+}
