@@ -1431,3 +1431,166 @@ html.device-phone #section-inicio [data-slogan]{
   margin-top:16px!important;
   font-size:7px!important;
 }
+
+
+/* v3.2 — input performance dashboard */
+.input-performance-dashboard{
+  display:grid;
+  gap:14px;
+  margin-bottom:16px;
+}
+.input-dash-hero{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:18px;
+  padding:4px 2px;
+}
+.input-dash-hero h2{
+  margin:3px 0 2px;
+  font-size:28px;
+  line-height:1.05;
+  letter-spacing:-.035em;
+  color:#173F35;
+}
+.input-dash-hero p{margin:0;color:#6F7C77;font-size:10px}
+.input-dash-updated{
+  flex:0 0 auto;
+  padding:8px 11px;
+  border-radius:999px;
+  background:#E8F0EC;
+  color:#173F35;
+  font-size:8px;
+  font-weight:900;
+}
+.input-dash-kpis{
+  display:grid;
+  grid-template-columns:1.35fr repeat(5,minmax(0,1fr));
+  gap:10px;
+}
+.input-kpi{
+  min-width:0;
+  padding:15px 14px;
+  border-radius:17px;
+  background:#fff;
+  border:1px solid #E8E4DA;
+  box-shadow:0 9px 24px rgba(23,63,53,.05);
+}
+.input-kpi span{display:block;font-size:7px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#6F7C77}
+.input-kpi strong{display:block;margin-top:8px;font-size:20px;line-height:1;color:#173F35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.input-kpi small{display:block;margin-top:7px;font-size:7px;color:#75817D}
+.input-kpi.main{
+  background:linear-gradient(140deg,#173F35,#24594C);
+  border-color:#173F35;
+}
+.input-kpi.main span,.input-kpi.main strong,.input-kpi.main small{color:#fff}
+.input-kpi.accent strong{color:#DE7C00}
+.input-dash-main,.input-growth-card,.input-share-card,.input-insights,.input-latest{padding:18px!important}
+.input-dash-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:start;
+  gap:14px;
+  margin-bottom:14px;
+}
+.input-dash-title h3{margin:3px 0 2px;font-size:18px;line-height:1.1;color:#173F35}
+.input-dash-title p{margin:0;font-size:8px;color:#77827E}
+.peak-chip{
+  padding:7px 10px;border-radius:999px;background:#FFF0DD;color:#B96000;
+  font-size:7px;font-weight:900;white-space:nowrap
+}
+.hourly-combo{
+  position:relative;
+  height:265px;
+  padding:8px 8px 0;
+  border-radius:14px;
+  background:linear-gradient(180deg,#FBFCFA,#F7F4ED);
+  border:1px solid #ECE8DF;
+  overflow:hidden;
+}
+.hourly-bars{
+  position:absolute;inset:18px 12px 12px;
+  display:flex;align-items:stretch;gap:6px;
+}
+.hour-bar-item{
+  min-width:24px;flex:1;display:grid;grid-template-rows:22px 1fr 20px;
+  align-items:end;text-align:center;
+}
+.hour-bar-value{font-size:6px;font-weight:900;color:#557068;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hour-bar-track{height:100%;display:flex;align-items:flex-end;justify-content:center;border-bottom:1px solid #D9DED9}
+.hour-bar-track i{
+  display:block;width:min(72%,28px);min-height:3px;border-radius:6px 6px 2px 2px;
+  background:linear-gradient(180deg,#2E6B58,#173F35);
+  box-shadow:0 4px 10px rgba(23,63,53,.12)
+}
+.hour-bar-item.peak .hour-bar-track i{background:linear-gradient(180deg,#F59A23,#DE7C00)}
+.hour-bar-item.peak .hour-bar-value{color:#DE7C00}
+.hour-bar-item>span{font-size:6px;color:#6F7C77;padding-top:5px}
+.hourly-line{
+  position:absolute;inset:28px 22px 37px;width:calc(100% - 44px);height:calc(100% - 65px);
+  pointer-events:none;overflow:visible
+}
+.hourly-line polyline{stroke:#DE7C00;stroke-width:2}
+.input-dash-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);gap:14px}
+.growth-chart{
+  min-height:210px;display:flex;align-items:stretch;gap:6px;padding-top:8px
+}
+.growth-item{
+  min-width:28px;flex:1;display:grid;grid-template-rows:26px 1fr 18px;text-align:center
+}
+.growth-item>b{font-size:6.5px;color:#6F7C77;align-self:end}
+.growth-axis{
+  min-height:145px;display:flex;align-items:flex-end;justify-content:center;
+  border-bottom:1px solid #DADDD9;
+}
+.growth-axis i{display:block;width:min(65%,24px);min-height:4px;border-radius:5px 5px 1px 1px;background:#AEB9B4}
+.growth-item.up .growth-axis i{background:#2E6B58}
+.growth-item.down .growth-axis i{background:#D95A4E}
+.growth-item.up>b{color:#2E6B58}.growth-item.down>b{color:#B64B40}
+.growth-item>span{font-size:6px;color:#77827E;padding-top:4px}
+.share-list{display:grid;gap:10px;padding-top:7px}
+.share-rank{
+  display:grid;grid-template-columns:28px 48px minmax(0,1fr) 46px;align-items:center;gap:8px
+}
+.share-rank>span{
+  width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#FFF0DD;color:#B96000;font-size:7px;font-weight:900
+}
+.share-rank>b{font-size:8px;color:#173F35}
+.share-rank>div{height:7px;border-radius:999px;background:#ECEAE4;overflow:hidden}
+.share-rank>div i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#173F35,#2E6B58)}
+.share-rank>strong{text-align:right;font-size:8px;color:#173F35}
+.input-insight-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.input-insight-grid>div{
+  padding:13px;border-radius:14px;background:#F8F7F3;border:1px solid #ECE8DF;min-width:0
+}
+.input-insight-grid span{display:block;font-size:7px;color:#667670;font-weight:800}
+.input-insight-grid strong{display:block;margin-top:7px;font-size:18px;color:#173F35}
+.input-insight-grid small{display:block;margin-top:4px;font-size:7px;color:#77827E}
+.input-empty{width:100%;display:grid;place-items:center;color:#7A8580;font-size:9px}
+.input-latest .table-wrap{border-radius:12px;border:1px solid #ECE8DF;overflow:auto}
+.input-latest table{min-width:680px}
+
+@media(max-width:1100px){
+  .input-dash-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .input-dash-grid{grid-template-columns:1fr}
+  .input-insight-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .input-performance-dashboard{gap:10px}
+  .input-dash-hero{align-items:flex-start;flex-direction:column;padding:0 2px}
+  .input-dash-hero h2{font-size:22px}
+  .input-dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .input-kpi{padding:12px 11px;border-radius:14px}
+  .input-kpi strong{font-size:17px}
+  .input-kpi.main{grid-column:1/-1}
+  .input-dash-main,.input-growth-card,.input-share-card,.input-insights,.input-latest{padding:13px!important}
+  .input-dash-title h3{font-size:16px}
+  .hourly-combo{height:230px;overflow-x:auto}
+  .hourly-bars{min-width:680px}
+  .hourly-line{min-width:650px}
+  .growth-chart{min-width:680px;overflow:visible}
+  .input-growth-card{overflow-x:auto}
+  .input-insight-grid{grid-template-columns:1fr 1fr}
+  .input-insight-grid strong{font-size:15px}
+  .share-rank{grid-template-columns:26px 42px minmax(0,1fr) 42px}
+}
