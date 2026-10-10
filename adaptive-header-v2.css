@@ -2136,203 +2136,107 @@ html.device-desktop .adaptive-home-person em{
 }
 
 
-/* v4.2 — Home 3D depth scene */
+/* v4.3 — Home campaign photo with depth and layered overlap */
 #section-inicio>.section-head{
   position:relative!important;
   overflow:hidden!important;
   isolation:isolate!important;
 }
 
-#section-inicio>.section-head>div:not(.home-depth-scene){
-  position:relative;
-  z-index:4;
-}
-
-.home-depth-scene{
-  position:absolute;
-  top:0;
-  right:0;
-  bottom:0;
-  width:48%;
-  z-index:1;
-  pointer-events:none;
-  perspective:1100px;
-  transform-style:preserve-3d;
-  overflow:hidden;
-}
-
-.home-depth-scene::before{
+#section-inicio>.section-head::before{
   content:"";
   position:absolute;
-  inset:0;
-  background:
-    linear-gradient(90deg,rgba(23,63,53,.98) 0%,rgba(23,63,53,.72) 16%,rgba(23,63,53,.20) 56%,rgba(23,63,53,.02) 100%),
-    radial-gradient(circle at 68% 36%,rgba(214,210,196,.20),transparent 26%),
-    linear-gradient(145deg,#173F35 0%,#235A4B 58%,#193D34 100%);
+  z-index:0;
+  pointer-events:none;
 }
 
-.depth-glow{
+#section-inicio>.section-head::after{
+  content:"";
   position:absolute;
-  right:8%;
-  top:14%;
-  width:58%;
-  aspect-ratio:1;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(222,124,0,.23) 0%,rgba(214,210,196,.12) 28%,transparent 68%);
-  filter:blur(18px);
-  opacity:.9;
+  z-index:1;
+  pointer-events:none;
 }
 
-.depth-plane{
-  position:absolute;
-  border:1px solid rgba(214,210,196,.22);
-  background:linear-gradient(145deg,rgba(255,255,255,.11),rgba(255,255,255,.025));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.18),
-    0 22px 42px rgba(4,26,21,.26);
-  backdrop-filter:blur(7px);
-  -webkit-backdrop-filter:blur(7px);
-  transform-style:preserve-3d;
+#section-inicio>.section-head>div{
+  position:relative;
+  z-index:3;
 }
 
-.plane-a{
-  width:58%;
-  height:72%;
-  right:-7%;
-  bottom:-14%;
-  border-radius:34px;
-  transform:rotateY(-20deg) rotateX(7deg) rotateZ(-7deg) translateZ(-30px);
-}
-
-.plane-b{
-  width:45%;
-  height:54%;
-  right:20%;
-  top:14%;
-  border-radius:28px;
-  transform:rotateY(-16deg) rotateX(10deg) rotateZ(7deg) translateZ(20px);
-}
-
-.plane-c{
-  width:36%;
-  height:46%;
-  right:43%;
-  bottom:-2%;
-  border-radius:26px;
-  transform:rotateY(-14deg) rotateX(12deg) rotateZ(-9deg) translateZ(38px);
-}
-
-.depth-card{
-  position:absolute;
-  display:grid;
-  place-items:center;
-  color:#D6D2C4;
-  border:1px solid rgba(214,210,196,.30);
-  background:
-    linear-gradient(145deg,rgba(41,95,79,.97),rgba(12,51,42,.96));
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.18),
-    inset -10px -12px 24px rgba(0,0,0,.14),
-    0 18px 36px rgba(3,24,19,.34);
-  text-shadow:0 2px 0 rgba(0,0,0,.18);
-  transform-style:preserve-3d;
-}
-
-.depth-main{
-  width:33%;
-  aspect-ratio:1.18;
-  right:17%;
-  bottom:10%;
-  border-radius:28px;
-  transform:rotateY(-17deg) rotateX(14deg) rotateZ(8deg) translateZ(92px);
-}
-
-.depth-main span{
-  font-family:"Bricolage Grotesque",sans-serif;
-  font-size:clamp(34px,4.3vw,72px);
-  font-weight:700;
-  letter-spacing:.04em;
-  color:#D6D2C4;
-  filter:drop-shadow(0 8px 7px rgba(0,0,0,.24));
-}
-
-.depth-mini{
-  width:14%;
-  aspect-ratio:1;
-  border-radius:18px;
-  font-size:clamp(18px,2vw,34px);
-  font-weight:900;
-}
-
-.depth-chart{
-  right:42%;
-  top:16%;
-  transform:rotateY(-15deg) rotateX(10deg) rotateZ(-5deg) translateZ(108px);
-  grid-template-columns:repeat(3,1fr);
-  align-items:end;
-  gap:4px;
-  padding:20% 18%;
-}
-.depth-chart i{
-  display:block;
-  width:100%;
-  border-radius:5px 5px 2px 2px;
-  background:#D6D2C4;
-  box-shadow:0 4px 8px rgba(0,0,0,.16);
-}
-.depth-chart i:nth-child(1){height:42%}
-.depth-chart i:nth-child(2){height:68%}
-.depth-chart i:nth-child(3){height:88%;background:#DE7C00}
-
-.depth-target{
-  right:25%;
-  top:11%;
-  transform:rotateY(-15deg) rotateX(10deg) rotateZ(3deg) translateZ(124px);
-  color:#D6D2C4;
-}
-
-.depth-team{
-  right:8%;
-  top:22%;
-  transform:rotateY(-17deg) rotateX(12deg) rotateZ(8deg) translateZ(82px);
-  font-size:clamp(12px,1.25vw,22px);
-  letter-spacing:-.18em;
-}
-
-/* Soft branding embedded in the background */
-.home-depth-scene::after{
-  content:"RIA";
-  position:absolute;
-  right:-1%;
-  top:38%;
-  font-family:"Bricolage Grotesque",sans-serif;
-  font-size:clamp(80px,9vw,150px);
-  line-height:1;
-  font-weight:800;
-  letter-spacing:.04em;
-  color:rgba(214,210,196,.07);
-  transform:rotate(-4deg);
-}
-
-/* Desktop composition: reserve space for the 3D scene without crushing text */
+/* Desktop: official Pool Jeans campaign photo integrated as layered background */
 html.device-desktop #section-inicio>.section-head{
-  min-height:345px!important;
-  padding:30px 45% 34px 34px!important;
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  grid-template-rows:auto auto 1fr auto!important;
-  align-content:start!important;
-  gap:10px 16px!important;
-  background:linear-gradient(135deg,#173F35 0%,#1B4B3F 64%,#234E43 100%)!important;
+  min-height:340px!important;
+  padding:30px 44% 34px 34px!important;
   border-radius:28px!important;
+  background:
+    linear-gradient(135deg,#173F35 0%,#1A4A3E 58%,#214F43 100%)!important;
   box-shadow:0 24px 56px rgba(23,63,53,.18)!important;
 }
 
-html.device-desktop #section-inicio>.section-head>div:not(.adaptive-home-identity):not(.home-depth-scene):first-of-type{
-  grid-column:1!important;
-  grid-row:2!important;
-  align-self:center!important;
-  max-width:620px!important;
+html.device-desktop #section-inicio>.section-head::before{
+  top:-5%;
+  right:-1%;
+  width:49%;
+  height:110%;
+  background-image:
+    linear-gradient(90deg,rgba(23,63,53,.86) 0%,rgba(23,63,53,.28) 26%,rgba(23,63,53,.02) 64%),
+    url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg");
+  background-size:cover!important;
+  background-position:center 38%!important;
+  background-repeat:no-repeat!important;
+  border-radius:34px 0 0 34px;
+  transform:
+    perspective(1200px)
+    rotateY(-7deg)
+    translateZ(0)
+    scale(1.035);
+  transform-origin:center right;
+  box-shadow:
+    -30px 0 55px rgba(6,34,27,.30),
+    inset 18px 0 36px rgba(23,63,53,.38);
+  filter:saturate(.95) contrast(1.02);
+}
+
+/* Layered translucent planes create depth without replacing the photo */
+html.device-desktop #section-inicio>.section-head::after{
+  right:3.5%;
+  top:10%;
+  width:35%;
+  height:74%;
+  border-radius:30px;
+  border:1px solid rgba(255,255,255,.16);
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.025));
+  box-shadow:
+    -34px 30px 0 -12px rgba(214,210,196,.07),
+    -62px 58px 0 -24px rgba(255,255,255,.045),
+    0 26px 55px rgba(6,34,27,.16);
+  backdrop-filter:blur(2px);
+  -webkit-backdrop-filter:blur(2px);
+  transform:
+    perspective(1000px)
+    rotateY(-5deg)
+    rotateZ(-1.5deg);
+}
+
+html.device-desktop #section-inicio .adaptive-home-identity{
+  position:relative!important;
+  right:auto!important;
+  top:auto!important;
+  width:min(760px,76%)!important;
+  max-width:760px!important;
+  margin:0 0 30px!important;
+  padding:12px 14px!important;
+  border-radius:18px!important;
+  background:rgba(255,255,255,.085)!important;
+  border:1px solid rgba(255,255,255,.16)!important;
+  box-shadow:0 12px 26px rgba(0,0,0,.08)!important;
+  backdrop-filter:blur(10px)!important;
+  -webkit-backdrop-filter:blur(10px)!important;
+}
+
+html.device-desktop #section-inicio>.section-head>div:not(.adaptive-home-identity):first-of-type{
+  width:100%!important;
+  max-width:600px!important;
 }
 
 html.device-desktop #section-inicio>.section-head h1{
@@ -2346,66 +2250,65 @@ html.device-desktop #section-inicio>.section-head p{
   max-width:560px!important;
   font-size:14px!important;
   line-height:1.45!important;
-  color:rgba(255,255,255,.85)!important;
+  color:rgba(255,255,255,.86)!important;
 }
 
 html.device-desktop #section-inicio>.section-head .eyebrow{
   color:#D6D2C4!important;
 }
 
-html.device-desktop #section-inicio .adaptive-home-identity{
-  position:relative!important;
-  right:auto!important;
-  top:auto!important;
-  grid-column:1/-1!important;
-  grid-row:1!important;
-  width:min(760px,72%)!important;
-  max-width:760px!important;
-  margin:0!important;
-  padding:12px 14px!important;
-  border-radius:18px!important;
-  background:rgba(255,255,255,.085)!important;
-  border:1px solid rgba(255,255,255,.16)!important;
-  box-shadow:0 12px 26px rgba(0,0,0,.08)!important;
-  backdrop-filter:blur(10px)!important;
-  -webkit-backdrop-filter:blur(10px)!important;
-}
-
 html.device-desktop #section-inicio>.section-head .hero-actions{
-  grid-column:1!important;
-  grid-row:3!important;
-  align-self:end!important;
-  justify-self:start!important;
-  margin:0!important;
+  width:auto!important;
+  margin-top:18px!important;
+  justify-content:flex-start!important;
 }
 
 html.device-desktop #section-inicio .home-admin-store{
-  position:relative!important;
-  right:auto!important;
-  bottom:auto!important;
-  grid-column:1/-1!important;
-  grid-row:4!important;
   width:100%!important;
   max-width:none!important;
-  margin:12px 0 0!important;
+  margin:18px 0 0!important;
   padding:9px 10px!important;
-  z-index:5!important;
-  background:rgba(255,255,255,.105)!important;
+  background:rgba(255,255,255,.10)!important;
   border-color:rgba(255,255,255,.18)!important;
   box-shadow:0 10px 24px rgba(0,0,0,.08)!important;
 }
 
-/* Tablet gets a reduced 3D scene */
-html.device-tablet .home-depth-scene{
-  width:42%;
-  opacity:.78;
-}
+/* Tablet: same photo, shallower depth */
 html.device-tablet #section-inicio>.section-head{
-  min-height:230px!important;
-  padding-right:37%!important;
+  position:relative!important;
+  overflow:hidden!important;
+  min-height:240px!important;
+  padding-right:38%!important;
 }
 
-/* Phone stays clean and readable */
-html.device-phone .home-depth-scene{
+html.device-tablet #section-inicio>.section-head::before{
+  top:0;
+  right:0;
+  width:42%;
+  height:100%;
+  background-image:
+    linear-gradient(90deg,rgba(23,63,53,.86),rgba(23,63,53,.16) 55%,rgba(23,63,53,0)),
+    url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg");
+  background-size:cover!important;
+  background-position:center 36%!important;
+  border-radius:28px 0 0 28px;
+  transform:perspective(900px) rotateY(-5deg) scale(1.02);
+  box-shadow:-18px 0 36px rgba(6,34,27,.22);
+}
+
+html.device-tablet #section-inicio>.section-head::after{
+  right:4%;
+  top:14%;
+  width:30%;
+  height:64%;
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:22px;
+  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+  transform:rotate(-2deg);
+}
+
+/* Phone: preserve clean current experience */
+html.device-phone #section-inicio>.section-head::before,
+html.device-phone #section-inicio>.section-head::after{
   display:none!important;
 }
