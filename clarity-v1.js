@@ -155,7 +155,7 @@
         '</section>'+
         '<section id="claritySupervisorChecklist" class="clarity-supervisor-checklist card hidden">'+
           '<div class="clarity-checklist-head">'+
-            '<div><span class="eyebrow">PREPARO DA OPERAÇÃO</span><h2>Checklist do supervisor</h2><p>Marque os pontos validados na abertura.</p></div>'+
+            '<div><span class="eyebrow">MINHA ROTINA DE HOJE</span><h2>Operação pronta?</h2><p>Marque cada ponto já verificado. O percentual mostra o preparo da operação para o dia.</p></div>'+
             '<div class="clarity-checklist-score"><strong id="clarityChecklistPct">0%</strong><span id="clarityChecklistStatus">em preparo</span></div>'+
           '</div>'+
           '<div class="clarity-checklist-progress"><i id="clarityChecklistBar"></i></div>'+
@@ -178,14 +178,17 @@
 
 
   const clarityChecklistLabels=[
-    ["meta","Meta e curva do dia validadas"],
-    ["hc","HC do dia e posicionamento do time definidos"],
-    ["comerciais","Comerciais alinhados com meta e foco do dia"],
-    ["estore","Meta eStore distribuída para o HC disponível"],
-    ["ruptura","Ruptura, reposição e prioridades operacionais checadas"],
-    ["omni","Omni, Locker, Retira e SLAs revisados"],
-    ["lpr","LPR, recebimento e pendências da abertura conferidos"],
-    ["comunicacao","Time comunicado sobre prioridades e direcionamentos"]
+    ["hidratacao","Você já se hidratou?","Comece cuidando de você para conduzir o dia com mais presença."],
+    ["prioridades","Prioridades alinhadas com a gerência?","Confirme os principais focos e resultados esperados para hoje."],
+    ["meta","Meta e curva do dia validadas?","Revise meta financeira, física e curva esperada por horário."],
+    ["hc","HC do dia e posicionamento do time definidos?","Garanta cobertura, distribuição e responsabilidades por área."],
+    ["comerciais","Comerciais alinhados com meta e foco do dia?","Valide responsáveis, DCOs prioritários e direcionamentos comerciais."],
+    ["estore","Meta eStore distribuída para o HC disponível?","Confirme a meta digital e o compromisso de captação do time."],
+    ["ruptura","Ruptura, reposição e prioridades operacionais checadas?","Revise os principais desvios que podem impactar a venda do dia."],
+    ["omni","Omni, Locker, Retira e SLAs revisados?","Cheque pendências, prazos e experiência dos pedidos digitais."],
+    ["lpr","LPR, recebimento e pendências da abertura conferidos?","Valide recebimento, organização, sensores, cabides e pendências críticas."],
+    ["mobiles","Mobiles e equipamentos prontos para a operação?","Confirme reinício, atualização e funcionamento dos equipamentos do time."],
+    ["comunicacao","Time comunicado sobre prioridades e direcionamentos?","Garanta que todos saibam o foco, a meta e o que precisa acontecer hoje."]
   ];
 
   function clarityChecklistKey(){
@@ -216,11 +219,14 @@
     const pct=Math.round(done/total*100);
     const items=$("clarityChecklistItems");
     if(items){
-      items.innerHTML=clarityChecklistLabels.map(([id,label])=>
+      items.innerHTML=clarityChecklistLabels.map(([id,label,description])=>
         '<label class="clarity-check-item '+(saved[id]?"checked":"")+'">'+
           '<input type="checkbox" data-clarity-check="'+id+'" '+(saved[id]?"checked":"")+'>'+
           '<span class="clarity-check-box">✓</span>'+
-          '<span class="clarity-check-label">'+esc(label)+'</span>'+
+          '<span class="clarity-check-copy">'+
+            '<strong class="clarity-check-label">'+esc(label)+'</strong>'+
+            '<small class="clarity-check-desc">'+esc(description||"")+'</small>'+
+          '</span>'+
         '</label>'
       ).join("");
       items.querySelectorAll("[data-clarity-check]").forEach(input=>{
@@ -234,7 +240,7 @@
       });
     }
     if($("clarityChecklistPct")) $("clarityChecklistPct").textContent=pct+"%";
-    if($("clarityChecklistStatus")) $("clarityChecklistStatus").textContent=pct===100?"concluído":pct>=75?"quase pronto":pct>0?"em andamento":"em preparo";
+    if($("clarityChecklistStatus")) $("clarityChecklistStatus").textContent=pct===100?"operação pronta":pct>=75?"quase pronto":pct>0?"em andamento":"em preparo";
     if($("clarityChecklistBar")) $("clarityChecklistBar").style.width=pct+"%";
     if($("clarityChecklistDone")) $("clarityChecklistDone").textContent=done+" de "+total+" concluídos";
     if($("clarityChecklistDate")) $("clarityChecklistDate").textContent=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
