@@ -396,33 +396,73 @@ function buildAdminStoreSelect(){
   if(homeSel){ homeSel.innerHTML=html; homeSel.value=state.storeCode; }
 }
 
+let loadAllRequestSeq=0;
+
 async function changeAdminStore(code){
-  state.storeCode=code;
-  if($("identityStore")) $("identityStore").textContent="Loja "+state.storeCode;
-  if($("adminStoreSelect")) $("adminStoreSelect").value=code;
-  if($("homeAdminStoreSelect")) $("homeAdminStoreSelect").value=code;
-  await loadAll();
-  setSection(state.section);
+  const next=String(code||"").trim();
+  if(!next) return;
+
+  state.storeCode=next;
+  if($("identityStore")) $("identityStore").textContent="Loja "+next;
+  if($("adminStoreSelect")) $("adminStoreSelect").value=next;
+  if($("homeAdminStoreSelect")) $("homeAdminStoreSelect").value=next;
+  if($("workspaceLabel")) $("workspaceLabel").textContent="WORKSPACE • LOJA "+next;
+
+  const selectors=[$("adminStoreSelect"),$("homeAdminStoreSelect")].filter(Boolean);
+  selectors.forEach(s=>s.disabled=true);
+  try{
+    await loadAll(next);
+    setSection(state.section);
+  }finally{
+    selectors.forEach(s=>s.disabled=false);
+  }
 }
 
-async function loadAll(){
-  $("workspaceLabel").textContent="WORKSPACE • LOJA "+state.storeCode;
-  $("dateBadge").textContent=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
+async function loadAll(storeOverride=null){
+  const requestedStore=String(storeOverride||state.storeCode||"").trim();
+  const requestId=++loadAllRequestSeq;
+
+  if($("workspaceLabel")) $("workspaceLabel").textContent="WORKSPACE • LOJA "+requestedStore;
+  if($("dateBadge")) $("dateBadge").textContent=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
+
   try{
     const [day,detail,groups,history,groupHourlyHistory]=await Promise.all([
-      api("dashboard",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
-      api("detail",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
-      api("groups",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
-      api("history",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode}),
-      api("groupHourlyHistory",{matricula:state.matricula,business_date:localDate(),store_code:state.storeCode})
+      api("dashboard",{matricula:state.matricula,business_date:localDate(),store_code:requestedStore}),
+      api("detail",{matricula:state.matricula,business_date:localDate(),store_code:requestedStore}),
+      api("groups",{matricula:state.matricula,business_date:localDate(),store_code:requestedStore}),
+      api("history",{matricula:state.matricula,business_date:localDate(),store_code:requestedStore}),
+      api("groupHourlyHistory",{matricula:state.matricula,business_date:localDate(),store_code:requestedStore})
     ]);
-    state.day=day; state.detail=detail; state.groupSummary=groups; state.history=Array.isArray(history)?history:[];
+
+    if(requestId!==loadAllRequestSeq || requestedStore!==String(state.storeCode)) return false;
+
+    state.day=day;
+    state.detail=detail;
+    state.groupSummary=groups;
+    state.history=Array.isArray(history)?history:[];
     state.groupHourlyHistory=Array.isArray(groupHourlyHistory)?groupHourlyHistory:[];
-    renderDashboard(); renderGroups(); renderGroupSharePanel(); renderHistory();
+
+    if($("adminStoreSelect")) $("adminStoreSelect").value=requestedStore;
+    if($("homeAdminStoreSelect")) $("homeAdminStoreSelect").value=requestedStore;
+    if($("workspaceLabel")) $("workspaceLabel").textContent="WORKSPACE • LOJA "+requestedStore;
+    if($("identityStore")) $("identityStore").textContent="Loja "+requestedStore;
+
+    renderDashboard();
+    renderGroups();
+    renderGroupSharePanel();
+    renderHistory();
+    if(typeof window.renderClarityHome==="function") window.renderClarityHome();
     if(state.section==="comerciais") await loadCommercials();
+    return true;
   }catch(e){
-    toast(e.message,true);
-    $("metaNotice").textContent=e.message; $("metaNotice").className="notice error";
+    if(requestId===loadAllRequestSeq){
+      toast(e.message,true);
+      if($("metaNotice")){
+        $("metaNotice").textContent=e.message;
+        $("metaNotice").className="notice error";
+      }
+    }
+    return false;
   }
 }
 
@@ -1758,6 +1798,15 @@ function logout(){
   state.section="inicio";
   state.logged=false; $("appShell").classList.add("hidden"); $("loginScreen").classList.remove("hidden");
 }
+
+document.addEventListener("change",e=>{
+  const id=e.target?.id;
+  if(id==="homeAdminStoreSelect" || id==="adminStoreSelect"){
+    const value=String(e.target.value||"").trim();
+    if(value && value!==String(state.storeCode)) changeAdminStore(value);
+  }
+});
+document.documentElement.dataset.storeSwitchDelegated="1";
 
 function bind(){
   $("loginForm").addEventListener("submit",async e=>{
