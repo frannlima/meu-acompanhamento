@@ -1232,10 +1232,7 @@ async function loadCommercials(){
   }
 }
 
-function renderCommercials(){
-  const payload=state.commercial||{};
-  const rows=Array.isArray(payload.commercials)?payload.commercials:[];
-  const commercialTargetValue=r=>{
+function commercialTargetValue(r){
     const direct=Number(r?.target_financial||0);
     if(direct>0) return direct;
     const dcos=Array.isArray(r?.dcos)?r.dcos:[];
@@ -1247,7 +1244,23 @@ function renderCommercials(){
     return detailRows()
       .filter(row=>assigned.has(Number(row.dco_code)))
       .reduce((sum,row)=>sum+Number(row.target_financial||0),0);
-  };
+}
+
+// Ordenação única para a tela e os complementos que mapeiam card por posição.
+function rankCommercialRows(rows){
+  return rows.sort((a,b)=>{
+    const targetA=commercialTargetValue(a),targetB=commercialTargetValue(b);
+    const saleA=Number(a.sales_financial||0),saleB=Number(b.sales_financial||0);
+    const attainmentA=targetA>0?saleA/targetA:-1;
+    const attainmentB=targetB>0?saleB/targetB:-1;
+    return attainmentB-attainmentA || saleB-saleA ||
+      String(a.commercial_name||"").localeCompare(String(b.commercial_name||""),"pt-BR");
+  });
+}
+
+function renderCommercials(){
+  const payload=state.commercial||{};
+  const rows=rankCommercialRows(Array.isArray(payload.commercials)?payload.commercials:[]);
   const total=rows.reduce((a,r)=>{
     a.target+=commercialTargetValue(r);
     a.sale+=Number(r.sales_financial||0);
@@ -1280,7 +1293,7 @@ function renderCommercials(){
   }
 
   empty.classList.add("hidden");
-  grid.innerHTML=rows.map(r=>{
+  grid.innerHTML=rows.map((r,rankIndex)=>{
     const target=commercialTargetValue(r);
     const sale=Number(r.sales_financial||0);
     const attainment=target?sale/target*100:0;
@@ -1300,7 +1313,10 @@ function renderCommercials(){
     return '<article class="commercial-card commercial-performance-card">'+
       '<div class="commercial-card-top">'+
         '<div class="commercial-person"><div class="commercial-avatar">'+photo+'</div><div><span class="eyebrow">RESPONSÁVEL COMERCIAL</span><h2>'+esc(r.commercial_name)+'</h2><small>'+esc(worlds.join(" • ")||"DCOs atribuídos")+'</small></div></div>'+
-        '<div class="commercial-donut evolution-donut '+evolutionClass+'" style="--p:'+evolutionPct+'"><div><strong>'+(evolution===null?"—":(evolution>0?"+":"")+pct(evolution))+'</strong><span>evolução</span></div></div>'+
+        '<div class="commercial-rank-side">'+
+          '<div class="commercial-donut evolution-donut '+evolutionClass+'" style="--p:'+evolutionPct+'"><div><strong>'+(evolution===null?"—":(evolution>0?"+":"")+pct(evolution))+'</strong><span>evolução</span></div></div>'+
+          '<span class="commercial-rank-badge" aria-label="'+(rankIndex+1)+'ª posição por atingimento">'+(rankIndex+1)+'º</span>'+
+        '</div>'+
       '</div>'+
       '<div class="commercial-metrics commercial-performance-metrics">'+
         '<div><span>Meta</span><strong>'+money(target,2)+'</strong></div>'+
