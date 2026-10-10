@@ -513,3 +513,10 @@ html.device-desktop .adaptive-store-context{
 #section-mais .adaptive-store-context{
   margin-left:auto;
 }
+
+
+/* v2.2 — remove identity hero completely */
+#executionIdentityHero,
+.execution-identity-hero{
+  display:none!important;
+}
