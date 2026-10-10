@@ -2136,7 +2136,7 @@ html.device-desktop .adaptive-home-person em{
 }
 
 
-/* v4.3 — Home campaign photo with depth and layered overlap */
+/* v4.4 — Home campaign photo clean split layout */
 #section-inicio>.section-head{
   position:relative!important;
   overflow:hidden!important;
@@ -2162,94 +2162,73 @@ html.device-desktop .adaptive-home-person em{
   z-index:3;
 }
 
-/* Desktop: official Pool Jeans campaign photo integrated as layered background */
+/* Desktop: clean editorial split, no 3D */
 html.device-desktop #section-inicio>.section-head{
-  min-height:340px!important;
-  padding:30px 44% 34px 34px!important;
+  min-height:330px!important;
+  padding:28px 46% 30px 28px!important;
   border-radius:28px!important;
-  background:
-    linear-gradient(135deg,#173F35 0%,#1A4A3E 58%,#214F43 100%)!important;
-  box-shadow:0 24px 56px rgba(23,63,53,.18)!important;
+  background:#173F35!important;
+  box-shadow:0 20px 48px rgba(23,63,53,.16)!important;
 }
 
 html.device-desktop #section-inicio>.section-head::before{
-  top:-5%;
-  right:-1%;
-  width:49%;
-  height:110%;
-  background-image:
-    linear-gradient(90deg,rgba(23,63,53,.86) 0%,rgba(23,63,53,.28) 26%,rgba(23,63,53,.02) 64%),
-    url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg");
+  top:0;
+  right:0;
+  width:48%;
+  height:100%;
+  background-image:url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg");
   background-size:cover!important;
-  background-position:center 38%!important;
+  background-position:center 34%!important;
   background-repeat:no-repeat!important;
-  border-radius:34px 0 0 34px;
-  transform:
-    perspective(1200px)
-    rotateY(-7deg)
-    translateZ(0)
-    scale(1.035);
-  transform-origin:center right;
-  box-shadow:
-    -30px 0 55px rgba(6,34,27,.30),
-    inset 18px 0 36px rgba(23,63,53,.38);
   filter:saturate(.95) contrast(1.02);
 }
 
-/* Layered translucent planes create depth without replacing the photo */
 html.device-desktop #section-inicio>.section-head::after{
-  right:3.5%;
-  top:10%;
-  width:35%;
-  height:74%;
-  border-radius:30px;
-  border:1px solid rgba(255,255,255,.16);
+  top:0;
+  right:0;
+  width:55%;
+  height:100%;
   background:
-    linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.025));
-  box-shadow:
-    -34px 30px 0 -12px rgba(214,210,196,.07),
-    -62px 58px 0 -24px rgba(255,255,255,.045),
-    0 26px 55px rgba(6,34,27,.16);
-  backdrop-filter:blur(2px);
-  -webkit-backdrop-filter:blur(2px);
-  transform:
-    perspective(1000px)
-    rotateY(-5deg)
-    rotateZ(-1.5deg);
+    linear-gradient(90deg,
+      #173F35 0%,
+      rgba(23,63,53,.96) 10%,
+      rgba(23,63,53,.72) 24%,
+      rgba(23,63,53,.28) 44%,
+      rgba(23,63,53,0) 68%);
 }
 
 html.device-desktop #section-inicio .adaptive-home-identity{
   position:relative!important;
   right:auto!important;
   top:auto!important;
-  width:min(760px,76%)!important;
-  max-width:760px!important;
-  margin:0 0 30px!important;
+  width:min(720px,78%)!important;
+  max-width:720px!important;
+  margin:0 0 28px!important;
   padding:12px 14px!important;
   border-radius:18px!important;
-  background:rgba(255,255,255,.085)!important;
+  background:rgba(255,255,255,.08)!important;
   border:1px solid rgba(255,255,255,.16)!important;
-  box-shadow:0 12px 26px rgba(0,0,0,.08)!important;
-  backdrop-filter:blur(10px)!important;
-  -webkit-backdrop-filter:blur(10px)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(8px)!important;
+  -webkit-backdrop-filter:blur(8px)!important;
 }
 
 html.device-desktop #section-inicio>.section-head>div:not(.adaptive-home-identity):first-of-type{
   width:100%!important;
-  max-width:600px!important;
+  max-width:560px!important;
 }
 
 html.device-desktop #section-inicio>.section-head h1{
-  font-size:48px!important;
-  line-height:.98!important;
+  font-size:46px!important;
+  line-height:1!important;
   margin:6px 0 8px!important;
   color:#fff!important;
 }
 
 html.device-desktop #section-inicio>.section-head p{
-  max-width:560px!important;
+  max-width:520px!important;
   font-size:14px!important;
-  line-height:1.45!important;
+  line-height:1.5!important;
   color:rgba(255,255,255,.86)!important;
 }
 
@@ -2266,19 +2245,20 @@ html.device-desktop #section-inicio>.section-head .hero-actions{
 html.device-desktop #section-inicio .home-admin-store{
   width:100%!important;
   max-width:none!important;
-  margin:18px 0 0!important;
+  margin:20px 0 0!important;
   padding:9px 10px!important;
   background:rgba(255,255,255,.10)!important;
   border-color:rgba(255,255,255,.18)!important;
-  box-shadow:0 10px 24px rgba(0,0,0,.08)!important;
+  box-shadow:none!important;
 }
 
-/* Tablet: same photo, shallower depth */
+/* Tablet: same clean split with softer photo area */
 html.device-tablet #section-inicio>.section-head{
   position:relative!important;
   overflow:hidden!important;
-  min-height:240px!important;
-  padding-right:38%!important;
+  min-height:230px!important;
+  padding-right:40%!important;
+  background:#173F35!important;
 }
 
 html.device-tablet #section-inicio>.section-head::before{
@@ -2286,28 +2266,20 @@ html.device-tablet #section-inicio>.section-head::before{
   right:0;
   width:42%;
   height:100%;
-  background-image:
-    linear-gradient(90deg,rgba(23,63,53,.86),rgba(23,63,53,.16) 55%,rgba(23,63,53,0)),
-    url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg");
+  background-image:url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg");
   background-size:cover!important;
-  background-position:center 36%!important;
-  border-radius:28px 0 0 28px;
-  transform:perspective(900px) rotateY(-5deg) scale(1.02);
-  box-shadow:-18px 0 36px rgba(6,34,27,.22);
+  background-position:center 34%!important;
 }
 
 html.device-tablet #section-inicio>.section-head::after{
-  right:4%;
-  top:14%;
-  width:30%;
-  height:64%;
-  border:1px solid rgba(255,255,255,.15);
-  border-radius:22px;
-  background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
-  transform:rotate(-2deg);
+  top:0;
+  right:0;
+  width:50%;
+  height:100%;
+  background:linear-gradient(90deg,#173F35 0%,rgba(23,63,53,.82) 24%,rgba(23,63,53,.16) 68%,rgba(23,63,53,0) 100%);
 }
 
-/* Phone: preserve clean current experience */
+/* Phone: preserve the existing clean mobile layout */
 html.device-phone #section-inicio>.section-head::before,
 html.device-phone #section-inicio>.section-head::after{
   display:none!important;
