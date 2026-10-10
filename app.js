@@ -86,6 +86,26 @@ function setSection(section){
   }
 }
 
+function startBusinessDateWatcher(){
+  let activeDate=localDate();
+  const refreshIfChanged=async ()=>{
+    const today=localDate();
+    if(today===activeDate || !state.logged) return;
+    activeDate=today;
+    try{
+      await loadAll();
+      if(state.role==="administrador") buildAdminStoreSelect();
+      toast("Novo dia carregado: metas e indicadores atualizados.");
+    }catch(e){
+      console.warn("Falha ao atualizar virada do dia",e);
+    }
+  };
+  setInterval(refreshIfChanged,30000);
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible") refreshIfChanged();
+  });
+}
+
 function parsePt(value){
   const s=String(value??"").trim().replace(/R\$/gi,"").replace(/%/g,"").replace(/\s/g,"");
   if(!s) return 0;
@@ -342,6 +362,7 @@ async function doLogin(matricula, storeCode, save=true){
   if($("identityStore")) $("identityStore").textContent=person.store_name||("Loja "+state.storeCode);
   document.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
   $("adminStoreBar").classList.toggle("hidden",state.role!=="administrador");
+  if($("homeAdminStoreBar")) $("homeAdminStoreBar").classList.toggle("hidden",state.role!=="administrador");
   document.querySelectorAll(".reset-capable").forEach(el=>el.classList.toggle("hidden",!["administrador","gerente","supervisor"].includes(state.role)));
   buildAdminStoreSelect();
   await loadAll();
@@ -368,14 +389,18 @@ function chooseWorld(world){
 }
 
 function buildAdminStoreSelect(){
+  const html=STORE_CODES.map(c=>'<option value="'+c+'">Loja '+c+'</option>').join("");
   const sel=$("adminStoreSelect");
-  sel.innerHTML=STORE_CODES.map(c=>'<option value="'+c+'">Loja '+c+'</option>').join("");
-  sel.value=state.storeCode;
+  if(sel){ sel.innerHTML=html; sel.value=state.storeCode; }
+  const homeSel=$("homeAdminStoreSelect");
+  if(homeSel){ homeSel.innerHTML=html; homeSel.value=state.storeCode; }
 }
 
 async function changeAdminStore(code){
   state.storeCode=code;
   if($("identityStore")) $("identityStore").textContent="Loja "+state.storeCode;
+  if($("adminStoreSelect")) $("adminStoreSelect").value=code;
+  if($("homeAdminStoreSelect")) $("homeAdminStoreSelect").value=code;
   await loadAll();
   setSection(state.section);
 }
@@ -1616,7 +1641,10 @@ function bind(){
   $("resetDayModal").addEventListener("click",e=>{if(e.target===$("resetDayModal")) closeResetDay()});
   $("pasteArea").addEventListener("input",updatePastePreview); $("confirmPaste").onclick=confirmPaste;
   if($("finishChecklist")) $("finishChecklist").onclick=()=>{$("checklistModal").classList.add("hidden");showWorldModal()};
-  $("logoutBtn").onclick=logout; $("adminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
+  $("logoutBtn").onclick=logout;
+  $("adminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
+  if($("homeAdminStoreSelect")) $("homeAdminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
+  startBusinessDateWatcher();
   $("refreshRegional").onclick=loadRegional;
   $("openRegionalPanel").onclick=openRegionalPanel;
   $("closeRegionalPanel").onclick=closeRegionalPanel;
