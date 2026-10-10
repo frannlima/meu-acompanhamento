@@ -63,6 +63,43 @@
     if(wrap.parentElement!==actions) actions.prepend(wrap);
   }
 
+
+  function greetingForNow(){
+    try{
+      const h=Number(new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Fortaleza",hour:"2-digit",hour12:false}).format(new Date()));
+      return h<12?"Bom dia":h<18?"Boa tarde":"Boa noite";
+    }catch(_){
+      const h=new Date().getHours();
+      return h<12?"Bom dia":h<18?"Boa tarde":"Boa noite";
+    }
+  }
+
+  function renderCompactHomeIdentity(){
+    const home=document.querySelector("#section-inicio > .section-head");
+    if(!home) return;
+
+    let chip=document.getElementById("adaptiveHomeIdentity");
+    if(!chip){
+      chip=document.createElement("div");
+      chip.id="adaptiveHomeIdentity";
+      chip.className="adaptive-home-identity";
+      home.prepend(chip);
+    }
+
+    const u=(window.state&&state.user)||{};
+    const first=String((window.state&&state.employeeName)||u.first_name||u.full_name||"").trim()||"Time";
+    const role=String(u.job_title||"").trim()||"Supervisor";
+    const store=String((window.state&&state.storeCode)||"").trim();
+
+    chip.innerHTML=
+      '<span class="adaptive-home-avatar">'+first.charAt(0).toUpperCase()+'</span>'+
+      '<span class="adaptive-home-person">'+
+        '<small>'+greetingForNow()+',</small>'+
+        '<strong>'+first+'</strong>'+
+        '<em>'+role+(store?' • Loja '+store:'')+'</em>'+
+      '</span>';
+  }
+
   function syncContext(){
     removeLegacyIdentity();
 
@@ -77,6 +114,7 @@
       mobileMeta.textContent=store?("Loja "+store+" • Meu Acompanhamento"):"Meu Acompanhamento";
     }
 
+    renderCompactHomeIdentity();
     placeStoreContext();
   }
 
