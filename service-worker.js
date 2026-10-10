@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v73";
+const CACHE="meu-acompanhamento-v74";
 const ASSETS=[
   "./",
   "./index.html",
@@ -9,7 +9,7 @@ const ASSETS=[
   "./mobile-experience-v1.css?v=3",
   "./responsive-device-v1.css?v=1",
   "./execution-v1.css?v=8",
-  "./adaptive-header-v2.css?v=19",
+  "./adaptive-header-v2.css?v=20",
   "./app.js?v=26",
   "./enhancements-v9.js?v=8",
   "./premium-v22.js?v=9",
@@ -22,6 +22,7 @@ const ASSETS=[
   "./assets/riachuelo-logo-vertical.svg",
   "./assets/riachuelo-logo.svg",
   "./assets/ria-logo-approved.svg",
+  "./assets/ria-signature-horizontal.svg",
   "./assets/esquadrao-cliente.svg",
   "./assets/profiles/roberta-paiva.jpg",
   "./assets/profiles/camila-barros.jpg",
