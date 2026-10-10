@@ -1284,3 +1284,34 @@
     font-size:5.5px!important;
   }
 }
+
+/* Ranking de comerciais por percentual de atingimento */
+.commercial-performance-card .commercial-rank-side{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex:0 0 auto;
+  gap:10px;
+}
+.commercial-performance-card .commercial-rank-badge{
+  display:grid;
+  place-items:center;
+  flex:0 0 52px;
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:#DE7C00;
+  color:#fff;
+  font:800 19px/1 Arial,sans-serif;
+  box-shadow:0 4px 12px rgba(222,124,0,.18);
+  white-space:nowrap;
+}
+@media(max-width:600px){
+  .commercial-performance-card .commercial-rank-side{gap:6px;}
+  .commercial-performance-card .commercial-rank-badge{
+    flex-basis:38px;
+    width:38px;
+    height:38px;
+    font-size:14px;
+  }
+}
