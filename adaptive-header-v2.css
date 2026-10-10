@@ -1969,3 +1969,271 @@ html.device-desktop .adaptive-home-person em{
   font-size:10.5px!important;
   line-height:1.4!important;
 }
+
+
+/* v4.0 — premium login composition only */
+@media(min-width:901px){
+  #loginScreen.login-screen{
+    grid-template-columns:minmax(0,1.75fr) minmax(420px,.78fr)!important;
+    background:#F4F1E9!important;
+  }
+
+  #loginScreen .login-hero{
+    position:relative!important;
+    min-height:100vh!important;
+    overflow:hidden!important;
+    background-image:
+      linear-gradient(90deg,rgba(4,44,34,.98) 0%,rgba(4,44,34,.92) 37%,rgba(4,44,34,.58) 57%,rgba(4,44,34,.08) 82%,rgba(4,44,34,0) 100%),
+      var(--fashion-image)!important;
+    background-size:cover!important;
+    background-position:center 24%!important;
+  }
+
+  #loginScreen .login-overlay{
+    background:
+      linear-gradient(180deg,rgba(7,42,34,.04),rgba(7,42,34,.22))!important;
+  }
+
+  #loginScreen .login-hero-content{
+    width:100%!important;
+    max-width:none!important;
+    min-height:100vh!important;
+    padding:56px 58px 48px!important;
+    justify-content:space-between!important;
+  }
+
+  #loginScreen .login-brand-line{
+    width:max-content!important;
+    max-width:54%!important;
+  }
+
+  #loginScreen .login-logo-horizontal{
+    width:300px!important;
+    max-width:100%!important;
+    filter:brightness(0) invert(1)!important;
+  }
+
+  #loginScreen .login-brand-divider{
+    height:72px!important;
+    opacity:.75!important;
+  }
+
+  #loginScreen .login-brand-line .eyebrow{
+    font-size:12px!important;
+    line-height:1.55!important;
+    letter-spacing:.22em!important;
+  }
+
+  #loginScreen .login-title-block{
+    max-width:760px!important;
+    margin-top:auto!important;
+    margin-bottom:26px!important;
+  }
+
+  #loginScreen .login-title-block h1{
+    font-size:clamp(62px,5.8vw,96px)!important;
+    line-height:.88!important;
+    letter-spacing:-.065em!important;
+    max-width:760px!important;
+    margin:0 0 22px!important;
+    color:#fff!important;
+  }
+
+  #loginScreen .login-title-block h1 span{
+    color:#F2DFC0!important;
+  }
+
+  #loginScreen .login-accent-line{
+    width:112px!important;
+    height:5px!important;
+    border-radius:999px!important;
+    background:#DE7C00!important;
+  }
+
+  #loginScreen .login-title-block p{
+    margin-top:20px!important;
+    max-width:610px!important;
+    font-size:18px!important;
+    line-height:1.5!important;
+    color:rgba(255,255,255,.94)!important;
+  }
+
+  #loginScreen .login-benefits{
+    width:min(650px,66%)!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:0!important;
+    margin-top:10px!important;
+  }
+
+  #loginScreen .login-benefits>div{
+    min-height:72px!important;
+    display:grid!important;
+    grid-template-columns:54px 1fr!important;
+    align-items:center!important;
+    gap:12px!important;
+    padding:0 18px!important;
+    border-right:1px solid rgba(255,255,255,.35)!important;
+  }
+
+  #loginScreen .login-benefits>div:first-child{padding-left:0!important}
+  #loginScreen .login-benefits>div:last-child{border-right:0!important}
+
+  #loginScreen .login-benefits b{
+    width:50px!important;
+    height:50px!important;
+    display:grid!important;
+    place-items:center!important;
+    border-radius:14px!important;
+    background:rgba(255,255,255,.12)!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    color:#F2DFC0!important;
+    font-size:24px!important;
+    backdrop-filter:blur(6px)!important;
+  }
+
+  #loginScreen .login-benefits span{
+    color:#fff!important;
+    font-size:12px!important;
+    line-height:1.35!important;
+    font-weight:700!important;
+  }
+
+  #loginScreen .login-pane{
+    padding:40px 34px!important;
+    background:linear-gradient(145deg,#F5F1E8,#EEE7D8)!important;
+  }
+
+  #loginScreen .login-card{
+    width:min(520px,100%)!important;
+    padding:38px 38px 30px!important;
+    border-radius:28px!important;
+    border:1px solid rgba(23,63,53,.08)!important;
+    box-shadow:0 26px 70px rgba(23,63,53,.14)!important;
+  }
+
+  #loginScreen .login-card h2{
+    max-width:430px!important;
+    font-size:46px!important;
+    line-height:.98!important;
+    margin:10px 0 16px!important;
+  }
+
+  #loginScreen .login-card>p{
+    font-size:15px!important;
+    line-height:1.5!important;
+    margin-bottom:30px!important;
+  }
+
+  #loginScreen .login-card label{
+    font-size:12px!important;
+    margin-top:18px!important;
+  }
+
+  #loginScreen .login-input-shell{
+    min-height:58px!important;
+    border-radius:14px!important;
+  }
+
+  #loginScreen .login-input-shell input{
+    height:58px!important;
+    font-size:16px!important;
+  }
+
+  #loginScreen .login-enter-btn{
+    min-height:58px!important;
+    margin-top:24px!important;
+    font-size:14px!important;
+    justify-content:space-between!important;
+    padding:0 22px!important;
+    border-radius:14px!important;
+  }
+
+  #loginScreen .login-rule{
+    display:none!important;
+  }
+
+  #loginScreen .login-card-footer{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 190px!important;
+    align-items:center!important;
+    gap:18px!important;
+    margin-top:26px!important;
+    padding-top:20px!important;
+    border-top:1px solid #E3DED3!important;
+  }
+
+  #loginScreen .login-secure-note{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+    color:#466964!important;
+  }
+
+  #loginScreen .login-secure-note>span{
+    width:34px!important;
+    height:34px!important;
+    border:1px solid #466964!important;
+    border-radius:11px!important;
+    display:grid!important;
+    place-items:center!important;
+    font-size:15px!important;
+  }
+
+  #loginScreen .login-secure-note small{
+    font-size:9px!important;
+    line-height:1.45!important;
+    font-weight:700!important;
+  }
+
+  #loginScreen .login-ria-signature{
+    width:180px!important;
+    max-width:100%!important;
+    height:auto!important;
+    justify-self:end!important;
+    display:block!important;
+  }
+}
+
+/* Tablet keeps the premium composition without squeezing copy */
+@media(min-width:701px) and (max-width:900px){
+  #loginScreen .login-card-footer{
+    display:grid!important;
+    grid-template-columns:1fr 150px!important;
+    gap:12px!important;
+    align-items:center!important;
+    margin-top:18px!important;
+    padding-top:16px!important;
+    border-top:1px solid #E3DED3!important;
+  }
+  #loginScreen .login-ria-signature{width:145px!important}
+}
+
+/* Mobile: simple, readable and branded */
+@media(max-width:700px){
+  #loginScreen .login-benefits{display:none!important}
+  #loginScreen .login-card-footer{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    gap:14px!important;
+    margin-top:18px!important;
+    padding-top:16px!important;
+    border-top:1px solid #E3DED3!important;
+  }
+  #loginScreen .login-ria-signature{
+    width:150px!important;
+    max-width:70%!important;
+    height:auto!important;
+  }
+  #loginScreen .login-secure-note{
+    display:flex!important;
+    gap:8px!important;
+    align-items:center!important;
+    color:#466964!important;
+  }
+  #loginScreen .login-secure-note small{
+    font-size:8px!important;
+    line-height:1.4!important;
+  }
+}
