@@ -1744,3 +1744,130 @@ html.device-phone #section-inicio [data-slogan]{
   width:21px!important;
   height:21px!important;
 }
+
+
+/* v3.6 — commercial evolution donut alignment */
+#section-comerciais .commercial-performance-card .commercial-card-top{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 96px!important;
+  align-items:center!important;
+  gap:14px!important;
+}
+
+#section-comerciais .commercial-performance-card .evolution-donut{
+  position:relative!important;
+  width:88px!important;
+  height:88px!important;
+  min-width:88px!important;
+  max-width:88px!important;
+  flex:0 0 88px!important;
+  justify-self:center!important;
+  align-self:center!important;
+  margin:0 auto!important;
+  border-radius:50%!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+
+#section-comerciais .commercial-performance-card .evolution-donut:after{
+  content:""!important;
+  position:absolute!important;
+  inset:11px!important;
+  border-radius:50%!important;
+  background:#fff!important;
+  z-index:0!important;
+}
+
+#section-comerciais .commercial-performance-card .evolution-donut>div{
+  position:absolute!important;
+  inset:11px!important;
+  z-index:2!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  border-radius:50%!important;
+  background:#fff!important;
+  padding:0!important;
+  margin:0!important;
+  line-height:1!important;
+  box-sizing:border-box!important;
+}
+
+#section-comerciais .commercial-performance-card .evolution-donut strong{
+  display:block!important;
+  width:100%!important;
+  margin:0!important;
+  padding:0!important;
+  font-size:13px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:-.03em!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+}
+
+#section-comerciais .commercial-performance-card .evolution-donut span{
+  display:block!important;
+  width:100%!important;
+  margin:5px 0 0!important;
+  padding:0!important;
+  font-size:5.5px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  letter-spacing:.08em!important;
+  text-transform:uppercase!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+}
+
+@media(max-width:900px){
+  #section-comerciais .commercial-performance-card .commercial-card-top{
+    grid-template-columns:minmax(0,1fr) 78px!important;
+    gap:10px!important;
+  }
+  #section-comerciais .commercial-performance-card .evolution-donut{
+    width:72px!important;
+    height:72px!important;
+    min-width:72px!important;
+    max-width:72px!important;
+    flex-basis:72px!important;
+  }
+  #section-comerciais .commercial-performance-card .evolution-donut:after,
+  #section-comerciais .commercial-performance-card .evolution-donut>div{
+    inset:9px!important;
+  }
+  #section-comerciais .commercial-performance-card .evolution-donut strong{
+    font-size:11px!important;
+  }
+  #section-comerciais .commercial-performance-card .evolution-donut span{
+    margin-top:4px!important;
+    font-size:4.8px!important;
+  }
+}
+
+@media(max-width:380px){
+  #section-comerciais .commercial-performance-card .commercial-card-top{
+    grid-template-columns:minmax(0,1fr) 70px!important;
+  }
+  #section-comerciais .commercial-performance-card .evolution-donut{
+    width:66px!important;
+    height:66px!important;
+    min-width:66px!important;
+    max-width:66px!important;
+    flex-basis:66px!important;
+  }
+  #section-comerciais .commercial-performance-card .evolution-donut:after,
+  #section-comerciais .commercial-performance-card .evolution-donut>div{
+    inset:8px!important;
+  }
+  #section-comerciais .commercial-performance-card .evolution-donut strong{
+    font-size:10px!important;
+  }
+  #section-comerciais .commercial-performance-card .evolution-donut span{
+    font-size:4.5px!important;
+  }
+}
