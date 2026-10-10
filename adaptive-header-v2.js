@@ -12,9 +12,29 @@
     mais:"Mais"
   };
 
+  let identityCache={name:"",role:"",store:""};
+
   function activeSection(){
     const active=document.querySelector(".section.active");
     return active?.id?.replace("section-","")||"inicio";
+  }
+
+  function captureIdentity(){
+    const legacy=document.querySelector("#executionIdentityHero,.execution-identity-hero");
+    const legacyName=legacy?.querySelector(".identity-copy h2")?.textContent?.replace(/!+$/,"").trim()||"";
+    const legacyRole=legacy?.querySelector(".identity-copy p")?.textContent?.trim()||"";
+
+    const sideName=document.getElementById("identityName")?.textContent?.trim()||"";
+    const sideRole=document.getElementById("identityRole")?.textContent?.trim()||"";
+    const sideStore=document.getElementById("identityStore")?.textContent?.trim()||"";
+
+    if(legacyName && legacyName!=="—") identityCache.name=legacyName;
+    else if(sideName && sideName!=="—") identityCache.name=sideName;
+
+    if(legacyRole && legacyRole!=="—") identityCache.role=legacyRole;
+    else if(sideRole && sideRole!=="—") identityCache.role=sideRole;
+
+    if(sideStore && sideStore!=="—") identityCache.store=sideStore;
   }
 
   function removeLegacyIdentity(){
@@ -25,9 +45,14 @@
     return document.querySelector(".section.active > .section-head, .section.active > .premium-more-hero");
   }
 
+  function isAdmin(){
+    return !!document.querySelector(".admin-only:not(.hidden)");
+  }
+
   function ensureAdaptiveStoreContext(){
     const select=document.getElementById("adminStoreSelect");
     if(!select) return null;
+
     let wrap=document.getElementById("adaptiveStoreContext");
     if(!wrap){
       wrap=document.createElement("div");
@@ -42,12 +67,11 @@
   function placeStoreContext(){
     const wrap=ensureAdaptiveStoreContext();
     const head=getActiveHead();
-    const adminBar=document.getElementById("adminStoreBar");
-    if(!wrap||!head||!adminBar) return;
+    if(!wrap||!head) return;
 
-    const shouldShow=!adminBar.classList.contains("hidden");
-    wrap.classList.toggle("hidden",!shouldShow);
-    if(!shouldShow) return;
+    const show=isAdmin();
+    wrap.classList.toggle("hidden",!show);
+    if(!show) return;
 
     if(head.classList.contains("premium-more-hero")){
       if(wrap.parentElement!==head) head.appendChild(wrap);
@@ -62,7 +86,6 @@
     }
     if(wrap.parentElement!==actions) actions.prepend(wrap);
   }
-
 
   function greetingForNow(){
     try{
@@ -86,34 +109,43 @@
       home.prepend(chip);
     }
 
-    const u=(window.state&&state.user)||{};
-    const first=String((window.state&&state.employeeName)||u.first_name||u.full_name||"").trim()||"Time";
-    const role=String(u.job_title||"").trim()||"Supervisor";
-    const store=String((window.state&&state.storeCode)||"").trim();
+    const name=(identityCache.name||document.getElementById("identityName")?.textContent||"").trim();
+    const role=(identityCache.role||document.getElementById("identityRole")?.textContent||"").trim();
+    const store=(identityCache.store||document.getElementById("identityStore")?.textContent||"").trim();
+
+    const safeName=name && name!=="—" ? name : "Usuário conectado";
+    const safeRole=role && role!=="—" ? role : "Perfil em carregamento";
+    const storeLabel=store && store!=="—" ? store : "";
 
     chip.innerHTML=
-      '<span class="adaptive-home-avatar">'+first.charAt(0).toUpperCase()+'</span>'+
+      '<span class="adaptive-home-avatar">'+safeName.charAt(0).toUpperCase()+'</span>'+
       '<span class="adaptive-home-person">'+
         '<small>'+greetingForNow()+',</small>'+
-        '<strong>'+first+'</strong>'+
-        '<em>'+role+(store?' • Loja '+store:'')+'</em>'+
+        '<strong>'+safeName+'</strong>'+
+        '<em>'+safeRole+(storeLabel?' • '+storeLabel:'')+'</em>'+
       '</span>';
   }
 
+  function syncMobileTitle(){
+    const key=activeSection();
+    const mobileName=document.getElementById("mobileGreetingName");
+    const mobileMeta=document.getElementById("mobileGreetingMeta");
+    if(mobileName) mobileName.textContent=sectionTitles[key]||"Meu Acompanhamento";
+
+    if(mobileMeta){
+      const store=(identityCache.store||document.getElementById("identityStore")?.textContent||"").trim();
+      mobileMeta.textContent=store && store!=="—" ? store : "Meu Acompanhamento";
+    }
+  }
+
   function syncContext(){
+    captureIdentity();
     removeLegacyIdentity();
 
     const key=activeSection();
     document.body.dataset.activeSection=key;
 
-    const mobileName=document.getElementById("mobileGreetingName");
-    const mobileMeta=document.getElementById("mobileGreetingMeta");
-    if(mobileName) mobileName.textContent=sectionTitles[key]||"Meu Acompanhamento";
-    if(mobileMeta){
-      const store=(window.state&&state.storeCode)?String(state.storeCode):"";
-      mobileMeta.textContent=store?("Loja "+store+" • Meu Acompanhamento"):"Meu Acompanhamento";
-    }
-
+    syncMobileTitle();
     renderCompactHomeIdentity();
     placeStoreContext();
   }
