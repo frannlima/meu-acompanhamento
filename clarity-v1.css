@@ -630,3 +630,21 @@
     font-size:8px;
   }
 }
+
+
+/* Checklist visibility priority */
+.clarity-home > .clarity-summary{order:1}
+.clarity-home > .clarity-routine-grid{order:2}
+.clarity-home > .clarity-groups{order:3}
+.clarity-home > .clarity-curve{order:4}
+.clarity-home > .clarity-actions{order:5}
+.clarity-routine-grid > .clarity-supervisor-checklist{order:1}
+.clarity-routine-grid > .clarity-journey{order:2}
+
+@media(max-width:900px){
+  .clarity-routine-grid > .clarity-supervisor-checklist{
+    order:1;
+    margin-top:0;
+  }
+  .clarity-routine-grid > .clarity-journey{order:2}
+}
