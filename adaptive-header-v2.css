@@ -1612,3 +1612,23 @@ html.device-phone #section-inicio [data-slogan]{
   position:relative;
   z-index:1;
 }
+
+
+/* v3.4 — commercial form action safety */
+#commercialAdminPanel .modal-actions{
+  position:relative!important;
+  z-index:140!important;
+  pointer-events:auto!important;
+}
+#commercialAdminPanel .modal-actions .btn,
+#saveCommercialBtn,
+#cancelCommercialEdit{
+  position:relative!important;
+  z-index:141!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#saveCommercialBtn:disabled{
+  opacity:.72!important;
+  cursor:wait!important;
+}
