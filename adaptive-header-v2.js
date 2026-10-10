@@ -46,7 +46,11 @@
   }
 
   function isAdmin(){
-    return !!document.querySelector(".admin-only:not(.hidden)");
+    try{
+      return String(state.role||"").toLowerCase()==="administrador";
+    }catch(_){
+      return false;
+    }
   }
 
   function ensureAdaptiveStoreContext(){
@@ -118,7 +122,7 @@
     const storeLabel=store && store!=="—" ? store : "";
 
     chip.innerHTML=
-      '<span class="adaptive-home-avatar"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></span>'+
+      '<span class="adaptive-home-avatar"><img src="./assets/ria-logo-approved.svg" alt="RIA"></span>'+
       '<span class="adaptive-home-person">'+
         '<small>'+greetingForNow()+',</small>'+
         '<strong>'+safeName+'</strong>'+
