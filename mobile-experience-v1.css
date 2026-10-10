@@ -313,3 +313,77 @@ body{background:#F4F0E7!important}
 @media(max-width:390px){
   .group-hourly-insights{grid-template-columns:1fr}
 }
+
+
+/* Desktop squad layout — vertical emphasis */
+@media(min-width:901px){
+  #mobileSquadCard.squad-card{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto auto!important;
+    gap:22px!important;
+    align-items:start!important;
+    padding:26px 30px 30px!important;
+    background:linear-gradient(135deg,#F7F4ED 0%,#FBF8F0 100%)!important;
+  }
+
+  #mobileSquadCard .squad-copy{
+    width:100%!important;
+    max-width:none!important;
+  }
+
+  #mobileSquadCard .squad-copy .eyebrow{
+    display:block!important;
+    margin-bottom:8px!important;
+  }
+
+  #mobileSquadCard .squad-copy h2{
+    max-width:760px!important;
+    margin:0 0 8px!important;
+    font-size:30px!important;
+    line-height:1.08!important;
+    letter-spacing:-.035em!important;
+  }
+
+  #mobileSquadCard .squad-copy p{
+    max-width:900px!important;
+    font-size:11px!important;
+    line-height:1.6!important;
+  }
+
+  #mobileSquadCard .culture-phrase{
+    display:inline-flex!important;
+    align-items:center!important;
+    margin-top:14px!important;
+    padding:10px 14px!important;
+    border-radius:12px!important;
+    font-size:9px!important;
+  }
+
+  #mobileSquadCard > img{
+    width:min(64%,620px)!important;
+    max-width:620px!important;
+    min-width:420px!important;
+    height:auto!important;
+    justify-self:center!important;
+    align-self:start!important;
+    margin:2px auto 0!important;
+    display:block!important;
+  }
+}
+
+@media(min-width:1400px){
+  #mobileSquadCard.squad-card{
+    padding:30px 38px 36px!important;
+    gap:26px!important;
+  }
+
+  #mobileSquadCard .squad-copy h2{
+    font-size:34px!important;
+  }
+
+  #mobileSquadCard > img{
+    width:min(60%,700px)!important;
+    max-width:700px!important;
+  }
+}
