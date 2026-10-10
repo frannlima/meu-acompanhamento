@@ -1969,3 +1969,168 @@ html.device-desktop .adaptive-home-person em{
   font-size:10.5px!important;
   line-height:1.4!important;
 }
+
+
+/* v4.1 — login option 1 clean campaign */
+@media(min-width:901px){
+  #loginScreen.login-screen{
+    grid-template-columns:minmax(0,1.5fr) minmax(430px,.82fr)!important;
+    background:#F4F1E9!important;
+  }
+
+  #loginScreen .login-hero{
+    position:relative!important;
+    overflow:hidden!important;
+    min-height:100vh!important;
+    background-image:
+      linear-gradient(90deg,
+        rgba(10,48,39,.98) 0%,
+        rgba(10,48,39,.92) 28%,
+        rgba(10,48,39,.68) 48%,
+        rgba(10,48,39,.20) 70%,
+        rgba(10,48,39,0) 100%),
+      url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg")!important;
+    background-size:cover!important;
+    background-position:center 30%!important;
+    background-repeat:no-repeat!important;
+  }
+
+  #loginScreen .login-overlay{
+    background:
+      linear-gradient(180deg,rgba(3,35,28,.04),rgba(3,35,28,.18))!important;
+  }
+
+  #loginScreen .login-hero-content{
+    position:relative!important;
+    z-index:2!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:100vh!important;
+    padding:54px 56px 54px!important;
+    justify-content:space-between!important;
+  }
+
+  #loginScreen .login-brand-approved{
+    width:auto!important;
+    max-width:360px!important;
+    margin:0!important;
+  }
+
+  #loginScreen .login-ria-approved{
+    display:block!important;
+    width:300px!important;
+    max-width:100%!important;
+    height:auto!important;
+    filter:brightness(0) invert(1)!important;
+  }
+
+  #loginScreen .login-title-block{
+    max-width:720px!important;
+    margin-top:auto!important;
+    margin-bottom:10px!important;
+  }
+
+  #loginScreen .login-title-block h1{
+    max-width:720px!important;
+    margin:0 0 22px!important;
+    font-size:clamp(62px,5.2vw,88px)!important;
+    line-height:.92!important;
+    letter-spacing:-.06em!important;
+    color:#fff!important;
+    text-shadow:0 6px 22px rgba(0,0,0,.16)!important;
+  }
+
+  #loginScreen .login-title-block h1 span{
+    color:#F2DFC0!important;
+  }
+
+  #loginScreen .login-accent-line{
+    width:100px!important;
+    height:5px!important;
+    border-radius:999px!important;
+    background:#DE7C00!important;
+  }
+
+  #loginScreen .login-title-block p{
+    max-width:590px!important;
+    margin-top:20px!important;
+    font-size:18px!important;
+    line-height:1.55!important;
+    color:rgba(255,255,255,.94)!important;
+  }
+
+  #loginScreen .login-pane{
+    padding:38px 34px!important;
+    background:linear-gradient(145deg,#F6F2E8,#EFE8DA)!important;
+  }
+
+  #loginScreen .login-card{
+    width:min(500px,100%)!important;
+    padding:38px!important;
+    border-radius:28px!important;
+    border:1px solid rgba(23,63,53,.08)!important;
+    box-shadow:0 24px 64px rgba(23,63,53,.12)!important;
+  }
+
+  #loginScreen .login-card h2{
+    max-width:430px!important;
+    font-size:43px!important;
+    line-height:1!important;
+    margin:10px 0 15px!important;
+  }
+
+  #loginScreen .login-card>p{
+    font-size:14px!important;
+    line-height:1.55!important;
+    margin-bottom:28px!important;
+  }
+
+  #loginScreen .login-input-shell{
+    border-radius:14px!important;
+  }
+
+  #loginScreen .login-input-shell input{
+    height:56px!important;
+    font-size:15px!important;
+  }
+
+  #loginScreen .login-enter-btn{
+    min-height:56px!important;
+    border-radius:14px!important;
+    font-size:13px!important;
+    justify-content:space-between!important;
+    padding:0 20px!important;
+  }
+}
+
+/* Tablet: keep campaign image visible without sacrificing the form */
+@media(min-width:701px) and (max-width:900px){
+  #loginScreen .login-hero{
+    background-image:
+      linear-gradient(180deg,rgba(10,48,39,.72),rgba(10,48,39,.32)),
+      url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg")!important;
+    background-size:cover!important;
+    background-position:center 26%!important;
+  }
+  #loginScreen .login-ria-approved{
+    width:230px!important;
+    filter:brightness(0) invert(1)!important;
+  }
+}
+
+/* Mobile: image becomes a clean top banner */
+@media(max-width:700px){
+  #loginScreen .login-hero{
+    background-image:
+      linear-gradient(180deg,rgba(10,48,39,.72),rgba(10,48,39,.48)),
+      url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg")!important;
+    background-size:cover!important;
+    background-position:center 20%!important;
+  }
+  #loginScreen .login-ria-approved{
+    width:180px!important;
+    max-width:72vw!important;
+    height:auto!important;
+    filter:brightness(0) invert(1)!important;
+  }
+}
