@@ -379,3 +379,137 @@ html.device-phone.orientation-landscape .admin-store-bar{
   table{font-variant-numeric:tabular-nums}
   button,select,.nav-item{touch-action:manipulation}
 }
+
+
+/* v2.1 — remove duplicate top blocks and integrates store context */
+#adminStoreBar{display:none!important}
+
+.adaptive-store-context{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  min-width:220px;
+  padding:8px 10px;
+  border-radius:14px;
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(8px);
+}
+.adaptive-store-context.hidden{display:none!important}
+.adaptive-store-label{
+  font-size:6px;
+  font-weight:900;
+  letter-spacing:.12em;
+  color:#D6D2C4;
+}
+.adaptive-store-context select{
+  width:100%;
+  min-width:0;
+  height:36px;
+  border:0!important;
+  border-radius:10px!important;
+  padding:0 30px 0 10px!important;
+  background:#fff!important;
+  color:#173F35!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  outline:none!important;
+}
+
+/* identity appears only on Home and is smaller there */
+.execution-identity-hero.adaptive-hide-identity{display:none!important}
+
+html.device-phone #executionIdentityHero{
+  margin:8px 0 8px!important;
+  min-height:88px!important;
+  padding:12px 14px!important;
+  border-radius:18px!important;
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  gap:11px!important;
+  align-items:center!important;
+}
+html.device-phone #executionIdentityHero .identity-brand img{
+  width:78px!important;
+}
+html.device-phone #executionIdentityHero .identity-greeting{
+  font-size:6px!important;
+}
+html.device-phone #executionIdentityHero .identity-copy h2{
+  margin:2px 0 2px!important;
+  font-size:18px!important;
+  line-height:1.05!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+html.device-phone #executionIdentityHero .identity-copy p{
+  margin:0!important;
+  font-size:7px!important;
+  line-height:1.35!important;
+}
+html.device-phone #executionIdentityHero .identity-copy small{
+  margin-top:3px!important;
+  font-size:6px!important;
+}
+html.device-phone #executionIdentityHero .execution-announcement-banner{
+  grid-column:1/-1!important;
+}
+
+html.device-phone .section>.section-head .section-actions{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+}
+html.device-phone .adaptive-store-context{
+  width:100%!important;
+  min-width:0!important;
+  padding:7px 8px!important;
+  background:rgba(255,255,255,.09)!important;
+}
+html.device-phone .adaptive-store-context select{
+  height:34px!important;
+  font-size:9px!important;
+}
+html.device-phone body:not([data-active-section="inicio"]) .section.active>.section-head{
+  min-height:132px!important;
+}
+html.device-phone body:not([data-active-section="inicio"]) .section.active>.section-head .adaptive-store-context{
+  margin-top:2px!important;
+}
+
+/* tablet: context sits at right of header */
+html.device-tablet .adaptive-store-context{
+  min-width:280px!important;
+}
+html.device-tablet #executionIdentityHero.adaptive-hide-identity{
+  display:none!important;
+}
+html.device-tablet #executionIdentityHero{
+  margin:0 0 12px!important;
+  min-height:96px!important;
+  padding:14px 18px!important;
+}
+
+/* desktop: no repeated identity card outside Home */
+html.device-desktop #executionIdentityHero.adaptive-hide-identity{
+  display:none!important;
+}
+html.device-desktop #executionIdentityHero{
+  margin:0 auto 14px!important;
+  max-width:1440px!important;
+  min-height:96px!important;
+  padding:16px 20px!important;
+}
+html.device-desktop .adaptive-store-context{
+  min-width:300px!important;
+  max-width:380px!important;
+}
+
+/* More menu uses the same context treatment */
+#section-mais .premium-more-hero{
+  position:relative;
+}
+#section-mais .adaptive-store-context{
+  margin-left:auto;
+}
