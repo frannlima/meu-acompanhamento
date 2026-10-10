@@ -763,3 +763,127 @@ html.device-phone.orientation-landscape .section.active > .section-head{
 html.device-phone.orientation-landscape .section.active > .section-head .section-actions{
   align-self:center!important;
 }
+
+
+/* v2.4 — compact home identity */
+.adaptive-home-identity{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  gap:9px;
+  width:max-content;
+  max-width:100%;
+  padding:6px 9px;
+  border-radius:14px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  color:#fff;
+}
+.adaptive-home-avatar{
+  flex:0 0 32px;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:#F7F4ED;
+  color:#173F35;
+  font-size:13px;
+  font-weight:900;
+}
+.adaptive-home-person{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:baseline;
+  column-gap:5px;
+}
+.adaptive-home-person small{
+  grid-column:1/-1;
+  font-size:6px;
+  color:#D6D2C4;
+  font-weight:800;
+}
+.adaptive-home-person strong{
+  font-size:11px;
+  line-height:1.1;
+  color:#fff;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.adaptive-home-person em{
+  font-style:normal;
+  font-size:6.5px;
+  color:rgba(255,255,255,.78);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+#section-inicio>.section-head>#adaptiveHomeIdentity + div:first-of-type .eyebrow{
+  display:none!important;
+}
+
+/* Home keeps identity, but never recreates the old oversized card */
+html.device-phone body[data-active-section="inicio"] #section-inicio>.section-head{
+  padding-top:12px!important;
+  gap:9px!important;
+}
+html.device-phone .adaptive-home-identity{
+  width:100%!important;
+  box-sizing:border-box!important;
+  padding:7px 9px!important;
+}
+html.device-phone .adaptive-home-avatar{
+  width:34px!important;
+  height:34px!important;
+  flex-basis:34px!important;
+}
+html.device-phone .adaptive-home-person strong{
+  font-size:12px!important;
+}
+html.device-phone .adaptive-home-person em{
+  font-size:6.8px!important;
+}
+html.device-phone #section-inicio>.section-head h1{
+  font-size:28px!important;
+}
+html.device-phone #section-inicio>.section-head p{
+  margin-top:4px!important;
+}
+
+/* Tablet */
+html.device-tablet .adaptive-home-identity{
+  padding:8px 11px!important;
+}
+html.device-tablet .adaptive-home-avatar{
+  width:38px!important;
+  height:38px!important;
+  flex-basis:38px!important;
+}
+html.device-tablet .adaptive-home-person strong{
+  font-size:13px!important;
+}
+html.device-tablet .adaptive-home-person em{
+  font-size:7.5px!important;
+}
+
+/* Desktop */
+html.device-desktop .adaptive-home-identity{
+  position:absolute;
+  right:22px;
+  top:18px;
+  max-width:390px;
+}
+html.device-desktop #section-inicio>.section-head{
+  padding-right:430px!important;
+}
+html.device-desktop .adaptive-home-person strong{
+  font-size:13px!important;
+}
+html.device-desktop .adaptive-home-person em{
+  font-size:7.5px!important;
+}
