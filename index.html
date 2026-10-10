@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="./styles.css?v=9">
   <link rel="stylesheet" href="./enhancements-v9.css?v=10">
   <link rel="stylesheet" href="./premium-v22.css?v=8">
+  <link rel="stylesheet" href="./estore-live-v1.css?v=1">
   <link rel="stylesheet" href="./clarity-v1.css?v=4">
   <link rel="stylesheet" href="./mobile-experience-v1.css?v=3">
   <link rel="stylesheet" href="./responsive-device-v1.css?v=1">
@@ -263,6 +264,20 @@
           <div><span class="eyebrow">ECOSSISTEMA CE+PI</span><h1>eStore CE+PI</h1><p>Acesso integrado ao eStore, preservando a base oficial e a sessão do Meu Acompanhamento.</p></div>
           <a class="btn accent" href="https://frannlima.github.io/app-estore-cepi/?from=meu-acompanhamento&open=home">Abrir eStore CE+PI</a>
         </div>
+        <section id="estoreLivePanel" class="card estore-live-panel" aria-label="Parcial eStore da filial">
+          <div class="estore-live-head">
+            <div><span class="eyebrow">HORA A HORA eSTORE</span><h2>Parcial eStore do dia</h2><p id="estoreLiveTitle">Resultado da filial selecionada</p></div>
+            <button id="estoreLiveRefresh" type="button">↻ Atualizar</button>
+          </div>
+          <p id="estoreLiveStatus" role="status">Aguardando consulta do Hora a Hora oficial.</p>
+          <div id="estoreLiveGrid" class="estore-live-grid" aria-live="polite">
+            <div class="estore-live-placeholder">A parcial será exibida ao abrir o menu eStore.</div>
+          </div>
+          <div class="estore-live-footer">
+            <span id="estoreLiveMeta">Dados oficiais do eStore CE+PI • atualização automática ao visualizar esta tela</span>
+            <a href="https://frannlima.github.io/app-estore-cepi/?from=meu-acompanhamento&open=hourly">Alimentar Hora a Hora ↗</a>
+          </div>
+        </section>
         <div class="estore-hub-grid">
           <a class="estore-hub-card" href="https://frannlima.github.io/app-estore-cepi/?from=meu-acompanhamento&open=hourly"><span>◷</span><strong>Hora a Hora eStore</strong><small>Abra diretamente o Hora a Hora e alimente a venda da filial.</small></a>
           <a class="estore-hub-card" href="https://frannlima.github.io/app-estore-cepi/?from=meu-acompanhamento&open=metas"><span>🎯</span><strong>Meta e Pedidos do Dia</strong><small>Abra diretamente a meta financeira e o desafio de pedidos.</small></a>
@@ -591,5 +606,6 @@
   <script src="./responsive-device-v1.js?v=1" defer></script>
   <script src="./execution-v1.js?v=4" defer></script>
   <script src="./adaptive-header-v2.js?v=10" defer></script>
+  <script src="./estore-live-v1.js?v=1" defer></script>
 </body>
 </html>
