@@ -1909,3 +1909,63 @@ html.device-desktop .adaptive-home-person em{
   font-size:8.7px!important;
   line-height:1.4!important;
 }
+
+
+/* v3.8 — greeting typography larger and clearer */
+.adaptive-home-person small{
+  font-size:9px!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  margin-bottom:3px!important;
+}
+
+.adaptive-home-person strong{
+  font-size:15px!important;
+  line-height:1.08!important;
+  font-weight:900!important;
+}
+
+.adaptive-home-person em{
+  font-size:9.5px!important;
+  line-height:1.35!important;
+  font-weight:600!important;
+  margin-top:3px!important;
+}
+
+html.device-phone .adaptive-home-person small{
+  font-size:9px!important;
+}
+
+html.device-phone .adaptive-home-person strong{
+  font-size:16px!important;
+}
+
+html.device-phone .adaptive-home-person em{
+  font-size:9.8px!important;
+  line-height:1.38!important;
+}
+
+html.device-tablet .adaptive-home-person small{
+  font-size:9.5px!important;
+}
+
+html.device-tablet .adaptive-home-person strong{
+  font-size:16px!important;
+}
+
+html.device-tablet .adaptive-home-person em{
+  font-size:10px!important;
+}
+
+html.device-desktop .adaptive-home-person small{
+  font-size:10px!important;
+}
+
+html.device-desktop .adaptive-home-person strong{
+  font-size:17px!important;
+}
+
+html.device-desktop .adaptive-home-person em{
+  font-size:10.5px!important;
+  line-height:1.4!important;
+}
