@@ -13,6 +13,7 @@
     "Body Work":[235,310,360],
     "Íntima":[135,165,225,245,265,275,330,365,375],
     "Praia":[131,240,331],
+    "Masculino":[148],
     "CBA":[130,255,500,505,510,520,540,560,565,572,595],
     "Beleza":[215,280,281,282,283,284,285,289],
     "Relógios":[550,551],
@@ -20,7 +21,7 @@
   };
   const MAPPING={};
   Object.entries(SETS).forEach(([label,codes])=>codes.forEach(code=>MAPPING[code]=label));
-  const EXCLUDED=new Set([148,530,531,532,552]);
+  const EXCLUDED=new Set([530,531,532,552]);
   let selected=null;
   function ggOf(r){
     const code=Number(r.dco_code??r.code);
