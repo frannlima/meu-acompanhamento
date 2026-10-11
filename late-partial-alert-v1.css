@@ -15,3 +15,5 @@
 @keyframes ma-alert-flash{0%,100%{border-color:#bb2b3c}50%{border-color:#fb5b66}}
 @media(max-width:700px){.ma-late-alert{left:9px;right:9px;bottom:86px;width:auto;max-width:none}}
 @media(prefers-reduced-motion:reduce){.ma-late-alert,.ma-late-shake{animation:none}}
+
+.ma-test-small{font-size:10px;border:1px solid #e9bcc4;background:#fff5f5;color:#96283c;border-radius:8px;padding:6px 9px;cursor:pointer}
