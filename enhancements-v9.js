@@ -446,11 +446,29 @@ async function importMonthlyTargets(file){
     let binary="";const bytes=new Uint8Array(buf);const chunk=0x8000;
     for(let i=0;i<bytes.length;i+=chunk) binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));
     const b64=btoa(binary);
-    const r=await api("importTargets",{
-      matricula:state.matricula,
-      filename:file.name,
-      file_base64:b64
-    })||{};
+    let offset=0, r={}, attempts=0;
+    do {
+      try {
+        r=await api("importTargets",{
+          matricula:state.matricula,
+          filename:file.name,
+          file_base64:b64,
+          offset
+        })||{};
+        attempts=0;
+      } catch (err) {
+        if(++attempts>2) throw err;
+        status.textContent="Conexão interrompida na etapa "+(offset+1)+". Tentando novamente ("+attempts+"/2)...";
+        await new Promise(resolve=>setTimeout(resolve,1200*attempts));
+        continue;
+      }
+      if(r.complete===false){
+        const next=Number(r.next_offset);
+        if(!Number.isFinite(next)||next<=offset) throw new Error("Progresso inválido da importação.");
+        offset=next;
+        status.textContent="Atualizando metas: "+num(r.rows_processed)+" de "+num(r.rows_total)+" registros ("+Math.round(100*r.rows_processed/r.rows_total)+"%). Não feche esta tela.";
+      }
+    } while(r.complete===false);
     status.className="import-status success";
     status.innerHTML='<strong>Importação concluída.</strong> '+num(r.rows_imported)+' linhas • '+num(r.stores)+' lojas • '+num(r.dcos)+' DCOs • período '+esc(r.date_from||"—")+' a '+esc(r.date_to||"—")+'.';
     await loadAll();
