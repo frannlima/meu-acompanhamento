@@ -512,7 +512,9 @@ function canvasRoundedRect(ctx,x,y,w,h,r,fill,stroke){
 function loadCanvasImage(src){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=src})}
 async function createGroupPanelImage(){
   const d=state.day||{};
-  const groups=GROUP_ORDER.map(code=>(state.groupSummary?.groups||[]).find(g=>g.group_code===code)).filter(Boolean);
+  const groups=typeof window.getOfficialGgSummaries==="function"
+    ? window.getOfficialGgSummaries()
+    : GROUP_ORDER.map(code=>(state.groupSummary?.groups||[]).find(g=>g.group_code===code)).filter(Boolean);
   const width=1840,rowH=46,height=360+(groups.length+1)*rowH+165;
   const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
   const ctx=canvas.getContext("2d");
