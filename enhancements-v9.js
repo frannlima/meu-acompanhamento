@@ -438,45 +438,70 @@ renderAdminVisual = function(){
 
 async function importMonthlyTargets(file){
   if(!file) return;
-  const status=$("targetImportStatus");
-  if(!confirm("Importar "+file.name+" e atualizar as metas por DCO?")){ $("monthlyTargetFile").value=""; return; }
-  status.className="import-status loading";status.textContent="Lendo arquivo e validando metas...";
+  const status=$("targetImportStatus"), input=$("monthlyTargetFile");
+  if(!confirm("Importar "+file.name+" e atualizar as metas por DCO?")){input.value="";return}
+  status.className="import-status loading";
+  status.textContent="Preparando arquivo para importação por etapas...";
   try{
-    const buf=await file.arrayBuffer();
-    let binary="";const bytes=new Uint8Array(buf);const chunk=0x8000;
-    for(let i=0;i<bytes.length;i+=chunk) binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));
-    const b64=btoa(binary);
-    let offset=0, r={}, attempts=0;
-    while(true) {
-      try {
-        r=await api("importTargets",{
-          matricula:state.matricula,
-          filename:file.name,
-          file_base64:b64,
-          offset
-        })||{};
-        attempts=0;
-      } catch (err) {
-        if(++attempts>2) throw err;
-        status.textContent="Conexão interrompida na etapa "+(offset+1)+". Tentando novamente ("+attempts+"/2)...";
-        await new Promise(resolve=>setTimeout(resolve,1200*attempts));
-        continue;
+    if(typeof XLSX==="undefined") throw new Error("Leitor Excel indisponível. Atualize a página e tente novamente.");
+    const workbook=XLSX.read(await file.arrayBuffer(),{type:"array",cellDates:true});
+    const sheetName=workbook.SheetNames.find(n=>n.toLowerCase().includes("meta")&&n.toLowerCase().includes("dco"))||workbook.SheetNames[0];
+    const matrix=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,raw:true,defval:null});
+    const normalize=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+    const headerIndex=matrix.findIndex((row,i)=>i<30&&row.some(c=>normalize(c)==="data")&&row.some(c=>normalize(c)==="loja")&&row.some(c=>normalize(c).includes("dco")));
+    if(headerIndex<0) throw new Error("Cabeçalho Data, Loja e Cód-DCO não encontrado.");
+    const header=matrix[headerIndex], normalized=header.map(normalize);
+    const dateIdx=normalized.indexOf("data"),storeIdx=normalized.indexOf("loja");
+    const groups=new Map();
+    for(const row of matrix.slice(headerIndex+1)){
+      const date=row[dateIdx],store=row[storeIdx];
+      if(!date||!store) continue;
+      const key=String(date instanceof Date?date.toISOString().slice(0,10):date)+"|"+String(store);
+      if(!groups.has(key)) groups.set(key,[]);
+      groups.get(key).push(row);
+    }
+    // Nunca dividir uma mesma loja/data entre etapas: o servidor consolida cada uma.
+    const chunks=[],maxRows=900;
+    let current=[];
+    for(const rows of groups.values()){
+      if(current.length&&current.length+rows.length>maxRows){chunks.push(current);current=[];}
+      if(rows.length>maxRows) throw new Error("Uma loja/data possui mais de 900 linhas. Consulte o suporte.");
+      current.push(...rows);
+    }
+    if(current.length)chunks.push(current);
+    if(!chunks.length)throw new Error("Não há linhas válidas para importar.");
+    let imported=0,total=chunks.reduce((sum,part)=>sum+part.length,0),stores=new Set(),dcos=new Set();
+    let from="",to="";
+    for(let k=0;k<chunks.length;k++){
+      status.textContent="Atualizando metas: etapa "+(k+1)+" de "+chunks.length+" • "+imported+" de "+total+" linhas processadas. Não feche esta tela.";
+      const ws=XLSX.utils.aoa_to_sheet([header,...chunks[k]]);
+      const partial=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(partial,ws,"Colar Meta DCO");
+      const bytes=XLSX.write(partial,{bookType:"xlsx",type:"base64",compression:true});
+      let response,attempt=0;
+      while(true){
+        try{
+          response=await api("importTargets",{matricula:state.matricula,filename:file.name,file_base64:bytes,offset:0});
+          break;
+        }catch(e){
+          if(++attempt>=3)throw new Error("Falha na etapa "+(k+1)+"/"+chunks.length+": "+e.message+". "+imported+" linhas já enviadas. Pode repetir a importação sem duplicar metas.");
+          await new Promise(resolve=>setTimeout(resolve,1200*attempt));
+        }
       }
-      if(r.complete===false){
-        const next=Number(r.next_offset);
-        if(!Number.isFinite(next)||next<=offset) throw new Error("Progresso inválido da importação.");
-        offset=next;
-        status.textContent="Atualizando metas: "+num(r.rows_processed)+" de "+num(r.rows_total)+" registros ("+Math.round(100*r.rows_processed/r.rows_total)+"%). Não feche esta tela.";
-      }
-      if(r.complete!==false) break;
+      if(response?.complete===false)throw new Error("Etapa "+(k+1)+" não foi concluída.");
+      imported+=chunks[k].length;
+      if(response?.date_from&&(!from||response.date_from<from))from=response.date_from;
+      if(response?.date_to&&(!to||response.date_to>to))to=response.date_to;
     }
     status.className="import-status success";
-    status.innerHTML='<strong>Importação concluída.</strong> '+num(r.rows_imported)+' linhas • '+num(r.stores)+' lojas • '+num(r.dcos)+' DCOs • período '+esc(r.date_from||"—")+' a '+esc(r.date_to||"—")+'.';
+    status.textContent="Importação concluída. "+imported.toLocaleString("pt-BR")+" linhas processadas em "+chunks.length+" etapas • período "+(from||"—")+" a "+(to||"—")+".";
     await loadAll();
     toast("Metas do mês atualizadas.");
   }catch(e){
-    status.className="import-status error";status.textContent="Falha na importação: "+(e.message||"erro não identificado");toast(e.message||"Falha na importação.",true);
-  }finally{$("monthlyTargetFile").value=""}
+    status.className="import-status error";
+    status.textContent="Falha na importação: "+(e.message||"erro não identificado");
+    toast(e.message||"Falha na importação.",true);
+  }finally{input.value=""}
 }
 
 function canvasRoundedRect(ctx,x,y,w,h,r,fill,stroke){
