@@ -37,3 +37,12 @@
 @media(max-width:1050px){#worldSwitcher.gg-world-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.gg-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){#worldSwitcher.gg-world-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.gg-panel{padding:12px}.gg-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.gg-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.gg-tile{padding:9px}.gg-tile.active{padding:8px}.gg-tile-stats{grid-template-columns:1fr}.gg-tile-stats em{font-size:13px}.gg-metric{padding:10px}.gg-metric strong{font-size:14px}}
 @media(max-width:360px){.gg-tiles{grid-template-columns:1fr}.gg-metrics{grid-template-columns:1fr}}
+
+/* Sobrescreve os botões em formato pílula do tema mobile anterior. */
+#worldSwitcher.gg-world-grid{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible!important;flex-wrap:unset!important;justify-content:stretch!important}
+#worldSwitcher.gg-world-grid .gg-world{width:100%;min-height:76px!important;flex:none!important;border-radius:13px!important;padding:12px!important;font-size:13px!important;white-space:normal!important}
+#worldSwitcher.gg-world-grid .gg-world.selected{border-color:var(--gg-color)!important;border-width:2px!important;padding:11px!important}
+.dual-target-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+.dual-target-actions .btn{white-space:nowrap}
+@media(max-width:1050px){#worldSwitcher.gg-world-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){#worldSwitcher.gg-world-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dual-target-actions{justify-content:stretch;width:100%}.dual-target-actions .btn{flex:1;text-align:center;font-size:11px;padding:10px 12px}}
