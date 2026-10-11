@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v86";
+const CACHE="meu-acompanhamento-v87";
 const ASSETS=[
   "./",
   "./index.html",
@@ -15,13 +15,13 @@ const ASSETS=[
   "./enhancements-v9.js?v=11",
   "./premium-v22.js?v=10",
   "./clarity-v1.js?v=20",
-  "./mobile-experience-v1.js?v=3",
+  "./mobile-experience-v1.js?v=4",
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=4",
   "./adaptive-header-v2.js?v=10",
   "./estore-live-v1.js?v=1",
   "./gg-worlds-v1.css?v=2",
-  "./gg-worlds-v1.js?v=3",
+  "./gg-worlds-v1.js?v=4",
   "./gg-official-performance-v2.js?v=2",
   "./gg-target-import-v1.js?v=1",
   "./manifest.webmanifest",
