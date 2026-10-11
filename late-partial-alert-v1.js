@@ -65,7 +65,9 @@ function tabAlert(active){
   favicon.href="data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect rx="13" width="64" height="64" fill="#C92E3A"/><text x="32" y="47" text-anchor="middle" font-size="49" font-family="Arial" font-weight="bold" fill="#fff">!</text></svg>');
   document.head.appendChild(favicon);
   let on=false;
-  const swap=()=>{on=!on;document.title=on?"🔴 PARCIAL ATRASADA • "+state.storeCode:TITLE;favicon.disabled=!on};
+  const redIcon=favicon.href;
+  const normalIcon="./assets/riachuelo-logo-vertical.svg";
+  const swap=()=>{on=!on;document.title=on?"🔴 PARCIAL ATRASADA • "+state.storeCode:TITLE;favicon.href=on?redIcon:normalIcon};
   swap();flash=setInterval(swap,1400);
 }
 async function systemNotify(s){
