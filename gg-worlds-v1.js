@@ -156,6 +156,10 @@
       if(String(state.storeCode)===currentStore){
         state.ggTargets=Array.isArray(targets)?targets:[];
         render();
+        // Reprocessar o panorama e o card com a classificação oficial,
+        // depois que as metas por DCO estiverem disponíveis.
+        if(typeof window.renderClarityHome==="function")window.renderClarityHome();
+        if(typeof renderGroupSharePanel==="function")renderGroupSharePanel();
       }
     }catch(e){
       // Não bloquear as demais telas em caso de indisponibilidade pontual.
