@@ -309,9 +309,12 @@
           <section class="card target-import-card">
             <div class="card-head">
               <div><span class="eyebrow">IMPORTAÇÃO MENSAL</span><h2>Carregar Meta do Mês / DCOs</h2></div>
-              <label class="btn primary file-action">Selecionar arquivo<input id="monthlyTargetFile" type="file" accept=".xlsx,.xls" hidden></label>
+              <div class="dual-target-actions">
+                <label class="btn primary file-action">Meta financeira + A.A.<input id="financialTargetFile" type="file" accept=".xlsx,.xls" hidden></label>
+                <label class="btn secondary file-action">Meta física<input id="physicalTargetFile" type="file" accept=".xlsx,.xls" hidden></label>
+              </div>
             </div>
-            <p class="modal-hint">Use o mesmo modelo de metas por DCO enviado no início da construção do app. A importação atualiza Meta Fin., Meta Fís., LY financeiro e LY físico por loja, data e DCO.</p>
+            <p class="modal-hint">Importe separadamente: (1) relatório financeiro por GG e DCO para Meta Fin., Venda A.A. financeira e física; (2) relatório físico para Meta Fís. Cada arquivo atualiza apenas seus próprios indicadores, sem zerar a outra fonte. Fanlab e Eletrônicos são excluídos.</p>
             <div id="targetImportStatus" class="import-status">Nenhum arquivo importado nesta sessão.</div>
           </section>
           <section class="card">
@@ -610,5 +613,6 @@
   <script src="./adaptive-header-v2.js?v=10" defer></script>
   <script src="./estore-live-v1.js?v=1" defer></script>
   <script src="./gg-worlds-v1.js?v=1" defer></script>
+  <script src="./gg-target-import-v1.js?v=1" defer></script>
 </body>
 </html>
