@@ -284,7 +284,8 @@
 
   function renderGroupsPanel(){
     const d=state.day||{};
-    const groups=groupRows();
+    const groups=typeof window.getOfficialGgSummaries==="function"
+      ? window.getOfficialGgSummaries() : groupRows();
     const rows=groups.map(g=>{
       const meta=Number(g.target_financial||0),venda=Number(g.sales_financial||0);
       const ating=meta?venda/meta*100:0,aa=Number(g.ly_financial||0);
