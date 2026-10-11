@@ -69,7 +69,7 @@ function tabAlert(active){
   swap();flash=setInterval(swap,1400);
 }
 async function systemNotify(s){
-  if(!("Notification" in window)||Notification.permission!=="granted)return;
+  if(!("Notification" in window)||Notification.permission!=="granted")return;
   const body=(s.stale?"Sem venda atualizada há "+s.minutes+" minutos. ":"")+
     (s.notShared?"Compartilhamento não confirmado neste navegador.":"");
   try{
