@@ -11,7 +11,7 @@
     "FEMININO":[200,204,205,206,208,217,220,227,230,250,270,290,295],
     "INFANTIL":[100,102,105,106,110,115,120,125,130,131,135,142,145,150,151,165,195,196],
     "INTIMA":[225,245,265,275,330,365,375],
-    "MASCULINO":[301,305,306,314,315,320,325,340,350,380,390,395],
+    "MASCULINO":[148,301,305,306,314,315,320,325,340,350,380,390,395],
     "PRAIA":[240,331],
     "RELOGIOS":[550,551]
   };
@@ -21,7 +21,7 @@
     "INFANTIL":"Infantil","INTIMA":"Íntima","MASCULINO":"Masculino",
     "PRAIA":"Praia","RELOGIOS":"Relógios"
   };
-  const excluded=new Set([148,530,531,532,552]);
+  const excluded=new Set([530,531,532,552]);
   const keyByDco=new Map();
   Object.entries(GG_DCO).forEach(([gg,codes])=>codes.forEach(code=>{
     if(keyByDco.has(code))throw new Error("DCO duplicado na classificação oficial: "+code);
