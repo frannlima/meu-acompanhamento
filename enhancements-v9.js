@@ -447,7 +447,7 @@ async function importMonthlyTargets(file){
     for(let i=0;i<bytes.length;i+=chunk) binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));
     const b64=btoa(binary);
     let offset=0, r={}, attempts=0;
-    do {
+    while(true) {
       try {
         r=await api("importTargets",{
           matricula:state.matricula,
@@ -468,7 +468,8 @@ async function importMonthlyTargets(file){
         offset=next;
         status.textContent="Atualizando metas: "+num(r.rows_processed)+" de "+num(r.rows_total)+" registros ("+Math.round(100*r.rows_processed/r.rows_total)+"%). Não feche esta tela.";
       }
-    } while(r.complete===false);
+      if(r.complete!==false) break;
+    }
     status.className="import-status success";
     status.innerHTML='<strong>Importação concluída.</strong> '+num(r.rows_imported)+' linhas • '+num(r.stores)+' lojas • '+num(r.dcos)+' DCOs • período '+esc(r.date_from||"—")+' a '+esc(r.date_to||"—")+'.';
     await loadAll();
