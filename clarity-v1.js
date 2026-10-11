@@ -652,6 +652,7 @@
       const textMsg=buildDailyShareSummary();
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({title:"Hora a Hora • Resultado do Dia",text:textMsg,files:[file]});
+        window.registrarCompartilhamentoParcial?.();
       }else{
         const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
         if(navigator.clipboard) await navigator.clipboard.writeText(textMsg).catch(()=>{});
