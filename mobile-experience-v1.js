@@ -3,25 +3,36 @@
   "use strict";
 
   function groupData(){
-    const detail=typeof detailRows==="function"?detailRows():[];
-    if(!detail.length) return [];
-    const map=new Map();
-    detail.forEach(r=>{
-      const code=r.group_code||"outros";
-      if(!map.has(code)) map.set(code,{code,meta:0,venda:0,aa:0});
-      const g=map.get(code);
+    const byDco=new Map();
+    for(const r of (Array.isArray(state.ggTargets)?state.ggTargets:[])){
+      const code=Number(r.dco_code);
+      if(code>0)byDco.set(code,{...r});
+    }
+    for(const r of (typeof detailRows==="function"?detailRows():[])){
+      const code=Number(r.dco_code);if(!code)continue;
+      const old=byDco.get(code);
+      byDco.set(code,old?{
+        ...old,sales_financial:r.sales_financial,sales_physical:r.sales_physical,
+        interval_sales_financial:r.interval_sales_financial
+      }:{...r});
+    }
+    const classify=window.ggOfficialMapping?.worldOf;
+    if(typeof classify!=="function")return [];
+    const group=new Map();
+    for(const r of byDco.values()){
+      const world=classify(r);
+      if(!["feminino","masculino","infantil","casa","beleza_relogios"].includes(world))continue;
+      if(!group.has(world))group.set(world,{code:world,meta:0,venda:0,aa:0});
+      const g=group.get(world);
       g.meta+=Number(r.target_financial||0);
       g.venda+=Number(r.sales_financial||0);
       g.aa+=Number(r.ly_financial||0);
-    });
-    return [...map.values()].map(g=>({
-      ...g,
-      ating:g.meta?g.venda/g.meta*100:0,
-      desvio:g.venda-g.meta,
-      ev:g.aa?((g.venda/g.aa)-1)*100:null
+    }
+    return [...group.values()].map(g=>({
+      ...g,ating:g.meta?100*g.venda/g.meta:0,
+      desvio:g.venda-g.meta,ev:g.aa?(100*g.venda/g.aa-100):null
     }));
   }
-
 
   function groupPerformanceColors(code){
     const map={
@@ -185,8 +196,8 @@
         if(table) table.insertAdjacentElement("beforebegin",summary);
         const head=shell.querySelector(".clarity-card-head");
         if(head){
-          const copy=head.querySelector("p"); if(copy) copy.textContent="Veja rapidamente quais mundos precisam de atenção e compartilhe a parcial completa.";
-          const title=head.querySelector("h2"); if(title) title.textContent="Panorama dos mundos";
+          const copy=head.querySelector("p"); if(copy) copy.textContent="Compare as metas oficiais por GG e compartilhe a parcial completa.";
+          const title=head.querySelector("h2"); if(title) title.textContent="Panorama por GGs";
         }
       }
     }
@@ -207,7 +218,7 @@
         '</div>'+
         '<div class="action-list">'+
           (worst.length?worst.map((g,i)=>{
-            const name=GROUP_LABELS[g.code]||g.code;
+            const name=WORLD_LABELS[g.code]||g.code;
             const message=i===0
               ?"Maior desvio financeiro do momento"
               : g.ating<80?"Abaixo de 80% de atingimento":"Oportunidade para recuperar ritmo";
@@ -233,7 +244,7 @@
       summary.innerHTML=best.map(g=>
         '<button type="button" data-world="'+esc(g.code)+'">'+
           '<span class="world-dot '+(g.ating>=100?"ok":g.ating>=80?"warn":"risk")+'"></span>'+
-          '<span><b>'+esc(GROUP_LABELS[g.code]||g.code)+'</b><small>Venda '+money(g.venda,2)+'</small></span>'+
+          '<span><b>'+esc(WORLD_LABELS[g.code]||g.code)+'</b><small>Venda '+money(g.venda,2)+'</small></span>'+
           '<strong class="'+(g.ating>=100?"positive":g.ating>=80?"warning":"negative")+'">'+pct(g.ating)+'</strong>'+
           '<i>›</i>'+
         '</button>'
