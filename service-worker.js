@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v88";
+const CACHE="meu-acompanhamento-v89";
 const ASSETS=[
   "./",
   "./index.html",
@@ -21,7 +21,7 @@ const ASSETS=[
   "./adaptive-header-v2.js?v=10",
   "./estore-live-v1.js?v=1",
   "./gg-worlds-v1.css?v=2",
-  "./gg-worlds-v1.js?v=5",
+  "./gg-worlds-v1.js?v=6",
   "./gg-official-performance-v2.js?v=3",
   "./gg-target-import-v1.js?v=2",
   "./manifest.webmanifest",
