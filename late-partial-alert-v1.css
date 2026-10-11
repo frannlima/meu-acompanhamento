@@ -1,0 +1,17 @@
+
+.ma-late-alert[hidden],.ma-late-actions button[hidden]{display:none!important}
+.ma-late-alert{position:fixed;bottom:20px;right:20px;z-index:1200;max-width:450px;width:calc(100vw - 40px);padding:15px;border:2px solid #c52e41;border-radius:16px;background:#fff5f6;color:#7b2030;box-shadow:0 8px 28px #c52e4133;box-sizing:border-box;animation:ma-alert-flash 2.5s infinite}
+.ma-late-line{display:flex;align-items:flex-start;gap:10px}
+.ma-late-icon{display:flex;align-items:center;justify-content:center;background:#bc2739;color:#fff;border-radius:50%;width:31px;height:31px;font-weight:800;flex-shrink:0}
+.ma-late-line>div{flex:1}.ma-late-line strong{font-size:14px}.ma-late-line p{font-size:12px;line-height:1.45;margin:5px 0}
+#maLateSnooze{border:0;background:transparent;font-size:22px;cursor:pointer;color:#a33143}
+.ma-late-actions{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.ma-late-actions button{padding:9px 11px;border:1px solid #dfb1b7;border-radius:8px;background:white;color:#86283b;font-size:11px;font-weight:700;cursor:pointer}
+#maLateInput{background:#bf2d40;color:#fff;border-color:#bf2d40}
+.ma-late-alert small{font-size:10px;color:#9b6470}
+.ma-late-active #updateBadge{background:#fce2e6!important;color:#a6293c!important}
+.ma-late-shake{animation:ma-alert-bump .5s 1,ma-alert-flash 2.5s infinite}
+@keyframes ma-alert-bump{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+@keyframes ma-alert-flash{0%,100%{border-color:#bb2b3c}50%{border-color:#fb5b66}}
+@media(max-width:700px){.ma-late-alert{left:9px;right:9px;bottom:86px;width:auto;max-width:none}}
+@media(prefers-reduced-motion:reduce){.ma-late-alert,.ma-late-shake{animation:none}}
