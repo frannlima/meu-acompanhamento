@@ -11,7 +11,7 @@
 #dailyEvolutionPanel .dev-refresh:hover{background:#25634F}
 #dailyEvolutionPanel .dev-filters{display:flex;align-items:end;flex-wrap:wrap;gap:10px;margin:0 0 17px}
 #dailyEvolutionPanel .dev-filters label{display:flex;flex-direction:column;gap:6px;color:#61756B;font-size:11px;font-weight:750;min-width:150px;flex:0 1 250px}
-#dailyEvolutionPanel .dev-filters select{height:40px;padding:0 12px;width:100%;border:1px solid #D7E2D9;border-radius:10px;background:#fff;color:#143B30;font:600 12px inherit;font-size:12px;outline:none}
+#dailyEvolutionPanel .dev-filters select{height:40px;padding:0 12px;width:100%;border:1px solid #D7E2D9;border-radius:10px;background:#fff;color:#143B30;font-family:inherit;font-weight:600;font-size:12px;outline:none}
 #dailyEvolutionPanel .dev-filters select:focus{outline:2px solid #DE7C00;outline-offset:1px}
 #dailyEvolutionPanel .dev-filters select:disabled{background:#F4F6F2;color:#577267;opacity:1;cursor:not-allowed}
 #dailyEvolutionPanel .dev-context{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex:1;flex-wrap:wrap;padding-bottom:6px}
