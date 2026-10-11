@@ -91,10 +91,14 @@
     if(!DATA[state.world])state.world="feminino";
     worldSwitcher();
     const unique=new Map();
+    // Metas já disponíveis antes do primeiro input; a venda corrente tem prioridade.
+    (Array.isArray(state.ggTargets)?state.ggTargets:[]).forEach(r=>{
+      const code=Number(r.dco_code);
+      if(Number.isFinite(code)&&!EXCLUDED.has(code))unique.set(code,r);
+    });
     (Array.isArray(state.detail?.rows)?state.detail.rows:[]).forEach(r=>{
       const code=Number(r.dco_code);
-      if(!Number.isFinite(code)||EXCLUDED.has(code))return;
-      if(!unique.has(code))unique.set(code,r);
+      if(Number.isFinite(code)&&!EXCLUDED.has(code))unique.set(code,r);
     });
     const rows=[...unique.values()].filter(r=>worldOf(r)===state.world);
     const totals=aggregate(rows),a=att(totals),e=totals.ly?100*(totals.venda/totals.ly-1):null;
@@ -137,6 +141,28 @@
       selected=btn.dataset.ggSelect;render();
     });
   }
+  const previousLoadAll=loadAll;
+  loadAll=async function(...args){
+    state.ggTargets=[];
+    const result=await previousLoadAll(...args);
+    if(result===false||!state.logged)return result;
+    const currentStore=String(state.storeCode||"");
+    try{
+      const targets=await api("ggTargets",{
+        matricula:state.matricula,
+        business_date:localDate(),
+        store_code:currentStore
+      });
+      if(String(state.storeCode)===currentStore){
+        state.ggTargets=Array.isArray(targets)?targets:[];
+        render();
+      }
+    }catch(e){
+      // Não bloquear as demais telas em caso de indisponibilidade pontual.
+      if(state.section==="grupos")toast("Metas por GG temporariamente indisponíveis.",true);
+    }
+    return result;
+  };
   renderGroups=render;
   renderWorldSwitcher=worldSwitcher;
   window.ggOfficialMapping={ggOf,worldOf,excluded:[...EXCLUDED]};
