@@ -392,8 +392,19 @@
       '</tbody></table></div></details>';
   }
 
+  function officialDailyCardGroups(){
+    // O card e o texto de compartilhamento usam a mesma classificação oficial
+    // do Panorama por GGs: cada DCO aparece uma única vez; Fanlab integra Masculino.
+    const groups=typeof window.getOfficialGgSummaries==="function"
+      ? window.getOfficialGgSummaries() : [];
+    if(!groups.length){
+      throw new Error("GGs oficiais ainda não carregados. Aguarde as metas por DCO e tente compartilhar novamente.");
+    }
+    return groups;
+  }
+
   async function createDailyCardBlob(){
-    const d=state.day||{},groups=groupRows();
+    const d=state.day||{},groups=officialDailyCardGroups();
     const curve=curveForStore();
     const tp=timeParts(d.captured_at||null);
     const expectedPct=expectedPctAt(curve,tp.h,tp.m,"fin");
@@ -543,7 +554,7 @@
       const dev=venda-meta;
       const proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
       const physical=Number(g.sales_physical||0);
-      drawRow(y,GROUP_LABELS[g.group_code]||g.group_code,meta,venda,ating,aa,ev,dev,proj,physical,false);
+      drawRow(y,g.gg_label||GROUP_LABELS[g.group_code]||g.group_code,meta,venda,ating,aa,ev,dev,proj,physical,false);
       y+=rowH;
     }
 
@@ -609,14 +620,14 @@
   }
 
   function buildDailyShareSummary(){
-    const d=state.day||{},groups=groupRows();
+    const d=state.day||{},groups=officialDailyCardGroups();
     const curve=curveForStore(),tp=timeParts(d.captured_at||null),expectedPct=expectedPctAt(curve,tp.h,tp.m,"fin");
     const meta=Number(d.target_financial||0),venda=Number(d.sales_financial||0);
     const att=meta?venda/meta*100:0,dev=venda-meta;
     const proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
 
     const ranked=[...groups].map(g=>({
-      name:GROUP_LABELS[g.group_code]||g.group_code,
+      name:g.gg_label||GROUP_LABELS[g.group_code]||g.group_code,
       dev:Number(g.sales_financial||0)-Number(g.target_financial||0),
       att:Number(g.target_financial||0)?Number(g.sales_financial||0)/Number(g.target_financial||0)*100:0
     }));
