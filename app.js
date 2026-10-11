@@ -728,7 +728,9 @@ function signedMoney(value, digits=2){
 function buildGroupPanelHtml(){
   const d=state.day||{};
   const groups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
-  const ordered=GROUP_ORDER.map(code=>groups.find(g=>g.group_code===code)).filter(Boolean);
+  const ordered=typeof window.getOfficialGgSummaries==="function"
+    ? window.getOfficialGgSummaries()
+    : GROUP_ORDER.map(code=>groups.find(g=>g.group_code===code)).filter(Boolean);
 
   const target=Number(d.target_financial||ordered.reduce((a,g)=>a+Number(g.target_financial||0),0));
   const sale=Number(d.sales_financial||ordered.reduce((a,g)=>a+Number(g.sales_financial||0),0));
