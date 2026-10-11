@@ -54,7 +54,7 @@
       const gg=keyByDco.get(code);
       if(!gg)continue;
       if(!byGG.has(gg))byGG.set(gg,{
-        group_code:gg,gg_label:aliases[gg],
+        group_code:aliases[gg],gg_label:aliases[gg],
         target_financial:0,target_physical:0,
         ly_financial:0,ly_physical:0,
         sales_financial:0,sales_physical:0,
