@@ -30,7 +30,7 @@
     const m=String(v??"").trim().match(/^(\d{3})\b/);
     return m?Number(m[1]):0;
   }
-  const blockedDcos=new Set([148,530,531,532,552]);
+  const blockedDcos=new Set([530,531,532,552]);
   function parseWorkbook(file,source){
     const bytesPromise=file.arrayBuffer();
     return bytesPromise.then(data=>{
