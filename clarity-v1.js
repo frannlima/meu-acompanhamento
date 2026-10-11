@@ -35,6 +35,8 @@
   };
 
   const curveForStore=()=>STREET_STORES.has(String(state.storeCode).padStart(3,"0"))?SALES_CURVES.RUA:SALES_CURVES.SHOPPING;
+  // A mesma curva aprovada é utilizada pelo painel HH no menu inicial.
+  window.getOperationalSalesCurve=()=>curveForStore().map(item=>({h:item.h,fin:item.fin}));
   const formatForStore=()=>STREET_STORES.has(String(state.storeCode).padStart(3,"0"))?"Loja de rua • 08h–18h":"Shopping • 10h–22h";
 
   function timeParts(iso){
