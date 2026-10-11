@@ -2,7 +2,7 @@
 (function(){
   "use strict";
   const el=id=>document.getElementById(id);
-  const periods=[{offset:1,name:"Dia anterior (D−1)"},{offset:7,name:"Semana anterior (D−7)"}];
+  const periods=[{offset:1,name:"Dia anterior (D−1)"},{offset:7,name:"Mesmo dia da semana passada (D−7)"}];
   let comparisonOffset=1, previousHistory=[],currentKey="",loadedKey="",previousError="",seq=0;
   const cache=new Map();
   const n=v=>Number(v||0);
@@ -44,10 +44,9 @@
     return {hourly,target};
   }
   function hours(){
-    const c=typeof window.getOperationalSalesCurve==="function"?window.getOperationalSalesCurve():[];
-    const opening=c.length?Math.max(0,c[0].h-1):8;
-    const closing=c.length?Math.min(23,c[c.length-1].h+1):23;
-    return Array.from({length:closing-opening+1},(_,i)=>i+opening);
+    // Mantém as 24 faixas do dia, como no painel de referência.
+    // Faixas sem input permanecem sem venda atribuída, nunca viram zeros fictícios.
+    return Array.from({length:24},(_,i)=>i);
   }
   function timeLabel(h){return String(h).padStart(2,"0")+"h–"+String((h+1)%24).padStart(2,"0")+"h";}
   function moneyShort(v){const abs=Math.abs(v);return abs>=1000?"R$ "+(v/1000).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil":"R$ "+rounded(v);}
