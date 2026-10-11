@@ -2,11 +2,11 @@
 (function(){
   "use strict";
   const DATA={
-    feminino:{label:"Feminino",color:"#B63F52",groups:["Feminino","Íntima","CBA","Praia"]},
-    masculino:{label:"Masculino",color:"#2D6DA9",groups:["Masculino","Íntima","CBA","Praia"]},
+    feminino:{label:"Feminino",color:"#B63F52",groups:["Feminino","Íntima","CBA","Praia","Body Work"]},
+    masculino:{label:"Masculino",color:"#2D6DA9",groups:["Masculino","Íntima","CBA","Praia","Body Work"]},
     infantil:{label:"Infantil",color:"#D6A321",groups:["Infantil","CBA","Íntima","Praia","Carter's"]},
     casa:{label:"Casa",color:"#418A69",groups:["Casa Riachuelo"]},
-    beleza_relogios:{label:"Beleza / Relógios",color:"#C979A5",groups:["Beleza","Body Work","Relógios"]}
+    beleza_relogios:{label:"Beleza / Relógios",color:"#C979A5",groups:["Beleza","Relógios"]}
   };
   const SETS={
     "Carter's":[101,111,121,141],
@@ -36,7 +36,10 @@
   function worldOf(r){
     const code=Number(r.dco_code??r.code),gg=ggOf(r);
     if(!gg)return null;
-    if(gg==="Beleza"||gg==="Body Work"||gg==="Relógios"||gg==="Casa Riachuelo")
+    // Body Work distribuído por Mundo: 235 Feminino; 310 e 360 Masculino.
+    if(code===235)return "feminino";
+    if(code===310||code===360)return "masculino";
+    if(gg==="Beleza"||gg==="Relógios"||gg==="Casa Riachuelo")
       return gg==="Casa Riachuelo"?"casa":"beleza_relogios";
     const inferred=r.world_code;
     if(["feminino","masculino","infantil"].includes(inferred))return inferred;
