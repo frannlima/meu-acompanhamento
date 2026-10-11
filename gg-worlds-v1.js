@@ -158,7 +158,8 @@
         render();
         // Reprocessar o panorama e o card com a classificação oficial,
         // depois que as metas por DCO estiverem disponíveis.
-        if(typeof window.renderClarityHome==="function")window.renderClarityHome();
+        if(typeof renderDashboard==="function")renderDashboard();
+        else if(typeof window.renderClarityHome==="function")window.renderClarityHome();
         if(typeof renderGroupSharePanel==="function")renderGroupSharePanel();
       }
     }catch(e){
