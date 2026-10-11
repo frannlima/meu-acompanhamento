@@ -453,6 +453,10 @@ async function loadAll(storeOverride=null){
     renderHistory();
     if(typeof window.renderClarityHome==="function") window.renderClarityHome();
     if(state.section==="comerciais") await loadCommercials();
+    // Avisar componentes independentes após finalizar a carga de histórico e metas.
+    document.dispatchEvent(new CustomEvent("ma:dashboard-ready",{
+      detail:{store:requestedStore,business_date:localDate()}
+    }));
     return true;
   }catch(e){
     if(requestId===loadAllRequestSeq){
