@@ -165,29 +165,57 @@
       'As vendas por hora representam os incrementos entre os inputs, atribuídos à hora do registro. '+
       'Um horário sem input aparece como “—”, não como venda zerada. Acumulados refletem a última parcial disponível.'+
       '</div><button id="devGoGroups" type="button" class="dev-groups">Ver Mundos e DCOs →</button></div>';
-    el("devRefresh")?.addEventListener("click",()=>loadAll());
+    el("devRefresh")?.addEventListener("click",()=>{void loadAll().then(onDataReady)});
     el("devGoGroups")?.addEventListener("click",()=>setSection("grupos"));
     el("devStore")?.addEventListener("change",e=>{
       if(state.role==="administrador" && STORE_CODES.includes(e.target.value))changeAdminStore(e.target.value);
     });
     el("devComparison")?.addEventListener("change",e=>{
       comparisonOffset=Number(e.target.value)===7?7:1;
-      previousHistory=[];loadedKey="";previousError="";
-      fetchPrevious();
+      previousHistory=[];loadedKey="";pendingKey="";previousError="";
+      void fetchPrevious();
     });
+  }
+  // O componente reage ao evento emitido pela carga principal.
+  // Não depende de um wrapper que possa ser substituído por outro módulo.
+  let pendingKey="",lastRenderedKey="";
+  function draw(){
+    if(!state.logged)return;
+    try{
+      buildPanel();
+      lastRenderedKey=String(state.storeCode)+"|"+localDate();
+    }catch(error){
+      console.error("Falha ao renderizar o painel HH:",error);
+      const root=el("dailyEvolutionPanel");
+      if(root){
+        root.innerHTML='<div class="dev-head"><div class="dev-heading"><span class="eyebrow">EVOLUÇÃO HH</span><h2>Painel de Vendas Diário</h2></div></div>'+
+          '<div class="dev-note dev-load-error">Não foi possível desenhar o comparativo: '+esc(error?.message||"erro inesperado")+
+          '. Os lançamentos realizados continuam preservados. <button type="button" id="devRetry">Tentar novamente</button></div>';
+        el("devRetry")?.addEventListener("click",onDataReady);
+      }
+    }
+  }
+  function onDataReady(){
+    if(!state.logged)return;
+    draw();
+    const date=backDate(localDate(),comparisonOffset);
+    const key=String(state.storeCode)+"|"+date;
+    if(key!==loadedKey&&key!==pendingKey)void fetchPrevious();
   }
   async function fetchPrevious(){
     if(!state.logged)return;
     const store=String(state.storeCode),day=localDate(),date=backDate(day,comparisonOffset),key=store+"|"+date;
+    if(key===pendingKey)return;
     currentKey=key;
     if(cache.has(key)){
       previousHistory=cache.get(key);
-      loadedKey=key;previousError="";
-      buildPanel();return;
+      loadedKey=key;previousError="";pendingKey="";
+      draw();return;
     }
     const id=++seq;
+    pendingKey=key;
     previousHistory=[];loadedKey="";previousError="";
-    buildPanel();
+    draw();
     try{
       const records=await api("history",{matricula:state.matricula,business_date:date,store_code:store});
       if(id!==seq||currentKey!==key||String(state.storeCode)!==store)return;
@@ -198,19 +226,30 @@
       if(id!==seq||currentKey!==key)return;
       previousError=e.message||"Falha na consulta";
       loadedKey=key;previousHistory=[];
+    }finally{
+      if(pendingKey===key)pendingKey="";
     }
-    buildPanel();
+    draw();
+  }
+  document.addEventListener("ma:dashboard-ready",onDataReady);
+  const baseRenderDashboard=window.renderDashboard;
+  if(typeof baseRenderDashboard==="function"){
+    window.renderDashboard=function(...args){
+      const result=baseRenderDashboard.apply(this,args);
+      // Dados locais já disponíveis aqui; a consulta anterior é assíncrona.
+      onDataReady();
+      return result;
+    };
   }
   const baseLoadAll=window.loadAll;
-  window.loadAll=async function(...args){
-    const result=await baseLoadAll(...args);
-    if(result===true && state.logged){
-      buildPanel();
-      const key=String(state.storeCode)+"|"+backDate(localDate(),comparisonOffset);
-      if(key!==loadedKey)await fetchPrevious();
-    }
-    return result;
-  };
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{if(state.logged){buildPanel();fetchPrevious()}});
-  else if(state.logged){buildPanel();fetchPrevious()}
+  if(typeof baseLoadAll==="function"){
+    window.loadAll=async function(...args){
+      const result=await baseLoadAll.apply(this,args);
+      if(result===true)onDataReady();
+      return result;
+    };
+  }
+  const init=()=>{if(state.logged)onDataReady()};
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
+  else init();
 })();
