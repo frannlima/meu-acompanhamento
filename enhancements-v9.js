@@ -651,6 +651,7 @@ async function shareMainGroupPanel(){
     const file=new File([blob],"Parcial_Grupos_Loja_"+state.storeCode+"_"+localDate()+".png",{type:"image/png"});
     if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
       await navigator.share({title:"Desempenho por grupo de venda",files:[file]});
+      window.registrarCompartilhamentoParcial?.();
     }else{
       const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
       toast("Imagem da parcial gerada para compartilhamento.");
