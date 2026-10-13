@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v99";
+const CACHE="meu-acompanhamento-v100";
 const ASSETS=[
   "./",
   "./index.html",
@@ -7,15 +7,15 @@ const ASSETS=[
   "./premium-v22.css?v=8",
   "./estore-live-v1.css?v=1",
   "./clarity-v1.css?v=5",
-  "./mobile-experience-v1.css?v=3",
-  "./responsive-device-v1.css?v=1",
-  "./execution-v1.css?v=8",
+  "./mobile-experience-v1.css?v=4",
+  "./responsive-device-v1.css?v=2",
+  "./execution-v1.css?v=9",
   "./adaptive-header-v2.css?v=24",
   "./app.js?v=29",
   "./enhancements-v9.js?v=12",
   "./premium-v22.js?v=10",
   "./clarity-v1.js?v=23",
-  "./mobile-experience-v1.js?v=4",
+  "./mobile-experience-v1.js?v=5",
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=4",
   "./adaptive-header-v2.js?v=10",

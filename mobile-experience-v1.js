@@ -176,16 +176,6 @@
       else home.appendChild(card);
     }
 
-    if(!$("mobileUpdateFab")){
-      const fab=document.createElement("button");
-      fab.id="mobileUpdateFab";
-      fab.type="button";
-      fab.className="mobile-update-fab";
-      fab.innerHTML='<b>＋</b><span>Atualizar<br>parcial</span>';
-      fab.onclick=()=>showPaste();
-      document.body.appendChild(fab);
-    }
-
     if(!$("mobileHomeGroupSummary")){
       const summary=document.createElement("div");
       summary.id="mobileHomeGroupSummary";

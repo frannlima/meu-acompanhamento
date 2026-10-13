@@ -52,11 +52,6 @@ html.device-phone .mobile-dock{
   right:max(8px,var(--safe-right))!important;
   bottom:calc(7px + var(--safe-bottom))!important;
 }
-html.device-phone .mobile-update-fab{
-  right:max(18px,var(--safe-right))!important;
-  bottom:calc(88px + var(--safe-bottom))!important;
-}
-
 /* iPhone refinements */
 html.device-phone.platform-ios .mobile-header{
   padding-top:calc(10px + var(--safe-top))!important;
@@ -127,11 +122,6 @@ html.device-tablet .mobile-dock{
   width:min(620px,calc(100vw - 40px))!important;
   bottom:calc(12px + var(--safe-bottom))!important;
 }
-html.device-tablet .mobile-update-fab{
-  display:flex!important;
-  right:max(28px,var(--safe-right))!important;
-  bottom:calc(102px + var(--safe-bottom))!important;
-}
 html.device-tablet .section-head{
   border-radius:22px!important;
   margin:0 0 14px!important;
@@ -182,8 +172,7 @@ html.device-tablet.orientation-landscape .clarity-actions{grid-column:1/-1}
 
 /* DESKTOP / NOTEBOOK */
 html.device-desktop .mobile-header,
-html.device-desktop .mobile-dock,
-html.device-desktop .mobile-update-fab{display:none!important}
+html.device-desktop .mobile-dock{display:none!important}
 html.device-desktop .sidebar{display:flex!important}
 html.device-desktop .main{
   margin-left:240px!important;

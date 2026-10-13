@@ -207,17 +207,6 @@ body{background:#F4F0E7!important}
   #section-comerciais .commercial-dco-resizable{margin-top:8px!important;border-radius:13px!important}
   #section-comerciais .commercial-detractors{display:none!important}
 
-  .mobile-update-fab{
-    display:flex!important;
-    position:fixed;right:18px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:95;
-    width:72px;height:72px;border-radius:50%;
-    border:3px solid #fff;background:var(--app-green);color:#fff;
-    box-shadow:0 12px 30px rgba(23,63,53,.28);
-    align-items:center;justify-content:center;flex-direction:column;
-    font-weight:900
-  }
-  .mobile-update-fab b{font-size:24px;line-height:.8}.mobile-update-fab span{font-size:7px;line-height:1.05;margin-top:5px}
-
   .mobile-dock{
     height:72px!important;min-height:72px!important;
     left:8px!important;right:8px!important;bottom:calc(7px + env(safe-area-inset-bottom))!important;
@@ -227,10 +216,6 @@ body{background:#F4F0E7!important}
   .dock-item{height:60px!important;min-height:60px!important;border-radius:16px!important}
   .dock-item.active{background:rgba(255,255,255,.11)!important;box-shadow:inset 0 -3px 0 var(--app-orange)!important}
   .dock-label{font-size:6.8px!important;color:#fff!important}
-}
-
-@media(min-width:901px){
-  .mobile-update-fab{display:none!important}
 }
 
 

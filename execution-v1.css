@@ -769,10 +769,6 @@ html,body{
   max-width:100%;
   overflow-x:hidden;
 }
-#loginScreen:not(.hidden) ~ #mobileUpdateFab{
-  display:none!important;
-}
-
 @media(max-width:900px){
   .login-screen.login-premium{
     width:100%!important;
