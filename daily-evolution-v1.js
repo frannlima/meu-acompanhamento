@@ -1,255 +1,173 @@
-/* Painel de Vendas Diário — somente Meu Acompanhamento, sem dependências externas. */
+/* Ritmo de Vendas — Hoje x A.A. | Meu Acompanhamento (CE+PI). */
 (function(){
   "use strict";
-  const el=id=>document.getElementById(id);
-  const periods=[{offset:1,name:"Dia anterior (D−1)"},{offset:7,name:"Mesmo dia da semana passada (D−7)"}];
-  let comparisonOffset=1, previousHistory=[],currentKey="",loadedKey="",previousError="",seq=0;
-  const cache=new Map();
-  const n=v=>Number(v||0);
-  const brl=v=>money(v,2);
-  const rounded=v=>Number(v||0).toLocaleString("pt-BR",{maximumFractionDigits:0});
-  function backDate(value,days){
-    const d=new Date(value+"T12:00:00Z");
-    d.setUTCDate(d.getUTCDate()-days);
-    return d.toISOString().slice(0,10);
+  const $=id=>document.getElementById(id);
+  const currency=value=>money(value,2);
+  const amount=value=>Number.isFinite(Number(value))?Number(value):0;
+  const positive=value=>Number.isFinite(Number(value))&&Number(value)>0?Number(value):null;
+  const clockHour=iso=>{
+    const parts=new Intl.DateTimeFormat("pt-BR",{timeZone:"America/Fortaleza",hour:"2-digit",minute:"2-digit",hourCycle:"h23",hour12:false}).formatToParts(new Date(iso));
+    return {h:Number(parts.find(p=>p.type==="hour")?.value||0)%24,m:Number(parts.find(p=>p.type==="minute")?.value||0)};
+  };
+  const timeLabel=h=>String(h).padStart(2,"0")+"h";
+  const signed=value=>!Number.isFinite(value)?"—":(value<0?"− ":"+ ")+currency(Math.abs(value));
+  const percent=value=>!Number.isFinite(value)?"—":(value>0?"+ ":"")+value.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%";
+  const short=value=>Math.abs(value)>=1000?"R$ "+(value/1000).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil":"R$ "+Math.round(value).toLocaleString("pt-BR");
+
+  function curve(){
+    const raw=typeof window.getOperationalSalesCurve==="function"?window.getOperationalSalesCurve():[];
+    if(!Array.isArray(raw))return [];
+    const list=raw.map(r=>({h:Number(r.h),weight:Number(r.fin)}))
+      .filter(r=>Number.isInteger(r.h)&&r.h>=0&&r.h<24&&Number.isFinite(r.weight)&&r.weight>0)
+      .sort((a,b)=>a.h-b.h);
+    const total=list.reduce((s,r)=>s+r.weight,0);
+    return total>0?list.map(r=>({h:r.h,weight:r.weight/total})):[];
   }
-  function dateBr(value){if(!value)return "—";const a=value.split("-");return a[2]+"/"+a[1]+"/"+a[0];}
-  function hourOf(iso){
-    const parts=new Intl.DateTimeFormat("pt-BR",{hour:"2-digit",hour12:false,hourCycle:"h23",timeZone:"America/Fortaleza"}).formatToParts(new Date(iso));
-    return Number(parts.find(p=>p.type==="hour")?.value||0)%24;
+  function progress(rows,h,m=0){
+    return Math.max(0,Math.min(1,rows.reduce((s,r)=>
+      s+(r.h<h?r.weight:r.h===h?r.weight*Math.max(0,Math.min(1,m/60)):0),0)));
   }
-  function snapSeries(entries){
-    const hourly=Array(24).fill(null),cumulative=Array(24).fill(null);
-    const valid=(Array.isArray(entries)?entries:[]).filter(r=>r.captured_at&&Number.isFinite(Number(r.sales_financial)));
-    valid.sort((a,b)=>new Date(a.captured_at)-new Date(b.captured_at));
-    let before=0;
-    for(const record of valid){
-      const current=n(record.sales_financial), hour=hourOf(record.captured_at);
-      const delta=current-before;before=current;
-      hourly[hour]=(hourly[hour]===null?0:hourly[hour])+delta;
-      cumulative[hour]=current;
+  function snapshots(){
+    const history=Array.isArray(state.history)?state.history:[];
+    const valid=history.filter(r=>r?.captured_at&&Number.isFinite(Date.parse(r.captured_at))&&Number.isFinite(Number(r.sales_financial)))
+      .map(r=>({time:r.captured_at,sale:Number(r.sales_financial)}));
+    const day=state.day||{};
+    if(day.has_input&&day.captured_at&&Number.isFinite(Date.parse(day.captured_at))&&Number.isFinite(Number(day.sales_financial))
+       &&!valid.some(r=>r.time===day.captured_at)){
+      valid.push({time:day.captured_at,sale:Number(day.sales_financial)});
     }
-    let last=null;
-    for(let hour=0;hour<24;hour++){
-      if(cumulative[hour]!==null)last=cumulative[hour];
-      else if(last!==null)cumulative[hour]=last;
+    valid.sort((a,b)=>Date.parse(a.time)-Date.parse(b.time));
+    const byHour=new Map();
+    valid.forEach(r=>{const t=clockHour(r.time);byHour.set(t.h,{sale:r.sale,time:r.time,minute:t.m});});
+    return {last:valid.length?valid[valid.length-1]:null,byHour};
+  }
+  function analytics(){
+    const rows=curve(),snap=snapshots(),last=snap.last,aa=positive(state.day?.ly_financial),
+      target=positive(state.day?.target_financial),sale=last?last.sale:null;
+    const clock=last?clockHour(last.time):null;
+    const fraction=clock?progress(rows,clock.h,clock.m):0;
+    const expected=aa!==null&&fraction>0?aa*fraction:null;
+    const delta=sale!==null&&expected!==null?sale-expected:null;
+    const variation=delta!==null&&expected>0?delta/expected*100:null;
+    const projection=sale!==null&&fraction>=0.025?sale/fraction:null;
+    const next=clock?rows.find(r=>r.h>clock.h):null;
+    const nextAA=next&&aa!==null?aa*progress(rows,next.h):null;
+    const required=nextAA!==null&&sale!==null?Math.max(0,nextAA-sale):null;
+    return {rows,snap,last,aa,target,sale,clock,fraction,expected,delta,variation,projection,next,required};
+  }
+  function stat(label,value,sub,kind){
+    return '<div class="dev-kpi '+(kind||"")+'"><span>'+label+'</span><strong>'+value+'</strong><small>'+sub+'</small></div>';
+  }
+  function status(model){
+    const x=model;
+    if(!x.rows.length)return {cls:"warn",badge:"Sem curva",title:"Curva horária indisponível",body:"Não foi possível recuperar a curva histórica da filial. Confira a configuração antes de analisar as referências."};
+    if(x.aa===null)return {cls:"warn",badge:"Sem A.A.",title:"Venda A.A. não cadastrada para esta filial",body:"Não foi possível calcular a referência do ano anterior. A venda de hoje e a meta continuam disponíveis, sem estimativas fictícias do A.A."};
+    if(x.sale===null)return {cls:"neutral",badge:"Aguardando input",title:"Faça a primeira atualização da venda",body:"Quando a parcial for registrada, o painel comparará o realizado com o A.A. distribuído pela curva histórica da loja."};
+    if(x.delta===null)return {cls:"neutral",badge:"Antes da abertura",title:"Aguardando ritmo comparável",body:"A referência horária começa no período operacional da loja. Atualize a parcial durante o expediente."};
+    return x.delta>=0?
+      {cls:"good",badge:"Acima da referência",title:"Estamos "+signed(x.delta)+" acima do A.A. estimado",body:"O acumulado de hoje supera a referência proporcional do ano anterior até a última atualização."}:
+      {cls:"bad",badge:"Abaixo da referência",title:"Precisamos recuperar "+currency(Math.abs(x.delta)),body:"O acumulado de hoje está abaixo da referência proporcional do ano anterior até a última atualização."};
+  }
+  function direction(x){
+    if(x.sale===null)return "Registre a primeira parcial para receber o desafio da próxima hora.";
+    if(x.aa===null)return "Sem Venda A.A. válida, não é possível calcular o desafio comparativo. Confirme a base do ano anterior.";
+    if(!x.rows.length)return "A curva histórica ainda não foi carregada.";
+    if(x.next&&x.required!==null){
+      const gap=x.required>0?"Precisamos vender mais <strong>"+currency(x.required)+"</strong>":"Já alcançamos a referência de <strong>"+timeLabel(x.next.h)+"</strong>";
+      return gap+" até "+timeLabel(x.next.h)+" para acompanhar o A.A. estimado. <small>Referência prevista ao início desse horário, conforme a curva.</small>";
     }
-    return {hourly,cumulative,final:valid.length?before:null,first:valid[0]?.captured_at||null,last:valid.at(-1)?.captured_at||null,count:valid.length};
+    return "Última faixa operacional alcançada. Compare o acumulado de hoje com o <strong>A.A. total</strong> para avaliar o fechamento.";
   }
-  function reference(){
-    const target=n(state.day?.target_financial);
-    const rows=typeof window.getOperationalSalesCurve==="function"?window.getOperationalSalesCurve():[];
-    const hourly=Array(24).fill(null);
-    for(const r of rows){if(r.h>=0&&r.h<24)hourly[r.h]=target*n(r.fin);}
-    return {hourly,target};
-  }
-  function hours(){
-    // Mantém as 24 faixas do dia, como no painel de referência.
-    // Faixas sem input permanecem sem venda atribuída, nunca viram zeros fictícios.
-    return Array.from({length:24},(_,i)=>i);
-  }
-  function timeLabel(h){return String(h).padStart(2,"0")+"h–"+String((h+1)%24).padStart(2,"0")+"h";}
-  function moneyShort(v){const abs=Math.abs(v);return abs>=1000?"R$ "+(v/1000).toLocaleString("pt-BR",{maximumFractionDigits:0})+" mil":"R$ "+rounded(v);}
-  function plot(current,prior,goal,hourKeys){
-    const W=1000,H=460,pad={l:93,r:22,t:24,b:91};
-    const max=Math.max(1,...hourKeys.flatMap(h=>[current.hourly[h]||0,prior.hourly[h]||0,goal.hourly[h]||0]).map(Math.abs));
-    const upper=Math.ceil(max/10000)*10000||10000;
-    const sx=i=>pad.l+(i/Math.max(1,hourKeys.length-1))*(W-pad.l-pad.r);
-    const sy=v=>H-pad.b-(v/upper)*(H-pad.b-pad.t);
+  function chart(x){
+    const rows=x.rows;
+    if(!rows.length)return '<p class="dev-empty">Curva indisponível.</p>';
+    const W=840,H=315,L=77,R=20,T=20,B=55;
+    const hourlyCurrent=rows.map(r=>x.snap.byHour.get(r.h)?.sale??null);
+    const aa=rows.map(r=>x.aa!==null?x.aa*progress(rows,r.h+1):null);
+    const meta=rows.map(r=>x.target!==null?x.target*progress(rows,r.h+1):null);
+    const all=[...hourlyCurrent,...aa,...meta].filter(v=>v!==null&&Number.isFinite(v));
+    const maximum=Math.max(1,...all);
+    const upper=Math.ceil(maximum/10000)*10000||10000;
+    const sx=i=>L+i*(W-L-R)/Math.max(1,rows.length-1);
+    const sy=v=>T+(upper-v)/upper*(H-T-B);
     let svg="";
-    for(let k=0;k<=5;k++){
-      const value=upper*k/5,y=sy(value);
-      svg+='<line x1="'+pad.l+'" x2="'+(W-pad.r)+'" y1="'+y+'" y2="'+y+'" stroke="#E8ECE8" stroke-dasharray="3 7"/>';
-      svg+='<text x="'+(pad.l-14)+'" y="'+(y+5)+'" text-anchor="end" font-size="14" fill="#748179">'+esc(moneyShort(value))+'</text>';
+    for(let i=0;i<=4;i++){
+      const value=upper*i/4,y=sy(value);
+      svg+='<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="#E5EDE5" stroke-dasharray="4 5"/>';
+      svg+='<text x="'+(L-9)+'" y="'+(y+4)+'" text-anchor="end" font-size="12" fill="#6A7F74">'+esc(short(value))+'</text>';
     }
-    hourKeys.forEach((h,i)=>{
-      const x=sx(i);
-      svg+='<text transform="translate('+x+','+(H-pad.b+26)+') rotate(-45)" font-size="12" text-anchor="end" fill="#64776C">'+esc(timeLabel(h))+'</text>';
+    rows.forEach((r,i)=>{svg+='<text x="'+sx(i)+'" y="'+(H-20)+'" text-anchor="middle" fill="#587268" font-size="12">'+timeLabel(r.h)+'</text>';});
+    const lines=[{values:meta,color:"#DC840D",dash:' stroke-dasharray="6 5"'},{values:aa,color:"#376D94",dash:' stroke-dasharray="6 4"'},{values:hourlyCurrent,color:"#178866",dash:""}];
+    lines.forEach(line=>{
+      const pts=line.values.flatMap((v,i)=>v===null||!Number.isFinite(v)?[]:[{x:sx(i),y:sy(v),value:v,h:rows[i].h}]);
+      if(pts.length>=2)svg+='<polyline points="'+pts.map(p=>p.x+","+p.y).join(" ")+'" fill="none" stroke="'+line.color+'" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"'+line.dash+'/>';
+      pts.forEach(p=>{svg+='<circle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="'+line.color+'" stroke="white" stroke-width="1.8"><title>'+timeLabel(p.h)+": "+currency(p.value)+'</title></circle>';});
     });
-    const series=[
-      {values:current.hourly,color:"#16866A"},
-      {values:prior.hourly,color:"#285D86"},
-      {values:goal.hourly,color:"#DE7C00"}
-    ];
-    for(const seriesLine of series){
-      let segment=[];
-      const addSegment=()=>{
-        if(segment.length>1)svg+='<polyline points="'+segment.join(" ")+'" fill="none" stroke="'+seriesLine.color+'" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>';
-        segment=[];
-      };
-      hourKeys.forEach((h,i)=>{
-        const value=seriesLine.values[h];
-        if(value===null || !Number.isFinite(value)){addSegment();return;}
-        segment.push(sx(i).toFixed(1)+","+sy(value).toFixed(1));
-        svg+='<circle cx="'+sx(i).toFixed(1)+'" cy="'+sy(value).toFixed(1)+'" r="4.2" fill="'+seriesLine.color+'" stroke="#FFFFFF" stroke-width="1.5"><title>'+esc(timeLabel(h)+": "+brl(value))+'</title></circle>';
-      });
-      addSegment();
-    }
-    svg+='<text x="'+(W/2)+'" y="'+(H-9)+'" text-anchor="middle" fill="#2B473D" font-size="14" font-weight="700">Hora do input</text>';
-    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Curva comparativa de vendas atual, dia de comparação e referência histórica">'+svg+'</svg>';
+    return '<div class="dev-chart-scroll"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Evolução acumulada: venda real registrada, A.A. estimado e meta pela curva histórica">'+svg+'</svg></div>';
   }
-  function signedCurrency(v){
-    if(v===null)return "—";
-    return (v<0?"− ":"+ ")+brl(Math.abs(v));
-  }
-  function deltaCell(value,isPercent){
-    if(value===null || !Number.isFinite(value))return '<span class="dev-muted">—</span>';
-    const cls=value>0?"up":value<0?"down":"flat";
-    const str=isPercent?Math.abs(value).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%":brl(Math.abs(value));
-    return '<span class="dev-delta '+cls+'">'+(value>0?"▲ ":value<0?"▼ ":"— ")+str+'</span>';
-  }
-  function totalLine(current,prior,goal){
-    const equal=current.final!==null && prior.final!==null;
-    const variance=equal?current.final-prior.final:null;
-    const variation=equal&&prior.final!==0?variance/prior.final*100:null;
-    return '<tr class="dev-total"><th>Total registrado</th><td>'+ (current.final===null?"—":brl(current.final))+'</td>'+
-      '<td>'+(current.final===null?"—":brl(current.final))+'</td><td>'+(prior.final===null?"—":brl(prior.final))+'</td>'+
-      '<td>'+(prior.final===null?"—":brl(prior.final))+'</td><td>'+deltaCell(variation,true)+'</td><td>'+deltaCell(variance,false)+'</td></tr>';
-  }
-  function table(current,prior,goal,hourKeys){
+  function detail(x){
+    if(!x.rows.length)return "";
     let body="";
-    for(const h of hourKeys){
-      const av=current.hourly[h],pv=prior.hourly[h],curCum=current.cumulative[h],prevCum=prior.cumulative[h];
-      const comp=av!==null&&pv!==null;
-      const d=comp?av-pv:null;
-      const percent=comp&&pv!==0?(d/pv*100):null;
-      body+='<tr><th>'+timeLabel(h)+'</th><td class="dev-current">'+(av===null?"—":brl(av))+'</td>'+
-      '<td>'+(curCum===null?"—":brl(curCum))+'</td><td class="dev-previous">'+(pv===null?"—":brl(pv))+'</td>'+
-      '<td>'+(prevCum===null?"—":brl(prevCum))+'</td>'+
-      '<td>'+deltaCell(percent,true)+'</td><td>'+deltaCell(d,false)+'</td></tr>';
-    }
-    return '<div class="dev-table-scroll"><table><thead><tr><th>Hora</th><th>Venda atual</th><th>Atual acum.</th><th>Venda anterior</th><th>Anterior acum.</th><th>Δ %</th><th>Δ R$</th></tr></thead><tbody>'+body+'</tbody><tfoot>'+
-      totalLine(current,prior,goal)+'</tfoot></table></div>';
-  }
-  function statusCards(current,prior,goal){
-    const av=current.final,pv=prior.final;
-    const delta=av!==null&&pv!==null?av-pv:null;
-    const att=av!==null&&goal.target?100*av/goal.target:null;
-    return '<div class="dev-kpis">'+
-      '<div class="dev-kpi"><span>Meta financeira do dia</span><strong>'+brl(goal.target)+'</strong><small>Referência da curva da loja</small></div>'+
-      '<div class="dev-kpi"><span>Venda atual registrada</span><strong>'+(av===null?"—":brl(av))+'</strong><small>'+(att===null?"Aguardando input":pct(att)+" de atingimento")+'</small></div>'+
-      '<div class="dev-kpi"><span>Venda no período anterior</span><strong>'+(pv===null?"—":brl(pv))+'</strong><small>'+dateBr(backDate(localDate(),comparisonOffset))+'</small></div>'+
-      '<div class="dev-kpi"><span>Variação entre registros</span><strong class="'+(delta===null?"":delta>=0?"dev-good":"dev-bad")+'">'+signedCurrency(delta)+'</strong><small>'+(delta===null?"Sem base comparável":"Valores até o último input de cada dia")+'</small></div>'+
-      '</div>';
-  }
-  function buildPanel(){
-    const root=el("dailyEvolutionPanel");if(!root||!state.logged)return;
-    const day=localDate(),compareDay=backDate(day,comparisonOffset);
-    const current=snapSeries(state.history),prev=snapSeries(previousHistory),ref=reference(),useHours=hours();
-    const waiting=(loadedKey!==String(state.storeCode)+"|"+compareDay);
-    const error=previousError;
-    const activePeriod=periods.find(p=>p.offset===comparisonOffset);
-    root.innerHTML=
-      '<div class="dev-head"><div class="dev-head-icon" aria-hidden="true">▥</div>'+
-      '<div class="dev-heading"><span class="eyebrow">INTELIGÊNCIA DE VENDAS • LOJA '+esc(state.storeCode)+'</span><h2>Painel de Vendas Diário</h2>'+
-      '<p>Evolução de vendas hora a hora • Comparação e referência histórica</p></div>'+
-      '<button class="dev-refresh" type="button" id="devRefresh" title="Atualizar resultado da loja">↻ Atualizar</button></div>'+
-      '<div class="dev-filters">'+
-      '<label>Loja<select id="devStore" '+(state.role==="administrador"?"":"disabled")+' aria-label="Filial em análise">'+
-      STORE_CODES.map(code=>'<option value="'+code+'" '+(code===String(state.storeCode)?"selected":"")+'>Loja '+code+'</option>').join("")+
-      '</select></label>'+
-      '<label>Comparar com<select id="devComparison" aria-label="Período de comparação">'+
-      periods.map(p=>'<option value="'+p.offset+'" '+(p.offset===comparisonOffset?"selected":"")+'>'+p.name+'</option>').join("")+
-      '</select></label>'+
-      '<div class="dev-context"><span>CE+PI</span><span>Referência: curva histórica</span></div></div>'+
-      statusCards(current,prev,ref)+
-      '<div class="dev-content"><div class="dev-chart"><div class="dev-subheading"><h3>Evolução das vendas hora a hora (HH)</h3>'+
-      '<p>'+(current.last?"Atualizado às "+localTime(current.last):"Aguardando o primeiro input")+' • Comparação: '+dateBr(compareDay)+'</p></div>'+
-      '<div class="dev-legend"><span><i class="dev-dot current"></i>Venda atual</span><span><i class="dev-dot previous"></i>'+activePeriod.name+'</span>'+
-      '<span><i class="dev-dot reference"></i>Meta / curva histórica</span></div>'+
-      '<div class="dev-chart-scroll">'+plot(current,prev,ref,useHours)+'</div></div>'+
-      '<div class="dev-table"><div class="dev-table-title"><strong>Comparativo por hora</strong><small>'+dateBr(day)+' × '+dateBr(compareDay)+'</small></div>'+
-      table(current,prev,ref,useHours)+'</div></div>'+
-      '<div class="dev-footer"><div class="dev-note">'+
-      (waiting?"Carregando venda anterior… ":error?"Não foi possível consultar o período anterior. ":"")+
-      'As vendas por hora representam os incrementos entre os inputs, atribuídos à hora do registro. '+
-      'Um horário sem input aparece como “—”, não como venda zerada. Acumulados refletem a última parcial disponível.'+
-      '</div><button id="devGoGroups" type="button" class="dev-groups">Ver Mundos e DCOs →</button></div>';
-    el("devRefresh")?.addEventListener("click",()=>{void loadAll().then(onDataReady)});
-    el("devGoGroups")?.addEventListener("click",()=>setSection("grupos"));
-    el("devStore")?.addEventListener("change",e=>{
-      if(state.role==="administrador" && STORE_CODES.includes(e.target.value))changeAdminStore(e.target.value);
+    x.rows.forEach(r=>{
+      const point=x.snap.byHour.get(r.h);
+      const actual=point?point.sale:null;
+      const fraction=point?progress(x.rows,r.h,point.minute):progress(x.rows,r.h+1);
+      const expected=x.aa!==null?x.aa*fraction:null;
+      const delta=actual!==null&&expected!==null?actual-expected:null;
+      const varPct=delta!==null&&expected>0?delta/expected*100:null;
+      const change=delta===null?"—":'<span class="'+(delta>=0?"dev-good":"dev-bad")+'">'+signed(delta)+'</span>';
+      body+='<tr><th scope="row">'+timeLabel(r.h)+'</th><td>'+(actual===null?"—":currency(actual))+'</td><td>'+(expected===null?"—":currency(expected))+'</td><td>'+change+'</td><td>'+(varPct===null?"—":percent(varPct))+'</td></tr>';
     });
-    el("devComparison")?.addEventListener("change",e=>{
-      comparisonOffset=Number(e.target.value)===7?7:1;
-      previousHistory=[];loadedKey="";pendingKey="";previousError="";
-      void fetchPrevious();
-    });
+    return '<details class="dev-details"><summary>Ver comparativo detalhado por horário <span>▾</span></summary>'+
+      '<div class="dev-table-scroll"><table><thead><tr><th>Faixa</th><th>Hoje acum.</th><th>A.A. est.*</th><th>Δ R$</th><th>Δ %</th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+      '<p class="dev-table-note">Os traços indicam horários sem input. Para horários registrados, o A.A. é proporcional ao minuto da atualização; nos demais, é a referência ao fim da faixa.</p></details>';
   }
-  // O componente reage ao evento emitido pela carga principal.
-  // Não depende de um wrapper que possa ser substituído por outro módulo.
-  let pendingKey="",lastRenderedKey="";
-  function draw(){
-    if(!state.logged)return;
+  function render(){
+    const root=$("dailyEvolutionPanel");if(!root||!state.logged)return;
     try{
-      buildPanel();
-      lastRenderedKey=String(state.storeCode)+"|"+localDate();
+      const x=analytics(),s=status(x);
+      const time=x.last?"Último input às "+localTime(x.last.time):"Aguardando primeira parcial";
+      const compare=x.clock?"Referência às "+localTime(x.last.time):"Estimativa após o primeiro input";
+      const projection=x.projection!==null?currency(x.projection):"—";
+      root.innerHTML=
+        '<div class="dev-head"><div class="dev-head-icon" aria-hidden="true">↗</div><div class="dev-heading">'+
+        '<span class="eyebrow">INTELIGÊNCIA DE VENDAS • LOJA '+esc(state.storeCode)+'</span>'+
+        '<h2>Ritmo de Vendas <em>Hoje × A.A.</em></h2><p>'+time+' • Curva histórica por filial</p></div>'+
+        '<button type="button" id="devRefresh" class="dev-refresh" title="Atualizar venda e referências">↻ Atualizar</button></div>'+
+        '<div class="dev-filters"><label>Filial<select id="devStore" '+(state.role==="administrador"?"":"disabled")+' aria-label="Filial em análise">'+
+        STORE_CODES.map(code=>'<option value="'+code+'" '+(code===String(state.storeCode)?"selected":"")+'>Loja '+code+'</option>').join("")+
+        '</select></label><div class="dev-context"><span>Comparativo: A.A. estimado</span><span>Venda real: Hora a Hora</span></div></div>'+
+        '<div class="dev-kpis">'+
+        stat("Venda hoje",x.sale===null?"—":currency(x.sale),x.sale===null?"Aguardando input":"Realizado acumulado","main")+
+        stat("A.A. até o input*",x.expected===null?"—":currency(x.expected),compare,"")+
+        stat("Evolução vs A.A.*",x.variation===null?"—":percent(x.variation),x.delta===null?"Sem comparação":signed(x.delta)+" em reais",x.delta===null?"":x.delta>=0?"good":"bad")+
+        stat("Projeção de fechamento",projection,x.projection===null?"Aguardando ritmo":"Estimativa pela curva até o último input","")+
+        '</div>'+
+        '<div class="dev-status '+s.cls+'"><span class="dev-status-badge">'+s.badge+'</span><strong>'+s.title+'</strong><p>'+s.body+'</p></div>'+
+        '<div class="dev-chart"><div class="dev-subheading"><h3>Evolução acumulada por hora</h3><p>Hoje: valor real dos inputs • A.A. e meta: referências proporcionais à curva</p></div>'+
+        '<div class="dev-legend"><span><i class="dev-dot current"></i>Hoje real</span>'+
+        (x.aa!==null?'<span><i class="dev-dot previous"></i>A.A. estimado*</span>':"")+
+        (x.target!==null?'<span><i class="dev-dot reference"></i>Meta estimada</span>':"")+'</div>'+chart(x)+'</div>'+
+        '<div class="dev-action"><div class="dev-action-icon">🎯</div><div><span>DESAFIO DA PRÓXIMA HORA</span><p>'+direction(x)+'</p></div></div>'+
+        '<div class="dev-basis">'+
+        '<span>A.A. total: <strong>'+(x.aa===null?"Indisponível":currency(x.aa))+'</strong></span>'+
+        '<span>Meta do dia: <strong>'+(x.target===null?"Indisponível":currency(x.target))+'</strong></span></div>'+
+        detail(x)+
+        '<div class="dev-footer"><p><strong>*Referência estimada:</strong> o total oficial do A.A. é distribuído pela curva histórica de vendas da loja. Não representa vendas horárias reais do ano anterior. A projeção é indicativa, não é uma garantia de fechamento.</p>'+
+        '<button type="button" id="devGoGroups" class="dev-groups">Ver Mundos e DCOs →</button></div>';
+      $("devRefresh")?.addEventListener("click",()=>{void loadAll()});
+      $("devGoGroups")?.addEventListener("click",()=>setSection("grupos"));
+      $("devStore")?.addEventListener("change",e=>{
+        const store=String(e.target.value);
+        if(state.role==="administrador"&&STORE_CODES.includes(store)&&store!==String(state.storeCode))void changeAdminStore(store);
+      });
     }catch(error){
-      console.error("Falha ao renderizar o painel HH:",error);
-      const root=el("dailyEvolutionPanel");
-      if(root){
-        root.innerHTML='<div class="dev-head"><div class="dev-heading"><span class="eyebrow">EVOLUÇÃO HH</span><h2>Painel de Vendas Diário</h2></div></div>'+
-          '<div class="dev-note dev-load-error">Não foi possível desenhar o comparativo: '+esc(error?.message||"erro inesperado")+
-          '. Os lançamentos realizados continuam preservados. <button type="button" id="devRetry">Tentar novamente</button></div>';
-        el("devRetry")?.addEventListener("click",onDataReady);
-      }
+      console.error("Erro no painel Hoje x A.A.:",error);
+      root.innerHTML='<div class="dev-error"><strong>Não foi possível exibir o Ritmo de Vendas.</strong><p>'+esc(error.message||"Erro inesperado")+'</p><button type="button" id="devRetry">Tentar novamente</button></div>';
+      $("devRetry")?.addEventListener("click",render);
     }
   }
-  function onDataReady(){
-    if(!state.logged)return;
-    draw();
-    const date=backDate(localDate(),comparisonOffset);
-    const key=String(state.storeCode)+"|"+date;
-    if(key!==loadedKey&&key!==pendingKey)void fetchPrevious();
-  }
-  async function fetchPrevious(){
-    if(!state.logged)return;
-    const store=String(state.storeCode),day=localDate(),date=backDate(day,comparisonOffset),key=store+"|"+date;
-    if(key===pendingKey)return;
-    currentKey=key;
-    if(cache.has(key)){
-      previousHistory=cache.get(key);
-      loadedKey=key;previousError="";pendingKey="";
-      draw();return;
-    }
-    const id=++seq;
-    pendingKey=key;
-    previousHistory=[];loadedKey="";previousError="";
-    draw();
-    try{
-      const records=await api("history",{matricula:state.matricula,business_date:date,store_code:store});
-      if(id!==seq||currentKey!==key||String(state.storeCode)!==store)return;
-      previousHistory=Array.isArray(records)?records:[];
-      cache.set(key,previousHistory);
-      loadedKey=key;
-    }catch(e){
-      if(id!==seq||currentKey!==key)return;
-      previousError=e.message||"Falha na consulta";
-      loadedKey=key;previousHistory=[];
-    }finally{
-      if(pendingKey===key)pendingKey="";
-    }
-    draw();
-  }
-  document.addEventListener("ma:dashboard-ready",onDataReady);
-  const baseRenderDashboard=window.renderDashboard;
-  if(typeof baseRenderDashboard==="function"){
-    window.renderDashboard=function(...args){
-      const result=baseRenderDashboard.apply(this,args);
-      // Dados locais já disponíveis aqui; a consulta anterior é assíncrona.
-      onDataReady();
-      return result;
-    };
-  }
-  const baseLoadAll=window.loadAll;
-  if(typeof baseLoadAll==="function"){
-    window.loadAll=async function(...args){
-      const result=await baseLoadAll.apply(this,args);
-      if(result===true)onDataReady();
-      return result;
-    };
-  }
-  const init=()=>{if(state.logged)onDataReady()};
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);
-  else init();
+  document.addEventListener("ma:dashboard-ready",render);
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render);
+  else render();
 })();
