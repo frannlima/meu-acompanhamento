@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v100";
+const CACHE="meu-acompanhamento-v101";
 const ASSETS=[
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS=[
   "./enhancements-v9.css?v=10",
   "./premium-v22.css?v=8",
   "./estore-live-v1.css?v=1",
+  "./estore-integrated-v2.css?v=1",
   "./clarity-v1.css?v=5",
   "./mobile-experience-v1.css?v=4",
   "./responsive-device-v1.css?v=2",
@@ -19,7 +20,7 @@ const ASSETS=[
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=4",
   "./adaptive-header-v2.js?v=10",
-  "./estore-live-v1.js?v=1",
+  "./estore-integrated-v2.js?v=1",
   "./gg-worlds-v1.css?v=2",
   "./gg-worlds-v1.js?v=6",
   "./gg-official-performance-v2.js?v=3",
