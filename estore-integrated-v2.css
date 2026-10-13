@@ -1,0 +1,38 @@
+/* Meu Acompanhamento: Hora a Hora eStore integrado */
+#section-estore .estore-hour-entry{padding:17px 19px;margin:15px 0;border-radius:20px;border:1px solid #DCE6DC;background:#FFFEFA;min-width:0}
+#section-estore .estore-entry-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px;flex-wrap:wrap}
+#section-estore .estore-entry-heading .eyebrow{font-size:10px;color:#BD6A0A;font-weight:850}
+#section-estore .estore-entry-heading h2{font-size:19px;color:#173F35;margin:4px 0}
+#section-estore .estore-entry-heading p{font-size:12px;color:#697B70;margin:0;line-height:1.5}
+#section-estore #estoreEntryContext{font-size:11px;font-weight:800;color:#245A43;background:#EAF3EC;padding:8px 12px;border-radius:30px}
+#section-estore .estore-hour-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr) auto;gap:9px;align-items:end}
+#section-estore .estore-hour-form label{display:flex;flex-direction:column;gap:6px;color:#426351;font-size:11px;font-weight:750;min-width:0}
+#section-estore .estore-hour-form input{min-width:0;width:100%;height:43px;border:1px solid #D5E0D7;border-radius:11px;padding:10px 11px;background:#fff;color:#173F35;font:700 15px system-ui}
+#section-estore .estore-hour-form button{min-height:43px;font-size:12px;white-space:nowrap}
+#section-estore .estore-hour-form button:disabled{opacity:.6}
+#section-estore .estore-entry-info{font-size:11px;line-height:1.5;color:#62756A;margin:12px 0 0}
+#section-estore #estoreHourFeedback{font-size:12px;font-weight:750;line-height:1.5;margin:7px 0 0}
+#section-estore #estoreHourFeedback:empty{display:none}
+#section-estore #estoreHourFeedback[data-kind="error"]{color:#B24B41}
+#section-estore #estoreHourFeedback[data-kind="success"]{color:#187453}
+#section-estore .estore-live-share-real{grid-column:1/-1;min-width:0;background:#EFF7EF;border:1px solid #D2E8D4;padding:14px 15px;border-radius:15px}
+#section-estore .estore-live-share-real>span{color:#35644D;font-size:11px;font-weight:850}
+#section-estore .estore-live-share-real>strong{display:block;font-size:clamp(24px,2.6vw,35px);color:#173F35;margin:4px 0;font-variant-numeric:tabular-nums}
+#section-estore .estore-live-share-real>small{color:#62766A;font-size:11px;line-height:1.5;display:block}
+#section-estore .estore-share-bases{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}
+#section-estore .estore-share-bases div{background:white;border-radius:9px;padding:8px 11px;flex:1;min-width:145px;font-size:10px;color:#607669}
+#section-estore .estore-share-bases b{display:block;margin-top:3px;font-size:13px;color:#173F35}
+#section-estore .estore-share-bases small{display:block;margin-top:4px;font-size:10px;color:#75857C}
+#estoreQuickFab{display:none}
+@media(max-width:900px){
+ #estoreQuickFab{display:flex;position:fixed;right:max(12px,env(safe-area-inset-right));bottom:calc(91px + env(safe-area-inset-bottom));z-index:94;width:62px;height:62px;flex-direction:column;align-items:center;justify-content:center;border:3px solid #fff;border-radius:50%;background:#173F35;color:#fff;box-shadow:0 8px 20px rgba(23,63,53,.24);font-family:inherit;cursor:pointer}
+ #estoreQuickFab span{font-size:20px;line-height:1}
+ #estoreQuickFab b{font-size:10px;line-height:1.05;margin-top:3px}
+ #section-estore .estore-hour-entry{padding:14px}
+ #section-estore .estore-hour-form{grid-template-columns:1fr 1fr}
+ #section-estore .estore-hour-form button{grid-column:1/-1;width:100%}
+}
+@media(max-width:410px){#section-estore .estore-hour-form{grid-template-columns:1fr}}
+#loginScreen:not(.hidden) ~ #estoreQuickFab{display:none!important}
+html.device-desktop #estoreQuickFab{display:none!important}
+
