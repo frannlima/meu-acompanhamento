@@ -11,7 +11,7 @@
 #dailyEvolutionPanel .dev-refresh{border:1px solid #C7D9CD;background:#153F34;color:#fff;border-radius:11px;min-height:39px;padding:8px 13px;font-size:12px;font-weight:750;cursor:pointer;flex-shrink:0}
 #dailyEvolutionPanel .dev-filters{display:flex;align-items:end;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:16px}
 #dailyEvolutionPanel .dev-filters label{display:flex;flex-direction:column;gap:6px;color:#61756B;font-size:11px;font-weight:750;min-width:150px}
-#dailyEvolutionPanel .dev-filters select{height:40px;padding:0 12px;width:100%;border:1px solid #D7E2D9;border-radius:10px;background:#fff;color:#143B30;font:600 12px inherit;outline:none}
+#dailyEvolutionPanel .dev-filters select{height:40px;padding:0 12px;width:100%;border:1px solid #D7E2D9;border-radius:10px;background:#fff;color:#143B30;font-family:inherit;font-size:12px;font-weight:600;outline:none}
 #dailyEvolutionPanel .dev-filters select:disabled{background:#F4F6F2;color:#577267;opacity:1}
 #dailyEvolutionPanel .dev-context{display:flex;flex-wrap:wrap;gap:7px}
 #dailyEvolutionPanel .dev-context span{background:#F2F7F2;border:1px solid #DBE9DD;border-radius:30px;padding:6px 10px;font-size:11px;color:#416354;font-weight:650}
