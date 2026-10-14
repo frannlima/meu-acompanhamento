@@ -10,7 +10,7 @@
  const norm=s=>String(s||"").replace(/\D/g,"").padStart(3,"0");
  const ctx=()=>({store:norm(state.storeCode),date:localDate()});
  const ctxKey=c=>c.store+"|"+c.date;
- const visible=()=>state.logged&&state.section==="estore"&&!document.hidden&&$("section-estore")?.classList.contains("active");
+ const visible=()=>state.logged&&["inicio","estore"].includes(state.section)&&!document.hidden;
  let loadedRetailStore="",loadedRetailDate="",loadedEstore=null,loadedEstoreKey="",seq=0,controller=null,lastRequest=0,lastKey="",submitting=false;
  function status(msg,tone=""){const el=$("estoreLiveStatus");if(el){el.textContent=msg;el.dataset.kind=tone;}}
  function feedback(msg,tone=""){const el=$("estoreHourFeedback");if(el){el.textContent=msg;el.dataset.kind=tone;}}
@@ -29,6 +29,7 @@
       orderGoal=Math.max(0,Math.trunc(Number(row?.orderTarget)||0)),goal=Math.max(0,Number(row?.metaValue)||0),
       shop=retail(c),share=has&&shop?cap/shop.sale*100:null,att=has&&goal>0?cap/goal*100:null,
       deviation=has&&goal>0?cap-goal:null;
+   document.dispatchEvent(new CustomEvent("ma:estore-snapshot",{detail:{store:c.store,date:c.date,has,captured:has?cap:null,orders:has?orders:null,share,metaValue:goal,updated_at:row?.updated_at||null,retail_updated_at:shop?.updated?.toISOString()||null,error:false}}));
    const eDate=row?.updated_at&&Number.isFinite(Date.parse(row.updated_at))?time(row.updated_at):"sem lançamento";
    const rDate=shop?time(shop.updated):"sem input da loja";
    $("estoreLiveTitle").textContent="Loja "+c.store+" • "+brDate(c.date);
@@ -77,6 +78,7 @@
    }catch(e){
      if(id!==seq||ctxKey(ctx())!==k)return;
      loadedEstore=null;loadedEstoreKey="";
+     document.dispatchEvent(new CustomEvent("ma:estore-snapshot",{detail:{store:c.store,date:c.date,has:false,share:null,error:true}}));
      const grid=$("estoreLiveGrid");if(grid)grid.textContent="Não foi possível carregar a parcial eStore. Tente atualizar.";
      status(e?.name==="AbortError"?"Tempo de consulta esgotado.":String(e?.message||"Falha na consulta"),"warning");
    }finally{
@@ -162,3 +164,4 @@
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
  else init();
 })();
+

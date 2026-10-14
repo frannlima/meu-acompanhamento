@@ -1,5 +1,7 @@
-const CACHE="meu-acompanhamento-v101";
+const CACHE="meu-acompanhamento-v102";
 const ASSETS=[
+  "./decision-ui-v1.css?v=1",
+  "./decision-ui-v1.js?v=1",
   "./",
   "./index.html",
   "./styles.css?v=9",
@@ -15,12 +17,12 @@ const ASSETS=[
   "./app.js?v=29",
   "./enhancements-v9.js?v=12",
   "./premium-v22.js?v=10",
-  "./clarity-v1.js?v=23",
+  "./clarity-v1.js?v=24",
   "./mobile-experience-v1.js?v=5",
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=4",
-  "./adaptive-header-v2.js?v=10",
-  "./estore-integrated-v2.js?v=1",
+  "./adaptive-header-v2.js?v=11",
+  "./estore-integrated-v2.js?v=2",
   "./gg-worlds-v1.css?v=2",
   "./gg-worlds-v1.js?v=6",
   "./gg-official-performance-v2.js?v=3",
@@ -47,7 +49,7 @@ const ASSETS=[
   "./assets/profiles/mariane-nogueira.jpg"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("meu-acompanhamento-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{
   const u=new URL(e.request.url);
   if(e.request.method!=="GET"||u.origin!==self.location.origin) return;
@@ -69,3 +71,4 @@ self.addEventListener("notificationclick",event=>{
     if(self.clients.openWindow) await self.clients.openWindow("./");
   })());
 });
+

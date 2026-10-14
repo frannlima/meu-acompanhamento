@@ -3,6 +3,9 @@
 
   const sectionTitles={
     inicio:"Início",
+    hora:"Hora a Hora",
+    historico:"Histórico do dia",
+    rotina:"Minha rotina",
     grupos:"Mundos",
     comerciais:"Comercial",
     descontos:"Descontos",
