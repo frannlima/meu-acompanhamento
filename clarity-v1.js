@@ -701,7 +701,7 @@
     const att=meta?sale/meta*100:0;
     const dev=sale-meta;
     const dateLabel=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
-    const sections=["inicio","grupos","comerciais","descontos","estore","regional","admin","mais","hora","historico","rotina"];
+    const sections=["inicio","grupos","comerciais","descontos","estore","regional","admin","mais"];
 
     sections.forEach(id=>{
       const section=$("section-"+id);
@@ -714,7 +714,14 @@
         if(head) head.insertAdjacentElement("afterend",bar);
         else section.prepend(bar);
       }
-      bar.innerHTML='<div class="menu-day-meta-context"><b>Meta da loja · '+esc(state.storeCode)+'</b></div><strong>'+ (meta?money(meta,2):"Sem meta") +'</strong>';
+      bar.innerHTML=
+        '<div class="menu-day-meta-context"><span>'+dateLabel+' • Loja '+esc(state.storeCode)+'</span><b>Meta do dia</b></div>'+
+        '<strong>'+ (meta?money(meta,2):"Sem meta") +'</strong>'+
+        '<div class="menu-day-meta-mini">'+
+          '<span>Venda <b>'+(d.has_input?money(sale,2):"—")+'</b></span>'+
+          '<span>Ating. <b>'+(d.has_input?pct(att):"—")+'</b></span>'+
+          '<span class="'+(d.has_input?tone(dev):"")+'">Desvio <b>'+(d.has_input?signedMoney(dev,2):"—")+'</b></span>'+
+        '</div>';
     });
   }
 
@@ -722,11 +729,6 @@
     const card=$("claritySupervisorChecklist");
     const home=$("clarityHome");
     if(!card||!home) return;
-    const decisionFold=$("decisionChecklist");
-    if(document.documentElement.classList.contains("decision-ui") && decisionFold){
-      if(card.parentElement!==decisionFold) decisionFold.appendChild(card);
-      return;
-    }
 
     const summary=home.querySelector(".clarity-summary");
     const routine=home.querySelector(".clarity-routine-grid");
@@ -892,4 +894,3 @@
 
   window.renderClarityHome=renderClarity;
 })();
-
