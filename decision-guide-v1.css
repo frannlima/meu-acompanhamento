@@ -5,6 +5,7 @@
   color:var(--dg-ink);box-sizing:border-box;
 }
 .dg-shell{
+  grid-column:1/-1;min-width:0;
   padding:21px 22px 19px;
   border:1px solid var(--dg-line);border-radius:21px;
   background:linear-gradient(127deg,#fff 0%,#fff 72%,#fff9ed 100%);
