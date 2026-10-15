@@ -122,7 +122,11 @@
       (state.role!=="administrador"?'<p class="eo-footnote">As vendas reais das demais filiais exigem permissão administrativa na base do Meu Acompanhamento; seus shares ficam indisponíveis neste perfil.</p>':'');
   }
 
-  function renderAll(){paintSummary();paintRegion();}
+  function renderAll(){
+    const entry=$("estoreHourEntry");
+    if(entry)entry.classList.toggle("hidden",state.logged&&!hasOwnRole());
+    paintSummary();paintRegion();
+  }
   async function loadExtras(c){
     if(loadingExtras)return;
     loadingExtras=true;
