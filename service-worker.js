@@ -1,7 +1,7 @@
-const CACHE="meu-acompanhamento-v104";
+const CACHE="meu-acompanhamento-v105";
 const ASSETS=[
-  "./home-campaign-v1.css?v=1",
-  "./home-campaign-v1.js?v=1",
+  "./home-campaign-v1.css?v=2",
+  "./home-campaign-v1.js?v=2",
   "./assets/olhares-brasileiros-1.webp",
   "./assets/olhares-brasileiros-2.webp",
   "./assets/olhares-brasileiros-3.webp",
@@ -23,7 +23,7 @@ const ASSETS=[
   "./clarity-v1.js?v=23",
   "./mobile-experience-v1.js?v=5",
   "./responsive-device-v1.js?v=1",
-  "./execution-v1.js?v=5",
+  "./execution-v1.js?v=6",
   "./adaptive-header-v2.js?v=12",
   "./estore-integrated-v2.js?v=1",
   "./gg-worlds-v1.css?v=2",

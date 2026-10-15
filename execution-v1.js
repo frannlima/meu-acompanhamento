@@ -233,28 +233,57 @@
       '<div class="execution-modal-head"><span class="eyebrow">INFORMAÇÃO IMPORTANTE</span><h2>'+esc(item.title)+'</h2></div>'+
       '<div class="announcement-body">'+esc(item.body||"").replace(/\n/g,"<br>")+'</div>'+
       attachment+
-      '<div class="execution-modal-actions"><button id="announcementDone" class="btn primary">Entendi</button></div>'
+      '<div class="execution-modal-actions">'+(state.role==="administrador"?'<button id="deleteOpenedAnnouncement" type="button" class="btn danger">Excluir informativo</button>':"")+'<button id="announcementDone" class="btn primary">Entendi</button></div>'
     );
     $("announcementDone").onclick=closeModal;
+    if($("deleteOpenedAnnouncement")) $("deleteOpenedAnnouncement").onclick=()=>deletePublishedAnnouncement(item,$("deleteOpenedAnnouncement"));
     if(!item.seen){
       try{await api("markAnnouncementRead",{matricula:state.matricula,announcement_id:item.id}); item.seen=true; renderAnnouncementBanner(); document.dispatchEvent(new CustomEvent("ma:announcements-ready",{detail:{matricula:state.matricula}}));}catch(_){}
     }
   }
 
-  async function openAnnouncementsCenter(){
-    await refreshAnnouncements();
+  async function openAnnouncementsCenter(refresh=true){
+    if(refresh) await refreshAnnouncements();
     const rows=state.executionAnnouncements||[];
     openModal(
       '<div class="execution-modal-head"><span class="eyebrow">FIQUE POR DENTRO</span><h2>Informações importantes</h2><p>Direcionamentos, campanhas e comunicados da operação.</p></div>'+
       '<div class="announcement-list">'+(rows.length?rows.map(x=>
-        '<button class="announcement-list-item" data-ann="'+esc(x.id)+'"><span class="'+(x.seen?"":"dot")+'"></span><div><b>'+esc(x.title)+'</b><small>'+new Date(x.created_at).toLocaleDateString("pt-BR")+'</small></div><i>›</i></button>'
+        '<div class="announcement-manage-row"><button type="button" class="announcement-list-item" data-ann="'+esc(x.id)+'"><span class="'+(x.seen?"":"dot")+'"></span><div><b>'+esc(x.title)+'</b><small>'+new Date(x.created_at).toLocaleDateString("pt-BR")+'</small></div><i>›</i></button>'+
+        (state.role==="administrador"?'<button type="button" class="announcement-delete" data-delete-ann="'+esc(x.id)+'" aria-label="Excluir informativo: '+esc(x.title)+'">Excluir</button>':"")+'</div>'
       ).join(""):'<div class="empty-box">Nenhum informativo ativo no momento.</div>')+'</div>'+
       (state.role==="administrador"?'<div class="execution-modal-actions"><button id="newAnnouncementBtn" class="btn primary">＋ Novo informativo</button></div>':"")
     );
     document.querySelectorAll("[data-ann]").forEach(b=>b.onclick=()=>{
       const item=rows.find(x=>x.id===b.dataset.ann); if(item) openAnnouncement(item);
     });
+    document.querySelectorAll("[data-delete-ann]").forEach(b=>b.onclick=()=>{
+      const item=rows.find(x=>String(x.id)===b.dataset.deleteAnn); if(item) void deletePublishedAnnouncement(item,b);
+    });
     if($("newAnnouncementBtn")) $("newAnnouncementBtn").onclick=()=>openAnnouncementAdmin();
+  }
+
+  let announcementDeleteBusy=false;
+  async function deletePublishedAnnouncement(item,button){
+    if(state.role!=="administrador"||!item?.id||announcementDeleteBusy)return;
+    if(!window.confirm('Excluir o informativo "'+String(item.title||"Sem título")+'"? Ele deixará de aparecer para a equipe.'))return;
+    const owner=String(state.matricula),label=button?.textContent||"Excluir";
+    announcementDeleteBusy=true;
+    if(button){button.disabled=true;button.textContent="Excluindo…";}
+    try{
+      await api("deleteAnnouncement",{matricula:owner,id:String(item.id)});
+      if(!state.logged||String(state.matricula)!==owner)return;
+      state.executionAnnouncements=(state.executionAnnouncements||[]).filter(x=>String(x.id)!==String(item.id));
+      document.dispatchEvent(new CustomEvent("ma:announcements-ready",{detail:{matricula:owner}}));
+      renderAnnouncementBanner();
+      toast("Informativo excluído.");
+      await refreshAnnouncements();
+      if(state.logged&&String(state.matricula)===owner) await openAnnouncementsCenter(false);
+    }catch(error){
+      toast(error?.message||"Não foi possível excluir o informativo. Tente novamente.",true);
+    }finally{
+      announcementDeleteBusy=false;
+      if(button){button.disabled=false;button.textContent=label;}
+    }
   }
 
   window.openHomeAnnouncement=openAnnouncement;
@@ -532,7 +561,7 @@
     if(state.role==="administrador"){
       moreButton("moreMonthlyTargetBtn","🎯","Alimentar Meta do Mês","Usar o modelo oficial de metas por DCO",()=>{gotoAdminTab("metas");setTimeout(()=>$("monthlyTargetFile")?.click(),250)},true);
       moreButton("moreCommercialAdminBtn","◎","Cadastrar / Editar Comerciais","Responsáveis, fotos e DCOs atribuídos",()=>gotoAdminTab("comerciais"),true);
-      moreButton("moreAnnouncementAdminBtn","📣","Cadastrar Informativos","Texto, mídias, vídeos e documentos",openAnnouncementAdmin,true);
+      moreButton("moreAnnouncementAdminBtn","📣","Gerenciar informativos","Publicar, consultar e excluir avisos",openAnnouncementsCenter,true);
       moreButton("moreCollaboratorsBtn","👥","Atualizar Banco de Colaboradores","Importar base geral de colaboradores",openCollaboratorImport,true);
       moreButton("moreVisibilityBtn","◉","Visibilidade de Perfis","Definir menus disponíveis por perfil",openVisibilityAdmin,true);
     }
