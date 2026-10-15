@@ -196,8 +196,11 @@
   async function refreshAnnouncements(){
     if(!state.logged) return;
     try{
-      const rows=await api("listAnnouncements",{matricula:state.matricula});
+      const owner=String(state.matricula);
+      const rows=await api("listAnnouncements",{matricula:owner});
+      if(!state.logged||String(state.matricula)!==owner)return;
       state.executionAnnouncements=Array.isArray(rows)?rows:[];
+      document.dispatchEvent(new CustomEvent("ma:announcements-ready",{detail:{matricula:owner}}));
       renderAnnouncementBanner();
     }catch(_){}
   }
@@ -234,7 +237,7 @@
     );
     $("announcementDone").onclick=closeModal;
     if(!item.seen){
-      try{await api("markAnnouncementRead",{matricula:state.matricula,announcement_id:item.id}); item.seen=true; renderAnnouncementBanner();}catch(_){}
+      try{await api("markAnnouncementRead",{matricula:state.matricula,announcement_id:item.id}); item.seen=true; renderAnnouncementBanner(); document.dispatchEvent(new CustomEvent("ma:announcements-ready",{detail:{matricula:state.matricula}}));}catch(_){}
     }
   }
 
@@ -253,6 +256,9 @@
     });
     if($("newAnnouncementBtn")) $("newAnnouncementBtn").onclick=()=>openAnnouncementAdmin();
   }
+
+  window.openHomeAnnouncement=openAnnouncement;
+  window.openHomeAnnouncementsCenter=openAnnouncementsCenter;
 
   function openAnnouncementAdmin(){
     openModal(
@@ -705,3 +711,4 @@
   window.refreshExecutionUi=refreshExecutionUi;
   window.testSalesUpdateAlert=enableAndTestSalesAlerts;
 })();
+

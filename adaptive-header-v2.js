@@ -82,11 +82,11 @@
 
     const key=activeSection();
 
-    // Na Home, o seletor fica sempre visível logo abaixo da identificação.
+    // Na Home, a filial acompanha a capa aprovada, abaixo dos comunicados.
     if(key==="inicio"){
-      const identity=document.getElementById("adaptiveHomeIdentity");
-      if(identity){
-        identity.insertAdjacentElement("afterend",wrap);
+      const anchor=document.getElementById("homeCampaignSlot")||document.getElementById("adaptiveHomeIdentity");
+      if(anchor){
+        if(anchor.nextElementSibling!==wrap) anchor.insertAdjacentElement("afterend",wrap);
       }else if(wrap.parentElement!==head){
         head.prepend(wrap);
       }
@@ -137,24 +137,26 @@
     const safeRole=role && role!=="—" ? role : "Perfil em carregamento";
     const storeLabel=store && store!=="—" ? store : "";
 
-    chip.innerHTML=
+    const identityMarkup=
       '<span class="adaptive-home-avatar"><img src="./assets/ria-logo-approved.svg" alt="RIA"></span>'+
       '<span class="adaptive-home-person">'+
         '<small>'+greetingForNow()+',</small>'+
         '<strong>'+safeName+'</strong>'+
         '<em>'+safeRole+(storeLabel?' • '+storeLabel:'')+'</em>'+
       '</span>';
+    if(chip.dataset.identityMarkup!==identityMarkup){chip.innerHTML=identityMarkup;chip.dataset.identityMarkup=identityMarkup;}
   }
 
   function syncMobileTitle(){
     const key=activeSection();
     const mobileName=document.getElementById("mobileGreetingName");
     const mobileMeta=document.getElementById("mobileGreetingMeta");
-    if(mobileName) mobileName.textContent=sectionTitles[key]||"Meu Acompanhamento";
+    if(mobileName && mobileName.textContent!==(sectionTitles[key]||"Meu Acompanhamento")) mobileName.textContent=sectionTitles[key]||"Meu Acompanhamento";
 
     if(mobileMeta){
       const store=(identityCache.store||document.getElementById("identityStore")?.textContent||"").trim();
-      mobileMeta.textContent=store && store!=="—" ? store : "Meu Acompanhamento";
+      const label=store && store!=="—" ? store : "Meu Acompanhamento";
+      if(mobileMeta.textContent!==label) mobileMeta.textContent=label;
     }
   }
 
