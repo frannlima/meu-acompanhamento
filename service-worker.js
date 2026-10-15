@@ -1,7 +1,9 @@
-const CACHE="meu-acompanhamento-v105";
+const CACHE="meu-acompanhamento-v106";
 const ASSETS=[
   "./home-campaign-v1.css?v=2",
   "./home-campaign-v1.js?v=2",
+  "./decision-guide-v1.css?v=1",
+  "./decision-guide-v1.js?v=1",
   "./assets/olhares-brasileiros-1.webp",
   "./assets/olhares-brasileiros-2.webp",
   "./assets/olhares-brasileiros-3.webp",
