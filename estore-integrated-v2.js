@@ -66,7 +66,7 @@
    $("estoreLiveTitle").textContent="Loja "+c.store+" • "+brDate(c.date);
    try{
      const response=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},
-       body:JSON.stringify({action:"hourly_get",result_date:c.date}),signal:ctrl.signal,cache:"no-store"});
+       body:JSON.stringify({action:"hourly_get",matricula:String(state.matricula),result_date:c.date}),signal:ctrl.signal,cache:"no-store"});
      const data=await response.json().catch(()=>({}));
      if(!response.ok||data.ok!==true||!Array.isArray(data.stores))throw new Error(data.error||"Consulta eStore indisponível.");
      if(data.result_date&&String(data.result_date)!==c.date)throw new Error("A API retornou outra data.");
@@ -74,11 +74,13 @@
      const row=data.stores.find(x=>norm(x.st)===c.store);
      if(!row)throw new Error("Filial não encontrada na parcial eStore.");
      loadedEstore=row;loadedEstoreKey=k;render(row,c);
+     document.dispatchEvent(new CustomEvent("ma:estore-hourly-loaded",{detail:{context:c,stores:data.stores,updated_at:row.updated_at||null}}));
    }catch(e){
      if(id!==seq||ctxKey(ctx())!==k)return;
      loadedEstore=null;loadedEstoreKey="";
      const grid=$("estoreLiveGrid");if(grid)grid.textContent="Não foi possível carregar a parcial eStore. Tente atualizar.";
      status(e?.name==="AbortError"?"Tempo de consulta esgotado.":String(e?.message||"Falha na consulta"),"warning");
+     document.dispatchEvent(new CustomEvent("ma:estore-hourly-error",{detail:{context:c,message:String(e?.message||"Consulta indisponível")}}));
    }finally{
      clearTimeout(timeout);
      if(id===seq){controller=null;if(button){button.disabled=false;button.textContent="↻ Atualizar";}}
@@ -111,6 +113,7 @@
        $("estoreHourAmount").value="";$("estoreHourOrders").value="";
        feedback("Parcial somada ao eStore oficial. Atualizando o share…","success");
        await update(true);
+       try{localStorage.setItem("estore_hourly_changed_v3",JSON.stringify({store:c.store,date:c.date,at:Date.now()}));}catch(_){}
      }else feedback("Lançamento registrado; a filial em tela mudou. Consulte a filial correta.","success");
    }catch(err){feedback("Não foi possível registrar: "+String(err?.message||"erro de conexão"),"error");}
    finally{submitting=false;if(button){button.disabled=false;button.textContent="＋ Adicionar ao acumulado";}}
