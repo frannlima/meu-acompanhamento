@@ -72,10 +72,19 @@
     });
     const classify=window.ggOfficialMapping?.worldOf;
     const ggOf=window.ggOfficialMapping?.ggOf;
+    const officialGG=window.getOfficialGgForDco;
     if(typeof classify!=="function")return [];
-    return [...unique.values()].map(r=>({
-      ...r,world:classify(r),gg:typeof ggOf==="function"?ggOf(r):null
-    })).filter(r=>WORLD_NAMES[r.world]);
+    const knownWorld={
+      Feminino:"feminino",Masculino:"masculino",Infantil:"infantil",
+      "Carter's":"infantil","Casa Riachuelo":"casa",
+      Beleza:"beleza_relogios",Relógios:"beleza_relogios"
+    };
+    return [...unique.values()].map(r=>{
+      const official=typeof officialGG==="function"?officialGG(r.dco_code):null;
+      const world=classify(r)||knownWorld[official]||null;
+      const gg=official||(typeof ggOf==="function"?ggOf(r):null);
+      return {...r,world,gg};
+    }).filter(r=>WORLD_NAMES[r.world]);
   }
 
   function worldModel(curve){
