@@ -1,0 +1,73 @@
+/* Riachuelo · Design System 2025
+   Fonte: Brandbook 2025 + paleta Pantone operacional.
+   Não sobrepor cores semânticas de status, ranking ou mundos/DCOs.
+   Larsseit deve ser fornecida/licenciada para incorporação @font-face. */
+:root{
+  --ria-brand-green:#0C2E2D;
+  --ria-brand-dune:#D7D0BB;
+  --ria-pantone-green:#173F35;
+  --ria-pantone-sage:#466964;
+  --ria-pantone-orange:#DE7C00;
+  --ria-pantone-orange-u:#D37C32;
+  --ria-pantone-gray:#DAD9D6;
+  --ria-pantone-sand:#D6D2C4;
+  --ria-pantone-wine:#76232F;
+  --ria-pantone-red:#E03C31;
+  --ria-pantone-pink:#E68699;
+  --ria-font:"Larsseit","Larsseit Regular","Arial",sans-serif;
+  --primary:var(--ria-brand-green);
+  --primary2:var(--ria-pantone-sage);
+  --ria-green:var(--ria-brand-green);
+  --ria-green-soft:var(--ria-pantone-sage);
+  --ria-sand:var(--ria-brand-dune);
+  --ria-gray:var(--ria-pantone-gray);
+  --ria-orange:var(--ria-pantone-orange);
+  --ah-green:var(--ria-brand-green);
+  --ah-cream:#F7F6F2;
+  --bg:#F7F6F2;
+  --fg:#0C2E2D;
+  --card:#FFFEFC;
+  --border:#E2DED3;
+  --shadow:0 5px 20px rgba(12,46,45,.065);
+  --shadow-lg:0 18px 55px rgba(12,46,45,.16);
+}
+html,body{font-family:var(--ria-font)!important;color:var(--fg);}
+button,input,textarea,select{font-family:var(--ria-font)!important;}
+:is(h1,h2,h3,h4,.section-head h1,.login-hero h1,.login-card h2,.card h2,.brand strong,.premium-group-head h2){
+  font-family:var(--ria-font)!important;
+  letter-spacing:-.025em;
+}
+:where(.eyebrow,.badge,.nav-label){font-family:var(--ria-font)!important;}
+.sidebar{background:var(--ria-brand-green)!important;}
+.brand{flex-direction:column;align-items:flex-start;gap:8px;padding:5px 10px 18px;}
+.brand .ria-brand-logo{width:178px!important;height:51px!important;max-width:100%;padding:9px 13px!important;background:var(--ria-brand-dune)!important;border-color:transparent!important;border-radius:10px;}
+.brand .ria-brand-logo img{width:100%!important;height:100%!important;object-fit:contain!important;}
+.brand strong{font-size:13px!important;line-height:1.18!important;letter-spacing:.01em!important;color:#F6F4EC;}
+#loginScreen .login-ria-approved{width:min(310px,78vw)!important;height:auto!important;object-fit:contain!important;filter:brightness(0) invert(1)!important;}
+#loginScreen .login-title-block h1{letter-spacing:-.03em!important;}
+#loginScreen .login-pane{background:#F7F6F2!important;}
+#loginScreen .login-card{background:#FFFEFC!important;border-color:#E2DED3!important;}
+#loginScreen .login-enter-btn{background:var(--ria-brand-green)!important;color:#fff!important;}
+#loginScreen .login-accent-line{background:var(--ria-pantone-orange)!important;}
+.mobile-header,html.device-phone .mobile-header,html.device-tablet .mobile-header{
+  background:var(--ria-brand-green)!important;
+}
+.mobile-header img{object-fit:contain;}
+.section-head h1,.card-head h2{color:var(--ria-brand-green);}
+.card,.login-card,.premium-group-card{
+  border-color:var(--border);
+  box-shadow:0 6px 22px rgba(12,46,45,.07);
+}
+.btn.primary,.login-enter-btn{background:var(--ria-brand-green)!important;color:#fff!important;}
+.btn.accent{background:var(--ria-pantone-orange)!important;color:#fff!important;}
+:is(input,select,textarea):focus-visible{outline:2px solid var(--ria-pantone-sage);outline-offset:1px;}
+:where(button,a,[role="button"]):focus-visible{outline:3px solid var(--ria-pantone-orange)!important;outline-offset:2px;}
+.ria-nav .nav-item.active{border-color:rgba(215,208,187,.32)!important;}
+.ria-nav .nav-item.active .nav-label{font-weight:700;}
+/* Preserve as cores distintas Feminino, Masculino, Infantil, Casa, Beleza e CBA,
+   semântica de desvio/alerta e a composição da mandala Esquadrão do Cliente. */
+@media(max-width:680px){
+  #loginScreen .login-ria-approved{width:min(250px,65vw)!important;}
+  .card,.premium-group-card{border-radius:16px;}
+  .section-head h1{letter-spacing:-.025em!important;}
+}
