@@ -97,23 +97,7 @@
    ctx.fillRect(0,y,W,Math.max(3,Math.round(W*.004)));
    ctx.fillStyle=orange;
    ctx.fillRect(Math.round(W*.745),y,Math.round(W*.21),Math.max(4,Math.round(W*.006)));
-   const left=edge+Math.round(W*.017);
-   const logoW=Math.min(W*.30,Math.max(140,Math.round(W*.255)));
-   const logoH=logoW*194/1237;
-   const logoY=y+(foot-logoH)/2+2;
-   ctx.save();
-   try {
-     ctx.translate(left,logoY);
-     ctx.scale(logoW/1237,logoW/1237);
-     ctx.fillStyle=dune;
-     ctx.fill(new Path2D(WORDMARK));
-   }catch(e){
-     ctx.restore();ctx.save();
-     ctx.fillStyle=dune;
-     ctx.font="700 "+Math.round(Math.min(32,foot*.27))+"px Larsseit, Arial, sans-serif";
-     ctx.fillText("RIACHUELO",left,y+foot*.56);
-   }
-   ctx.restore();
+   // A marca já é desenhada no cabeçalho do card de origem. Evitar segunda assinatura no rodapé.
    const tx=W-edge-Math.round(W*.017);
    const tagSize=Math.max(11,Math.min(28,Math.round(W*.020)));
    ctx.font="700 "+tagSize+"px Larsseit, Arial, sans-serif";
@@ -125,7 +109,7 @@
    ctx.font="500 "+sub+"px Larsseit, Arial, sans-serif";
    ctx.fillStyle="#C4D3CB";
    const app=(w.location?.pathname||"").includes("meu-acompanhamento")?"MEU ACOMPANHAMENTO":"ESTORE CE+PI";
-   ctx.fillText(app+"  •  IDENTIDADE RIACHUELO",tx,y+foot*.70,Math.max(W*.43,150));
+   ctx.fillText(app,tx,y+foot*.70,Math.max(W*.43,150));
    ctx.textAlign="left";
    if(out.dataset){out.dataset.riaCard2025="1";out.dataset.riaCardPreview="1";}
    return out;
