@@ -67,11 +67,13 @@ async function refreshAdminStoreCatalog(){
   }catch(e){ console.warn("Store catalog",e); }
 }
 
+function welcomeNeedsReplay(day=localDate()){
+  // Reapresentação pontual após acesso de teste; expira automaticamente amanhã.
+  return state.matricula==="3978243" && day==="2026-10-16";
+}
 function dailyWelcomeKey(day=localDate()){
-  // Reabrir o acolhimento da gerente da 108 após o acesso de teste em 16/10/2026.
-  // O sufixo isola esta reapresentação do registro local anterior; o controle
-  // padrão de uma apresentação por dia permanece inalterado para os demais.
-  const replay = state.matricula==="3978243" && day==="2026-10-16" ? "_reapresentacao" : "";
+  // Chave isolada do acolhimento visualizado no teste anterior.
+  const replay = welcomeNeedsReplay(day) ? "_reapresentacao" : "";
   return "ma_acolher_"+day+"_"+state.matricula+replay;
 }
 
@@ -100,10 +102,14 @@ window.afterMeuAcompanhamentoLogin = async function(person){
   }
 
   let already=false;
-  try{
-    already=!!(await api("welcomeStatus",{matricula:state.matricula,business_date:day}));
-  }catch(_){
-    already=false;
+  // O acolhimento da Rebeca foi consumido num teste: ignorar apenas uma vez
+  // neste aparelho a marcação antiga, sem alterar o histórico do servidor.
+  if(!welcomeNeedsReplay(day)){
+    try{
+      already=!!(await api("welcomeStatus",{matricula:state.matricula,business_date:day}));
+    }catch(_){
+      already=false;
+    }
   }
 
   if(already){
