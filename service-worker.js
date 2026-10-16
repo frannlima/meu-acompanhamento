@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v132";
+const CACHE="meu-acompanhamento-v133";
 const ASSETS=[
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
@@ -45,9 +45,9 @@ const ASSETS=[
   "./late-partial-alert-v1.js?v=2",
   "./daily-evolution-v1.css?v=5",
   "./daily-evolution-v1.js?v=4",
-  "./operational-review-v32.css?v=32",
-  "./operational-charts-v32.js?v=32",
-  "./operational-sharing-v32.js?v=32",
+  "./operational-review-v32.css?v=33",
+  "./operational-charts-v32.js?v=33",
+  "./operational-sharing-v32.js?v=33",
   "./manifest.webmanifest",
   "./assets/app-icon-192.png",
   "./assets/app-icon-512.png",
