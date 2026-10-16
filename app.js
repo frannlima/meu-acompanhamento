@@ -1047,17 +1047,17 @@ async function createRegionalPanelImage(){
   ctx.fillStyle=C.orange; ctx.fillRect(0,142,width,7);
 
   ctx.fillStyle=C.white;
-  ctx.font="800 28px Arial";
+  ctx.font="800 28px Larsseit, Arial";
   ctx.fillText("RIACHUELO",52,58);
-  ctx.font="700 14px Arial";
+  ctx.font="700 14px Larsseit, Arial";
   ctx.fillText("CE+PI • PARCIAL HORA A HORA",52,88);
-  ctx.font="800 40px Arial";
+  ctx.font="800 40px Larsseit, Arial";
   ctx.fillText("CONSOLIDADO REGIONAL",520,66);
-  ctx.font="400 16px Arial";
+  ctx.font="400 16px Larsseit, Arial";
   ctx.fillStyle="#D6D2C4";
   ctx.fillText(new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+" • visão por lojas",520,96);
   ctx.textAlign="right";
-  ctx.font="700 13px Arial";
+  ctx.font="700 13px Larsseit, Arial";
   ctx.fillStyle=C.white;
   ctx.fillText("MODA QUE INSPIRA O BRASIL",1745,72);
   ctx.textAlign="left";
@@ -1087,10 +1087,10 @@ async function createRegionalPanelImage(){
     const x=52+i*(cardW+gap);
     ctx.fillStyle=C.soft; ctx.strokeStyle=C.line; ctx.lineWidth=1;
     ctx.beginPath(); ctx.roundRect(x,cardY,cardW,cardH,14); ctx.fill(); ctx.stroke();
-    ctx.fillStyle=C.green2; ctx.font="700 12px Arial"; ctx.fillText(c[0],x+16,cardY+26);
+    ctx.fillStyle=C.green2; ctx.font="700 12px Larsseit, Arial"; ctx.fillText(c[0],x+16,cardY+26);
     ctx.fillStyle=(c[0]==="DESVIO"&&dev<0)||(c[0]==="EVOLUÇÃO VS A.A."&&ev!==null&&ev<0)||(c[0]==="VS HORA ANTERIOR"&&hourEv!==null&&hourEv<0)?C.red:C.ink;
-    ctx.font="800 24px Arial"; ctx.fillText(c[1],x+16,cardY+60);
-    ctx.fillStyle=C.muted; ctx.font="400 12px Arial"; ctx.fillText(c[2],x+16,cardY+84);
+    ctx.font="800 24px Larsseit, Arial"; ctx.fillText(c[1],x+16,cardY+60);
+    ctx.fillStyle=C.muted; ctx.font="400 12px Larsseit, Arial"; ctx.fillText(c[2],x+16,cardY+84);
   });
 
   const cols=[
@@ -1110,7 +1110,7 @@ async function createRegionalPanelImage(){
   let x=tableX;
   ctx.fillStyle=C.green; ctx.fillRect(tableX,tableY,width-104,rowH);
   cols.forEach(col=>{
-    ctx.fillStyle=C.white;ctx.font="700 12px Arial";
+    ctx.fillStyle=C.white;ctx.font="700 12px Larsseit, Arial";
     if(col.align==="left"){ctx.textAlign="left";ctx.fillText(col.label,x+10,tableY+29)}
     else{ctx.textAlign="right";ctx.fillText(col.label,x+col.w-10,tableY+29)}
     x+=col.w;
@@ -1147,7 +1147,7 @@ async function createRegionalPanelImage(){
       if(col.k==="dev"&&r.has_input) tone=deviation>=0?C.good:C.red;
       if(col.k==="ev"&&evol!==null) tone=evol>=0?C.good:C.red;
       if(col.k==="hour"&&hEv!==null) tone=hEv>=0?C.good:C.red;
-      ctx.fillStyle=tone;ctx.font=(col.k==="store"?"800":"600")+" 12px Arial";
+      ctx.fillStyle=tone;ctx.font=(col.k==="store"?"800":"600")+" 12px Larsseit, Arial";
       if(col.align==="left"){ctx.textAlign="left";ctx.fillText(String(vals[col.k]),x+10,y+29)}
       else{ctx.textAlign="right";ctx.fillText(String(vals[col.k]),x+col.w-10,y+29)}
       x+=col.w;
@@ -1159,13 +1159,13 @@ async function createRegionalPanelImage(){
   const totalVals=["CE+PI",compactMoney(total.meta),compactMoney(total.sale),pct(att),signedMoney(dev,0),num(total.physical),compactMoney(total.ly),ev===null?"—":pct(ev),compactMoney(total.interval),hourEv===null?"—":pct(hourEv),"—"];
   x=tableX;
   cols.forEach((col,i)=>{
-    ctx.fillStyle=C.white;ctx.font="800 12px Arial";
+    ctx.fillStyle=C.white;ctx.font="800 12px Larsseit, Arial";
     if(col.align==="left"){ctx.textAlign="left";ctx.fillText(totalVals[i],x+10,ty+29)}
     else{ctx.textAlign="right";ctx.fillText(totalVals[i],x+col.w-10,ty+29)}
     x+=col.w;
   });
 
-  ctx.textAlign="left";ctx.fillStyle=C.green2;ctx.font="700 12px Arial";
+  ctx.textAlign="left";ctx.fillStyle=C.green2;ctx.font="700 12px Larsseit, Arial";
   ctx.fillText("MEU ACOMPANHAMENTO • Resultado regional atualizado conforme último input de cada filial",52,height-38);
   ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",width-52,height-38);
   ctx.textAlign="left";
