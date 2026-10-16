@@ -399,8 +399,11 @@ function buildAdminStoreSelect(){
 let loadAllRequestSeq=0;
 
 async function changeAdminStore(code){
+  if(state.role!=="administrador")return;
   const next=String(code||"").trim();
-  if(!next) return;
+  if(!STORE_CODES.includes(next))return;
+  if(next===state.storeCode)return;
+  const previous=state.storeCode;
 
   state.storeCode=next;
   if($("identityStore")) $("identityStore").textContent="Loja "+next;
@@ -411,8 +414,16 @@ async function changeAdminStore(code){
   const selectors=[$("adminStoreSelect"),$("homeAdminStoreSelect")].filter(Boolean);
   selectors.forEach(s=>s.disabled=true);
   try{
-    await loadAll(next);
+    const loaded=await loadAll(next);
+    if(loaded===false)throw new Error("Não foi possível carregar a filial selecionada.");
     setSection(state.section);
+  }catch(error){
+    state.storeCode=previous;
+    if($("adminStoreSelect")) $("adminStoreSelect").value=previous;
+    if($("homeAdminStoreSelect")) $("homeAdminStoreSelect").value=previous;
+    if($("identityStore")) $("identityStore").textContent="Loja "+previous;
+    await loadAll(previous);
+    toast(error.message||"Filial indisponível.",true);
   }finally{
     selectors.forEach(s=>s.disabled=false);
   }
@@ -1894,8 +1905,8 @@ function bind(){
   $("pasteArea").addEventListener("input",updatePastePreview); $("confirmPaste").onclick=confirmPaste;
   if($("finishChecklist")) $("finishChecklist").onclick=()=>{$("checklistModal").classList.add("hidden");showWorldModal()};
   $("logoutBtn").onclick=logout;
-  $("adminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
-  if($("homeAdminStoreSelect")) $("homeAdminStoreSelect").onchange=e=>changeAdminStore(e.target.value);
+  // Uma única escuta delegada de change controla os dois seletores administrativos.
+  // Evita duas consultas concorrentes à mesma filial ao trocar no desktop ou celular.
   startBusinessDateWatcher();
   $("refreshRegional").onclick=loadRegional;
   $("openRegionalPanel").onclick=openRegionalPanel;
