@@ -615,7 +615,7 @@
     ctx.fillText("MEU ACOMPANHAMENTO",48,height-34);
     ctx.textAlign="right";ctx.fillText("Riachuelo • Moda que inspira o Brasil",width-48,height-34);
 
-    return await new Promise((resolve,reject)=>canvas.toBlob(
+    return await new Promise((resolve,reject)=>window.RiachueloBrandCards.decorateCanvas(canvas).toBlob(
       b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),
       "image/png",1
     ));
