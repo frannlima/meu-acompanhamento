@@ -368,7 +368,7 @@
       ["Esperado até agora",target?money(expectedNow,2):"—",""],
       ["Realizado",d.has_input?money(sale,2):"—",d.has_input?tone(gap):""],
       ["Desvio vs curva",d.has_input?signedMoney(gap,2):"—",d.has_input?tone(gap):""],
-      ["Ating. esperado",target?pct(finPct*100):"—",""],
+      ["Ating. da curva",d.has_input&&expectedNow>0?pct(sale/expectedNow*100):"—",d.has_input&&expectedNow>0?tone(gap):""],
       ["Projeção pela curva",curveProjection?money(curveProjection,2):"—",curveProjection?tone(projDev):""],
       ["Peças esperado / real",targetPcs?(num(Math.round(expectedPcs))+" / "+num(salePcs)):"—",salePcs>=expectedPcs?"positive":"negative"]
     ].map(r=>'<article class="clarity-mini-kpi '+r[2]+'"><span>'+r[0]+'</span><strong>'+r[1]+'</strong></article>').join("");
