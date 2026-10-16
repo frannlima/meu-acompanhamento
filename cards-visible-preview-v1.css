@@ -1,0 +1,131 @@
+/* RIACHUELO | Prévia visual reversível dos cards exibidos — V1.
+   Altera apenas estilo dos componentes já existentes, não valores nem ações.
+   Inspirado nas cartelas do Brandbook e nos mockups aprovados. */
+:root{
+ --card-trial-green:#0C2E2D;
+ --card-trial-cream:#F7F6F2;
+ --card-trial-dune:#D7D0BB;
+ --card-trial-orange:#DE7C00;
+}
+#section-inicio .home-group-panel,
+#section-comerciais .commercial-groups-shell,
+#section-regional > .card,
+#section-descontos > .card {
+ background:#F7F6F2!important;
+ border:1px solid #D7D0BB!important;
+ border-radius:20px!important;
+ box-shadow:0 14px 35px rgba(12,46,45,.13)!important;
+}
+#section-inicio .home-group-panel{
+ padding:0!important;
+ overflow:hidden;
+}
+#section-inicio .home-group-panel .group-panel-app-head{
+ padding:19px 20px!important;
+ margin:0!important;
+ background:linear-gradient(112deg,#0C2E2D,#245348)!important;
+ border-bottom:4px solid #DE7C00!important;
+ border-radius:18px 18px 0 0!important;
+ align-items:center!important;
+}
+#section-inicio .home-group-panel .group-panel-app-head .eyebrow,
+#section-inicio .home-group-panel .group-panel-app-head h2,
+#section-inicio .home-group-panel .group-panel-app-head p{
+ color:#F7F6F2!important;
+}
+#section-inicio .home-group-panel .group-panel-app-head h2{
+ font-family:var(--ria-font,Arial,sans-serif)!important;
+ font-size:clamp(17px,2vw,24px)!important;
+ letter-spacing:-.02em!important;
+}
+#section-inicio .home-group-panel .group-panel-app-head .eyebrow{
+ color:#D7D0BB!important;
+}
+#section-inicio .home-group-panel .group-share-scroll{
+ padding:16px!important;
+ background:#F7F6F2!important;
+}
+#section-inicio .home-group-panel .group-share-panel{
+ border:1px solid rgba(12,46,45,.16)!important;
+ background:#FFFEFC!important;
+ box-shadow:0 4px 18px rgba(12,46,45,.065)!important;
+}
+#section-inicio .home-group-panel #shareGroupPanelHome{
+ background:#DE7C00!important;
+ border-color:#DE7C00!important;
+ color:#fff!important;
+}
+#section-inicio .home-group-panel #maConfirmShare{
+ background:#F7F6F2!important;
+ color:#0C2E2D!important;
+}
+#section-inicio .kpi-grid .kpi,
+#section-grupos .kpi-grid .kpi,
+#section-comerciais .kpi-grid .kpi,
+#section-regional .kpi-grid .kpi,
+#section-descontos .kpi-grid .kpi {
+ border:1px solid #DFDACC!important;
+ border-top:4px solid #466964!important;
+ border-radius:16px!important;
+ box-shadow:0 5px 18px rgba(12,46,45,.07)!important;
+}
+#section-inicio .kpi-grid .kpi strong,
+#section-comerciais .kpi-grid .kpi strong,
+#section-regional .kpi-grid .kpi strong{
+ font-family:var(--ria-font,Arial,sans-serif)!important;
+}
+#section-comerciais .commercial-groups-shell{
+ padding:18px!important;
+}
+#section-comerciais .commercial-groups-shell>.card-head{
+ background:#0C2E2D!important;
+ border-left:5px solid #DE7C00!important;
+ margin:-18px -18px 17px!important;
+ padding:16px 18px!important;
+ border-radius:18px 18px 0 0!important;
+}
+#section-comerciais .commercial-groups-shell>.card-head .eyebrow,
+#section-comerciais .commercial-groups-shell>.card-head h2{
+ color:#F7F6F2!important;
+}
+#section-comerciais .commercial-groups-shell>.card-head .eyebrow{
+ color:#D7D0BB!important;
+}
+#section-comerciais .commercial-card{
+ border:1px solid #D7D0BB!important;
+ border-top:4px solid #DE7C00!important;
+ border-radius:18px!important;
+ background:#FFFEFC!important;
+ box-shadow:0 8px 24px rgba(12,46,45,.09)!important;
+}
+#section-comerciais .commercial-group-card{
+ border-color:rgba(12,46,45,.17)!important;
+ box-shadow:0 6px 22px rgba(12,46,45,.075)!important;
+}
+#section-regional>.card{
+ border-top:5px solid #DE7C00!important;
+ padding:15px!important;
+}
+#section-descontos .discount-layout>.card{
+ border:1px solid #D7D0BB!important;
+ border-top:5px solid #DE7C00!important;
+ border-radius:18px!important;
+ box-shadow:0 8px 25px rgba(12,46,45,.075)!important;
+}
+@media(max-width:700px){
+ #section-inicio .home-group-panel .group-panel-app-head{
+   padding:14px!important;
+   gap:9px!important;
+ }
+ #section-inicio .home-group-panel .group-share-scroll{
+   padding:8px!important;
+ }
+ #section-comerciais .commercial-groups-shell{
+   padding:12px!important;
+ }
+ #section-comerciais .commercial-groups-shell>.card-head{
+   margin:-12px -12px 12px!important;
+   padding:13px!important;
+ }
+ #section-comerciais .commercial-card{border-radius:15px!important;}
+}
