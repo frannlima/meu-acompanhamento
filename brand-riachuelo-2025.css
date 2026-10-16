@@ -71,3 +71,42 @@ button,input,textarea,select{font-family:var(--ria-font)!important;}
   .card,.premium-group-card{border-radius:16px;}
   .section-head h1{letter-spacing:-.025em!important;}
 }
+
+/* Correção de clipping no wordmark horizontal - barra lateral */
+.sidebar .brand{
+  width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  align-items:flex-start;
+}
+.sidebar .brand .ria-brand-logo{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  max-width:204px!important;
+  height:auto!important;
+  min-height:52px!important;
+  padding:10px 12px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  border-radius:10px!important;
+  background:var(--ria-brand-dune)!important;
+  overflow:visible!important;
+}
+.sidebar .brand .ria-brand-logo img{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  height:auto!important;
+  max-height:none!important;
+  aspect-ratio:1237 / 194;
+  object-fit:contain!important;
+  object-position:center center!important;
+  margin:0!important;
+  padding:0!important;
+  transform:none!important;
+  transform-origin:center!important;
+  filter:none!important;
+}
