@@ -1,0 +1,301 @@
+/* Riachuelo · Composição editorial da Home e Comerciais — 2026-10-16
+   Ajusta somente apresentação; mantém atualização, carrossel, comunicados e compartilhamento.
+   Carrossel permanece no #homeCampaignSlot para preservar todos os handlers JS. */
+
+@media (min-width: 1100px) {
+  html body #section-inicio > .section-head.home-campaign-enabled {
+    display: grid !important;
+    grid-template-columns: minmax(0, .96fr) minmax(0, 1.14fr) !important;
+    grid-template-rows: minmax(78px, auto) minmax(54px, auto) minmax(34px, auto) auto auto auto !important;
+    column-gap: 22px !important;
+    row-gap: 10px !important;
+    align-items: start !important;
+    align-content: start !important;
+    min-height: 0 !important;
+    padding: 22px !important;
+    border-radius: 26px !important;
+    background: #193F35 !important;
+    background-image: none !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled #homeCampaignSlot {
+    display: contents !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled #adaptiveHomeIdentity {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: start !important;
+    max-width: 100% !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled .home-campaign-heading {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    align-self: center !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled .hero-actions {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    align-self: start !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled #homeCampaignSlot .ol-stage {
+    grid-column: 2 !important;
+    grid-row: 1 / span 3 !important;
+    height: 262px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    border-radius: 18px !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled #homeCampaignSlot .ol-controls {
+    grid-column: 2 !important;
+    grid-row: 4 !important;
+    padding: 0 !important;
+    min-height: 34px !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled #homeCampaignSlot .ol-notice {
+    grid-column: 1 / -1 !important;
+    grid-row: 5 !important;
+    width: 100% !important;
+    min-height: 98px !important;
+    margin: 0 !important;
+    padding: 15px 18px !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto auto !important;
+    column-gap: 24px !important;
+    row-gap: 2px !important;
+    align-items: center !important;
+    border-radius: 16px !important;
+    background: #F6F2E7 !important;
+    color: #173F35 !important;
+  }
+
+  #homeCampaignSlot .ol-notice-tag {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+  }
+
+  #homeCampaignSlot .ol-notice h2 {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+
+  #homeCampaignSlot .ol-notice p {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+  }
+
+  #homeCampaignSlot .ol-notice .ol-read {
+    grid-column: 2 !important;
+    grid-row: 2 / span 2 !important;
+    justify-self: end !important;
+    align-self: center !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 10px 14px !important;
+    min-width: 145px !important;
+    min-height: 40px !important;
+    border-radius: 11px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(23,63,53,.16) !important;
+    color: #173F35 !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled #adaptiveStoreContext {
+    grid-column: 1 / -1 !important;
+    grid-row: 6 !important;
+    align-self: start !important;
+    margin-top: 0 !important;
+  }
+
+  html #section-inicio > .section-head.home-campaign-enabled .home-campaign-heading h1 {
+    font-size: clamp(26px, 2.3vw, 34px) !important;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1099px) {
+  html #section-inicio > .section-head.home-campaign-enabled {
+    padding: 20px !important;
+    gap: 12px !important;
+    border-radius: 22px !important;
+    min-height: 0 !important;
+  }
+  #homeCampaignSlot .ol-stage { height: 255px !important; }
+  #homeCampaignSlot .ol-notice { min-height: 102px !important; }
+}
+
+/* Barra Comercial: título e ações compactas na mesma linha. */
+@media (min-width: 901px) {
+  html #section-comerciais > .section-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto auto !important;
+    grid-template-rows: auto !important;
+    gap: 14px !important;
+    align-items: center !important;
+    justify-content: stretch !important;
+    min-height: 112px !important;
+    padding: 22px 24px !important;
+    margin-bottom: 18px !important;
+    border-radius: 22px !important;
+    background: linear-gradient(110deg, #173F35, #245449) !important;
+    background-image: linear-gradient(110deg, #173F35, #245449) !important;
+  }
+
+  html #section-comerciais > .section-head > div:first-child {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: auto !important;
+    max-width: 600px !important;
+    min-width: 0 !important;
+    align-self: center !important;
+  }
+
+  html #section-comerciais > .section-head #refreshCommercials {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+  }
+
+  html #section-comerciais > .section-head #shareCommercialsCard {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+  }
+}
+
+/* Botões com hierarquia institucional — não alteram os eventos de clique. */
+#section-comerciais > .section-head #refreshCommercials,
+#section-comerciais > .section-head #shareCommercialsCard {
+  position: relative !important;
+  z-index: 4 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  max-width: 100% !important;
+  min-height: 44px !important;
+  margin: 0 !important;
+  padding: 10px 16px !important;
+  font-family: var(--ria-font, Arial, sans-serif) !important;
+  font-size: 12px !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+#section-comerciais > .section-head #refreshCommercials {
+  min-width: 116px !important;
+  background: #F7F6F2 !important;
+  color: #173F35 !important;
+  border: 1px solid rgba(255,255,255,.45) !important;
+}
+#section-comerciais > .section-head #shareCommercialsCard {
+  min-width: 216px !important;
+  background: #DE7C00 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+}
+#section-comerciais > .section-head h1 {
+  line-height: 1.05 !important;
+  margin: 4px 0 6px !important;
+}
+#section-comerciais > .section-head p {
+  max-width: 620px !important;
+  line-height: 1.45 !important;
+  margin: 0 !important;
+}
+#section-comerciais > .section-head #refreshCommercials:hover,
+#section-comerciais > .section-head #shareCommercialsCard:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+@media (min-width: 701px) and (max-width: 900px) {
+  html #section-comerciais > .section-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 9px 14px !important;
+    align-items: center !important;
+    min-height: 120px !important;
+    padding: 19px 20px !important;
+  }
+  #section-comerciais > .section-head > div:first-child {
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    align-self: center !important;
+    min-width: 0 !important;
+  }
+  #section-comerciais > .section-head #shareCommercialsCard {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+  }
+  #section-comerciais > .section-head #refreshCommercials {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-self: end !important;
+  }
+}
+
+@media (max-width: 700px) {
+  html #section-comerciais > .section-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr) !important;
+    grid-template-rows: auto auto !important;
+    gap: 12px 8px !important;
+    align-items: start !important;
+    padding: 18px 14px !important;
+    min-height: 0 !important;
+  }
+  html #section-comerciais > .section-head > div:first-child {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+  }
+  html #section-comerciais > .section-head #refreshCommercials {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  html #section-comerciais > .section-head #shareCommercialsCard {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    justify-self: stretch !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  html #section-inicio > .section-head.home-campaign-enabled {
+    min-height: 0 !important;
+  }
+  #homeCampaignSlot .ol-notice { min-height: 105px !important; }
+}
+
+@media (max-width: 360px) {
+  html #section-comerciais > .section-head {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto !important;
+  }
+  html #section-comerciais > .section-head > div:first-child {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+  html #section-comerciais > .section-head #shareCommercialsCard {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+  html #section-comerciais > .section-head #refreshCommercials {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+  }
+}
