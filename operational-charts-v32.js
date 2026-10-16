@@ -113,9 +113,12 @@ function draw(){
        }).join("")+'</div>';
    }
   }
+  html+='<div class="ma-regional-tools"><button type="button" id="maUpdateInputs32">Atualizar indicadores</button><button type="button" id="maOpenWorlds32">Ver Mundos e DCOs →</button></div>';
   html+='<h4 style="margin-top:18px;color:#173F35">Aceleração por mundo • comparação dos últimos intervalos</h4><div class="ma-world-hourly">'+worldCards()+'</div>'+
    '<p class="ma-upgrade-foot">As setas comparam intervalos reais dos inputs. Para velocidades, os intervalos são normalizados por duração em R$/hora. Sem três entradas válidas por grupo, não há comparativo confiável. O A.A. informado é diário, não uma venda histórica por hora.</p></div>';
   root.innerHTML=html;
+  $("maUpdateInputs32")?.addEventListener("click",()=>{if(typeof loadAll==="function")void loadAll();});
+  $("maOpenWorlds32")?.addEventListener("click",()=>{if(typeof setSection==="function")setSection("grupos");});
   const other=$("clarityCurveChart");if(other&&x.curve.length&&x.target)other.innerHTML='<div class="ma-upgrade-graph">'+chart(x)+'</div><div class="ma-upgrade-legend">Real (verde) · Meta pela curva (cinza tracejado) · Projeção (laranja tracejado)</div>';
  }catch(e){console.error("Gráfico de acompanhamento",e);root.innerHTML='<div class="ma-error-state">Não foi possível montar o painel. '+clean(e.message||String(e))+'<button type="button" id="maRetry32">Tentar novamente</button></div>';$("maRetry32")?.addEventListener("click",draw);}
 }
