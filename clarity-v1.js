@@ -402,7 +402,12 @@
     if(!groups.length){
       throw new Error("GGs oficiais ainda não carregados. Aguarde as metas por DCO e tente compartilhar novamente.");
     }
-    return groups;
+    return groups.slice().sort((a,b)=>{
+      const ma=Number(a.target_financial||0),mb=Number(b.target_financial||0);
+      const aa=ma>0?Number(a.sales_financial||0)/ma:-1;
+      const ab=mb>0?Number(b.sales_financial||0)/mb:-1;
+      return ab-aa || Number(b.sales_financial||0)-Number(a.sales_financial||0);
+    });
   }
 
   async function createDailyCardBlob(){
