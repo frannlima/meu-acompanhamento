@@ -68,7 +68,11 @@ async function refreshAdminStoreCatalog(){
 }
 
 function dailyWelcomeKey(day=localDate()){
-  return "ma_acolher_"+day+"_"+state.matricula;
+  // Reabrir o acolhimento da gerente da 108 após o acesso de teste em 16/10/2026.
+  // O sufixo isola esta reapresentação do registro local anterior; o controle
+  // padrão de uma apresentação por dia permanece inalterado para os demais.
+  const replay = state.matricula==="3978243" && day==="2026-10-16" ? "_reapresentacao" : "";
+  return "ma_acolher_"+day+"_"+state.matricula+replay;
 }
 
 function enterMainApp(){
