@@ -432,7 +432,7 @@
       if(fill){ctx.fillStyle=fill;ctx.fill()}
       if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke()}
     };
-    const drawPill=(cx,cy,w,h,text,fg,bg,font="800 22px Arial")=>{
+    const drawPill=(cx,cy,w,h,text,fg,bg,font="800 22px Larsseit, Arial")=>{
       rr(cx-w/2,cy-h/2,w,h,14,bg);
       ctx.fillStyle=fg;ctx.textAlign="center";ctx.textBaseline="middle";ctx.font=font;
       ctx.fillText(text,cx,cy+1);
@@ -449,20 +449,20 @@
       ctx.drawImage(logo,95,70,410,55);
     }catch(_){
       rr(50,38,500,116,22,C.white);
-      ctx.fillStyle=C.green;ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.font="800 48px Arial";
+      ctx.fillStyle=C.green;ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.font="800 48px Larsseit, Arial";
       ctx.fillText("RIACHUELO",92,110);
     }
 
     ctx.textBaseline="alphabetic";
-    ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 56px Arial";
+    ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 56px Larsseit, Arial";
     ctx.fillText("HORA A HORA | RESULTADO DO DIA",width/2,90);
-    ctx.font="600 23px Arial";ctx.fillStyle="#D6D2C4";
+    ctx.font="600 23px Larsseit, Arial";ctx.fillStyle="#D6D2C4";
     ctx.fillText(
       "Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+
       " • "+(d.captured_at?"Atualizado "+localTime(d.captured_at):"Sem input"),
       width/2,138
     );
-    ctx.textAlign="right";ctx.font="700 18px Arial";ctx.fillStyle=C.white;
+    ctx.textAlign="right";ctx.font="700 18px Larsseit, Arial";ctx.fillStyle=C.white;
     ctx.fillText("Moda que inspira o Brasil",width-58,82);
 
     const cols=[
@@ -479,7 +479,7 @@
 
     // Cabeçalho dos indicadores em laranja Pantone Riachuelo.
     rr(42,246,width-84,66,18,C.orange);
-    ctx.fillStyle=C.white;ctx.font="800 18px Arial";ctx.textBaseline="middle";
+    ctx.fillStyle=C.white;ctx.font="800 18px Larsseit, Arial";ctx.textBaseline="middle";
     cols.forEach((col,i)=>{
       ctx.textAlign=col.align==="left"?"left":"center";
       ctx.fillText(col.label,col.align==="left"?col.x+18:col.x+col.w/2,279);
@@ -499,7 +499,7 @@
 
       ctx.textBaseline="middle";
       ctx.textAlign="left";ctx.fillStyle=C.green;
-      ctx.font=(total?"800 ":"700 ")+"24px Arial";
+      ctx.font=(total?"800 ":"700 ")+"24px Larsseit, Arial";
       ctx.fillText(name,cols[0].x+18,y+(rowH-10)/2);
 
       const base=[
@@ -508,7 +508,7 @@
       ];
 
       // Meta
-      ctx.textAlign="center";ctx.fillStyle=C.green;ctx.font=(total?"800 ":"700 ")+"21px Arial";
+      ctx.textAlign="center";ctx.fillStyle=C.green;ctx.font=(total?"800 ":"700 ")+"21px Larsseit, Arial";
       ctx.fillText(base[0],cols[1].x+cols[1].w/2,y+46);
       // Venda
       ctx.fillText(base[1],cols[2].x+cols[2].w/2,y+46);
@@ -516,10 +516,10 @@
       // Atingimento com semáforo visual
       const attFg=ating>=100?C.white:ating>=90?C.green:C.white;
       const attBg=ating>=100?C.good:ating>=90?C.orange:C.red;
-      drawPill(cols[3].x+cols[3].w/2,y+46,148,54,pct(ating),attFg,attBg,total?"800 24px Arial":"800 22px Arial");
+      drawPill(cols[3].x+cols[3].w/2,y+46,148,54,pct(ating),attFg,attBg,total?"800 24px Larsseit, Arial":"800 22px Larsseit, Arial");
 
       // Ano anterior
-      ctx.fillStyle=C.green;ctx.font=(total?"800 ":"700 ")+"21px Arial";
+      ctx.fillStyle=C.green;ctx.font=(total?"800 ":"700 ")+"21px Larsseit, Arial";
       ctx.fillText(base[3],cols[4].x+cols[4].w/2,y+46);
 
       // Evolução
@@ -527,22 +527,22 @@
         ctx.fillStyle=C.muted;ctx.fillText("—",cols[5].x+cols[5].w/2,y+46);
       }else{
         const evFg=ev>=0?C.good:C.red,evBg=ev>=0?C.goodBg:C.redBg;
-        drawPill(cols[5].x+cols[5].w/2,y+46,164,52,(ev>=0?"▲ ":"▼ ")+pct(ev),evFg,evBg,total?"800 23px Arial":"800 21px Arial");
+        drawPill(cols[5].x+cols[5].w/2,y+46,164,52,(ev>=0?"▲ ":"▼ ")+pct(ev),evFg,evBg,total?"800 23px Larsseit, Arial":"800 21px Larsseit, Arial");
       }
 
       // Desvio em destaque
       const devFg=C.white,devBg=dev>=0?C.good:C.red;
-      drawPill(cols[6].x+cols[6].w/2,y+46,270,54,signedMoney(dev,2),devFg,devBg,total?"800 23px Arial":"800 21px Arial");
+      drawPill(cols[6].x+cols[6].w/2,y+46,270,54,signedMoney(dev,2),devFg,devBg,total?"800 23px Larsseit, Arial":"800 21px Larsseit, Arial");
 
       // Projeção condicionada à meta
       if(proj){
         const projFg=proj>=meta?C.good:C.red,projBg=proj>=meta?C.goodBg:C.redBg;
-        drawPill(cols[7].x+cols[7].w/2,y+46,252,52,money(proj,2),projFg,projBg,total?"800 22px Arial":"800 20px Arial");
+        drawPill(cols[7].x+cols[7].w/2,y+46,252,52,money(proj,2),projFg,projBg,total?"800 22px Larsseit, Arial":"800 20px Larsseit, Arial");
       }else{
         ctx.fillStyle=C.muted;ctx.fillText("—",cols[7].x+cols[7].w/2,y+46);
       }
 
-      ctx.fillStyle=C.green;ctx.font=(total?"800 ":"700 ")+"21px Arial";
+      ctx.fillStyle=C.green;ctx.font=(total?"800 ":"700 ")+"21px Larsseit, Arial";
       ctx.fillText(base[7],cols[8].x+cols[8].w/2,y+46);
 
       rowValues.push({name,meta,venda,ating,dev,proj});
@@ -573,7 +573,7 @@
     // Resumo rápido para leitura em tela pequena.
     const sy=y+rowH+24;
     rr(42,sy,width-84,summaryH-28,24,C.white,C.line);
-    ctx.textAlign="left";ctx.textBaseline="middle";ctx.fillStyle=C.green;ctx.font="800 34px Arial";
+    ctx.textAlign="left";ctx.textBaseline="middle";ctx.fillStyle=C.green;ctx.font="800 34px Larsseit, Arial";
     ctx.fillText("Resumo rápido",86,sy+70);
 
     const blocks=[
@@ -583,9 +583,9 @@
     ];
     blocks.forEach(b=>{
       rr(b.x,sy+28,390,118,20,b.bg);
-      ctx.fillStyle=C.muted;ctx.font="700 16px Arial";ctx.fillText(b.title,b.x+24,sy+55);
-      ctx.fillStyle=b.fg;ctx.font="800 27px Arial";ctx.fillText(b.value,b.x+24,sy+88);
-      ctx.fillStyle=C.muted;ctx.font="600 15px Arial";ctx.fillText(b.sub,b.x+24,sy+116);
+      ctx.fillStyle=C.muted;ctx.font="700 16px Larsseit, Arial";ctx.fillText(b.title,b.x+24,sy+55);
+      ctx.fillStyle=b.fg;ctx.font="800 27px Larsseit, Arial";ctx.fillText(b.value,b.x+24,sy+88);
+      ctx.fillStyle=C.muted;ctx.font="600 15px Larsseit, Arial";ctx.fillText(b.sub,b.x+24,sy+116);
     });
 
     // Direcionamento visual por grupos: legenda fixa e consistente em todo o Hora a Hora.
@@ -600,7 +600,7 @@
       {label:"CBA",color:"#FFFFFF",stroke:"#9AA39F"}
     ];
     rr(1970,sy+28,500,118,20,C.white,C.line);
-    ctx.fillStyle=C.green;ctx.font="800 16px Arial";ctx.textAlign="left";
+    ctx.fillStyle=C.green;ctx.font="800 16px Larsseit, Arial";ctx.textAlign="left";
     ctx.fillText("Mude o jogo nos grupos de maior impacto na venda /hora",1994,sy+53);
     ctx.fillText("na venda/hora",1994,sy+74);
     impactGroups.forEach((g,i)=>{
@@ -608,10 +608,10 @@
       ctx.beginPath();ctx.arc(gx,gy,6,0,Math.PI*2);
       ctx.fillStyle=g.color;ctx.fill();
       if(g.stroke){ctx.strokeStyle=g.stroke;ctx.lineWidth=1.5;ctx.stroke();}
-      ctx.fillStyle=C.green2;ctx.font="700 13px Arial";ctx.fillText(g.label,gx+12,gy+4);
+      ctx.fillStyle=C.green2;ctx.font="700 13px Larsseit, Arial";ctx.fillText(g.label,gx+12,gy+4);
     });
 
-    ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillStyle=C.green2;ctx.font="700 16px Arial";
+    ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillStyle=C.green2;ctx.font="700 16px Larsseit, Arial";
     ctx.fillText("MEU ACOMPANHAMENTO",48,height-34);
     ctx.textAlign="right";ctx.fillText("Riachuelo • Moda que inspira o Brasil",width-48,height-34);
 
