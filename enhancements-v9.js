@@ -641,7 +641,7 @@ async function createGroupPanelImage(){
   ctx.fillText("MEU ACOMPANHAMENTO • Parcial pronta para compartilhamento",42,height-28);
   ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",width-42,height-28);
 
-  return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("Falha ao gerar painel.")),"image/png",1));
+  return await new Promise((resolve,reject)=>window.RiachueloBrandCards.decorateCanvas(canvas).toBlob(b=>b?resolve(b):reject(new Error("Falha ao gerar painel.")),"image/png",1));
 }
 async function shareMainGroupPanel(){
   const btn=$("shareGroupPanelHome")||$("shareGroupPanel");
