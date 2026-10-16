@@ -311,7 +311,7 @@
       ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.fillStyle=color;
       let size=fontSize;
       do{
-        ctx.font=weight+" "+size+"px Arial";
+        ctx.font=weight+" "+size+"px Larsseit, Arial";
         if(ctx.measureText(text).width<=maxW||size<=14) break;
         size-=1;
       }while(size>14);
