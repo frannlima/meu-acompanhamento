@@ -470,7 +470,7 @@
     ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",56,height-28);
     ctx.textAlign="right";ctx.fillText("Ninguém faz nada sozinho.",1544,height-28);
 
-    return await new Promise((resolve,reject)=>canvas.toBlob(
+    return await new Promise((resolve,reject)=>window.RiachueloBrandCards.decorateCanvas(canvas).toBlob(
       b=>b?resolve(b):reject(new Error("Falha ao gerar card.")),
       "image/png",1
     ));
