@@ -534,11 +534,11 @@ async function createGroupPanelImage(){
     ctx.drawImage(logo,51,29,72,72);
   }catch(_){}
 
-  ctx.fillStyle=C.white;ctx.font="800 30px Arial";ctx.textAlign="left";
+  ctx.fillStyle=C.white;ctx.font="800 30px Larsseit, Arial";ctx.textAlign="left";
   ctx.fillText("DESEMPENHO POR GRUPO DE VENDA",175,55);
-  ctx.font="400 15px Arial";ctx.fillStyle="#D6D2C4";
+  ctx.font="400 15px Larsseit, Arial";ctx.fillStyle="#D6D2C4";
   ctx.fillText("Parcial hora a hora • Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+" • "+(d.captured_at?"Atualizado "+localTime(d.captured_at):"sem input"),175,87);
-  ctx.textAlign="right";ctx.font="700 13px Arial";ctx.fillStyle=C.white;
+  ctx.textAlign="right";ctx.font="700 13px Larsseit, Arial";ctx.fillStyle=C.white;
   ctx.fillText("MODA QUE INSPIRA O BRASIL",width-42,63);
   ctx.textAlign="left";
 
@@ -562,8 +562,8 @@ async function createGroupPanelImage(){
   cards.forEach((c,i)=>{
     const x=42+i*(cw+gap);
     canvasRoundedRect(ctx,x,cy,cw,ch,14,c[2],C.line);
-    ctx.fillStyle=C.green2;ctx.font="700 11px Arial";ctx.fillText(c[0],x+14,cy+25);
-    ctx.fillStyle=c[3];ctx.font="800 20px Arial";ctx.fillText(c[1],x+14,cy+58);
+    ctx.fillStyle=C.green2;ctx.font="700 11px Larsseit, Arial";ctx.fillText(c[0],x+14,cy+25);
+    ctx.fillStyle=c[3];ctx.font="800 20px Larsseit, Arial";ctx.fillText(c[1],x+14,cy+58);
   });
 
   const cols=[
@@ -574,7 +574,7 @@ async function createGroupPanelImage(){
   let x=42,ty=270;
   ctx.fillStyle=C.green;ctx.fillRect(42,ty,tableWidth,rowH);
   cols.forEach(([lab,w],i)=>{
-    ctx.fillStyle=C.white;ctx.font="700 11px Arial";ctx.textAlign=i===0?"left":"right";
+    ctx.fillStyle=C.white;ctx.font="700 11px Larsseit, Arial";ctx.textAlign=i===0?"left":"right";
     ctx.fillText(lab,i===0?x+10:x+w-10,ty+29);x+=w;
   });
 
@@ -601,7 +601,7 @@ async function createGroupPanelImage(){
       if(i===9){fill=perfFill(pf,100,70);color=perfText(pf,100,70)}
       if(i===10&&gp){fill=perfFill(gpAtt,100,90);color=perfText(gpAtt,100,90)}
       if(fill){ctx.fillStyle=fill;ctx.fillRect(x,y,w,rowH)}
-      ctx.fillStyle=color;ctx.font=(i===0?"800":"600")+" 11px Arial";ctx.textAlign=i===0?"left":"right";
+      ctx.fillStyle=color;ctx.font=(i===0?"800":"600")+" 11px Larsseit, Arial";ctx.textAlign=i===0?"left":"right";
       ctx.fillText(vals[i],i===0?x+10:x+w-10,y+29);
       x+=w;
     });
@@ -612,7 +612,7 @@ async function createGroupPanelImage(){
   const totalVals=["TOTAL",money(target,0),money(sale,0),pct(att),signedMoney(dev,0),money(ly,0),ev===null?"—":pct(ev),num(d.target_physical||0),num(d.sales_physical||0),d.target_physical?pct(Number(d.sales_physical||0)/Number(d.target_physical||0)*100):"0,0%",projection?money(projection,0):"—"];
   x=42;
   cols.forEach(([lab,w],i)=>{
-    ctx.fillStyle=C.white;ctx.font="800 11px Arial";ctx.textAlign=i===0?"left":"right";
+    ctx.fillStyle=C.white;ctx.font="800 11px Larsseit, Arial";ctx.textAlign=i===0?"left":"right";
     ctx.fillText(totalVals[i],i===0?x+10:x+w-10,fy+29);x+=w;
   });
 
@@ -632,12 +632,12 @@ async function createGroupPanelImage(){
     const ix=42+i*(insW+insGap);
     canvasRoundedRect(ctx,ix,insightY,insW,insH,14,it[3],C.line);
     ctx.fillStyle=it[4];ctx.beginPath();ctx.arc(ix+31,insightY+36,18,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=C.white;ctx.font="800 16px Arial";ctx.textAlign="center";ctx.fillText(it[0],ix+31,insightY+42);
-    ctx.textAlign="left";ctx.fillStyle=C.ink;ctx.font="800 13px Arial";ctx.fillText(it[1],ix+60,insightY+29);
-    ctx.fillStyle=C.muted;ctx.font="600 9px Arial";ctx.fillText(it[2],ix+60,insightY+48);
+    ctx.fillStyle=C.white;ctx.font="800 16px Larsseit, Arial";ctx.textAlign="center";ctx.fillText(it[0],ix+31,insightY+42);
+    ctx.textAlign="left";ctx.fillStyle=C.ink;ctx.font="800 13px Larsseit, Arial";ctx.fillText(it[1],ix+60,insightY+29);
+    ctx.fillStyle=C.muted;ctx.font="600 9px Larsseit, Arial";ctx.fillText(it[2],ix+60,insightY+48);
   });
 
-  ctx.fillStyle=C.green2;ctx.font="700 11px Arial";ctx.textAlign="left";
+  ctx.fillStyle=C.green2;ctx.font="700 11px Larsseit, Arial";ctx.textAlign="left";
   ctx.fillText("MEU ACOMPANHAMENTO • Parcial pronta para compartilhamento",42,height-28);
   ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",width-42,height-28);
 
