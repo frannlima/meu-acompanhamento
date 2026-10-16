@@ -732,9 +732,15 @@ function signedMoney(value, digits=2){
 function buildGroupPanelHtml(){
   const d=state.day||{};
   const groups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
-  const ordered=typeof window.getOfficialGgSummaries==="function"
+  const ordered=(typeof window.getOfficialGgSummaries==="function"
     ? window.getOfficialGgSummaries()
-    : GROUP_ORDER.map(code=>groups.find(g=>g.group_code===code)).filter(Boolean);
+    : GROUP_ORDER.map(code=>groups.find(g=>g.group_code===code)).filter(Boolean))
+    .slice().sort((a,b)=>{
+      const ma=Number(a.target_financial||0),mb=Number(b.target_financial||0);
+      const aa=ma>0?Number(a.sales_financial||0)/ma:-1;
+      const ab=mb>0?Number(b.sales_financial||0)/mb:-1;
+      return ab-aa || Number(b.sales_financial||0)-Number(a.sales_financial||0);
+    });
 
   const target=Number(d.target_financial||ordered.reduce((a,g)=>a+Number(g.target_financial||0),0));
   const sale=Number(d.sales_financial||ordered.reduce((a,g)=>a+Number(g.sales_financial||0),0));
@@ -758,7 +764,7 @@ function buildGroupPanelHtml(){
   const dateLabel=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
   const updated=d.captured_at?localTime(d.captured_at):"sem input";
 
-  const rows=ordered.map(g=>{
+  const rows=ordered.map((g,index)=>{
     const meta=Number(g.target_financial||0);
     const venda=Number(g.sales_financial||0);
     const ating=meta?venda/meta*100:0;
@@ -774,7 +780,7 @@ function buildGroupPanelHtml(){
     const groupProjectionAtt=meta&&groupProjection?groupProjection/meta*100:0;
 
     return '<tr>'+
-      '<td class="group-name-cell">'+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</td>'+
+      '<td class="group-name-cell"><span class="ma-rank-position">'+(index+1)+'º</span> '+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</td>'+
       '<td>'+money(meta,2)+'</td>'+
       '<td>'+money(venda,2)+'</td>'+
       '<td class="'+performanceClass(ating,100,70)+'">'+pct(ating)+'</td>'+
