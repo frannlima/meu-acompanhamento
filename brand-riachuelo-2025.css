@@ -110,3 +110,66 @@ button,input,textarea,select{font-family:var(--ria-font)!important;}
   transform-origin:center!important;
   filter:none!important;
 }
+
+/* Login RIA + enquadramento de campanha | ajuste 2026-10-16 */
+#loginScreen .login-brand-approved{
+  display:block!important;
+  width:auto!important;
+  max-width:min(320px,80vw)!important;
+  margin:0!important;
+}
+#loginScreen .login-ria-approved{
+  display:block!important;
+  width:min(290px,100%)!important;
+  max-width:100%!important;
+  height:auto!important;
+  padding:0!important;
+  margin:0!important;
+  object-fit:contain!important;
+  object-position:left center!important;
+  transform:none!important;
+  filter:brightness(0) invert(1)!important;
+}
+#loginScreen .login-hero{
+  background-image:
+    linear-gradient(90deg,
+      rgba(6,39,32,.91) 0%,
+      rgba(6,39,32,.78) 32%,
+      rgba(6,39,32,.43) 58%,
+      rgba(6,39,32,.10) 100%),
+    url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg")!important;
+  background-size:cover!important;
+  background-position:55% 8%!important;
+  background-repeat:no-repeat!important;
+}
+#loginScreen .login-overlay{
+  background:linear-gradient(180deg,rgba(3,35,28,.03),rgba(3,35,28,.17))!important;
+}
+@media(min-width:901px){
+  #loginScreen .login-hero{background-position:55% 8%!important;}
+  #loginScreen .login-title-block{max-width:600px!important;}
+  #loginScreen .login-title-block h1{
+    max-width:100%!important;
+    font-size:clamp(48px,4.6vw,68px)!important;
+    line-height:1!important;
+    letter-spacing:-.04em!important;
+  }
+}
+@media(min-width:701px) and (max-width:900px){
+  #loginScreen .login-hero{background-position:58% 9%!important;}
+  #loginScreen .login-ria-approved{width:min(250px,100%)!important;}
+  #loginScreen .login-title-block{max-width:570px!important;}
+  #loginScreen .login-title-block h1{
+    font-size:clamp(40px,5vw,56px)!important;
+    line-height:1.02!important;
+  }
+}
+@media(max-width:700px){
+  #loginScreen .login-hero{
+    background-image:
+      linear-gradient(180deg,rgba(6,39,32,.54),rgba(6,39,32,.60)),
+      url("https://rchloblogprod.akamaized.net/wp-content/nova-colecao-pool-jeans.jpg")!important;
+    background-position:62% 12%!important;
+  }
+  #loginScreen .login-ria-approved{width:min(190px,57vw)!important;}
+}
