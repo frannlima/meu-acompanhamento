@@ -340,10 +340,10 @@
 
       ctx.textAlign="center";ctx.textBaseline="middle";
       ctx.fillStyle=ringColor;
-      ctx.font="800 25px Arial";
+      ctx.font="800 25px Larsseit, Arial";
       ctx.fillText(v===null?"—":(v>0?"+":"")+pct(v),cx,cy-3);
       ctx.fillStyle=C.muted;
-      ctx.font="800 10px Arial";
+      ctx.font="800 10px Larsseit, Arial";
       ctx.fillText("EVOLUÇÃO",cx,cy+24);
     };
 
@@ -356,15 +356,15 @@
       const logo=await loadShareImage("./assets/riachuelo-logo.svg");
       ctx.drawImage(logo,72,54,420,78);
     }catch(_){
-      ctx.fillStyle=C.white;ctx.font="800 56px Arial";ctx.textAlign="left";
+      ctx.fillStyle=C.white;ctx.font="800 56px Larsseit, Arial";ctx.textAlign="left";
       ctx.fillText("RIACHUELO",72,110);
     }
 
-    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 46px Arial";
+    ctx.fillStyle=C.white;ctx.textAlign="right";ctx.font="800 46px Larsseit, Arial";
     ctx.fillText("PERFORMANCE COMERCIAL",1510,73);
-    ctx.font="600 22px Arial";ctx.fillStyle="#D6D2C4";
+    ctx.font="600 22px Larsseit, Arial";ctx.fillStyle="#D6D2C4";
     ctx.fillText("Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR"),1510,112);
-    ctx.font="700 18px Arial";
+    ctx.font="700 18px Larsseit, Arial";
     ctx.fillText("Moda que inspira o Brasil",1510,148);
 
     const totalTarget=rows.reduce((s,r)=>s+commercialTargetValue(r),0);
@@ -385,9 +385,9 @@
     kpis.forEach((k,i)=>{
       const x=56+i*(kw+gap),y=232;
       rr(x,y,kw,88,16,C.white,C.line);
-      ctx.textAlign="left";ctx.fillStyle=C.muted;ctx.font="800 12px Arial";
+      ctx.textAlign="left";ctx.fillStyle=C.muted;ctx.font="800 12px Larsseit, Arial";
       ctx.fillText(k[0],x+15,y+28);
-      ctx.fillStyle=k[2];ctx.font="800 22px Arial";
+      ctx.fillStyle=k[2];ctx.font="800 22px Larsseit, Arial";
       ctx.fillText(k[1],x+15,y+62);
     });
 
@@ -413,13 +413,13 @@
       }
       if(!avatarOk){
         ctx.fillStyle=C.green2;ctx.beginPath();ctx.arc(120,y+74,52,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 26px Arial";
+        ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 26px Larsseit, Arial";
         ctx.fillText(String(r.commercial_name||"?").split(/\s+/).slice(0,2).map(x=>x[0]).join("").toUpperCase(),120,y+83);
       }
 
       // Nome + DCOs
       drawFitText(String(r.commercial_name||"Comercial"),205,y+42,900,26,"800",C.green);
-      ctx.fillStyle=C.muted;ctx.font="700 13px Arial";ctx.textAlign="left";
+      ctx.fillStyle=C.muted;ctx.font="700 13px Larsseit, Arial";ctx.textAlign="left";
       const dcoText=dcos.length+" DCOs • "+dcos.map(d=>d.dco_code).join(" • ");
       const clipped=dcoText.length>125?dcoText.slice(0,122)+"...":dcoText;
       ctx.fillText(clipped,205,y+68);
@@ -433,8 +433,8 @@
       ];
       const cx=[205,525,805,1040];
       cols.forEach((k,i)=>{
-        ctx.fillStyle=C.muted;ctx.font="800 11px Arial";ctx.fillText(k[0],cx[i],y+105);
-        ctx.fillStyle=k[2];ctx.font="800 18px Arial";ctx.fillText(k[1],cx[i],y+133);
+        ctx.fillStyle=C.muted;ctx.font="800 11px Larsseit, Arial";ctx.fillText(k[0],cx[i],y+105);
+        ctx.fillStyle=k[2];ctx.font="800 18px Larsseit, Arial";ctx.fillText(k[1],cx[i],y+133);
       });
 
       // Barra de atingimento
@@ -460,13 +460,13 @@
       ctx.fillStyle=C.white;
       ctx.textAlign="center";
       ctx.textBaseline="middle";
-      ctx.font="800 31px Arial";
+      ctx.font="800 31px Larsseit, Arial";
       ctx.fillText((rankIndex+1)+"º",1492,y+79);
 
       y+=rowH;
     }
 
-    ctx.fillStyle=C.green2;ctx.font="700 14px Arial";ctx.textAlign="left";
+    ctx.fillStyle=C.green2;ctx.font="700 14px Larsseit, Arial";ctx.textAlign="left";
     ctx.fillText("MEU ACOMPANHAMENTO • COMERCIAIS",56,height-28);
     ctx.textAlign="right";ctx.fillText("Ninguém faz nada sozinho.",1544,height-28);
 
