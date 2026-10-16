@@ -1170,7 +1170,7 @@ async function createRegionalPanelImage(){
   ctx.textAlign="right";ctx.fillText("Moda que inspira o Brasil",width-52,height-38);
   ctx.textAlign="left";
 
-  return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Falha ao gerar imagem.")),"image/png",1));
+  return await new Promise((resolve,reject)=>window.RiachueloBrandCards.decorateCanvas(canvas).toBlob(blob=>blob?resolve(blob):reject(new Error("Falha ao gerar imagem.")),"image/png",1));
 }
 
 async function shareRegionalPanel(){
