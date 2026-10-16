@@ -1,0 +1,129 @@
+/* Riachuelo • Navegação lateral 2025 — composição e legibilidade
+   Corrige a regra legada ".nav-item span { width:20px }":
+   apenas a área do ícone tem tamanho fixo; os nomes usam o espaço restante.
+   Usa Larsseit quando licenciada/instalada, com fallback de sistema. */
+@media (min-width: 901px) {
+  html.device-desktop .sidebar {
+    width: 264px !important;
+    box-sizing: border-box !important;
+    padding: 18px 14px !important;
+    background: #0C2E2D !important;
+  }
+  html.device-desktop .main {
+    margin-left: 264px !important;
+    width: calc(100% - 264px) !important;
+  }
+}
+.sidebar .ria-nav {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 5px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 2px 0 !important;
+}
+.sidebar .ria-nav > .nav-item {
+  box-sizing: border-box !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 47px !important;
+  padding: 8px 10px !important;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: #F7F4ED !important;
+  text-align: left !important;
+  cursor: pointer;
+  transition: background-color .18s ease,border-color .18s ease !important;
+}
+.sidebar .ria-nav > .nav-item.hidden {
+  display: none !important;
+}
+.sidebar .ria-nav > .nav-item > .nav-icon {
+  box-sizing: border-box !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  margin: 0 !important;
+  border: 1px solid rgba(215,208,187,.12) !important;
+  border-radius: 10px !important;
+  background: rgba(215,208,187,.07) !important;
+  color: #D7D0BB !important;
+  text-align: center !important;
+}
+.sidebar .ria-nav > .nav-item > .nav-icon svg {
+  display: block !important;
+  flex: none !important;
+  width: 19px !important;
+  height: 19px !important;
+  overflow: visible !important;
+}
+.sidebar .ria-nav > .nav-item > .nav-icon svg * {
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.sidebar .ria-nav > .nav-item > .nav-icon svg .accent {
+  stroke: #DE7C00 !important;
+}
+.sidebar .ria-nav > .nav-item > .nav-label {
+  box-sizing: border-box !important;
+  display: block !important;
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: var(--ria-font, "Larsseit", Arial, sans-serif) !important;
+  font-size: 12.3px !important;
+  font-weight: 650 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .005em !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  color: #F7F4ED !important;
+}
+.sidebar .ria-nav > .nav-item:hover {
+  background: rgba(215,208,187,.095) !important;
+  border-color: rgba(215,208,187,.09) !important;
+}
+.sidebar .ria-nav > .nav-item.active {
+  background: linear-gradient(90deg,rgba(215,208,187,.20),rgba(215,208,187,.075)) !important;
+  border-color: rgba(215,208,187,.25) !important;
+  box-shadow: inset 3px 0 0 #DE7C00 !important;
+}
+.sidebar .ria-nav > .nav-item.active > .nav-icon {
+  background: rgba(222,124,0,.13) !important;
+  border-color: rgba(222,124,0,.24) !important;
+  color: #F7F4ED !important;
+}
+.sidebar .ria-nav > .nav-item.active > .nav-label {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+.sidebar .ria-nav > .nav-item:focus-visible {
+  outline: 2px solid #DE7C00 !important;
+  outline-offset: 2px !important;
+}
+/* Preserva o dock mobile/tablet: ajustes restritos à navegação da sidebar. */
