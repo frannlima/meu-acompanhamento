@@ -37,14 +37,14 @@
   function groupPerformanceColors(code){
     const map={
       feminino:"#E03C31",
-      masculino:"#2F6FB0",
-      infantil:"#E0A900",
-      casa:"#2E6B58",
+      masculino:"#2563EB",
+      infantil:"#E6B800",
+      casa:"#38865A",
       beleza:"#E68699",
-      relogios:"#76232F",
-      cba:"#A7ACA9",
-      lpg:"#D37C32",
-      basket:"#466964"
+      relogios:"#E68699",
+      cba:"#FFFFFF",
+      lpg:"#DE7C00",
+      basket:"#E68699"
     };
     return map[code]||"#466964";
   }
@@ -102,7 +102,7 @@
     const lines=series.map(s=>{
       const pts=s.values.map((v,i)=>x(i)+","+y(v)).join(" ");
       const dots=s.values.map((v,i)=>'<circle cx="'+x(i)+'" cy="'+y(v)+'" r="'+(i===s.values.length-1?5:3.5)+'" fill="'+s.color+'"/>').join("");
-      return '<polyline fill="none" stroke="'+s.color+'" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" points="'+pts+'"/>'+dots;
+      return '<polyline fill="none" stroke="'+(s.code==="cba"?"#5E6D65":s.color)+'" stroke-width="'+(s.code==="cba"?"7":"3.5")+'" stroke-linecap="round" stroke-linejoin="round" points="'+pts+'"/>'+(s.code==="cba"?'<polyline fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" points="'+pts+'"/>':"")+dots;
     }).join("");
 
     const lastRanking=series.map(s=>({name:s.name,value:s.values.at(-1)||0,color:s.color})).sort((a,b)=>b.value-a.value);
