@@ -1,0 +1,148 @@
+/* Olhares Brasileiros · direção de arte para fotos horizontais e verticais.
+   Fotos 2 e 3 são retratos 650x866: foreground completo + atmosfera desfocada,
+   ao contrário do antigo object-fit:cover que cortava grande parte da modelo. */
+#homeCampaignSlot .ol-stage{
+  isolation:isolate;
+  background:#123A30!important;
+}
+#homeCampaignSlot .ol-slide{
+  overflow:hidden;
+  isolation:isolate;
+}
+#homeCampaignSlot .ol-slide img{
+  display:block;
+  transform:none!important;
+  filter:none!important;
+}
+#homeCampaignSlot .ol-slide:nth-child(1) img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:50% 45%!important;
+}
+#homeCampaignSlot .ol-slide:nth-child(2){
+  --ol-scene:url("./assets/olhares-brasileiros-2.webp");
+}
+#homeCampaignSlot .ol-slide:nth-child(3){
+  --ol-scene:url("./assets/olhares-brasileiros-3.webp");
+}
+#homeCampaignSlot .ol-slide:nth-child(n+2)::before{
+  content:"";
+  position:absolute;
+  inset:-12px;
+  z-index:0;
+  background-image:
+    linear-gradient(90deg,rgba(12,46,45,.59),rgba(12,46,45,.15)),
+    var(--ol-scene);
+  background-size:cover;
+  background-position:center 33%;
+  filter:blur(16px) saturate(.92);
+  transform:scale(1.09);
+  pointer-events:none;
+}
+#homeCampaignSlot .ol-slide:nth-child(n+2) img{
+  position:absolute!important;
+  z-index:1;
+  inset:auto 1% 0 auto!important;
+  display:block!important;
+  width:auto!important;
+  height:100%!important;
+  max-width:64%!important;
+  object-fit:contain!important;
+  object-position:right center!important;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.94) 11%,#000 23%);
+  mask-image:linear-gradient(90deg,transparent 0%,rgba(0,0,0,.94) 11%,#000 23%);
+}
+#homeCampaignSlot .ol-slide:nth-child(n+2)::after{
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(8,38,31,.76) 0%,rgba(8,38,31,.48) 42%,transparent 80%);
+}
+#homeCampaignSlot .ol-shade{
+  background:linear-gradient(180deg,rgba(9,38,31,.15),transparent 34%,rgba(9,38,31,.63) 100%)!important;
+}
+#homeCampaignSlot .ol-campaign-copy{
+  bottom:16px!important;
+  left:18px!important;
+  right:18px!important;
+}
+#homeCampaignSlot .ol-campaign-copy strong{
+  font-size:clamp(27px,2.8vw,36px)!important;
+  line-height:1.04!important;
+  max-width:72%;
+  text-wrap:balance;
+}
+#homeCampaignSlot .ol-campaign-copy p{max-width:70%;}
+
+/* Trilha opcional: o navegador nunca inicia áudio automaticamente. */
+#homeCampaignSlot .ol-play-controls button.ol-sound{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  min-width:110px!important;
+  min-height:34px!important;
+  margin-right:8px!important;
+  padding:5px 10px!important;
+  background:rgba(255,255,255,.085)!important;
+  color:#F7F4ED!important;
+  border:1px solid rgba(255,255,255,.22)!important;
+  border-radius:10px!important;
+  font-family:var(--ria-font,Arial,sans-serif)!important;
+  font-size:11px!important;
+  font-weight:700!important;
+  letter-spacing:.01em!important;
+}
+#homeCampaignSlot .ol-play-controls button.ol-sound[aria-pressed="true"]{
+  background:#D37C32!important;
+  border-color:rgba(255,255,255,.32)!important;
+  color:#FFFFFF!important;
+}
+#homeCampaignSlot .ol-play-controls button.ol-sound:focus-visible{
+  outline:2px solid #DE7C00!important;
+  outline-offset:2px!important;
+}
+#homeCampaignSlot .ol-play-controls button.ol-sound:disabled{opacity:.4;cursor:not-allowed;}
+#homeCampaignSlot .ol-sound-icon{font-size:17px;line-height:1;}
+#homeCampaignSlot .ol-play-controls{gap:4px;min-width:0;}
+#homeCampaignSlot .ol-play-controls .ol-toggle{min-width:73px!important;}
+
+@media(min-width:1100px){
+  html #section-inicio>.section-head.home-campaign-enabled #homeCampaignSlot .ol-stage{
+    height:clamp(290px,27vw,335px)!important;
+  }
+}
+@media(min-width:701px) and (max-width:1099px){
+  #homeCampaignSlot .ol-stage{height:295px!important;}
+  #homeCampaignSlot .ol-slide:nth-child(n+2) img{max-width:65%!important;}
+}
+@media(max-width:700px){
+  #homeCampaignSlot .ol-stage{
+    height:clamp(244px,66vw,320px)!important;
+    border-radius:16px!important;
+  }
+  #homeCampaignSlot .ol-slide:nth-child(n+2) img{
+    max-width:73%!important;
+    right:-1%!important;
+  }
+  #homeCampaignSlot .ol-slide:nth-child(n+2)::after{
+    background:linear-gradient(90deg,rgba(8,38,31,.80),rgba(8,38,31,.42) 55%,transparent);
+  }
+  #homeCampaignSlot .ol-campaign-copy strong{
+    font-size:clamp(24px,6.5vw,31px)!important;
+    max-width:82%;
+  }
+  #homeCampaignSlot .ol-campaign-copy p{max-width:80%;}
+  #homeCampaignSlot .ol-campaign-copy span{font-size:8px!important;letter-spacing:1.3px!important;}
+  #homeCampaignSlot .ol-play-controls button.ol-sound{min-width:42px!important;padding:6px!important;margin-right:2px!important;}
+  #homeCampaignSlot .ol-sound [data-sound-label]{display:none!important;}
+  #homeCampaignSlot .ol-play-controls .ol-toggle{min-width:64px!important;}
+  #homeCampaignSlot .ol-controls{gap:3px!important;}
+  #homeCampaignSlot .ol-dot{min-width:26px!important;}
+}
+@media(prefers-reduced-motion:reduce){
+  #homeCampaignSlot .ol-slide{transition:none!important;}
+}
