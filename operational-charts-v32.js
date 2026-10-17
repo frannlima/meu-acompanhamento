@@ -66,16 +66,33 @@ const worlds=[
 function worldCards(){
  const rows=Array.isArray(state.groupHourlyHistory)?state.groupHourlyHistory:[];
  const times=[...new Set(rows.map(x=>x.captured_at).filter(Boolean))].sort((a,b)=>Date.parse(a)-Date.parse(b));
+ const groups=Array.isArray(state.groupSummary?.groups)?state.groupSummary.groups:[];
+ const weights=parts();
  return worlds.map(w=>{
   const codes=w.code.split(",");
-  const value=t=>rows.filter(r=>r.captured_at===t&&codes.includes(String(r.group_code))).reduce((s,r)=>s+Number(r.sales_financial||0),0);
+  const items=t=>rows.filter(r=>r.captured_at===t&&codes.includes(String(r.group_code)));
+  const value=t=>items(t).reduce((sum,r)=>sum+Number(r.sales_financial||0),0);
   const last=times.at(-1),prev=times.at(-2),before=times.at(-3);
-  const rate=last&&prev?value(last)-value(prev):null,previous=prev&&before?value(prev)-value(before):null;
-  const change=rate!==null&&previous>0?(rate/previous-1)*100:null;
+  const pair=Boolean(last&&prev&&items(last).length&&items(prev).length);
+  const previousPair=Boolean(prev&&before&&items(before).length&&items(prev).length);
+  const minutesLast=pair?(Date.parse(last)-Date.parse(prev))/60000:0;
+  const minutesPrev=previousPair?(Date.parse(prev)-Date.parse(before))/60000:0;
+  const actual=pair&&minutesLast>0?value(last)-value(prev):null;
+  const previous=previousPair&&minutesPrev>0?value(prev)-value(before):null;
+  const hourlyActual=actual!==null?actual*60/minutesLast:null;
+  const hourlyPrevious=previous!==null?previous*60/minutesPrev:null;
+  const change=hourlyActual!==null&&hourlyPrevious>0?(hourlyActual/hourlyPrevious-1)*100:null;
+  const targets=groups.filter(r=>codes.includes(String(r.group_code)));
+  const target=targets.length?targets.reduce((acc,r)=>acc+Number(r.target_financial||0),0):null;
+  const expectedValue=target!==null&&target>0&&pair&&weights.length?target*(expected(weights,last)-expected(weights,prev)):null;
+  const delta=expectedValue>0&&actual!==null?(actual/expectedValue-1)*100:null;
+  const positiveDelta=delta!==null?delta:change;
+  const gap=delta===null?null:actual-expectedValue;
   return '<div class="ma-world-card" data-world="'+(w.code==="cba"?"cba":"other")+'" style="--world-color:'+w.color+'"><b>'+w.label+'</b>'+
-   '<strong class="'+(change===null?'':tone(change))+'">'+(change===null?'—':(change>=0?'▲ +':'▼ ')+pct(change))+'</strong>'+
-   '<small>'+(change===null?'Aguardando três inputs para comparar':(change>=0?'Ritmo acelerou':'Ritmo desacelerou'))+
-   (rate!==null?' • Última venda: '+money(rate):'')+'</small></div>';
+   '<strong class="'+(positiveDelta===null?'':tone(positiveDelta))+'">'+(positiveDelta===null?'—':(positiveDelta>=0?'▲ +':'▼ ')+pct(positiveDelta))+'</strong>'+
+   '<small>'+(delta===null?'Ritmo vs curva indisponível':'Vs curva esperada na hora: '+(gap>=0?'+':'−')+money(Math.abs(gap)))+'</small>'+
+   '<small>Vs ritmo anterior: '+(change===null?'—':(change>=0?'▲ +':'▼ ')+pct(change))+'</small>'+
+   (actual!==null?'<small>Vendas no intervalo: '+money(actual)+'</small>':'')+'</div>';
  }).join("");
 }
 function stat(name,value,help,kind){
@@ -144,11 +161,23 @@ function admin(){
 }
 function meta(){
  const d=state.day||{},ev=d.has_input&&Number(d.ly_financial)>0?(Number(d.sales_financial)/Number(d.ly_financial)-1)*100:null;
- for(const id of ["kpiGrid","clarityExecutive"]){
-  const root=$(id);if(!root)continue;
+ const value=ev===null?'Sem A.A. cadastrado':(ev>=0?'▲ +':'▼ ')+pct(ev);
+ const root=$("clarityExecutive");
+ if(root){
   let el=root.querySelector(".ma-day-evolution");
   if(!el){el=document.createElement("div");el.className="ma-day-evolution";root.appendChild(el);}
-  el.innerHTML='<span>Evolução vs A.A.</span><b class="'+(ev===null?'':tone(ev))+'">'+(ev===null?'—':(ev>=0?'▲ +':'▼ ')+pct(ev))+'</b>';
+  el.innerHTML='<span>Evolução vs A.A.</span><b class="'+(ev===null?'':tone(ev))+'">'+value+'</b>';
+ }
+ const grid=$("kpiGrid");
+ if(grid&&!grid.querySelector(".ma-aa-kpi")){
+  const card=document.createElement("article");
+  card.className="kpi ma-aa-kpi";
+  card.innerHTML='<span>Evolução vs A.A.</span><strong class="'+(ev===null?'':ev>=0?'positive':'negative')+'">'+value+'</strong><small>Comparação com venda A.A. oficial</small>';
+  grid.appendChild(card);
+ }else if(grid){
+  const card=grid.querySelector(".ma-aa-kpi");
+  const strong=card.querySelector("strong");
+  if(strong){strong.textContent=value;strong.className=ev===null?'':ev>=0?'positive':'negative';}
  }
 }
 function render(){if(!state.logged)return;admin();meta();draw();}
