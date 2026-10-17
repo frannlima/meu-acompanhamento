@@ -286,14 +286,19 @@
 
   function renderGroupsPanel(){
     const d=state.day||{};
-    const groups=typeof window.getOfficialGgSummaries==="function"
-      ? window.getOfficialGgSummaries() : groupRows();
-    const rows=groups.map(g=>{
+    const groups=(typeof window.getOfficialGgSummaries==="function"
+      ? window.getOfficialGgSummaries() : groupRows()).slice().sort((a,b)=>{
+        const ma=Number(a.target_financial||0),mb=Number(b.target_financial||0);
+        const attA=ma>0?Number(a.sales_financial||0)/ma:-1;
+        const attB=mb>0?Number(b.sales_financial||0)/mb:-1;
+        return attB-attA || Number(b.sales_financial||0)-Number(a.sales_financial||0);
+      });
+    const rows=groups.map((g,index)=>{
       const meta=Number(g.target_financial||0),venda=Number(g.sales_financial||0);
       const ating=meta?venda/meta*100:0,aa=Number(g.ly_financial||0);
       const ev=aa&&d.has_input?((venda/aa)-1)*100:null,dev=venda-meta;
       return '<tr>'+
-        '<td><b>'+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</b></td>'+
+        '<td><span class="ma-rank-position">'+(index+1)+'º</span> <b>'+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</b></td>'+
         '<td>'+money(meta,2)+'</td>'+
         '<td>'+money(venda,2)+'</td>'+
         '<td class="'+(ating>=100?"positive":ating>=90?"warning":"negative")+'">'+pct(ating)+'</td>'+
