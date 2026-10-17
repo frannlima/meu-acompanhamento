@@ -775,7 +775,7 @@ function buildGroupPanelHtml(){
   const dateLabel=new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR");
   const updated=d.captured_at?localTime(d.captured_at):"sem input";
 
-  const rows=ordered.map((g,index)=>{
+  const rows=ordered.map(g=>{
     const meta=Number(g.target_financial||0);
     const venda=Number(g.sales_financial||0);
     const ating=meta?venda/meta*100:0;
@@ -791,7 +791,7 @@ function buildGroupPanelHtml(){
     const groupProjectionAtt=meta&&groupProjection?groupProjection/meta*100:0;
 
     return '<tr>'+
-      '<td class="group-name-cell"><span class="ma-rank-position">'+(index+1)+'º</span> '+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</td>'+
+      '<td class="group-name-cell"><strong>'+esc(GROUP_LABELS[g.group_code]||g.group_code)+'</strong></td>'+
       '<td>'+money(meta,2)+'</td>'+
       '<td>'+money(venda,2)+'</td>'+
       '<td class="'+performanceClass(ating,100,70)+'">'+pct(ating)+'</td>'+
