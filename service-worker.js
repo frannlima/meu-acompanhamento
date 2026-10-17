@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v140";
+const CACHE="meu-acompanhamento-v141";
 const ASSETS=[
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
@@ -32,7 +32,7 @@ const ASSETS=[
   "./enhancements-v9.js?v=14",
   "./premium-v22.js?v=11",
   "./clarity-v1.js?v=40",
-  "./mobile-experience-v1.js?v=6",
+  "./mobile-experience-v1.js?v=41",
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=6",
   "./adaptive-header-v2.js?v=12",
