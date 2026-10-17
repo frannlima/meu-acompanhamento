@@ -101,6 +101,10 @@ function stat(name,value,help,kind){
 function draw(){
  if(!state.logged)return;
  const root=$("dailyEvolutionPanel");if(!root)return;
+ // Se uma versão antiga do guia tiver escondido o gráfico num acordeão,
+ // restaurar o painel ao fluxo principal antes de renderizar.
+ const wrapper=root.closest("#decisionAdvanced");
+ if(wrapper&&wrapper.parentElement){wrapper.parentElement.insertBefore(root,wrapper);wrapper.remove();}
  try{
   const x=model(),d=state.day||{},hasAA=d.has_input&&Number(d.ly_financial)>0;
   const ev=hasAA?(Number(d.sales_financial)/Number(d.ly_financial)-1)*100:null;
