@@ -489,10 +489,12 @@
 
     // Cabeçalho dos indicadores em laranja Pantone Riachuelo.
     rr(42,246,width-84,66,18,C.orange);
-    ctx.fillStyle=C.white;ctx.font="800 18px Larsseit, Arial";ctx.textBaseline="middle";
+    // Nomes dos indicadores ampliados; maxWidth impede qualquer sobreposição
+    // mesmo em colunas estreitas na imagem compartilhável de 2560 px.
+    ctx.fillStyle=C.white;ctx.font="900 27px Larsseit, Arial";ctx.textBaseline="middle";
     cols.forEach((col,i)=>{
       ctx.textAlign=col.align==="left"?"left":"center";
-      ctx.fillText(col.label,col.align==="left"?col.x+18:col.x+col.w/2,279);
+      ctx.fillText(col.label,col.align==="left"?col.x+18:col.x+col.w/2,279,col.w-30);
       if(i>0){
         ctx.strokeStyle="rgba(255,255,255,.34)";
         ctx.lineWidth=1;
@@ -506,11 +508,13 @@
     const rowValues=[];
     const drawRow=(y,name,meta,venda,ating,aa,ev,dev,proj,physical,total=false)=>{
       rr(42,y,width-84,rowH-10,total?20:16,total?C.total:C.white,C.line);
-
+      // Verde institucional na coluna GRUPO, com texto branco em negrito.
+      // Mantém a largura original e o espaço de leitura dos demais indicadores.
+      rr(44,y+2,cols[0].x+cols[0].w-44,rowH-14,14,C.green);
       ctx.textBaseline="middle";
-      ctx.textAlign="left";ctx.fillStyle=C.green;
-      ctx.font=(total?"800 ":"700 ")+"24px Larsseit, Arial";
-      ctx.fillText(name,cols[0].x+18,y+(rowH-10)/2);
+      ctx.textAlign="left";ctx.fillStyle=C.white;
+      ctx.font=(total?"900 ":"800 ")+"28px Larsseit, Arial";
+      ctx.fillText(name,cols[0].x+18,y+(rowH-10)/2,cols[0].w-36);
 
       const base=[
         money(meta,2),money(venda,2),null,aa?money(aa,2):"—",
