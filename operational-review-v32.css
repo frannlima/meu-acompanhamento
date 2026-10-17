@@ -78,3 +78,14 @@
 }
 @media(max-width:400px){.ma-upgrade-grid,.ma-world-hourly{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.ma-upgrade-panel *{scroll-behavior:auto}}
+
+/* Indicador discreto para verificar que a nova versão realmente chegou ao dispositivo */
+.ma-release-stamp{display:inline-flex;align-items:center;gap:6px;margin:5px 0 9px;padding:6px 10px;border-radius:9px;background:#E8F1E9;color:#173F35;font-size:11px;font-weight:900;border:1px solid #8DB09C;letter-spacing:.02em}
+.ma-login-version{font-size:10px;color:#F5C980;font-weight:900;letter-spacing:.06em;display:block;margin-bottom:7px}
+#dailyEvolutionPanel{display:block!important;visibility:visible!important;opacity:1!important;margin:14px 0 18px!important}
+#decisionAdvanced{display:none!important}
+.ma-aa-kpi{background:#F5F2E8!important;border:1px solid #C6D3C6!important}
+.ma-aa-kpi span{display:block;color:#173F35!important;font-weight:850!important}
+.ma-aa-kpi strong.negative{color:#A82E39!important}
+.ma-aa-kpi strong.positive{color:#17724D!important}
+@media (max-width:700px){.ma-release-stamp{font-size:10px}.ma-admin-session #adminStoreBar{position:relative;z-index:2}}
