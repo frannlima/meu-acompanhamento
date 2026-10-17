@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v141";
+const CACHE="meu-acompanhamento-v142";
 const ASSETS=[
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
@@ -12,7 +12,7 @@ const ASSETS=[
   "./estore-operations-v3.css?v=1",
   "./estore-operations-v3.js?v=1",
   "./decision-guide-v1.css?v=1",
-  "./decision-guide-v1.js?v=40",
+  "./decision-guide-v1.js?v=41",
   "./assets/olhares-brasileiros-1.webp",
   "./assets/olhares-brasileiros-2.webp",
   "./assets/olhares-brasileiros-3.webp",
@@ -31,7 +31,7 @@ const ASSETS=[
   "./app.js?v=32",
   "./enhancements-v9.js?v=14",
   "./premium-v22.js?v=11",
-  "./clarity-v1.js?v=40",
+  "./clarity-v1.js?v=41",
   "./mobile-experience-v1.js?v=41",
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=6",
@@ -45,9 +45,9 @@ const ASSETS=[
   "./late-partial-alert-v1.js?v=2",
   "./daily-evolution-v1.css?v=5",
   "./daily-evolution-v1.js?v=4",
-  "./operational-review-v32.css?v=40",
-  "./operational-charts-v32.js?v=40",
-  "./operational-sharing-v32.js?v=40",
+  "./operational-review-v32.css?v=41",
+  "./operational-charts-v32.js?v=41",
+  "./operational-sharing-v32.js?v=41",
   "./manifest.webmanifest",
   "./assets/app-icon-192.png",
   "./assets/app-icon-512.png",
