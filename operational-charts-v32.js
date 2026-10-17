@@ -147,20 +147,15 @@ function admin(){
  const shell=$("appShell");if(!shell)return;
  const ok=state.logged&&state.role==="administrador";
  shell.classList.toggle("ma-admin-session",ok);
- for(const id of ["adminStoreBar","homeAdminStoreBar"]){
-  const bar=$(id);if(!bar)continue;
-  bar.classList.toggle("hidden",!ok);
-  if(!ok)continue;
-  const select=bar.querySelector("select");
-  if(select&&!select.options.length&&typeof buildAdminStoreSelect==="function")buildAdminStoreSelect();
-  let label=bar.querySelector(".ma-current-store-label");
-  if(!label){label=document.createElement("span");label.className="ma-current-store-label";bar.appendChild(label);}
-  label.textContent="Filial "+state.storeCode+" em análise";
-  if(!bar.querySelector(".ma-region-access")){
-   const btn=document.createElement("button");btn.className="ma-region-access";btn.type="button";btn.textContent="Visão Regional CE+PI";
-   btn.addEventListener("click",()=>{if(state.role==="administrador")setSection("regional");});
-   bar.appendChild(btn);
-  }
+ // O seletor oficial é o #adminStoreSelect, deslocado pelo cabeçalho adaptativo
+ // para uma área própria. Não exibir novamente as duas barras antigas.
+ const oldBar=$("adminStoreBar"),homeBar=$("homeAdminStoreBar");
+ oldBar?.classList.add("hidden");
+ homeBar?.classList.add("hidden");
+ if(!ok)return;
+ if(typeof buildAdminStoreSelect==="function"){
+  const selector=$("adminStoreSelect");
+  if(selector&&!selector.options.length)buildAdminStoreSelect();
  }
 }
 function meta(){
