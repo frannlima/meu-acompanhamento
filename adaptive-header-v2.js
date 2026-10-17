@@ -47,6 +47,8 @@
 
   function isAdmin(){
     const adminBar=document.getElementById("adminStoreBar");
+    const shell=document.getElementById("appShell");
+    if(shell?.classList.contains("ma-admin-session"))return true;
     if(adminBar && !adminBar.classList.contains("hidden")) return true;
 
     const adminVisible=document.querySelector(".admin-only:not(.hidden)");
@@ -74,11 +76,33 @@
   function placeStoreContext(){
     const wrap=ensureAdaptiveStoreContext();
     const head=getActiveHead();
-    if(!wrap||!head) return;
-
-    const show=isAdmin();
+    if(!wrap) return;
+    const shell=document.getElementById("appShell");
+    const show=!!shell&&!shell.classList.contains("hidden")&&isAdmin();
     wrap.classList.toggle("hidden",!show);
     if(!show) return;
+
+    // No mobile/tablet, o seletor é independente do hero.
+    // Antes ele era inserido dentro das ações do cabeçalho, sobrepondo
+    // título, saudação e botões do Consolidado Regional.
+    const compact=document.documentElement.classList.contains("device-phone")||
+       document.documentElement.classList.contains("device-tablet")||
+       window.matchMedia("(max-width:900px)").matches;
+    if(compact){
+      const mobile=document.querySelector(".main > .mobile-header");
+      const main=document.querySelector(".main");
+      if(main){
+        if(mobile){
+          if(wrap.parentElement!==main||wrap.previousElementSibling!==mobile){
+            mobile.insertAdjacentElement("afterend",wrap);
+          }
+        }else if(wrap.parentElement!==main){
+          main.prepend(wrap);
+        }
+      }
+      return;
+    }
+    if(!head)return;
 
     const key=activeSection();
 
