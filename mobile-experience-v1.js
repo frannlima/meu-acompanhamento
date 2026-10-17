@@ -36,10 +36,10 @@
 
   function groupPerformanceColors(code){
     const map={
-      feminino:"#E03C31",
-      masculino:"#2563EB",
-      infantil:"#E6B800",
-      casa:"#38865A",
+      feminino:"#E03C31",feminino_moda:"#E03C31",
+      masculino:"#2563EB",masculino_moda:"#2563EB",
+      infantil:"#E6B800",infantil_moda:"#E6B800",
+      casa:"#38865A",moda_casa:"#38865A",
       beleza:"#E68699",
       relogios:"#E68699",
       cba:"#FFFFFF",
