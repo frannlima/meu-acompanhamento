@@ -130,16 +130,13 @@
       card.setAttribute("aria-label","Leitura e direcionamento do mundo");
       worldBar.insertAdjacentElement("afterend",card);
     }
+    // O ritmo hora a hora é uma ferramenta de primeira leitura, não um conteúdo complementar.
+    // Não escondê-lo em <details>: isso inviabilizava a visualização da atualização.
     const advanced=el("dailyEvolutionPanel");
-    if(advanced&&!el("decisionAdvanced")&&advanced.parentElement?.id==="section-inicio"){
-      const details=document.createElement("details");
-      details.id="decisionAdvanced";
-      details.className="dg-advanced";
-      const summary=document.createElement("summary");
-      summary.innerHTML='<span><b>Análise complementar: Hoje x A.A.</b><small>Consulte o gráfico detalhado somente quando precisar aprofundar a leitura.</small></span><span aria-hidden="true">⌄</span>';
-      advanced.parentElement.insertBefore(details,advanced);
-      details.appendChild(summary);
-      details.appendChild(advanced);
+    const collapsed=el("decisionAdvanced");
+    if(advanced&&collapsed&&collapsed.contains(advanced)){
+      collapsed.parentElement.insertBefore(advanced,collapsed);
+      collapsed.remove();
     }
   }
 
