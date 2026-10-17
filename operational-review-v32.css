@@ -183,3 +183,46 @@
   }
   #appShell #section-regional>.section-head .section-actions{grid-template-columns:minmax(0,1fr)!important}
 }
+
+
+/* Ajuste visual v144 — grupos sem numeração, primeira coluna verde e cabeçalhos legíveis */
+/* Resumo do dia, com a mesma identidade Pantone 567 C do cabeçalho. */
+#clarityGroupsTable .clarity-table tbody tr:not(.clarity-total) > td.ma-group-label-cell,
+#homeGroupSharePanel .group-share-table tbody tr:not(.group-total-row) > td.group-name-cell,
+#groupPanelModalContent .group-share-table tbody tr:not(.group-total-row) > td.group-name-cell {
+  background-color:#173F35 !important;
+  color:#FFFFFF !important;
+  font-weight:900 !important;
+  font-size:12px !important;
+  line-height:1.35 !important;
+  vertical-align:middle !important;
+}
+/* Evitar herdar outra cor nos nomes inseridos em <b>/<strong>. */
+#clarityGroupsTable .clarity-table tbody .ma-group-label-cell b,
+#homeGroupSharePanel .group-share-table tbody .group-name-cell strong,
+#groupPanelModalContent .group-share-table tbody .group-name-cell strong {
+  color:#FFFFFF !important;
+  font-weight:900 !important;
+}
+/* Os cabeçalhos permanecem com ordenação por indicador. */
+#clarityGroupsTable .clarity-table thead th {
+  font-size:11px !important;
+  font-weight:900 !important;
+  letter-spacing:.025em !important;
+  line-height:1.3 !important;
+  white-space:nowrap !important;
+}
+#homeGroupSharePanel .group-share-table thead th,
+#groupPanelModalContent .group-share-table thead th {
+  font-size:12px !important;
+  font-weight:900 !important;
+  line-height:1.35 !important;
+}
+@media (max-width:900px) {
+  #clarityGroupsTable .clarity-table thead th {font-size:10px !important;}
+  #clarityGroupsTable .clarity-table tbody tr:not(.clarity-total) > td.ma-group-label-cell {font-size:11px !important;}
+  #homeGroupSharePanel .group-share-table thead th,
+  #groupPanelModalContent .group-share-table thead th {font-size:11px !important;}
+  #homeGroupSharePanel .group-share-table tbody tr:not(.group-total-row) > td.group-name-cell,
+  #groupPanelModalContent .group-share-table tbody tr:not(.group-total-row) > td.group-name-cell {font-size:11px !important;}
+}
