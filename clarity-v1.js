@@ -756,6 +756,9 @@
     positionSupervisorChecklist();
     renderGroupsPanel();
     renderCurve();
+    // Renderizar a camada de ritmo APÓS os módulos antigos, evitando sobrescrita.
+    if(typeof window.maOperationalChartsV32?.render==="function")window.maOperationalChartsV32.render();
+    if(typeof window.maOperationalShareV32?.refresh==="function")window.maOperationalShareV32.refresh();
   }
 
 
