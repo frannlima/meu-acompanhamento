@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v142";
+const CACHE="meu-acompanhamento-v143";
 const ASSETS=[
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
@@ -35,7 +35,7 @@ const ASSETS=[
   "./mobile-experience-v1.js?v=41",
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=6",
-  "./adaptive-header-v2.js?v=12",
+  "./adaptive-header-v2.js?v=43",
   "./estore-integrated-v2.js?v=3",
   "./gg-worlds-v1.css?v=2",
   "./gg-worlds-v1.js?v=6",
@@ -45,8 +45,8 @@ const ASSETS=[
   "./late-partial-alert-v1.js?v=2",
   "./daily-evolution-v1.css?v=5",
   "./daily-evolution-v1.js?v=4",
-  "./operational-review-v32.css?v=41",
-  "./operational-charts-v32.js?v=41",
+  "./operational-review-v32.css?v=43",
+  "./operational-charts-v32.js?v=43",
   "./operational-sharing-v32.js?v=41",
   "./manifest.webmanifest",
   "./assets/app-icon-192.png",
