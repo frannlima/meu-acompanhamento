@@ -93,6 +93,16 @@ async function shareRegional(){
 }
 function actions(){
  if(!state.logged)return;
+ // O botão fixo da tela Início estava sem listener de compartilhamento.
+ const shareHome=$("shareGroupPanelHome");
+ if(shareHome&&!shareHome.dataset.maShareBound){
+  shareHome.dataset.maShareBound="1";
+  shareHome.addEventListener("click",()=>{
+   const official=$("clarityShareDaily");
+   if(official)official.click();
+   else if(typeof toast==="function")toast("Aguarde o carregamento do card oficial.",true);
+  });
+ }
  const button=$("estoreOpsRegionalToggle"),pane=$("estoreOpsRegional");
  if(button&&!$("maRegionShare32")){
   const share=document.createElement("button");share.id="maRegionShare32";share.type="button";
