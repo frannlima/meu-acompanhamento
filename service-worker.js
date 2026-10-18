@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v145";
+const CACHE="meu-acompanhamento-v146-ria";
 const ASSETS=[
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
@@ -18,6 +18,8 @@ const ASSETS=[
   "./assets/olhares-brasileiros-3.webp",
   "./",
   "./index.html",
+  "./ria-guided-support-v5.js?v=2",
+  "./ria-float-safe-v5.js?v=1",
   "./styles.css?v=9",
   "./enhancements-v9.css?v=10",
   "./premium-v22.css?v=8",
