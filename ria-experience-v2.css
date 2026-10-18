@@ -1,0 +1,22 @@
+/* RIA enhancements v2 */
+#riaFloat{position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:900;display:none;align-items:center;gap:9px;padding:7px 13px 7px 7px;background:#173f35;color:white;border:2px solid #d6d2c4;border-radius:999px;box-shadow:0 7px 23px rgba(0,0,0,.19);font:inherit;cursor:pointer;max-width:min(230px,calc(100vw - 32px))}
+#riaFloat .ria-float-circle{background:#d6d2c4;color:#173f35;width:41px;height:41px;border-radius:50%;display:grid;place-items:center;font-size:23px;flex:none}
+#riaFloat .ria-float-text{display:flex;flex-direction:column;text-align:left;line-height:1.15;font-size:12px}
+#riaFloat .ria-float-text strong{font-size:14px}
+#riaFloat .ria-float-online{display:inline-block;width:7px;height:7px;background:#7fe0a3;border-radius:50%;margin-right:4px}
+#riaFloat.ria-compact{width:52px;height:52px;padding:4px;justify-content:center}
+#riaFloat.ria-compact .ria-float-text{display:none}
+#riaFloat.ria-compact .ria-float-circle{width:40px;height:40px}
+#riaFloat:focus-visible,.ria-end-button:focus-visible,.ria-star:focus-visible{outline:3px solid #de7c00;outline-offset:3px}
+#riaFloat.ria-available{display:flex}
+.ria-end-button{background:#fff;border:1px solid #466964;color:#173f35;border-radius:12px;padding:10px 14px;cursor:pointer;font:inherit}
+.ria-feedback{border:1px solid #c5d4ce;border-radius:15px;background:white;padding:17px;margin:14px 0;color:#173f35}
+.ria-feedback h3{margin:0 0 8px;font-size:17px}
+.ria-stars{display:flex;gap:4px;margin:12px 0}
+.ria-star{border:0;background:transparent;color:#a4aaa6;font-size:32px;line-height:1.2;cursor:pointer;padding:4px;touch-action:manipulation}
+.ria-star.selected{color:#de7c00}
+.ria-rating-send{background:#173f35;color:white;border:0;border-radius:9px;padding:10px 16px;cursor:pointer;font:inherit}
+.ria-rating-send:disabled{opacity:.45;cursor:not-allowed}
+.ria-feedback small{display:block;margin:9px 0;color:#626e67}
+@media(max-width:700px){#riaFloat{right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));width:50px;height:50px;padding:3px;justify-content:center}#riaFloat .ria-float-text{display:none}#riaFloat .ria-float-circle{width:40px;height:40px}#riaFloat.ria-compact{width:50px;height:50px}#riaFloat.ria-support-open{display:none}.ria-stars{justify-content:center}}
+@media(prefers-reduced-motion:reduce){#riaFloat{transition:none}}
