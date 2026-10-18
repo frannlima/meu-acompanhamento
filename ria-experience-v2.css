@@ -20,3 +20,18 @@
 .ria-feedback small{display:block;margin:9px 0;color:#626e67}
 @media(max-width:700px){#riaFloat{right:12px;bottom:calc(86px + env(safe-area-inset-bottom,0px));width:50px;height:50px;padding:3px;justify-content:center}#riaFloat .ria-float-text{display:none}#riaFloat .ria-float-circle{width:40px;height:40px}#riaFloat.ria-compact{width:50px;height:50px}#riaFloat.ria-support-open{display:none}.ria-stars{justify-content:center}}
 @media(prefers-reduced-motion:reduce){#riaFloat{transition:none}}
+
+/* RIA • selo de disponibilidade em telas compactas */
+#riaFloat{isolation:isolate}
+#riaFloat .ria-mobile-24h{display:none}
+@media(max-width:700px){
+  #riaFloat{overflow:visible;min-width:50px;min-height:50px}
+  #riaFloat .ria-mobile-24h{
+    display:block;position:absolute;right:-6px;bottom:-6px;z-index:1;
+    background:#7fe0a3;color:#173f35;border:2px solid #173f35;
+    border-radius:999px;min-width:28px;text-align:center;
+    padding:2px 3px;font-size:10px;font-weight:800;line-height:12px;
+    letter-spacing:-.15px;box-shadow:0 2px 4px rgba(0,0,0,.16);
+    pointer-events:none;
+  }
+}
