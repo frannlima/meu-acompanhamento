@@ -1,0 +1,16 @@
+(()=>{
+"use strict";
+const base="https://vvgejviwvtnlahbyopah.supabase.co";
+const key="sb_publishable_XBa55FcPfePH_roJs2ejHg_KK9lV0R6";
+const headers={"apikey":key,"Content-Type":"application/json"};
+function init(){
+const section=document.getElementById("section-ria-suporte"),form=document.getElementById("riaForm");if(!section||!form)return;
+const panel=document.createElement("section");panel.id="riaEmailVerification";panel.className="ria-feedback";panel.innerHTML='<h3>🔐 Ativar RIA inteligente com verificação de e-mail</h3><p>Seu acesso ao aplicativo permanece igual. Para conversar com a IA, confirme um e-mail previamente vinculado à sua matrícula e filial pelo administrador.</p><form id="riaEmailForm"><label for="riaEmail">Seu e-mail autorizado</label><div class="ria-input-row"><input id="riaEmail" required type="email" autocomplete="email" placeholder="seu@email.com"><button type="submit">Enviar código</button></div></form><form id="riaOtpForm" hidden><label for="riaOtp">Código recebido por e-mail</label><div class="ria-input-row"><input id="riaOtp" required inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Código de verificação"><button type="submit">Confirmar</button></div></form><p id="riaOtpStatus" role="status" aria-live="polite"></p>';
+section.querySelector(".ria-support")?.insertBefore(panel,document.getElementById("riaWelcome"));
+const emailForm=panel.querySelector("#riaEmailForm"),otpForm=panel.querySelector("#riaOtpForm"),status=panel.querySelector("#riaOtpStatus");let email="";
+try{const prior=JSON.parse(sessionStorage.getItem("ria_secure_auth")||"null");if(prior?.access_token&&prior.expires_at>Date.now()){panel.hidden=true;return}}catch{}
+emailForm.addEventListener("submit",async e=>{e.preventDefault();email=panel.querySelector("#riaEmail").value.trim().toLowerCase();const b=emailForm.querySelector("button");b.disabled=true;try{const response=await fetch(base+"/auth/v1/otp",{method:"POST",headers,body:JSON.stringify({email,create_user:true})});if(!response.ok)throw Error("Não foi possível enviar o código. Verifique a configuração de e-mail no Supabase.");otpForm.hidden=false;status.textContent="Confira sua caixa de entrada. Se esse endereço estiver habilitado pelo administrador, o acesso à IA poderá ser concluído após a confirmação."}catch(err){status.textContent=err.message}finally{b.disabled=false}});
+otpForm.addEventListener("submit",async e=>{e.preventDefault();const token=panel.querySelector("#riaOtp").value.trim();const b=otpForm.querySelector("button");b.disabled=true;try{const r=await fetch(base+"/auth/v1/verify",{method:"POST",headers,body:JSON.stringify({email,token,type:"email"})});const body=await r.json();if(!r.ok||!body.access_token)throw Error("Código inválido ou expirado.");const sess={access_token:body.access_token,expires_at:Date.now()+Math.max(0,(Number(body.expires_in)||3600)-60)*1000};sessionStorage.setItem("ria_secure_auth",JSON.stringify(sess));panel.hidden=true;document.getElementById("riaAiStatus").textContent="E-mail confirmado. O acesso à IA depende também do vínculo administrativo da matrícula e filial."; }catch(err){status.textContent=err.message}finally{b.disabled=false}});
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
