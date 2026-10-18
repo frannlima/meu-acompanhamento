@@ -1,0 +1,27 @@
+/* Meu Acompanhamento • instalação PWA */
+.ma-install-login{margin:13px 0 4px;text-align:center}
+.ma-install-login[hidden],.ma-install-login-btn[hidden],.ma-install-side-btn[hidden],.ma-install-mobile-btn[hidden]{display:none!important}
+.ma-install-login-btn{display:block;width:100%;border:1px solid #173f35;border-radius:13px;background:#edf3ee;color:#173f35;padding:12px 14px;font:inherit;font-weight:750;cursor:pointer;min-height:46px}
+.ma-install-login p{margin:7px 3px 0;color:#466964;font-size:12px;line-height:1.45}
+.ma-install-side-btn{display:block;width:100%;margin:0 0 10px;border-radius:10px;background:#d6d2c4;color:#173f35;border:1px solid #d6d2c4;padding:10px 9px;font:inherit;font-size:12px;font-weight:750;cursor:pointer}
+.ma-install-mobile-btn{flex-shrink:0;border:1px solid #d6d2c4;border-radius:9px;background:#173f35;color:white;padding:7px 9px;font:inherit;font-size:11px;font-weight:750;cursor:pointer;margin-left:auto;max-width:72px}
+.ma-install-login-btn:focus-visible,.ma-install-side-btn:focus-visible,.ma-install-mobile-btn:focus-visible,.ma-install-close:focus-visible,.ma-install-primary:focus-visible{outline:3px solid #de7c00;outline-offset:3px}
+.ma-install-dialog{background:#f8faf8;color:#173f35;border:1px solid #ccd9d0;border-radius:20px;padding:0;width:min(92vw,520px);max-height:min(86dvh,690px);overflow:auto;box-shadow:0 14px 60px rgba(0,0,0,.26);margin:auto}
+.ma-install-dialog::backdrop{background:rgba(10,32,26,.68)}
+.ma-install-dialog:not([open]){display:none}
+.ma-install-frame{padding:22px}
+.ma-install-top{display:flex;align-items:start;gap:13px}
+.ma-install-top img{border-radius:13px;object-fit:contain;flex:none}
+.ma-install-top h2{margin:3px 0 0;color:#173f35;font-size:clamp(18px,3.5vw,23px);line-height:1.24}
+.ma-install-eyebrow{color:#466964;font-size:10px;letter-spacing:1px;font-weight:750}
+.ma-install-close{margin-left:auto;padding:8px;background:transparent;border:0;color:#173f35;font-size:18px;cursor:pointer}
+.ma-install-description{margin:17px 0;color:#3f5d52;font-size:14px;line-height:1.55}
+.ma-install-dialog h3{font-size:15px;color:#173f35;margin:14px 0 9px}
+.ma-install-steps{padding-left:22px;margin:7px 0 15px}
+.ma-install-steps li{padding:0 0 10px 2px;line-height:1.5;font-size:14px}
+.ma-install-steps li::marker{color:#de7c00;font-weight:bold}
+.ma-install-primary{width:100%;border:0;border-radius:12px;background:#173f35;color:#fff;min-height:44px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer}
+.ma-install-status{font-size:13px;line-height:1.5;color:#466964;margin:10px 0}
+.ma-install-footer{border-top:1px solid #dae4de;padding-top:12px;font-size:12px;color:#60776a;margin-top:14px}
+@media(max-width:650px){.ma-install-frame{padding:17px}.ma-install-top img{width:43px;height:43px}.ma-install-mobile-btn{margin-left:8px}.ma-install-dialog{width:94vw;max-height:85dvh}}
+@media(min-width:901px){.ma-install-mobile-btn{display:none}}
