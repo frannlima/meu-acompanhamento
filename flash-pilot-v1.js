@@ -36,12 +36,12 @@
     }
   }
   window.addEventListener('message',event=>{
-    if(event.source!==window||event.origin!==location.origin||event.data?.type!=='MA_FLASH_PILOT_V1'||!allowed())return;
+    if((event.source!==window&&event.source!==null)||event.origin!==location.origin||event.data?.type!=='MA_FLASH_PILOT_V1'||!allowed())return;
     try{
       const next=core.validate(event.data.payload);
       if(Date.parse(next.collected_at)>Date.now()+60000||Date.now()-Date.parse(next.collected_at)>900000)throw Error('Coleta expirada; colete novamente no Flash.');
       packet=next;paint();toast('Flash recebido no piloto. Base oficial preservada.');
-    }catch(e){toast(e.message,true);}
+    }catch(e){const host=document.getElementById('flashPilotBody');if(host)host.textContent='Coleta recebida, mas recusada: '+e.message;toast(e.message,true);}
   });
   document.addEventListener('ma:estore-hourly-loaded',event=>{
     if(allowed()&&event.detail?.context?.date===localDate()&&String(event.detail?.context?.store).padStart(3,'0')===String(state.storeCode).padStart(3,'0')&&Array.isArray(event.detail?.stores)){hourly=event.detail;paint();}
