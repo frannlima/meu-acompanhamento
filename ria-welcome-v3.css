@@ -1,0 +1,21 @@
+/* RIA welcome experience v3 — first contact is guided and free-form */
+#section-ria-suporte .ria-support{max-width:860px}
+#section-ria-suporte .ria-welcome{padding:20px 4px 12px}
+#section-ria-suporte .ria-welcome h3{font-size:clamp(19px,2.5vw,24px);color:#173f35;margin:0 0 8px;font-weight:750}
+#section-ria-suporte .ria-welcome p{color:#466964;line-height:1.55;margin:0 0 17px}
+#section-ria-suporte .ria-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 10px}
+#section-ria-suporte .ria-chip{border:1px solid #c2d2c9;border-radius:14px;padding:14px 15px;text-align:left;white-space:normal;font-weight:600;background:#fff;min-height:52px}
+#section-ria-suporte .ria-chip:hover,#section-ria-suporte .ria-chip:focus-visible{border-color:#173f35;background:#eef4f0}
+#section-ria-suporte .ria-welcome.ria-started{display:none}
+#section-ria-suporte .ria-chat[hidden]{display:none!important}
+#section-ria-suporte .ria-chat{height:min(43vh,390px);margin:14px 0;overscroll-behavior:contain}
+#section-ria-suporte .ria-input-label{display:block;margin:0 0 9px;font-size:14px;color:#173f35;font-weight:650}
+#section-ria-suporte .ria-form{display:block;margin-top:12px}
+#section-ria-suporte .ria-input-row{display:flex;gap:10px;align-items:stretch}
+#section-ria-suporte .ria-form textarea{resize:vertical;min-height:66px;max-height:170px;flex:1;min-width:0;border:1px solid #a6bbb0;border-radius:12px;padding:12px 14px;color:#173f35;background:white;font:inherit;line-height:1.5}
+#section-ria-suporte .ria-form textarea:focus{outline:2px solid #466964;outline-offset:1px}
+#section-ria-suporte .ria-form button{flex:none;align-self:stretch;min-width:90px}
+#section-ria-suporte .ria-end-button[hidden],#section-ria-suporte .ria-feedback[hidden]{display:none!important}
+#section-ria-suporte .ria-end-button{margin-top:13px}
+#section-ria-suporte .ria-note{font-size:11px;line-height:1.5;margin-top:15px}
+@media(max-width:650px){#section-ria-suporte .ria-chips{grid-template-columns:1fr 1fr;gap:7px}#section-ria-suporte .ria-chip{padding:11px;font-size:12px;min-height:58px}#section-ria-suporte .ria-welcome{padding:16px 0 8px}#section-ria-suporte .ria-input-row{gap:7px}#section-ria-suporte .ria-form button{min-width:68px;padding:9px}#section-ria-suporte .ria-chat{height:min(41vh,340px)}}
