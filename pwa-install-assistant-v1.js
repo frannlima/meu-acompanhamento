@@ -11,8 +11,10 @@ const installedButtons=[];
 let dialog=null,launchControl=null;
 const heading="Instalar Meu Acompanhamento";
 window.addEventListener("beforeinstallprompt",(e)=>{
+  // No Samsung Internet, o WebAPK gerado pelo navegador pode receber alerta
+  // de incompatibilidade do Play Protect. Nunca oferecer instalação direta.
   e.preventDefault();
-  deferredPrompt=e;
+  deferredPrompt=isSamsungBrowser()?null:e;
   update();
 });
 window.addEventListener("appinstalled",()=>{
@@ -49,12 +51,12 @@ function instructions(){
     steps:["Abra este endereço no Safari.","Toque em Compartilhar (quadrado com seta para cima).","Selecione Adicionar à Tela de Início. Se necessário, role a lista de ações.","Confirme em Adicionar. O ícone Meu Acompanhamento ficará na tela inicial."]
   };
   if(isAndroid()&&isSamsungBrowser())return {
-    title:"Evite o atalho do Samsung Internet",
-    steps:["O pequeno símbolo do Samsung Internet sobre o ícone pode indicar um atalho da página, não a instalação independente desejada.","Abra o Google Chrome no celular e digite: https://frannlima.github.io/meu-acompanhamento/","Aguarde o carregamento completo; no menu ⋮ do Chrome, procure Instalar aplicativo (ou Adicionar à tela inicial e, em seguida, Instalar).","Confirme apenas a instalação do aplicativo. Se a opção for somente Criar atalho, não selecione: isso não cria o app independente.","Ao terminar, abra pelo novo ícone e confira que não há barra de endereço. Depois você pode remover o atalho antigo do Samsung Internet sem apagar o aplicativo."]
+    title:"Instalação bloqueada no Samsung Internet",
+    steps:["Se o Google Play Protect avisar que o app foi criado para uma versão antiga do Android, NÃO toque em Instalar assim mesmo nem desative a proteção.","Há relatos desse alerta em PWAs instalados pelo Samsung Internet. O pacote Android é gerado pelo navegador; o site não consegue atualizar o SDK desse pacote.","Abra o Google Chrome atualizado, digitando https://frannlima.github.io/meu-acompanhamento/ diretamente na barra de endereço.","Somente se o Chrome oferecer Instalar aplicativo sem alerta de segurança, prossiga e confira se abre sem barra de endereços.","Se o Chrome também mostrar o aviso, interrompa a instalação e utilize temporariamente a versão web até uma solução compatível ser validada."]
   };
   if(isAndroid())return {
     title:"Instalar o aplicativo no Android",
-    steps:["Abra o endereço diretamente no Google Chrome atualizado. Não use o navegador interno de WhatsApp ou outro aplicativo.","Aguarde a página carregar e toque em Instalar aplicativo, se o navegador oferecer a instalação.","Se o botão automático não aparecer, abra o menu ⋮ do Chrome e procure Instalar aplicativo. Algumas versões exibem Adicionar à tela inicial antes de mostrar a opção Instalar.","Confirme Instalar. Se aparecer apenas Criar atalho, não confunda com instalação: atualize o navegador e tente novamente.","Abra o novo ícone e confirme que o Meu Acompanhamento aparece sem barra de endereços."]
+    steps:["Abra o endereço diretamente no Google Chrome atualizado. Não use o navegador interno de WhatsApp ou outro aplicativo.","Aguarde a página carregar e toque em Instalar aplicativo, se o navegador oferecer a instalação.","Se o botão automático não aparecer, abra o menu ⋮ do Chrome e procure Instalar aplicativo. Algumas versões exibem Adicionar à tela inicial antes de mostrar a opção Instalar.","Confirme Instalar somente se não houver aviso de segurança do Play Protect. Se aparecer Criar atalho, não confunda com aplicativo: atualize o navegador e tente novamente.","Abra o novo ícone e confirme que o Meu Acompanhamento aparece sem barra de endereços."]
   };
   return {
     title:"Instalar no computador",
@@ -95,7 +97,7 @@ function createDialog(){
   notice.className="ma-install-status";
   notice.setAttribute("role","status");
   primary.addEventListener("click",async()=>{
-    if(!deferredPrompt){const i=instructions();subtitle.textContent=i.title;fillSteps(list,i.steps);notice.textContent="Siga estas instruções no navegador. A instalação é controlada pelo sistema e não pode ser forçada pelo site.";primary.hidden=true;return}
+    if(isSamsungBrowser()||!deferredPrompt){const i=instructions();subtitle.textContent=i.title;fillSteps(list,i.steps);notice.textContent="A instalação depende de um pacote atualizado gerado pelo navegador. Não contorne avisos do Play Protect.";primary.hidden=true;return}
     const prompt=deferredPrompt;
     deferredPrompt=null;
     try{
@@ -136,9 +138,9 @@ function start(e){
   const i=instructions();
   ui.subtitle.textContent=i.title;
   fillSteps(ui.list,i.steps);
-  ui.primary.hidden=!deferredPrompt;
-  ui.copyLink.hidden=!isAndroid()||!!deferredPrompt;
-  ui.notice.textContent=deferredPrompt?"Este navegador oferece a instalação. Toque em Instalar aplicativo para continuar.":isAndroid()?"Não detectei um convite de instalação automática. Use o Chrome e procure Instalar aplicativo; não selecione Criar atalho.":"Siga as etapas do Safari ou do seu navegador para instalar.";
+  ui.primary.hidden=isSamsungBrowser()||!deferredPrompt;
+  ui.copyLink.hidden=!isAndroid()||(!isSamsungBrowser()&&!!deferredPrompt);
+  ui.notice.textContent=isSamsungBrowser()?"Por segurança, desabilitamos a instalação direta pelo Samsung Internet. Use o Chrome atualizado; se o Play Protect bloquear também, interrompa a instalação.":deferredPrompt?"O navegador oferece instalação, mas só prossiga se o Android não apresentar nenhum alerta de segurança.":isAndroid()?"Use o Chrome e procure Instalar aplicativo. Não ignore avisos do Play Protect e não confunda com Criar atalho.":"Siga as etapas do Safari ou do seu navegador.";
   if(typeof dialog.showModal==="function")dialog.showModal();
   else dialog.setAttribute("open","");
 }
