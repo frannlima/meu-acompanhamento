@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v146-ria";
+const CACHE="meu-acompanhamento-v147-ria24h";
 const ASSETS=[
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
@@ -19,7 +19,8 @@ const ASSETS=[
   "./",
   "./index.html",
   "./ria-guided-support-v5.js?v=2",
-  "./ria-float-safe-v5.js?v=1",
+  "./ria-experience-v2.css?v=2",
+  "./ria-float-safe-v5.js?v=2",
   "./styles.css?v=9",
   "./enhancements-v9.css?v=10",
   "./premium-v22.css?v=8",
