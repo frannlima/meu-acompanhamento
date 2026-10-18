@@ -1,14 +1,14 @@
 (()=>{
 'use strict';
 const topics=[
-['Conhecer os menus','menu'],
-['Atualizar Hora a Hora','hora'],
-['Importar metas do mês','meta'],
-['Atualizar resultado D-1','d1'],
-['Interpretar indicadores','indicadores'],
-['Tratar desvios e FCA','fca'],
-['Relatar erro no app','erro'],
-['eStore e BOPIS','bopis']
+['🛠️ Suporte técnico e erros','tecnico'],
+['📱 Meu Acompanhamento — menus','acomp'],
+['🛍️ eStore CE+PI — menus','estoremenus'],
+['📈 Hora a Hora e parcial','hora'],
+['🎯 Metas e importações','meta'],
+['📊 Indicadores e DCOs','indicadores'],
+['🧩 Tratativas e FCA','fca'],
+['💬 Minha dúvida é outra','livre']
 ];
 const answers={
 menu:'Que bom que você quer conhecer melhor a ferramenta! 💚\n\n• Início / Visão Geral: acompanhe meta, realizado, desvio e ritmo.\n• Mundos / DCOs: veja como cada grupo contribui para o resultado.\n• Comerciais: consulte o desempenho por responsável.\n• Hora a Hora: acompanhe a evolução dos inputs de venda.\n• eStore CE+PI: consulte indicadores do canal digital.\n• Administração: recursos de cadastro e importação disponíveis apenas aos perfis autorizados.\n\nQual desses menus gostaria de explorar comigo?',
@@ -20,7 +20,13 @@ fca:'Vamos transformar a leitura do desvio em ação! 💚\n\nPara montar um FCA
 erro:'Obrigado por sinalizar a dificuldade. 💚 Vamos investigar sem perder seu trabalho.\n\nMe diga: qual menu apresentou problema, o que você tentou fazer e qual foi o comportamento (erro na tela, travamento ou informação não atualizada)?\n\nNão compartilhe senha, tokens nem dados pessoais. Se necessário, registre uma captura de tela sem informações sensíveis e encaminhe pelo canal de suporte autorizado.',
 bopis:'Claro, vamos entender! 💚 BOPIS é uma compra online com retirada na loja. No acompanhamento eStore, vendas classificadas como BOPIS não compõem a base comissionável dos colaboradores nem o pool de supervisores; podem aparecer no total comercial da filial conforme as regras do painel.\n\nOnde o valor aparece: Meu Resultado, Minha Filial ou Pool? Assim verificamos a leitura correta.'
 };
-function classify(t){const s=t.toLowerCase();if(/bopis|comiss|estore/.test(s))return 'bopis';if(/fca|tratativa|desvio|prioriz/.test(s))return 'fca';if(/hora|colar|parcial/.test(s))return 'hora';if(/meta|mensal/.test(s))return 'meta';if(/d-1|ontem|dia anterior/.test(s))return 'd1';if(/erro|trav|falha|problema|bug|tela/.test(s))return 'erro';if(/indicador|ating|proje|share/.test(s))return 'indicadores';if(/menu|aprender|utilizar|funcionalidade/.test(s))return 'menu';return null}
+const expanded={
+tecnico:'Estou aqui para ajudar a resolver isso com você! 💚\\n\\nPrimeiro, me diga qual aplicativo apresentou a dificuldade: Meu Acompanhamento ou eStore CE+PI?\\n\\nDepois, informe o menu, a ação realizada e o que aconteceu. Exemplos: botão sem resposta, tela sobreposta, dados não atualizados, falha de importação, login ou página em branco. Não envie senhas nem credenciais. Vou orientar a verificação por etapas.',
+acomp:'Vamos conhecer o Meu Acompanhamento! 💚\\n\\nPosso ajudar com: Início/Visão Geral; Mundos e DCOs; Comerciais; Painel de Descontos; Hora a Hora/Colar Venda da Web; Consolidado Regional; eStore integrado; Administração, metas, importações e permissões.\\n\\nQual menu você deseja entender ou está apresentando dificuldade?',
+estoremenus:'Vamos explorar o eStore CE+PI! 💚\\n\\nPosso orientar sobre Início; Meu Resultado; Metas; Minha Filial; Meu Time; Ranking; Pool; Hora a Hora; Campanhas; Informações; Resumo da Semana/FCA; notificações; Perfil e Administração.\\n\\nMe conte qual menu ou indicador deseja entender.',
+livre:'Claro! 💚 Pode explicar com suas palavras, sem precisar escolher um assunto. Vou procurar orientar pelo contexto. Se não houver procedimento confirmado, aviso com transparência e indico o suporte responsável.'
+};Object.assign(answers,expanded);
+function classify(t){const s=t.toLowerCase();if(/falha|bug|erro|trav|não abre|nao abre|sobrepo|não carrega|nao carrega|não atualiza|nao atualiza|não funciona|nao funciona|botão|botao|login|acesso/.test(s))return 'tecnico';if(/bopis|comiss/.test(s))return 'bopis';if(/estore|e-store/.test(s))return 'estoremenus';if(/desconto/.test(s))return 'descontos';if(/comercial|dco|mundo|grupo/.test(s))return 'acomp';if(/fca|tratativa|desvio|prioriz/.test(s))return 'fca';if(/hora|colar|parcial/.test(s))return 'hora';if(/meta|mensal/.test(s))return 'meta';if(/d-1|ontem|dia anterior/.test(s))return 'd1';if(/erro|trav|falha|problema|bug|tela/.test(s))return 'erro';if(/indicador|ating|proje|share/.test(s))return 'indicadores';if(/menu|aprender|utilizar|funcionalidade/.test(s))return 'menu';return null}
 function init(){
 const nav=document.querySelector('#nav');const main=document.querySelector('.main');if(!nav||!main)return;
 if(!nav.querySelector('[data-section="ria-suporte"]')){const btn=document.createElement('button');btn.className='nav-item';btn.dataset.section='ria-suporte';btn.innerHTML='<span class="nav-icon" aria-hidden="true">✦</span><span class="nav-label">Suporte às Filiais • RIA</span>';nav.append(btn)}
@@ -28,11 +34,21 @@ if(!document.getElementById('section-ria-suporte')){
 const sec=document.createElement('section');sec.id='section-ria-suporte';sec.className='section';sec.innerHTML='<div class="section-head"><div><span class="eyebrow">CENTRAL DE APOIO</span><h1>Suporte às Filiais</h1><p>Aprenda, tire dúvidas e encontre orientações com a RIA.</p></div></div><div class="ria-support"><div class="ria-hero"><div class="ria-avatar" aria-hidden="true">✦</div><div><h2>RIA · Sua parceira no dia a dia</h2><p>Estou aqui para acolher, orientar e ajudar você a encontrar uma solução. 💚</p></div></div><div id="riaWelcome" class="ria-welcome"><h3>Como posso ajudar você hoje?</h3><p>Escolha um assunto abaixo ou me conte com suas palavras. Estou aqui para ajudar no seu ritmo. 💚</p><div id="riaTopics" class="ria-chips"></div></div><div id="riaChat" class="ria-chat" role="log" aria-live="polite" aria-label="Conversa com a RIA" hidden></div><form id="riaForm" class="ria-form"><label for="riaInput" class="ria-input-label">Prefere explicar sua dúvida?</label><div class="ria-input-row"><textarea id="riaInput" maxlength="750" rows="2" aria-label="Sua dúvida" placeholder="Escreva aqui o que precisa. Pode explicar do seu jeito..." required></textarea><button type="submit">Enviar ➜</button></div></form><p class="ria-note">Assistente de orientação guiada. Nesta versão, respostas são baseadas em procedimentos predefinidos; a IA generativa e a análise de dados em tempo real ainda não estão ativas. Para erros sem solução, procure o suporte responsável. Não envie dados sensíveis.</p></div>';main.append(sec)
 }
 const chat=document.getElementById('riaChat'),form=document.getElementById('riaForm'),input=document.getElementById('riaInput'),chips=document.getElementById('riaTopics');
-if(!chat.dataset.ready){chat.dataset.ready='1';let count=0;function add(role,message){chat.hidden=false;document.getElementById('riaWelcome')?.classList.add('ria-started');const d=document.createElement('div');d.className='ria-message '+role;d.textContent=message;chat.append(d);chat.scrollTop=chat.scrollHeight;}let context={topic:null,menu:null};function guided(q,key){
+if(!chat.dataset.ready){chat.dataset.ready='1';let count=0;function add(role,message){chat.hidden=false;document.getElementById('riaWelcome')?.classList.add('ria-started');const d=document.createElement('div');d.className='ria-message '+role;d.textContent=message;chat.append(d);chat.scrollTop=chat.scrollHeight;}let context={topic:null,menu:null,app:null};function guided(q,key){
 const v=q.trim().toLowerCase();const detected=key||classify(q);
-const menu=/(meu resultado|minha filial|pool|visão geral|visao geral|administra|mundo|comerciais)/i.exec(q);
+const menu=/(meu resultado|minha filial|pool|visão geral|visao geral|administra|mundo|comerciais|hora a hora|descontos|ranking|campanhas|perfil|metas)/i.exec(q);
 if(menu)context.menu=menu[0];
-if(detected)context.topic=detected;
+if(detected)context.topic=detected;if(key==='tecnico')context.app=null;
+if(context.topic==='tecnico'){
+if(!context.app){if(/estore|e-store/i.test(v))context.app='eStore CE+PI';else if(/acompanhamento|meu resultado na palma|venda loja/i.test(v))context.app='Meu Acompanhamento';}
+if(!context.app)return 'Entendi que você precisa de suporte técnico. 💚 É no Meu Acompanhamento ou no eStore CE+PI? Assim consigo direcionar a investigação corretamente.';
+if(!context.menu){const m=/(início|visão geral|hora a hora|grupos|mundos|dco|comerciais|administração|metas|meu resultado|minha filial|meu time|ranking|pool|campanhas|descontos|regional|login)/i.exec(q);if(m)context.menu=m[0];}
+if(!context.menu)return 'Certo, vamos cuidar do '+context.app+'! 💚 Qual menu ou tela apresentou a dificuldade? Pode relatar exatamente o que aconteceu, sem receio.';
+if(/(corrigid|resolv|funcionou|deu certo)/i.test(v))return 'Que bom que funcionou! 💚 Fico feliz por ajudar. Caso tenha outra dúvida, estou aqui. Você pode encerrar e avaliar o atendimento quando desejar.';
+return 'Obrigada por detalhar. 💚 Identifiquei o contexto: '+context.app+', menu '+context.menu+'. Preciso saber mais uma coisa: a tela apresenta uma mensagem de erro, o botão não responde ou o valor exibido está incorreto? Não apague informações nem refaça uma importação antes de confirmar o resultado anterior. Se persistir, será necessário encaminhar o relato ao suporte técnico.';
+}
+if(context.topic==='acomp'&&/(desconto|comercial|mundo|dco|regional|visão geral|visao geral|início|inicio)/i.test(v))return 'Vamos por partes! 💚 No Meu Acompanhamento, Início/Visão Geral mostra o consolidado da loja; Mundos/DCOs permite identificar grupos com evolução ou retração; Comerciais organiza a performance por responsável; Painel de Descontos acompanha esse indicador; e Consolidado Regional compara filiais conforme permissão. Qual valor, botão ou atividade desse menu você quer aprender a usar?';
+if(context.topic==='estoremenus'&&/(ranking|pool|meu time|minha filial|meu resultado|campanha|perfil|administração|metas|hora a hora)/i.test(v))return 'Estou com você! 💚 No eStore, Meu Resultado apresenta a produção individual; Minha Filial mostra a performance da loja; Meu Time apoia a gestão do time; Ranking compara resultados; Pool trata do acompanhamento dos supervisores; e Administração concentra configurações autorizadas. Qual tarefa precisa realizar nesse menu?';
 if(context.topic==='bopis'){
 if(/meu resultado/i.test(v))return 'Entendi! 💚 Você está consultando o menu Meu Resultado. Ali, o valor identificado como BOPIS deve ficar separado da base comissionável. A venda BOPIS não entra no cálculo da comissão individual.\n\nVamos conferir juntos: esse valor está destacado como BOPIS ou aparece somado às vendas aprovadas? Assim verificamos se a apresentação do painel está correta.';
 if(/minha filial/i.test(v))return 'Certo! 💚 No Minha Filial, a venda BOPIS pode aparecer na composição comercial da loja, mas não deve integrar a base comissionável. Você quer conferir o valor apresentado ou o cálculo da comissão?';
