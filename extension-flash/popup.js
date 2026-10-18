@@ -34,7 +34,9 @@ document.getElementById('send').onclick=async()=>{
     if(!packet)throw Error('Faça a coleta primeiro.');
     if(!await chrome.permissions.request({origins:['https://frannlima.github.io/*']}))throw Error('Permissão para enviar ao app não concedida.');
     const tabs=await chrome.tabs.query({url:'https://frannlima.github.io/meu-acompanhamento/*'});
-    if(tabs.length!==1)throw Error('Mantenha exatamente uma aba do Meu Acompanhamento aberta e entre como administrador.');
+    if(!tabs.length)throw Error('Nenhuma aba do app encontrada neste perfil do Edge. Abra https://frannlima.github.io/meu-acompanhamento/ neste mesmo navegador e entre como administrador.');
+    tabs.sort((a,b)=>(b.lastAccessed||0)-(a.lastAccessed||0));
+    status.textContent='Enviando para a aba do app usada mais recentemente…';
     const [result]=await chrome.scripting.executeScript({target:{tabId:tabs[0].id},func:p=>{
       if(location.origin!=='https://frannlima.github.io'||!location.pathname.startsWith('/meu-acompanhamento/'))return false;
       window.postMessage({type:'MA_FLASH_PILOT_V1',payload:p},location.origin);return true;

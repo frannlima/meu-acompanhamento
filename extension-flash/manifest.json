@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Meu Acompanhamento — Flash piloto",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Coleta assistida do painel Total Lojas na sessão aberta pelo usuário.",
   "permissions": ["activeTab", "scripting"],
   "optional_host_permissions": ["https://frannlima.github.io/*"],
