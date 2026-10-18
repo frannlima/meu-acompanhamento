@@ -37,17 +37,51 @@ function options(items){choices.replaceChildren();choices.hidden=!items.length;i
 function answer(t,opts=[]){show("assistant",t);options(opts)}
 function techStart(){state.step="app";answer("Obrigado por buscar ajuda! 💚 Em qual aplicativo você encontrou a dificuldade?",[["Meu Acompanhamento","app-ma"],["eStore CE+PI","app-estore"]])}
 function respond(text,val){
-show("user",text);const t=text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
-if(val==="tech"||/erro|falha|trav|nao funciona|nao atualiza|bug|problema tecnico|tela sobrep|importacao falhou/.test(t)){state.step="tech";return techStart()}
-if(state.step==="app"||/^app-/.test(val||"")){state.app=val==="app-estore"||/estore/.test(t)?"eStore CE+PI":"Meu Acompanhamento";state.step="symptom";return answer("Entendi, vamos cuidar do "+state.app+"! 💚 Qual dificuldade apareceu?",symptoms)}
-if(state.step==="symptom"||symptoms.some(x=>x[1]===val)){state.symptom=val||"other";state.step="detail";return answer(techSteps[state.symptom]||techSteps.other,[["Consegui resolver","resolved"],["Ainda preciso de ajuda","escalate"]])}
-if(val==="resolved")return answer("Que bom que conseguimos avançar! 💚 Se quiser, encerre o atendimento para avaliar. Sempre que surgir uma dúvida, conte comigo.");
-if(val==="escalate"){state.step="escalate";report.hidden=false;report.innerHTML='<h3>Registro para suporte técnico</h3><p>A RIA não conseguiu concluir a solução automaticamente. Utilize o botão abaixo para copiar o resumo e encaminhar ao suporte interno autorizado. Nenhum chamado é enviado automaticamente.</p><button id="riaCopyReport" type="button" class="ria-end-button">Copiar relato técnico</button>';report.querySelector("#riaCopyReport").onclick=()=>{const txt="SUPORTE RIA | "+(state.app||"App não identificado")+"\n"+state.log.join("\n");navigator.clipboard?.writeText(txt).then(()=>answer("Resumo copiado. 💚 Encaminhe ao suporte técnico autorizado.")).catch(()=>answer("Não consegui copiar automaticamente. Selecione o histórico e copie manualmente."))};return answer("Vou ajudar você a encaminhar o problema com clareza. 💚 Preparei um resumo do que conversamos; use o botão Copiar relato técnico.")}
-if(val==="ma"||val==="estore"){state.app=val==="ma"?"Meu Acompanhamento":"eStore CE+PI";state.step="menu";return answer(GUIDE[val],[["Suporte técnico","tech"],["Hora a Hora","hora"],["Metas","meta"],["Indicadores","indic"]])}
-if(GUIDE[val])return answer(GUIDE[val]);
-if(state.step==="detail")return answer("Obrigada por explicar. 💚 O que você descreveu precisa de verificação técnica; não consigo consultar o sistema ou alterar dados por aqui. Se as orientações não resolveram, posso preparar o relato para o suporte autorizado.",[["Consegui resolver","resolved"],["Preparar relato","escalate"]]);
-if(state.step==="menu")return answer("Vamos tratar do menu "+text+". 💚 Qual ação você tentou e em qual etapa surgiu a dúvida? Posso explicar a leitura ou orientar uma verificação técnica.",[["É um erro técnico","tech"],["Consegui resolver","resolved"]]);
-return answer(GUIDE.other,[["Suporte técnico","tech"],["Meu Acompanhamento","ma"],["eStore CE+PI","estore"]]);
+ show("user",text);
+ const t=text.toLowerCase().normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+ const isTech= /erro|falha|trav|nao funciona|nao atualiza|bug|problema tecnico|sobrepos|quebrad|importacao falhou|tela branca/.test(t);
+ const isResolved=/^(resolvi|funcionou|consegui|deu certo|sim, resolveu)$/i.test(t);
+ const isStill=/nao resolveu|continua|persist|ainda nao|nao funcionou|nao deu certo/i.test(t);
+ if(val==="resolved"||isResolved)return answer("Que bom que conseguimos avançar! 💚 Você pode encerrar e avaliar o atendimento. Se precisar, continuo por aqui.");
+ if(val==="escalate"||isStill){
+ state.step="escalate";report.hidden=false;
+ report.innerHTML='<h3>Relato para suporte técnico</h3><p>Não consegui resolver automaticamente. Copie o resumo e encaminhe pelo canal autorizado da empresa. Nenhum chamado será enviado sem sua ação.</p><button id="riaCopyReport" type="button" class="ria-end-button">Copiar relato técnico</button>';
+ report.querySelector("#riaCopyReport").onclick=()=>{const txt="SUPORTE RIA | "+(state.app||"Aplicativo não identificado")+"\\n"+state.log.join("\\n");navigator.clipboard?.writeText(txt).then(()=>answer("Relato copiado! 💚 Encaminhe ao suporte autorizado.")).catch(()=>answer("Não consegui copiar automaticamente; copie o texto da conversa manualmente."))};
+ return answer("Entendi, a dificuldade continua. 💚 Preparei um resumo para encaminhamento técnico.")}
+ if(val==="tech"||((state.step==="start"||state.step==="menu")&&isTech))return techStart();
+ if(val==="app-ma"||val==="app-estore"||state.step==="app"){
+ state.app=(val==="app-estore"||/estore/.test(t))?"eStore CE+PI":"Meu Acompanhamento";
+ state.step="symptom";return answer("Vamos cuidar do "+state.app+"! 💚 Qual dificuldade você encontrou?",symptoms);
+ }
+ if(state.step==="symptom"||symptoms.some(x=>x[1]===val)){
+ state.symptom=val||(/^.*import/.test(t)?"import":/valor|diverg|resultado|venda/.test(t)?"numbers":/botao/.test(t)?"button":"other");
+ state.step="detail";
+ return answer(techSteps[state.symptom]||techSteps.other,[["Consegui resolver","resolved"],["Ainda preciso de ajuda","escalate"]]);
+ }
+ if(val==="ma"||val==="estore"){
+ state.app=val==="ma"?"Meu Acompanhamento":"eStore CE+PI";state.step="menu";
+ return answer(GUIDE[val],[["Suporte técnico","tech"],["Hora a Hora","hora"],["Metas","meta"],["Indicadores","indic"]]);
+ }
+ if(GUIDE[val]){
+ if(val==="hora"||val==="meta"||val==="indic"||val==="fca")state.step="guide";
+ return answer(GUIDE[val],[["Consegui resolver","resolved"],["Ainda preciso de ajuda","escalate"]]);
+ }
+ // Na escrita livre, identificar intenção e continuar a conversa sem reiniciar.
+ if(/venda|resultado|numero|valor|total|meta|atingimento|desvio|projecao/.test(t)){
+ state.step="followup";
+ const m=t.match(/(?:intima|feminino|masculino|infantil|casa|beleza|comerciais|dco|grupo)/);
+ if(m)state.menu=m[0];
+ return answer("Entendi, você quer ajuda para interpretar "+(state.menu?"o resultado de "+state.menu:"um resultado")+"! 💚 Me diga a filial, o período e se é uma dúvida de leitura ou se o valor está diferente do relatório oficial.",[["Como interpretar","indic"],["O valor está incorreto","tech"]]);
+ }
+ if(/meu resultado|minha filial|pool|ranking|desconto|comercial|mundo|dco/.test(t)){
+ state.menu=text;state.step="menu";return answer("Vamos olhar o menu "+text+" juntos. 💚 Você precisa encontrar uma funcionalidade, entender um número ou relatar um problema?",[["Entender indicadores","indic"],["É um erro técnico","tech"]]);
+ }
+ if(state.step==="detail"||state.step==="followup"){
+ return answer("Obrigada por explicar. 💚 Pelo que você relatou, precisamos comparar o valor exibido com a fonte oficial e conferir filial, período e última atualização. Não consigo consultar diretamente o resultado real por aqui. O que está diferente: venda, meta ou atingimento?",[["Valor incorreto","tech"],["Entender indicadores","indic"],["Preparar relato","escalate"]]);
+ }
+ if(state.step==="menu"||state.step==="guide")return answer("Estou acompanhando a sua dúvida. 💚 Me conte qual etapa do menu está causando dificuldade. Se aparecer uma mensagem de erro, informe somente o texto dela, sem dados confidenciais.",[["Suporte técnico","tech"],["Indicadores","indic"],["Preparar relato","escalate"]]);
+ state.step="clarify";
+ return answer("Obrigada por me contar. 💚 Para te orientar sem adivinhar, me diga se é no Meu Acompanhamento ou no eStore CE+PI e qual menu você está usando.",[["Meu Acompanhamento","ma"],["eStore CE+PI","estore"],["Suporte técnico","tech"]]);
 }
 TOPICS.forEach(([label,k])=>{const b=document.createElement("button");b.type="button";b.className="ria-chip";b.textContent=label;b.onclick=()=>respond(label,k);topics.append(b)});
 section.querySelector("#riaForm").onsubmit=e=>{e.preventDefault();const t=input.value.trim();if(t){respond(t);input.value="";input.focus()}};
