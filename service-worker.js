@@ -70,7 +70,17 @@ const ASSETS=[
   "./assets/profiles/lennon-batista.jpg",
   "./assets/profiles/mariane-nogueira.jpg"
 ];
-self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()))});
+// Uma mídia indisponível não deve impedir a instalação do PWA inteiro.
+self.addEventListener("install",e=>{
+  e.waitUntil((async()=>{
+    const cache=await caches.open(CACHE);
+    await Promise.allSettled(ASSETS.map(async url=>{
+      const response=await fetch(url,{cache:"reload"});
+      if(response.ok)await cache.put(url,response);
+    }));
+    await self.skipWaiting();
+  })());
+});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("meu-acompanhamento-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{
   const u=new URL(e.request.url);
