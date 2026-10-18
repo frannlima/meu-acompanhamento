@@ -5,6 +5,7 @@ let deferredPrompt=null;
 const standalone=()=>window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
 const isiOS=()=>/iPad|iPhone|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 const isAndroid=()=>/Android/i.test(navigator.userAgent);
+const isSamsungBrowser=()=>/SamsungBrowser/i.test(navigator.userAgent);
 const inApp=()=>/WhatsApp|Instagram|FBAN|FBAV|; wv\)|\bwv\b/i.test(navigator.userAgent);
 const installedButtons=[];
 let dialog=null,launchControl=null;
@@ -41,15 +42,19 @@ function closeDialog(){
 function instructions(){
   if(inApp())return {
     title:"Abra no navegador do celular",
-    steps:["Você está em um navegador dentro de outro aplicativo. Toque no menu do aplicativo e escolha Abrir no navegador, ou copie o link e abra no Chrome, Samsung Internet ou Safari.","Depois, volte ao botão Instalar Meu Acompanhamento para concluir."]
+    steps:["Este navegador interno pode oferecer somente um atalho. Use a opção Abrir no Chrome, se disponível, ou copie o endereço e abra diretamente no Google Chrome (Android) ou Safari (iPhone).","Depois, no navegador completo, abra Instalar Meu Acompanhamento e siga o procedimento próprio de instalação."]
   };
   if(isiOS())return {
     title:"Adicionar à Tela de Início — iPhone ou iPad",
     steps:["Abra este endereço no Safari.","Toque em Compartilhar (quadrado com seta para cima).","Selecione Adicionar à Tela de Início. Se necessário, role a lista de ações.","Confirme em Adicionar. O ícone Meu Acompanhamento ficará na tela inicial."]
   };
+  if(isAndroid()&&isSamsungBrowser())return {
+    title:"Evite o atalho do Samsung Internet",
+    steps:["O pequeno símbolo do Samsung Internet sobre o ícone pode indicar um atalho da página, não a instalação independente desejada.","Abra o Google Chrome no celular e digite: https://frannlima.github.io/meu-acompanhamento/","Aguarde o carregamento completo; no menu ⋮ do Chrome, procure Instalar aplicativo (ou Adicionar à tela inicial e, em seguida, Instalar).","Confirme apenas a instalação do aplicativo. Se a opção for somente Criar atalho, não selecione: isso não cria o app independente.","Ao terminar, abra pelo novo ícone e confira que não há barra de endereço. Depois você pode remover o atalho antigo do Samsung Internet sem apagar o aplicativo."]
+  };
   if(isAndroid())return {
-    title:"Instalar no Android",
-    steps:["Abra este endereço no Google Chrome ou Samsung Internet.","No menu do navegador (⋮ ou ☰), escolha Instalar aplicativo ou Adicionar à tela inicial.","Confirme Instalar ou Adicionar. Procure o ícone Meu Acompanhamento na tela de aplicativos ou na tela inicial.","Se a opção não estiver disponível, atualize o navegador e abra o link diretamente, fora do WhatsApp."]
+    title:"Instalar o aplicativo no Android",
+    steps:["Abra o endereço diretamente no Google Chrome atualizado. Não use o navegador interno de WhatsApp ou outro aplicativo.","Aguarde a página carregar e toque em Instalar aplicativo, se o navegador oferecer a instalação.","Se o botão automático não aparecer, abra o menu ⋮ do Chrome e procure Instalar aplicativo. Algumas versões exibem Adicionar à tela inicial antes de mostrar a opção Instalar.","Confirme Instalar. Se aparecer apenas Criar atalho, não confunda com instalação: atualize o navegador e tente novamente.","Abra o novo ícone e confirme que o Meu Acompanhamento aparece sem barra de endereços."]
   };
   return {
     title:"Instalar no computador",
@@ -71,13 +76,13 @@ function createDialog(){
   icon.width=52;
   icon.height=52;
   const title=document.createElement("div");
-  title.innerHTML='<span class="ma-install-eyebrow">ACESSO RÁPIDO</span><h2 id="maInstallHeading">Meu Acompanhamento na sua tela inicial</h2>';
+  title.innerHTML='<span class="ma-install-eyebrow">INSTALAÇÃO DO APP</span><h2 id="maInstallHeading">Instalar Meu Acompanhamento como aplicativo</h2>';
   const close=document.createElement("button");
   close.type="button";close.className="ma-install-close";close.textContent="✕";close.setAttribute("aria-label","Fechar instruções de instalação");close.onclick=closeDialog;
   top.append(icon,title,close);
   const desc=document.createElement("p");
   desc.className="ma-install-description";
-  desc.textContent="Instale como um aplicativo, sem precisar baixar APK ou acessar uma loja. Seu login continua igual.";
+  desc.textContent="Queremos um aplicativo independente, não um simples atalho do navegador. A instalação do PWA depende das opções oferecidas pelo seu aparelho. Seu login continua igual.";
   const subtitle=document.createElement("h3");
   subtitle.id="maInstallStepsTitle";
   const list=document.createElement("ol");
@@ -107,14 +112,17 @@ function createDialog(){
     const i=instructions();subtitle.textContent=i.title;fillSteps(list,i.steps);primary.hidden=true;
     update();
   });
+  const copyLink=document.createElement("button");
+  copyLink.type="button";copyLink.className="ma-install-copy";copyLink.textContent="Copiar link para abrir no Chrome";
+  copyLink.addEventListener("click",async()=>{try{await navigator.clipboard.writeText("https://frannlima.github.io/meu-acompanhamento/");notice.textContent="Link copiado! Abra o Google Chrome, cole o endereço e escolha Instalar aplicativo."}catch{notice.textContent="Copie este endereço manualmente no Chrome: https://frannlima.github.io/meu-acompanhamento/"}});
   const footer=document.createElement("p");
   footer.className="ma-install-footer";
   footer.textContent="Se o dispositivo for corporativo, a instalação poderá depender das permissões configuradas pela TI.";
-  frame.append(top,desc,subtitle,list,primary,notice,footer);
+  frame.append(top,desc,subtitle,list,primary,copyLink,notice,footer);
   dialog.append(frame);
   dialog.addEventListener("click",(e)=>{if(e.target===dialog)closeDialog()});
   document.body.append(dialog);
-  return {subtitle,list,primary,notice};
+  return {subtitle,list,primary,copyLink,notice};
 }
 function fillSteps(list,steps){
   list.replaceChildren();
@@ -129,7 +137,8 @@ function start(e){
   ui.subtitle.textContent=i.title;
   fillSteps(ui.list,i.steps);
   ui.primary.hidden=!deferredPrompt;
-  ui.notice.textContent=deferredPrompt?"Seu navegador permite instalar agora. Toque no botão abaixo para continuar.":"Se o navegador não apresentar a instalação automática, use as etapas abaixo.";
+  ui.copyLink.hidden=!isAndroid()||!!deferredPrompt;
+  ui.notice.textContent=deferredPrompt?"Este navegador oferece a instalação. Toque em Instalar aplicativo para continuar.":isAndroid()?"Não detectei um convite de instalação automática. Use o Chrome e procure Instalar aplicativo; não selecione Criar atalho.":"Siga as etapas do Safari ou do seu navegador para instalar.";
   if(typeof dialog.showModal==="function")dialog.showModal();
   else dialog.setAttribute("open","");
 }
@@ -143,7 +152,7 @@ function init(){
     card.id="maInstallLogin";
     const button=makeButton("⬇ Instalar Meu Acompanhamento","ma-install-login-btn");
     const help=document.createElement("p");
-    help.textContent="Coloque o aplicativo na tela inicial do seu celular. Gratuito e sem loja de aplicativos.";
+    help.textContent="Instale como aplicativo independente, e não apenas como atalho de navegador.";
     card.append(button,help);
     loginSubmit.insertAdjacentElement("afterend",card);
   }
