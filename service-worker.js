@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v151-ui-labels";
+const CACHE="meu-acompanhamento-v152-clean-overview";
 const ASSETS=[
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
