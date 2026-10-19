@@ -2,28 +2,75 @@
 (function(){
   'use strict';
   const MARKUP="      <div class=\"ol-stage\" role=\"region\" aria-roledescription=\"carrossel\" aria-label=\"Fotos da coleção Olhares Brasileiros\">\n        <div class=\"ol-slide active\" aria-hidden=\"false\"><img src=\"./assets/olhares-brasileiros-1.webp\" alt=\"As quatro artistas da coleção Olhares Brasileiros, em um cenário de vegetação brasileira\"></div>\n        <div class=\"ol-slide\" aria-hidden=\"true\"><img src=\"./assets/olhares-brasileiros-2.webp\" alt=\"Foto de divulgação da coleção com chapéu e peças estampadas em azul e branco\"></div>\n        <div class=\"ol-slide\" aria-hidden=\"true\"><img src=\"./assets/olhares-brasileiros-3.webp\" alt=\"Foto de divulgação da coleção com conjunto estampado em meio à vegetação\"></div>\n        <div class=\"ol-shade\"></div>\n        <div class=\"ol-campaign-top\"><span class=\"ol-count\">01 / 03</span></div>\n        <div class=\"ol-campaign-copy\"><span>Moda que inspira o Brasil</span><strong>Olhares<br>Brasileiros</strong><p>Arte, moda e identidade brasileira.</p></div>\n      </div>\n      <div class=\"ol-controls\">\n        <div class=\"ol-dots\" aria-label=\"Selecionar foto\">\n          <button class=\"ol-dot cursor-interaction\" type=\"button\" data-slide=\"0\" aria-label=\"Mostrar foto das artistas\" aria-pressed=\"true\"><span></span></button>\n          <button class=\"ol-dot cursor-interaction\" type=\"button\" data-slide=\"1\" aria-label=\"Mostrar foto da coleção azul\" aria-pressed=\"false\"><span></span></button>\n          <button class=\"ol-dot cursor-interaction\" type=\"button\" data-slide=\"2\" aria-label=\"Mostrar foto da coleção estampada\" aria-pressed=\"false\"><span></span></button>\n        </div>\n        <div class=\"ol-play-controls\">\n          <button class=\"cursor-interaction\" type=\"button\" data-prev aria-label=\"Foto anterior\"><span aria-hidden=\"true\">‹</span></button>\n          <button class=\"ol-toggle cursor-interaction\" type=\"button\" data-toggle aria-label=\"Pausar transição automática\"><span data-play-icon aria-hidden=\"true\">Ⅱ</span><span data-play-label>Pausar</span></button>\n          <button class=\"cursor-interaction\" type=\"button\" data-next aria-label=\"Próxima foto\"><span aria-hidden=\"true\">›</span></button>\n        </div>\n      </div>\n      <section class=\"ol-notice\" aria-label=\"Espaço de comunicados\">\n        <div class=\"ol-notice-tag\"><span aria-hidden=\"true\">●</span><span>FIQUE POR DENTRO</span><span id=\"homeCampaignNoticeCount\" class=\"ol-notice-count\"></span></div>\n        <h2 id=\"homeCampaignNoticeTitle\">Informações importantes</h2>\n        <p id=\"homeCampaignNoticeText\">Nenhum comunicado ativo no momento.</p>\n        <button id=\"homeCampaignRead\" type=\"button\" class=\"ol-read\">Ver comunicados <span aria-hidden=\"true\">→</span></button>\n      </section>\n";
+  const VIDEO_SLIDE="<div class=\"ol-slide ol-slide-video\" aria-hidden=\"false\"><video class=\"ol-campaign-video\" muted playsinline webkit-playsinline preload=\"metadata\" poster=\"./assets/olhares-brasileiros-1.webp\" aria-label=\"Vídeo da campanha Olhares Brasileiros\"><source src=\"./assets/olhares-brasileiros-transicao.mp4\" type=\"video/mp4\"></video></div>";
+  const VIDEO_DOT='<button class="ol-dot cursor-interaction" type="button" data-slide="0" aria-label="Mostrar vídeo da campanha" aria-pressed="true"><span></span></button>';
   const MUSIC_BUTTON='<button class="ol-sound cursor-interaction" type="button" data-sound aria-pressed="false" aria-label="Ativar trilha instrumental"><span class="ol-sound-icon" aria-hidden="true">♫</span><span data-sound-label>Ativar som</span></button>';
-  const CAMPAIGN_MARKUP=MARKUP.replace('<button class="ol-toggle',MUSIC_BUTTON+'<button class="ol-toggle');
+  const CAMPAIGN_MARKUP=MARKUP
+    .replace('class="ol-slide active" aria-hidden="false"','class="ol-slide" aria-hidden="true"')
+    .replace(/data-slide="(\d+)"/g,(_,n)=>'data-slide="'+(Number(n)+1)+'"')
+    .replace('aria-pressed="true"','aria-pressed="false"')
+    .replace('<div class="ol-shade"></div>',VIDEO_SLIDE+'<div class="ol-shade"></div>')
+    .replace('<div class="ol-dots" aria-label="Selecionar foto">','<div class="ol-dots" aria-label="Selecionar vídeo ou foto">'+VIDEO_DOT)
+    .replace('01 / 03','01 / 04')
+    .replace('Fotos da coleção Olhares Brasileiros','Vídeo e fotos da coleção Olhares Brasileiros')
+    .replace('<button class="ol-toggle',MUSIC_BUTTON+'<button class="ol-toggle');
   let root=null,current=0,timer=null,manualPause=false,visibleInPage=true,announcement=null,noticeOwner='';
   const failed=new Set();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
   const active=()=>state.logged&&state.section==='inicio'&&!document.hidden&&visibleInPage&&!manualPause&&!reduced.matches;
-  function photos(){return root?[...root.querySelectorAll('.ol-slide')]:[];}
-  function restart(){
-    clearInterval(timer);timer=null;
-    window.RiaCampaignMusic?.sync(Boolean(state.logged&&state.section==='inicio'&&!document.hidden));
-    if(active()&&failed.size<photos().length-1)timer=setInterval(()=>show(current+1),5500);
+  // Ordem visual: vídeo primeiro; as três fotos conservam sua posição original no DOM e no CSS.
+  function photos(){
+    if(!root)return [];
+    const slides=[...root.querySelectorAll('.ol-slide')];
+    const videoSlide=root.querySelector('.ol-slide-video');
+    return videoSlide?[videoSlide,...slides.filter(el=>el!==videoSlide)]:slides;
   }
-  function show(index,manual=false){
+  function video(){return root?.querySelector('.ol-campaign-video');}
+  function visibleSlides(){return photos().map((_,i)=>i).filter(i=>!failed.has(i));}
+  function restart(){
+    clearTimeout(timer);timer=null;
+    window.RiaCampaignMusic?.sync(Boolean(state.logged&&state.section==='inicio'&&!document.hidden));
+    const player=video();
+    const canPlay=active()&&!failed.has(0);
+    if(player){
+      if(current!==0||!canPlay){
+        player.pause();
+      }else{
+        const attempt=player.play();
+        if(attempt&&typeof attempt.catch==='function')attempt.catch(()=>{
+          // Respeitar bloqueios de autoplay sem travar a navegação.
+          failed.add(0);show(1);
+        });
+      }
+    }
+    if(!active()||!visibleSlides().length)return;
+    if(current===0&&!failed.has(0)){
+      // O vídeo avança pelo evento ended, não pela duração padrão das fotos.
+      // Evita travar o carrossel quando a rede parar antes do fim.
+      timer=setTimeout(()=>show(1),22000);
+    }else{
+      timer=setTimeout(()=>show(current+1),5500);
+    }
+  }
+  function show(index){
     const list=photos();if(!list.length)return;
     let next=(index+list.length)%list.length;
     for(let i=0;i<list.length&&failed.has(next);i++)next=(next+1)%list.length;
     if(failed.size===list.length){root.classList.add('ol-images-unavailable');return;}
+    const previous=current;
+    if(previous===0&&next!==0)video()?.pause();
     current=next;
+    if(current===0&&previous!==0){try{video().currentTime=0;}catch(_){}}
     list.forEach((el,i)=>{el.classList.toggle('active',i===current);el.setAttribute('aria-hidden',String(i!==current));});
-    root.querySelectorAll('[data-slide]').forEach((el,i)=>el.setAttribute('aria-pressed',String(i===current)));
-    root.querySelector('.ol-count').textContent=String(current+1).padStart(2,'0')+' / 03';
-    if(manual)restart();
+    root.classList.toggle('ol-video-active',current===0&&!failed.has(0));
+    root.querySelectorAll('[data-slide]').forEach(el=>{
+      const i=Number(el.dataset.slide);
+      el.setAttribute('aria-pressed',String(i===current));
+      el.hidden=failed.has(i);
+    });
+    const order=visibleSlides();
+    root.querySelector('.ol-count').textContent=String(order.indexOf(current)+1).padStart(2,'0')+' / '+String(order.length).padStart(2,'0');
+    restart();
   }
   function syncToggle(){
     if(!root)return;
@@ -59,10 +106,23 @@
     const head=document.querySelector('#section-inicio > .section-head');if(!head)return;
     if(!root){
       root=document.createElement('div');root.id='homeCampaignSlot';root.innerHTML=CAMPAIGN_MARKUP;head.appendChild(root);
-      root.querySelectorAll('.ol-slide img').forEach((img,i)=>{
-        img.addEventListener('error',()=>{failed.add(i);const dot=root.querySelector('[data-slide="'+i+'"]');if(dot)dot.disabled=true;show(current===i?current+1:current);restart();});
+      photos().forEach((slide,i)=>{
+        const img=slide.querySelector('img');
+        if(!img)return;
+        img.addEventListener('error',()=>{
+          failed.add(i);
+          show(current===i?current+1:current);
+        });
         if(img.complete&&img.naturalWidth===0)failed.add(i);
       });
+      const player=video();
+      if(player){
+        player.addEventListener('ended',()=>{if(current===0&&!manualPause)show(1);});
+        player.addEventListener('error',()=>{
+          failed.add(0);
+          show(current===0?1:current);
+        });
+      }
       root.addEventListener('click',e=>{
         const el=e.target.closest('button');if(!el)return;
         if(el.hasAttribute('data-slide'))show(Number(el.dataset.slide),true);
