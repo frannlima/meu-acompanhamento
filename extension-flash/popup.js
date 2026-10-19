@@ -1,39 +1,18 @@
 'use strict';
-let packet=null;
-const status=document.getElementById('status');
+let packet=null;const status=document.getElementById('status'),storeSelect=document.getElementById('store'),dcosInput=document.getElementById('dcos');
+storeSelect.innerHTML=MAFlashCore.stores.map(s=>'<option>'+s+'</option>').join('');document.getElementById('version').textContent='Extensão '+chrome.runtime.getManifest().version;
+const ready=chrome.storage.local.get(['flashStore','flashDcos']).then(c=>{storeSelect.value=c.flashStore||'108';dcosInput.value=c.flashDcos||'';});
+async function destination(){const tabs=await chrome.tabs.query({url:'https://frannlima.github.io/meu-acompanhamento/*'});if(!tabs.length)throw Error('Abra o app neste perfil e entre como administrador.');return tabs.sort((a,b)=>(b.lastAccessed||0)-(a.lastAccessed||0))[0].id;}
 document.getElementById('capture').onclick=async()=>{
-  packet=null;document.getElementById('send').disabled=true;
-  try{
-    const [tab]=await chrome.tabs.query({active:true,currentWindow:true});
-    const [r]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:captureVisibleTable,args:[MAFlashCore.stores]});
-    if(!r.result)throw Error('Não foi possível ler a tabela carregada.');
-    packet=MAFlashCore.validate({version:1,kind:'flash-stores',source:'flash.riachuelo.com.br',business_date:r.result.date,collected_at:new Date().toISOString(),rows:r.result.rows.map(row=>({...row,total:MAFlashCore.numberBR(row.total),omni:MAFlashCore.numberBR(row.omni),target:MAFlashCore.numberBR(row.target),coupons:MAFlashCore.numberBR(row.coupons),source_time:row.source_time==='-'?null:row.source_time}))});
-    status.textContent=packet.rows.length+' lojas coletadas em '+packet.business_date+'.\nLojas: '+packet.rows.map(r=>r.store).join(', ')+'.\nDados de referência; trocas não conciliadas.';
-    document.getElementById('send').disabled=false;
-  }catch(e){status.textContent=e.message;}
+ packet=null;document.getElementById('send').disabled=true;
+ try{const [tab]=await chrome.tabs.query({active:true,currentWindow:true});const u=new URL(tab.url);let options={store:storeSelect.value},raw;
+ if(u.origin!=='https://flash.riachuelo.com.br')throw Error('Abra o relatório no Flash.');
+ if(u.pathname.startsWith('/vendas/lojas/total')){const [r]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:captureVisibleTable,args:[MAFlashCore.stores]});raw=r.result;}
+ else{const prod=u.pathname.match(/^\/vendas\/item\/(\d{3})\/(\d{3})\//);options.kind=u.pathname.startsWith('/devolucao/')?'flash-exchanges':prod?'flash-products':'flash-departments';if(prod){options.dco=Number(prod[1]);options.store=prod[2];}else{const dep=u.pathname.match(/\/vendas\/deptos\/total\/\d{8}\/\d{8}\/(\d{3})/);if(dep)options.store=dep[1];}const [r]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:captureFlashDetail,args:[options]});raw=r.result;}
+ packet=buildFlashPacket(raw,options);status.textContent=packet.rows.length+' linhas conferidas • '+packet.business_date+'. Confira o escopo no app.';document.getElementById('send').disabled=false;
+ }catch(e){status.textContent=e.message;}
 };
-document.getElementById('send').onclick=async()=>{
-  try{
-    if(!packet)throw Error('Faça a coleta primeiro.');
-    if(!await chrome.permissions.request({origins:['https://frannlima.github.io/*']}))throw Error('Permissão para enviar ao app não concedida.');
-    const tabs=await chrome.tabs.query({url:'https://frannlima.github.io/meu-acompanhamento/*'});
-    if(!tabs.length)throw Error('Nenhuma aba do app encontrada neste perfil do Edge. Abra https://frannlima.github.io/meu-acompanhamento/ neste mesmo navegador e entre como administrador.');
-    tabs.sort((a,b)=>(b.lastAccessed||0)-(a.lastAccessed||0));
-    status.textContent='Enviando para a aba do app usada mais recentemente…';
-    const [result]=await chrome.scripting.executeScript({target:{tabId:tabs[0].id},func:p=>{
-      if(location.origin!=='https://frannlima.github.io'||!location.pathname.startsWith('/meu-acompanhamento/'))return false;
-      window.postMessage({type:'MA_FLASH_PILOT_V1',payload:p},location.origin);return true;
-    },args:[packet]});
-    if(!result.result)throw Error('Destino inválido');status.textContent='Transferência enviada. Confira o recebimento na área Flash piloto do app. Nenhum dado foi gravado na base oficial.';
-  }catch(e){status.textContent=e.message;}
-};
-async function autoStatus(){const config=await chrome.storage.local.get(['flashAutoEnabled','flashAutoStatus']);document.getElementById('autoStatus').textContent=(config.flashAutoEnabled?'Automático ativado. ':'Automático desligado. ')+(config.flashAutoStatus||'');}
-document.getElementById('startAuto').onclick=async()=>{
- try{
- if(!await chrome.permissions.request({origins:['https://flash.riachuelo.com.br/*','https://frannlima.github.io/*']}))throw Error('Permissão não concedida.');
- await chrome.storage.local.set({flashAutoEnabled:true,flashAutoStatus:'A aba Total Lojas será recarregada a cada 5 minutos. Mantenha o Flash autenticado e o app aberto como administrador.'});
- await chrome.alarms.create('flashAuto',{periodInMinutes:5,delayInMinutes:1});await autoStatus();
- }catch(e){document.getElementById('autoStatus').textContent=e.message;}
-};
-document.getElementById('stopAuto').onclick=async()=>{await chrome.storage.local.set({flashAutoEnabled:false,flashAutoStatus:''});await chrome.alarms.clear('flashAuto');await autoStatus();};
-autoStatus();
+document.getElementById('send').onclick=async()=>{try{if(!packet)throw Error('Confira uma coleta primeiro.');if(!await chrome.permissions.request({origins:['https://frannlima.github.io/*']}))throw Error('Permissão não concedida.');await sendFlashPacket(await destination(),packet);status.textContent='Recebimento confirmado no app. A sincronização compartilhada depende do e-mail confirmado no app.';}catch(e){status.textContent=e.message;}};
+async function autoStatus(){const c=await chrome.storage.local.get(['flashAutoEnabled','flashAutoStatus']);document.getElementById('autoStatus').textContent=(c.flashAutoEnabled?'Automático ativado. ':'Automático desligado. ')+(c.flashAutoStatus||'');}
+document.getElementById('startAuto').onclick=async()=>{try{await ready;const dcos=dcosInput.value.trim();if(dcos&&dcos.split(',').some(s=>!/^\d{3}$/.test(s.trim())||!MAFlashDetailCore.catalog[Number(s)]||MAFlashDetailCore.excluded.includes(Number(s))))throw Error('Informe DCOs válidos separados por vírgula.');if(dcos&&dcos.split(',').length>5)throw Error('Use no máximo 5 DCOs por ciclo.');if(!await chrome.permissions.request({origins:['https://flash.riachuelo.com.br/*','https://frannlima.github.io/*']}))throw Error('Permissão não concedida.');await destination();await chrome.storage.local.set({flashAutoEnabled:true,flashStore:storeSelect.value,flashDcos:dcos,flashAutoStatus:'Primeira coleta iniciada. Acompanhe o recebimento no app.'});await chrome.alarms.create('flashAuto',{periodInMinutes:5,delayInMinutes:5});await chrome.runtime.sendMessage({type:'flash-run'});await autoStatus();}catch(e){document.getElementById('autoStatus').textContent=e.message;}};
+document.getElementById('stopAuto').onclick=async()=>{await chrome.storage.local.set({flashAutoEnabled:false,flashAutoStatus:'A coleta em andamento será encerrada após o relatório atual.'});await chrome.alarms.clear('flashAuto');await autoStatus();};autoStatus();

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Meu Acompanhamento — Flash piloto",
-  "version": "0.2.0",
-  "description": "Coleta assistida do painel Total Lojas na sessão aberta pelo usuário.",
+  "name": "Meu Acompanhamento — Flash",
+  "version": "0.3.0",
+  "description": "Coleta de indicadores Flash na sessão aberta: lojas, grupos, produtos e trocas.",
   "permissions": [
     "activeTab",
     "scripting",
@@ -18,5 +18,6 @@
   },
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "minimum_chrome_version": "120"
 }

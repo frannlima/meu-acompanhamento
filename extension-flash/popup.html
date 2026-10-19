@@ -1,6 +1,12 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Flash piloto</title>
-<style>body{font:14px system-ui;width:340px;padding:16px;color:#173f35}button{display:block;width:100%;padding:12px;margin-top:12px}p{line-height:1.5}#status{white-space:pre-wrap}</style>
-<h2>Flash → Meu Acompanhamento</h2><p>Abra o Flash em Total Lojas, com início e fim do período no mesmo dia. A coleta inclui somente as 18 lojas CE+PI configuradas.</p>
-<p>Ao enviar, serão transferidos venda total, OMNI, orçamento, cupons e horários para o piloto no app aberto neste computador. Nenhuma senha ou cookie será coletado.</p>
-<button id="capture">1. Conferir coleta</button><button id="send" disabled>2. Enviar ao piloto no app</button><button id="startAuto">Ativar atualização a cada 5 minutos</button><button id="stopAuto">Parar atualização automática</button><p id="autoStatus" role="status"></p><p id="status" role="status"></p>
-<script src="flash-core-v1.js"></script><script src="capture.js"></script><script src="popup.js"></script></html>
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Flash • Meu Acompanhamento</title>
+<style>body{font:14px system-ui;width:350px;padding:16px;color:#173f35}button,input,select{box-sizing:border-box;display:block;width:100%;padding:11px;margin-top:8px}p{line-height:1.5}label{display:block;margin-top:12px}#status,#autoStatus{white-space:pre-wrap;font-size:13px}</style>
+<h2>Flash → Meu Acompanhamento</h2><p id="version"></p>
+<p>Coleta das 18 lojas em Total Lojas e dos grupos, produtos e fotos da loja abaixo. Trocas seguem a última data publicada no Flash.</p>
+<label>Loja para grupos e produtos<select id="store"></select></label>
+<label>DCOs de produtos (até 5)<input id="dcos" placeholder="Automático: maior DCO de cada mundo"></label>
+<p>Em branco: maior DCO em venda de cada mundo. Você também pode indicar códigos separados por vírgula. O painel informa quais DCOs foram coletados.</p>
+<button id="capture">1. Conferir relatório aberto</button><button id="send" disabled>2. Enviar ao app</button>
+<button id="startAuto">Ativar coleta a cada 5 minutos</button><button id="stopAuto">Parar coleta automática</button>
+<p>A coleta automática atualiza Total Lojas e abre uma aba auxiliar para consultar os relatórios. Mantenha o Flash autenticado e o app aberto como administrador. Senhas e cookies não são coletados.</p>
+<p id="autoStatus" role="status"></p><p id="status" role="status"></p>
+<script src="flash-core-v1.js"></script><script src="flash-detail-core-v1.js"></script><script src="capture.js"></script><script src="transfer.js"></script><script src="popup.js"></script></html>

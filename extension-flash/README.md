@@ -1,38 +1,28 @@
-# Flash — resultado das lojas (extensão 0.2.0)
+# Flash → Meu Acompanhamento • 0.3.0
 
-Coleta o painel Total Lojas da sessão autenticada do usuário no Flash, filtrando as 18 lojas CE+PI. Não lê senhas, cookies ou endpoints internos. Não contorna bloqueios de instalação da empresa.
+A extensão consulta somente páginas do Flash na sessão aberta pelo usuário. O app precisa estar aberto como administrador no mesmo perfil do navegador. Não solicita nem copia senha, cookie ou token do Flash.
 
-## Coleta manual
+## Instalação / atualização
 
-Abra o Flash em Total Lojas, selecione um dia e mantenha o Meu Acompanhamento aberto como administrador no mesmo perfil do Edge/Chrome. Na extensão, use Conferir coleta e Enviar. A aba do app mais recentemente acessada será o destino. O envio da extensão não confirma o aceite: confira o painel do app.
+1. Extraia o ZIP em uma pasta permanente.
+2. Em `edge://extensions`, atualize a extensão já instalada apontando para a pasta extraída (Carregar sem compactação), ou substitua os arquivos da pasta atual e clique em Recarregar.
+3. Confira que a versão exibida é 0.3.0. Abra Total Lojas e o Meu Acompanhamento.
+4. Na extensão, escolha a loja dos grupos/produtos e ative a coleta a cada cinco minutos. Autorize acesso somente aos dois domínios indicados.
 
-## Atualização periódica — opção explícita
+## Relatórios
 
-Use Ativar atualização a cada 5 minutos e autorize os dois domínios apresentados. A extensão recarrega a única aba Total Lojas e lê a tabela renderizada. Requer computador ligado, navegador ativo, Flash autenticado e app aberto como administrador. Não opera com computador desligado, não renova credenciais e não tem acesso independente ao Flash.
+- **Lojas:** 18 lojas CE+PI; total, OMNI, orçamento, cupons e horário da fonte.
+- **Grupos / DCOs:** todos os departamentos carregados da loja selecionada. Fanlab no Masculino, Relógios em Beleza; DCO 320 e Eletrônicos excluídos.
+- **Produtos:** até 100 linhas visíveis por DCO. Em branco, a configuração escolhe o maior DCO em venda de cada mundo; alternativamente, informe até cinco DCOs. A cobertura aparece no painel. Os rankings são entre os itens coletados, com venda acumulada do dia; não há filtro nativo da última hora.
+- **Fotos:** consulta no Raio X o primeiro item em quantidade de cada DCO coletado. Só aceita URLs de `static.riachuelo.com.br` contendo o SAP correto. Outros produtos mantêm link para o Flash e indicação de foto ainda não coletada.
+- **Trocas:** usa a data dos links publicados no menu do Flash. Na validação de 18/10, a fonte disponibilizou somente 17/10. Há visão por loja e visão por DCO da empresa; a fonte observada não cruza DCO com loja.
 
-O primeiro ciclo ocorre aproximadamente um minuto após ativação. O navegador pode atrasar alarmes. Se houver login, tabela indisponível, mais de uma aba Flash ou app fechado, exibe a pendência na extensão e tenta novamente no ciclo seguinte. Use Parar atualização automática para desligar. Não armazena vendas na extensão, somente a configuração e a última mensagem de estado.
+A coleta automática recarrega Total Lojas e utiliza uma aba auxiliar para os detalhes, fechada ao terminar. Falhas de carregamento preservam a última coleta; ausência não vira zero. Cada envio exige confirmação do app. O ciclo tem limite de duração e relatórios pendentes são tentados na atualização seguinte.
 
-A coleta periódica é código novo testado com mocks; a operação ponta a ponta no Edge do usuário ainda precisa ser validada. A versão instalada 0.1.1 mantém a coleta manual e não recebe a automação até ser substituída pela pasta 0.2.0.
+O computador e o navegador devem permanecer ligados. A extensão não efetua login, não renova credenciais e pausa quando o Flash pede autenticação. A automatização não funciona 24 horas com o computador desligado.
 
-## Visão do app
+## Proteção e interpretação
 
-Menu Flash • Lojas: total Flash, orçamento da fonte, atingimento, desvio, OMNI, físico de referência, cupons, ticket, participação entre lojas coletadas, filtros e ordenação. A marcação de atraso se refere à idade da coleta. Hora Flash de cada loja é exibida separadamente. Sem informação não equivale a zero.
+A extensão guarda somente configuração e status. O app mantém coletas locais em memória. Compartilhamento entre dispositivos exige e-mail confirmado e vínculo administrativo com a matrícula; os serviços verificam o usuário e o escopo da loja no servidor. Nenhum dado Flash entra na base oficial de vendas automaticamente.
 
-Histórico local em memória da sessão. Para histórico compartilhado, o endpoint flash-sync valida uma sessão Supabase Auth e o vínculo ativo do e-mail com matrícula/loja em ria_authorized_emails. Confirmação de e-mail não libera acesso sem esse vínculo. Administrador publica e consulta regional; demais perfis recebem somente a própria loja. A identificação normal do app não é alterada. Publicação e leitura compartilhadas ainda dependem do vínculo e do teste com sessão verificada.
-
-A tabela flash_snapshots tem RLS e não possui permissões de acesso direto para anon/authenticated; acesso ocorre somente pelo serviço autorizado. Sem dados reais em arquivos ou repositório.
-
-## Limites dos indicadores
-
-Total Flash contém componentes ainda não conciliados com Automação Web. Físico de referência = total − OMNI, sem afirmar venda contábil líquida. Orçamento Flash não substitui a meta oficial. Relação eStore/Flash é indicativa. A integração não escreve na venda oficial.
-
-## Pendências de escopo
-
-Detalhamento por grupo/DCO, trocas, produtos, fotos/estoque e recorte por hora dependem da inspeção autenticada e validação dos campos disponíveis. Não há esses dados nesta versão. Share eStore oficial depende da conciliação de canais e vales-troca. A fonte eStore regional também permanece pendente de validação.
-
-## Validação
-
-node tests/flash-core.test.cjs
-node tests/flash-capture.test.cjs
-node tests/flash-view.test.cjs
-node tests/flash-sync.test.cjs
+Total Flash não equivale à venda contábil líquida do Automação Web. Total menos OMNI é somente físico de referência. Trocas/devoluções não identificam valores de vales-troca resgatados; não são usados para ajustar o total. eStore e OMNI permanecem conceitos distintos.
