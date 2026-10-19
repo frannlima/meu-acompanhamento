@@ -16,8 +16,9 @@
       if(!stores.includes(r.store)||seen.has(r.store))throw Error('Loja excluída ou duplicada');seen.add(r.store);
       for(const k of ['total','omni','target','coupons'])if(typeof r[k]!=='number'||!Number.isFinite(r[k])||r[k]<0)throw Error('Indicador inválido');
       if(r.omni>r.total||!Number.isInteger(r.coupons))throw Error('Canais ou cupons inconsistentes');
-      if(r.source_time!==null&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(r.source_time))throw Error('Horário inválido');
-      return {store:r.store,total:r.total,omni:r.omni,target:r.target,coupons:r.coupons,source_time:r.source_time,physical_reference:r.total-r.omni};
+      const sourceTime=r.source_time==null||String(r.source_time).trim()===''||String(r.source_time).trim()==='-'?null:String(r.source_time).trim();
+      if(sourceTime!==null&&!/^([01]\d|2[0-3]):[0-5]\d$/.test(sourceTime))throw Error('Horário inválido na loja '+r.store+': '+String(sourceTime).slice(0,30));
+      return {store:r.store,total:r.total,omni:r.omni,target:r.target,coupons:r.coupons,source_time:sourceTime,physical_reference:r.total-r.omni};
     });
     return {version:1,kind:p.kind,source:p.source,business_date:p.business_date,collected_at:p.collected_at,rows};
   }
