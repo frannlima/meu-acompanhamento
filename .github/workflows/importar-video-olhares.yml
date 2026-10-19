@@ -1,0 +1,39 @@
+name: Importar vídeo Olhares Brasileiros
+
+on:
+  push:
+    paths:
+      - '.github/workflows/importar-video-olhares.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  importar-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Copiar o vídeo integral e validar
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 4 --connect-timeout 15 --max-time 180             'https://meu-resultado-palma.floot.app/_cdn/static/25a5fbd7-c19f-4dea-9289-564eb7be5247-olhares-brasileiros-transicao.mp4'             -o assets/olhares-brasileiros-transicao.mp4
+          echo '63ebcc49f6be7496534c655536d51d41f4dcd5e174b80372cc561a38b57300f7  assets/olhares-brasileiros-transicao.mp4' | sha256sum --check
+          file assets/olhares-brasileiros-transicao.mp4
+
+      - name: Publicar vídeo no repositório
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/olhares-brasileiros-transicao.mp4
+          if git diff --cached --quiet; then
+            echo 'Vídeo já presente e íntegro.'
+          else
+            git commit -m 'assets: publicar vídeo de abertura Olhares Brasileiros'
+            git push
+          fi
