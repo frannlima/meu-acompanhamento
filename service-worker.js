@@ -1,7 +1,7 @@
-const CACHE="meu-acompanhamento-v155-flash-time";
+const CACHE="meu-acompanhamento-v156-flash-regional";
 const ASSETS=[
   "./flash-core-v1.js?v=2",
-  "./flash-pilot-v1.js?v=2",
+  "./flash-pilot-v1.js?v=3",
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
   "./layout-balance-v1.css?v=1",

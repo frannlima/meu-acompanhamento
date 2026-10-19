@@ -1,23 +1,6 @@
 'use strict';
 let packet=null;
 const status=document.getElementById('status');
-function captureVisibleTable(allowed){
-  if(location.origin!=='https://flash.riachuelo.com.br'||!location.pathname.startsWith('/vendas/lojas/total'))throw Error('Abra Total Lojas no Flash.');
-  const start=document.querySelector('#dataDe')?.selectedOptions?.[0]?.textContent?.trim();
-  const end=document.querySelector('#dataAte')?.selectedOptions?.[0]?.textContent?.trim();
-  if(!/^\d{2}\/\d{2}\/\d{4}$/.test(start)||start!==end)throw Error('Selecione um único dia.');
-  const table=document.querySelector('#totalLojas');if(!table)throw Error('Tabela não carregada');
-  const heads=Array.from(table.querySelectorAll('thead th')).map(x=>x.textContent.trim().replace(/\s+/g,' ').toLowerCase());
-  const indexes=['loja','total','real online','orçado','cupom','hora'].map(h=>heads.indexOf(h));
-  if(indexes.some(i=>i<0))throw Error('Cabeçalhos mudaram; coleta interrompida.');
-  const rows=[];
-  for(const tr of table.querySelectorAll('tbody tr')){
-    const c=Array.from(tr.querySelectorAll('td')).map(x=>x.textContent.trim());
-    const match=c[indexes[0]]?.match(/^L(\d{3})\b/);if(!match||!allowed.includes(match[1]))continue;
-    rows.push({store:match[1],total:c[indexes[1]],omni:c[indexes[2]],target:c[indexes[3]],coupons:c[indexes[4]],source_time:c[indexes[5]]});
-  }
-  return {date:start.split('/').reverse().join('-'),rows};
-}
 document.getElementById('capture').onclick=async()=>{
   packet=null;document.getElementById('send').disabled=true;
   try{
@@ -44,3 +27,13 @@ document.getElementById('send').onclick=async()=>{
     if(!result.result)throw Error('Destino inválido');status.textContent='Transferência enviada. Confira o recebimento na área Flash piloto do app. Nenhum dado foi gravado na base oficial.';
   }catch(e){status.textContent=e.message;}
 };
+async function autoStatus(){const config=await chrome.storage.local.get(['flashAutoEnabled','flashAutoStatus']);document.getElementById('autoStatus').textContent=(config.flashAutoEnabled?'Automático ativado. ':'Automático desligado. ')+(config.flashAutoStatus||'');}
+document.getElementById('startAuto').onclick=async()=>{
+ try{
+ if(!await chrome.permissions.request({origins:['https://flash.riachuelo.com.br/*','https://frannlima.github.io/*']}))throw Error('Permissão não concedida.');
+ await chrome.storage.local.set({flashAutoEnabled:true,flashAutoStatus:'A aba Total Lojas será recarregada a cada 5 minutos. Mantenha o Flash autenticado e o app aberto como administrador.'});
+ await chrome.alarms.create('flashAuto',{periodInMinutes:5,delayInMinutes:1});await autoStatus();
+ }catch(e){document.getElementById('autoStatus').textContent=e.message;}
+};
+document.getElementById('stopAuto').onclick=async()=>{await chrome.storage.local.set({flashAutoEnabled:false,flashAutoStatus:''});await chrome.alarms.clear('flashAuto');await autoStatus();};
+autoStatus();

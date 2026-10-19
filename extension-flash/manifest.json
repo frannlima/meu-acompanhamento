@@ -1,9 +1,22 @@
 {
   "manifest_version": 3,
   "name": "Meu Acompanhamento — Flash piloto",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Coleta assistida do painel Total Lojas na sessão aberta pelo usuário.",
-  "permissions": ["activeTab", "scripting"],
-  "optional_host_permissions": ["https://frannlima.github.io/*"],
-  "action": {"default_popup": "popup.html"}
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "alarms",
+    "storage"
+  ],
+  "optional_host_permissions": [
+    "https://frannlima.github.io/*",
+    "https://flash.riachuelo.com.br/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
 }

@@ -1,40 +1,38 @@
-# Flash piloto — primeira etapa
+# Flash — resultado das lojas (extensão 0.2.0)
 
-Implementação experimental para Chrome/Edge desktop. Coleta assistida mediante clique do administrador, usando a sessão já aberta no Flash. Sem senhas, cookies, interceptação de rede ou endpoints internos. Não contorna restrições de instalação do computador.
+Coleta o painel Total Lojas da sessão autenticada do usuário no Flash, filtrando as 18 lojas CE+PI. Não lê senhas, cookies ou endpoints internos. Não contorna bloqueios de instalação da empresa.
 
-## Fluxo implementado
+## Coleta manual
 
-1. Carregar esta pasta como extensão sem compactação, caso o ambiente permita. Isso é feito pelo usuário; não é instalado pelo aplicativo.
-2. Manter exatamente uma aba de `https://frannlima.github.io/meu-acompanhamento/` aberta com login administrador e a versão que inclui este piloto.
-3. No Flash, abrir **Vendas → Total Lojas** e escolher um único dia. Para visão completa da regional, não restringir a tabela a uma única loja.
-4. Abrir a extensão, clicar **Conferir coleta** e conferir as lojas e a data. A coleta considera apenas as 18 lojas cadastradas no app e rejeita cabeçalhos inesperados, valores ausentes e lojas duplicadas.
-5. Clicar **Enviar ao piloto no app**. O navegador solicita acesso ao domínio do app somente nessa etapa. Conferir o recebimento em **Flash piloto**, disponível para administrador no menu lateral e em Mais.
-6. Abrir eStore e consultar a parcial para preencher a coluna eStore no piloto com a fonte já utilizada no app.
+Abra o Flash em Total Lojas, selecione um dia e mantenha o Meu Acompanhamento aberto como administrador no mesmo perfil do Edge/Chrome. Na extensão, use Conferir coleta e Enviar. A aba do app mais recentemente acessada será o destino. O envio da extensão não confirma o aceite: confira o painel do app.
 
-A coleta não transmite dados automaticamente ao carregar a página. Não contém temporizador em segundo plano, não altera a base oficial e não sincroniza entre computadores/celulares. O quadro piloto é mantido apenas em memória até logout/recarregamento; não é armazenado no repositório, em arquivo nem em servidor. Para limpar imediatamente, usar **Limpar coleta local**.
+## Atualização periódica — opção explícita
 
-## Semântica
+Use Ativar atualização a cada 5 minutos e autorize os dois domínios apresentados. A extensão recarrega a única aba Total Lojas e lê a tabela renderizada. Requer computador ligado, navegador ativo, Flash autenticado e app aberto como administrador. Não opera com computador desligado, não renova credenciais e não tem acesso independente ao Flash.
 
-- **Total Flash**: número da tela, ainda sem conciliação de vales-troca.
-- **OMNI**: Real Online, conforme definição operacional fornecida por Fran; não é eStore.
-- **Físico de referência**: Total Flash menos OMNI. Não chamar de venda líquida contábil.
-- **eStore / Total Flash**: percentual indicativo; não substitui o share oficial. Coletas das duas fontes têm horários independentes.
-- **Orçamento Flash**: exibido apenas como referência; não substitui meta oficial (foram observadas diferenças entre telas do Flash).
-- Ausência de uma loja não é zero confirmado. Horário nulo indica informação indisponível.
+O primeiro ciclo ocorre aproximadamente um minuto após ativação. O navegador pode atrasar alarmes. Se houver login, tabela indisponível, mais de uma aba Flash ou app fechado, exibe a pendência na extensão e tenta novamente no ciclo seguinte. Use Parar atualização automática para desligar. Não armazena vendas na extensão, somente a configuração e a última mensagem de estado.
 
-## Próximas etapas ainda não implementadas
+A coleta periódica é código novo testado com mocks; a operação ponta a ponta no Edge do usuário ainda precisa ser validada. A versão instalada 0.1.1 mantém a coleta manual e não recebe a automação até ser substituída pela pasta 0.2.0.
 
-- Conciliar totais do mesmo dia/horário com Automação Web e significado das trocas.
-- Definir denominador oficial (canais, vales, captado/aprovado) antes de integrar o share definitivo.
-- Persistência segura e distribuição para as lojas requerem implementação do lado do servidor e autorização por perfil, sem endpoint público de escrita.
-- Atualização contínua exige ciclo de sessão, falhas, atraso e deduplicação validados.
-- Trocas por grupos/DCOs exigem coleta validada no relatório de departamentos e mapeamento oficial dos grupos.
-- Reposição prioritária exige dados por produto/loja, imagens e intervalo. A tela 100 Maiores Vendas não teve linhas carregadas na inspeção; não há garantia de fotos nem corte da última hora. Não subtrair snapshots de rankings incompletos como se fossem vendas exatas por hora.
+## Visão do app
+
+Menu Flash • Lojas: total Flash, orçamento da fonte, atingimento, desvio, OMNI, físico de referência, cupons, ticket, participação entre lojas coletadas, filtros e ordenação. A marcação de atraso se refere à idade da coleta. Hora Flash de cada loja é exibida separadamente. Sem informação não equivale a zero.
+
+Histórico local em memória da sessão. Para histórico compartilhado, o endpoint flash-sync valida uma sessão Supabase Auth e o vínculo ativo do e-mail com matrícula/loja em ria_authorized_emails. Confirmação de e-mail não libera acesso sem esse vínculo. Administrador publica e consulta regional; demais perfis recebem somente a própria loja. A identificação normal do app não é alterada. Publicação e leitura compartilhadas ainda dependem do vínculo e do teste com sessão verificada.
+
+A tabela flash_snapshots tem RLS e não possui permissões de acesso direto para anon/authenticated; acesso ocorre somente pelo serviço autorizado. Sem dados reais em arquivos ou repositório.
+
+## Limites dos indicadores
+
+Total Flash contém componentes ainda não conciliados com Automação Web. Físico de referência = total − OMNI, sem afirmar venda contábil líquida. Orçamento Flash não substitui a meta oficial. Relação eStore/Flash é indicativa. A integração não escreve na venda oficial.
+
+## Pendências de escopo
+
+Detalhamento por grupo/DCO, trocas, produtos, fotos/estoque e recorte por hora dependem da inspeção autenticada e validação dos campos disponíveis. Não há esses dados nesta versão. Share eStore oficial depende da conciliação de canais e vales-troca. A fonte eStore regional também permanece pendente de validação.
 
 ## Validação
 
-`node tests/flash-core.test.cjs`
-
-`node tests/flash-capture.test.cjs`
-
-A extensão ainda precisa de teste ponta a ponta no navegador do usuário. Nenhum envio real foi feito nesta implementação.
+node tests/flash-core.test.cjs
+node tests/flash-capture.test.cjs
+node tests/flash-view.test.cjs
+node tests/flash-sync.test.cjs
