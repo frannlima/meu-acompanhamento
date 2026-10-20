@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v172-video-frozen-frame";
+const CACHE="meu-acompanhamento-v175-sacola-grafite";
 const ASSETS=[
   "./flash-detail-core-v1.js?v=1",
   "./flash-details-v1.js?v=1",
@@ -8,8 +8,8 @@ const ASSETS=[
   "./ma2-simple-v1.js?v=7",
   "./ma3-faithful-v1.css?v=3",
   "./ma3-faithful-v1.js?v=3",
-  "./cockpit-vendas-v1.css?v=3",
-  "./cockpit-vendas-v1.js?v=2",
+  "./cockpit-vendas-v1.css?v=4",
+  "./cockpit-vendas-v1.js?v=3",
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
   "./layout-balance-v1.css?v=1",
@@ -68,6 +68,7 @@ const ASSETS=[
   "./assets/app-icon-192.png",
   "./assets/app-icon-512.png",
   "./assets/riachuelo-logo-vertical.svg",
+  "./assets/cockpit-sacola-reciclavel-grafite.svg",
   "./assets/riachuelo-logo.svg",
   "./assets/ria-logo-approved.svg",
   "./assets/ria-signature-horizontal.svg",
