@@ -724,6 +724,21 @@
     finally{if(btn){btn.disabled=false;btn.textContent=old||"Compartilhar card";}}
   }
 
+  // Baixar o MESMO card institucional que o botão Compartilhar utiliza.
+  window.maDownloadGroupCard=async function(){
+    try{
+      if(!state.logged)throw new Error("Entre no aplicativo para baixar o card.");
+      const blob=await createDailyCardBlob();
+      const filename="Hora_a_Hora_Grupos_Loja_"+state.storeCode+"_"+localDate()+".png";
+      const link=document.createElement("a"),url=URL.createObjectURL(blob);
+      link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),30000);
+      toast("Card de grupos gerado para download.");
+    }catch(error){
+      toast(error.message||"Não foi possível baixar o card de grupos.",true);
+    }
+  };
+
   function renderOperationalTools(){
     const home=$("section-inicio");
     if(home){
