@@ -18,7 +18,7 @@
  function record(next){
   packet=next;
   const prior=history.find(p=>p.collected_at===next.collected_at&&p.business_date===next.business_date);if(!prior)history.unshift(next);
-  history=history.sort((a,b)=>Date.parse(b.collected_at)-Date.parse(a.collected_at)).slice(0,96);paint();
+  history=history.sort((a,b)=>Date.parse(b.collected_at)-Date.parse(a.collected_at)).slice(0,96);paint();document.dispatchEvent(new CustomEvent('ma:flash-update'));
  }
  async function sharePacket(){
   if(!packet||!admin()||!token())return;
@@ -28,7 +28,7 @@
   if(!allowed()||!token()||busy)return;busy=true;const who=identity;
   try{const data=await cloud('history',{business_date:localDate()});if(who!==identity)return;
    if(data.length){const valid=data.map(core.validate);history=valid;const newest=valid[0];if(!packet||Date.parse(newest.collected_at)>Date.parse(packet.collected_at))packet=newest;}
-   syncStatus=data.length?'Histórico compartilhado carregado.':'Nenhuma coleta compartilhada para hoje.';paint();
+   syncStatus=data.length?'Histórico compartilhado carregado.':'Nenhuma coleta compartilhada para hoje.';paint();document.dispatchEvent(new CustomEvent('ma:flash-update'));
   }catch(e){syncStatus=e.message;paint();}finally{busy=false;}
  }
  function paint(){
@@ -71,5 +71,14 @@
  });
  document.addEventListener('ma:estore-hourly-loaded',event=>{if(allowed()&&event.detail?.context?.date===localDate()&&String(event.detail.context.store).padStart(3,'0')===String(state.storeCode).padStart(3,'0')&&Array.isArray(event.detail.stores)){hourly=event.detail;paint();}});
  function sync(){mount();const next=state.logged?String(state.matricula)+':'+state.role+':'+state.storeCode:'';if(identity!==next){packet=null;hourly=null;history=[];filter='';identity=next;paint();}document.querySelectorAll('.ma-flash-entry').forEach(e=>{e.hidden=!allowed();e.classList.toggle('hidden',!allowed());});const save=document.getElementById('flashSharedSave');if(save)save.hidden=!admin();if(allowed()&&Date.now()-lastPoll>60000){lastPoll=Date.now();loadShared();if(state.section==='flash-pilot')paint();}}
+ // Leitura somente da filial autorizada e da data atual; nunca mistura Flash com venda pura Web.
+ window.getMA2FlashSnapshot=function(){
+  if(!allowed()||!packet||packet.business_date!==localDate())return null;
+  const code=String(state.storeCode||"").padStart(3,"0");
+  const r=(packet.rows||[]).find(item=>item.store===code);
+  if(!r)return null;
+  return Object.freeze({store:code,business_date:packet.business_date,captured_at:packet.collected_at,
+   total:r.total,target:r.target,omni:r.omni,coupons:r.coupons,source_time:r.source_time||null});
+ };
  sync();setInterval(sync,1500);
 })();
