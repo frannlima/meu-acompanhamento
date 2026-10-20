@@ -596,13 +596,26 @@
   function buildPremiumDock(){
     const dock=document.querySelector(".mobile-dock");
     if(!dock) return;
+    const manager=["administrador","gerente","supervisor"].includes(state.role);
+    const version=manager?"manager-cockpit-v3":"staff-cockpit-v3";
+    if(dock.dataset.ma2Role===version && dock.querySelector('[data-section="cockpit"]')) return;
+    const cockpitIcon='<span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><path d="m14 20 2-4 2 1 3-5"/></svg></span>';
+    const radarIcon='<span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="m12 12 6-6"/></svg></span>';
     dock.innerHTML=
-      '<button data-section="inicio" class="dock-item active">'+storeIcon()+'<span class="dock-label">Início</span></button>'+
-      '<button data-section="grupos" class="dock-item">'+worldsIcon()+'<span class="dock-label">Mundos</span></button>'+
-      '<button data-section="comerciais" class="dock-item">'+commercialIcon()+'<span class="dock-label">Comercial</span></button>'+
-      '<button data-section="estore" class="dock-item">'+estoreIcon()+'<span class="dock-label">eStore</span></button>'+
-      '<button id="mobileMoreBtn" data-section="mais" type="button" class="dock-item">'+moreIcon()+'<span class="dock-label">Mais</span></button>';
+      '<button type="button" data-section="inicio" data-ma2="hoje" class="dock-item">'+storeIcon()+'<span class="dock-label">Início</span></button>'+
+      '<button type="button" data-section="cockpit" class="dock-item">'+cockpitIcon+'<span class="dock-label">Cockpit</span></button>'+
+      (manager?'<button type="button" data-ma2="radar" class="dock-item">'+radarIcon+'<span class="dock-label">Radar</span></button>':'')+
+      '<button type="button" data-section="grupos" class="dock-item">'+worldsIcon()+'<span class="dock-label">Mundos</span></button>'+
+      (manager?'<button type="button" data-section="comerciais" class="dock-item">'+commercialIcon()+'<span class="dock-label">Equipe</span></button>':'')+
+      '<button type="button" data-section="estore" class="dock-item">'+estoreIcon()+'<span class="dock-label">eStore</span></button>'+
+      '<button id="mobileMoreBtn" type="button" data-section="mais" class="dock-item">'+moreIcon()+'<span class="dock-label">Mais</span></button>';
+    dock.dataset.ma2Role=version;
+    dock.classList.add("ma-nav-complete");
     dock.querySelectorAll("[data-section]").forEach(btn=>btn.onclick=()=>setSection(btn.dataset.section));
+    dock.querySelectorAll(".dock-item").forEach(btn=>{
+      const key=btn.dataset.section||btn.dataset.ma2;
+      btn.classList.toggle("active",key===state.section && !(state.section==="inicio" && document.getElementById("section-inicio")?.classList.contains("ma2-radar")));
+    });
   }
 
   function ensureMoreSection(){
@@ -707,6 +720,8 @@
     normalizeHomeGroupPanel();
   });
 
+  document.addEventListener("ma:dashboard-ready",buildPremiumDock);
+  document.addEventListener("ma:world-selected",buildPremiumDock);
   document.addEventListener("DOMContentLoaded",()=>{
     buildPremiumDock();
     ensureMoreSection();
