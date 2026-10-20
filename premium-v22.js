@@ -608,6 +608,17 @@
   function ensureMoreSection(){
     const existing=$("section-mais");
     if(existing){
+      // A navegação simplificada remapeou eStore para Mais: manter o atalho
+      // disponível também quando a seção já foi montada anteriormente.
+      const list=existing.querySelector(".premium-more-list");
+      if(list&&!existing.querySelector('[data-more-section="estore"]')){
+        const btn=document.createElement("button");
+        btn.type="button";
+        btn.setAttribute("data-more-section","estore");
+        btn.innerHTML='<span class="more-icon">▣</span><div><strong>eStore CE+PI</strong><small>Venda, pedidos, Hora a Hora e resultado regional</small></div><b>›</b>';
+        btn.onclick=()=>setSection("estore");
+        list.prepend(btn);
+      }
       existing.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
       return;
     }
@@ -622,6 +633,7 @@
         '<div><span class="eyebrow">MEU ACOMPANHAMENTO</span><h1>Mais</h1><p>Acesse outras áreas e funcionalidades do app.</p></div>'+
       '</div>'+
       '<div class="premium-more-list">'+
+        '<button type="button" data-more-section="estore"><span class="more-icon">▣</span><div><strong>eStore CE+PI</strong><small>Venda, pedidos, Hora a Hora e resultado regional</small></div><b>›</b></button>'+
         '<button data-more-section="descontos"><span class="more-icon">%</span><div><strong>Painel de Descontos</strong><small>Incidência, participação e DCOs</small></div><b>›</b></button>'+
         '<button data-more-section="regional" class="admin-only hidden"><span class="more-icon">▦</span><div><strong>Consolidado Regional</strong><small>Visão CE+PI por filial</small></div><b>›</b></button>'+
         '<button data-more-section="admin" class="admin-only hidden"><span class="more-icon">⚙</span><div><strong>Administração</strong><small>Metas, comerciais, inputs e acessos</small></div><b>›</b></button>'+
