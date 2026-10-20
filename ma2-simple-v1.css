@@ -187,3 +187,17 @@
  #section-inicio #ma2Essential .ma2-new-secondary article{padding:12px}
  #section-inicio #ma2Essential .ma2-new-secondary strong{font-size:17px}
 }
+
+/* Indicadores do gráfico permanecem estilizados após a realocação no novo dashboard. */
+#section-inicio #ma2Essential .ma2-chart-highlights{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:0 0 12px}
+#section-inicio #ma2Essential .ma2-chart-stat{padding:11px 10px;background:#F3F7F4;border:1px solid #E2ECE4;border-radius:12px;min-width:0}
+#section-inicio #ma2Essential .ma2-chart-stat span{color:#62776a;font-size:10px;display:block}
+#section-inicio #ma2Essential .ma2-chart-stat strong{color:#173F35;font-size:clamp(13px,1.9vw,18px);font-weight:850;display:block;margin-top:5px;overflow-wrap:anywhere}
+#section-inicio #ma2Essential .ma2-chart-stat.warning strong{color:#B4433A}
+#section-inicio #ma2Essential .ma2-legend{display:flex;gap:13px;flex-wrap:wrap;margin:9px 0;color:#65776f;font-size:11px}
+#section-inicio #ma2Essential .ma2-legend span{display:flex;gap:6px;align-items:center}
+#section-inicio #ma2Essential .ma2-legend i{display:inline-block;width:19px;height:3px;background:#176747}
+#section-inicio #ma2Essential .ma2-legend i.goal{background:repeating-linear-gradient(90deg,#9AA69D 0 5px,transparent 5px 8px)}
+#section-inicio #ma2Essential .ma2-legend i.forecast{background:repeating-linear-gradient(90deg,#DE7C00 0 5px,transparent 5px 8px)}
+#section-inicio #ma2Essential .clarity-curve-chart{border-radius:15px;overflow:hidden}
+@media(max-width:620px){#section-inicio #ma2Essential .ma2-chart-highlights{grid-template-columns:repeat(2,minmax(0,1fr))}}
