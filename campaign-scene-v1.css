@@ -198,14 +198,24 @@
 
 /* Vídeo editorial como primeira transição: preserva o enquadramento dos três slides originais. */
 #homeCampaignSlot .ol-slide-video::before{
-  background-image:url("./assets/olhares-brasileiros-1.webp")!important;
-  background-position:center center!important;
+  /* Imagem congelada da própria cena, capturada uma vez pelo player.
+     A foto existente é apenas o fallback quando o navegador não fornece frames. */
+  background-image:var(--ol-frozen-frame, url("./assets/olhares-brasileiros-1.webp"))!important;
+  background-position:center 45%!important;
+  background-repeat:no-repeat!important;
   background-size:cover!important;
-  filter:blur(15px) brightness(.5)!important;
-  transform:scale(1.1)!important;
+  filter:blur(18px) brightness(.66) saturate(.92)!important;
+  transform:scale(1.13)!important;
+  will-change:auto!important;
 }
 #homeCampaignSlot .ol-slide-video::after{
-  background:linear-gradient(90deg,rgba(6,36,29,.4),transparent 32%,transparent 68%,rgba(6,36,29,.4))!important;
+  background:linear-gradient(90deg,
+    rgba(6,36,29,.34) 0%,
+    rgba(6,36,29,.08) 28%,
+    transparent 43%,
+    transparent 57%,
+    rgba(6,36,29,.08) 72%,
+    rgba(6,36,29,.34) 100%)!important;
 }
 #homeCampaignSlot .ol-slide-video .ol-campaign-video{
   position:absolute;
