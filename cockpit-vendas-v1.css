@@ -175,3 +175,116 @@
 @media(max-width:360px){
   .mobile-dock[data-ma2-role$="cockpit-v2"] .ma2-dock-item .dock-label{font-size:7.5px!important}
 }
+
+/* Cockpit v3 — Venda Real: sacola da Riachuelo + pizza laranja + EV. */
+#section-cockpit .cp-main-tiles .cp-sale-tile{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(98px,36%);
+  gap:9px;
+  align-items:stretch;
+  min-height:160px;
+}
+#section-cockpit .cp-sale-details{
+  display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;
+  gap:8px;min-width:0;
+}
+#section-cockpit .cp-sale-details .cp-tile-label{
+  gap:7px;align-items:center;min-width:0;
+}
+#section-cockpit .cp-bag-mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:44px;height:59px;flex:0 0 44px;
+}
+#section-cockpit .cp-ria-bag{
+  display:block;width:42px;height:54px;overflow:visible;
+}
+#section-cockpit .cp-sale-tile .cp-tile-value{
+  font-size:clamp(16px,1.6vw,23px);
+  line-height:1.16;
+  font-variant-numeric:tabular-nums;
+  max-width:100%;
+}
+#section-cockpit .cp-sale-analytics{
+  min-width:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:space-around;
+  gap:7px;
+  padding-left:7px;
+  border-left:1px solid #e8ede9;
+}
+#section-cockpit .cp-pie{
+  --cp-progress:0;
+  width:88px;height:88px;
+  border-radius:50%;
+  flex:0 0 auto;
+  display:grid;place-items:center;
+  background:conic-gradient(#de7c00 0% calc(var(--cp-progress) * 1%),#e8eae7 calc(var(--cp-progress) * 1%) 100%);
+  box-shadow:inset 0 0 0 1px rgba(23,63,53,.05);
+}
+#section-cockpit .cp-pie-inner{
+  border-radius:50%;width:68px;height:68px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#fff;
+  box-shadow:0 0 0 1px rgba(255,255,255,.8);
+  text-align:center;
+}
+#section-cockpit .cp-pie-inner strong{
+  font-size:14px;font-weight:900;color:#bf6600;line-height:1.1;white-space:nowrap;
+}
+#section-cockpit .cp-pie-inner span{
+  font-size:8px;font-weight:800;color:#61756a;margin-top:2px;
+}
+#section-cockpit .cp-evolution{
+  display:flex;flex-direction:column;gap:3px;align-items:center;text-align:center;
+  color:#50655b;min-width:0;
+}
+#section-cockpit .cp-evolution-title{
+  display:block;font-size:10px;font-weight:900;color:#20392d;white-space:nowrap;
+}
+#section-cockpit .cp-evolution-title small{font-size:9px;font-weight:650;color:#6c7a73}
+#section-cockpit .cp-evolution strong{
+  font-size:13px;font-weight:900;line-height:1.1;
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#section-cockpit .cp-evolution.cp-ev-up strong{color:#13804e}
+#section-cockpit .cp-evolution.cp-ev-down strong{color:#d13e45}
+#section-cockpit .cp-evolution.cp-ev-neutral strong,
+#section-cockpit .cp-evolution.cp-ev-unavailable strong{color:#67756e}
+
+/* Rótulo solicitado: SHARE eSTORE acima do percentual, em verde. */
+#section-cockpit .cp-estore-share{
+  display:flex;flex-direction:column;align-items:flex-end;justify-content:center;
+  gap:3px;text-align:right;flex:0 0 auto;
+}
+#section-cockpit .cp-estore-share span{
+  display:block;color:#176a4b;font-size:12px;font-weight:900;
+  letter-spacing:.01em;line-height:1.1;white-space:nowrap;
+}
+#section-cockpit .cp-estore-share b{
+  display:block;color:#176a4b;font-size:19px;font-weight:900;line-height:1.12;
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:520px){
+  #section-cockpit .cp-main-tiles .cp-tile.cp-sale-tile:first-child{
+    min-height:151px;
+    grid-template-columns:minmax(0,1fr) minmax(105px,35%);
+  }
+  #section-cockpit .cp-main-tiles .cp-tile.cp-sale-tile:first-child .cp-tile-value{
+    font-size:clamp(17px,4.8vw,23px);
+  }
+  #section-cockpit .cp-estore-share span{font-size:11px}
+  #section-cockpit .cp-estore-share b{font-size:18px}
+}
+@media(max-width:360px){
+  #section-cockpit .cp-main-tiles .cp-tile.cp-sale-tile:first-child{
+    grid-template-columns:minmax(0,1fr) 100px;gap:4px;
+  }
+  #section-cockpit .cp-bag-mark{flex-basis:38px;width:38px;height:52px}
+  #section-cockpit .cp-ria-bag{width:36px;height:49px}
+  #section-cockpit .cp-sale-details .cp-tile-label{gap:4px;font-size:11px}
+  #section-cockpit .cp-pie{height:76px;width:76px}
+  #section-cockpit .cp-pie-inner{height:58px;width:58px}
+  #section-cockpit .cp-pie-inner strong{font-size:12px}
+  #section-cockpit .cp-evolution strong{font-size:11px}
+  #section-cockpit .cp-sale-analytics{padding-left:3px}
+}
