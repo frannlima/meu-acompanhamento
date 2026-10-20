@@ -37,16 +37,31 @@ function homeMarkup(data){
  const flash=data.flash?.total!=null?fmt(data.flash.total):"—";
  const sourceFlash=data.flash?.captured_at?"Coleta "+stamp(data.flash.captured_at):"Sem coleta disponível";
  const who=manager()?"Loja "+esc(state.storeCode):"Meu mundo";
- const storeSelector=state.role==="administrador"?'<button type="button" class="ma3-storejump" data-ma3="store">Alterar filial ▾</button>':"";
+ const originalSelect=$("homeAdminStoreSelect")||$("adminStoreSelect");
+ const savedCodes=Array.isArray(window.STORE_CODES)?window.STORE_CODES:["073","084","108","113","138","142","146","175","177","222","238","258","262","314","318","344","350","552"];
+ const codes=originalSelect?.options?.length?Array.from(originalSelect.options).map(o=>String(o.value||"").padStart(3,"0")).filter(v=>/^\d{3}$/.test(v)) : savedCodes;
+ const storeSelector=state.role==="administrador"?'<label class="ma3-switch"><span>Filial</span><select id="ma3SwitchStore" aria-label="Selecionar filial">'+
+ [...new Set(codes)].map(code=>'<option value="'+esc(code)+'"'+(String(state.storeCode).padStart(3,"0")===code?' selected':'')+'>Loja '+esc(code)+'</option>').join("")+
+ '</select></label>':"";
  const header='<div class="ma3-context"><div class="ma3-context-text"><span class="ma3-context-icon">▤</span><div>'+
    '<strong>'+who+'</strong><small>Resultado do dia · '+date(data.d.captured_at)+' · Atualizado '+stamp(data.d.captured_at)+'</small></div></div>'+
    '<div class="ma3-sources"><span title="Indicadores Flash dependem de coleta válida">▥ Flash: venda operacional <b>'+flash+'</b></span>'+
    '<span title="Base de metas, grupos e projeção">▣ Web: venda pura</span>'+storeSelector+'</div></div>';
  if(!manager()){
   const worlds=typeof window.getOfficialGgSummaries==="function"?window.getOfficialGgSummaries():[];
-  const group=worlds.find(w=>w.group_code===state.world)||null;
-  const gm=Number(group?.target_financial||0),gv=Number(group?.sales_financial||0);
-  return header+'<div class="ma3-kpis ma3-staff">'+stat("Meu mundo",esc(group?.gg_label||"Resultado do mundo"),"Venda pura Web")+
+  const worldCode=String(state.world||"");
+  const belongs=g=>{
+    const group=String(g.group_code||"").toLowerCase();
+    if(group===worldCode||group.startsWith(worldCode+"_"))return true;
+    if(worldCode==="beleza_relogios")return /beleza|relogios|relógios/.test(group);
+    if(worldCode==="infantil")return /infantil|carter/.test(group);
+    return false;
+  };
+  const matches=worlds.filter(belongs);
+  const gm=matches.reduce((n,g)=>n+Number(g.target_financial||0),0);
+  const gv=matches.reduce((n,g)=>n+Number(g.sales_financial||0),0);
+  const worldLabel={feminino:"Feminino",masculino:"Masculino",infantil:"Infantil",casa:"Casa",beleza_relogios:"Beleza"}[worldCode]||"meu mundo";
+  return header+'<div class="ma3-kpis ma3-staff">'+stat("Meu mundo",esc(worldLabel),"Venda pura Web")+
     stat("Venda do mundo",data.has?fmt(gv):"—","Meta "+(gm>0?fmt(gm):"—"))+
     stat("Atingimento",data.has&&gm>0?pct(gv/gm*100):"—","Meu desempenho")+'</div>'+
     '<div class="ma3-inline"><button type="button" data-ma3="mundos">Ver meu mundo e DCOs →</button></div>';
@@ -116,6 +131,8 @@ function previewImage(){
  const key=String(state.matricula)+":"+state.storeCode+":"+(d.captured_at||"none")+":"+Number(d.sales_financial||0);
  if(key===previewKey)return;
  if(key===pendingKey)return;
+ // Nunca exibir por alguns instantes a venda de outra filial após troca de loja.
+ el.hidden=true;status.hidden=false;status.textContent="Atualizando card oficial…";
  if(!d.has_input){
   el.hidden=true;status.hidden=false;status.textContent="Aguarde a primeira venda pura Web para gerar o card oficial.";
   return;
@@ -173,6 +190,7 @@ function enqueue(){
 document.addEventListener("click",event=>{
  const action=event.target.closest("[data-ma3]")?.dataset.ma3;
  if(!action){
+  if(event.target.closest("#ma3CardImage")){lightbox();return}
   if(event.target.closest("[data-ma2],[data-section],[data-more-section],[data-world]"))enqueue();
   return;
  }
@@ -183,16 +201,19 @@ document.addEventListener("click",event=>{
  if(action==="close"){$("ma3PreviewModal")?.close();return}
  if(action==="share"){window.maShareDailyGroupCard?.();return}
  if(action==="download"){window.maDownloadGroupCard?.();return}
- if(action==="store"){
-  const existing=$("homeAdminStoreSelect")||$("adminStoreSelect");
-  if(existing){existing.focus();existing.click();}
- }
+
 });
 document.addEventListener("ma:dashboard-ready",enqueue);
 document.addEventListener("ma:flash-update",enqueue);
 document.addEventListener("ma:flash-clear",enqueue);
 document.addEventListener("ma:section-change",enqueue);
 document.addEventListener("change",e=>{
+ if(e.target?.id==="ma3SwitchStore"&&state.role==="administrador"){
+  const existing=$("homeAdminStoreSelect")||$("adminStoreSelect");
+  if(existing){existing.value=e.target.value;existing.dispatchEvent(new Event("change",{bubbles:true}));}
+  else if(typeof window.changeAdminStore==="function")window.changeAdminStore(e.target.value);
+  enqueue();
+ }
  if(e.target?.id==="homeAdminStoreSelect"||e.target?.id==="adminStoreSelect")enqueue();
 });
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>setTimeout(enqueue,50));
