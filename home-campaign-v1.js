@@ -14,10 +14,10 @@
     .replace('01 / 03','01 / 04')
     .replace('Fotos da coleção Olhares Brasileiros','Vídeo e fotos da coleção Olhares Brasileiros')
     .replace('<button class="ol-toggle',MUSIC_BUTTON+'<button class="ol-toggle');
-  let root=null,current=0,timer=null,manualPause=false,visibleInPage=true,announcement=null,noticeOwner='';
+  let root=null,current=0,timer=null,playProbe=null,playAttempt=0,manualPause=false,announcement=null,noticeOwner='';
   const failed=new Set();
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)');
-  const active=()=>state.logged&&state.section==='inicio'&&!document.hidden&&visibleInPage&&!manualPause&&!reduced.matches;
+  const active=()=>state.logged&&state.section==='inicio'&&!document.hidden&&!manualPause&&!reduced.matches;
   // Ordem visual: vídeo primeiro; as três fotos conservam sua posição original no DOM e no CSS.
   function photos(){
     if(!root)return [];
@@ -59,30 +59,42 @@
     }
   }
   function visibleSlides(){return photos().map((_,i)=>i).filter(i=>!failed.has(i));}
+  function offerVideoPlay(){
+    if(!root||current!==0||failed.has(0))return;
+    root.classList.add('ol-video-needs-play');
+    syncToggle();
+  }
   function restart(){
     clearTimeout(timer);timer=null;
+    clearTimeout(playProbe);playProbe=null;
+    const attemptId=++playAttempt;
     window.RiaCampaignMusic?.sync(Boolean(state.logged&&state.section==='inicio'&&!document.hidden));
     const player=video();
     const canPlay=active()&&!failed.has(0);
     if(player){
       if(current!==0||!canPlay){
         player.pause();
+        if(current!==0)root?.classList.remove('ol-video-needs-play');
       }else{
         player.muted=true;
-        const attempt=player.play();
-        if(attempt&&typeof attempt.then==="function")attempt.then(()=>{root?.classList.remove("ol-video-needs-play");syncToggle();});
-        if(attempt&&typeof attempt.catch==='function')attempt.catch(()=>{
-          // Respeitar bloqueios de autoplay sem travar a navegação.
-          player.pause();
-          root?.classList.add("ol-video-needs-play");
-          syncToggle();
-        });
+        player.defaultMuted=true;
+        const initialTime=player.currentTime;
+        try{
+          const started=player.play();
+          if(started?.then)started.then(()=>{
+            if(attemptId!==playAttempt||current!==0||!active())return;
+            if(!player.paused){root?.classList.remove('ol-video-needs-play');syncToggle();}
+          }).catch(()=>{if(attemptId===playAttempt)offerVideoPlay();});
+        }catch(_){offerVideoPlay();}
+        // Se o vídeo não avançar, exibir uma ação manual em vez de uma imagem estática.
+        playProbe=setTimeout(()=>{
+          if(attemptId!==playAttempt||current!==0||!active())return;
+          if(player.paused||player.currentTime<=initialTime+.08)offerVideoPlay();
+        },2600);
       }
     }
     if(!active()||!visibleSlides().length)return;
     if(current===0&&!failed.has(0)){
-      // O vídeo avança pelo evento ended, não pela duração padrão das fotos.
-      // Evita travar o carrossel quando a rede parar antes do fim.
       timer=setTimeout(()=>show(1),22000);
     }else{
       timer=setTimeout(()=>show(current+1),5500);
@@ -111,7 +123,7 @@
   }
   function syncToggle(){
     if(!root)return;
-    const playing=!manualPause&&!reduced.matches&&!(current===0&&root.classList.contains("ol-video-needs-play"));
+    const playing=!manualPause&&!reduced.matches&&!(current===0&&(video()?.paused||root.classList.contains('ol-video-needs-play')));
     const b=root.querySelector('[data-toggle]');
     b.querySelector('[data-play-label]').textContent=reduced.matches?'Próxima':playing?'Pausar':'Reproduzir';
     b.querySelector('[data-play-icon]').textContent=playing?'Ⅱ':'▷';
@@ -155,6 +167,10 @@
       const player=video();
       if(player){
         player.addEventListener("playing",()=>{root.classList.remove("ol-video-needs-play");syncToggle();});
+        player.addEventListener("pause",()=>{
+          if(current===0&&state.section==='inicio'&&!document.hidden&&!player.ended)offerVideoPlay();
+        });
+        player.addEventListener("stalled",offerVideoPlay);
         player.addEventListener("waiting",()=>{root.classList.add("ol-video-needs-play");syncToggle();});
         player.addEventListener('loadeddata',()=>captureFrozenVideoFrame(player));
         player.addEventListener('timeupdate',()=>captureFrozenVideoFrame(player,true));
@@ -167,7 +183,7 @@
         });
       }
       const replay=document.createElement('button');replay.type='button';replay.className='ol-video-replay';replay.textContent='▶ Reproduzir vídeo';replay.setAttribute('aria-label','Reproduzir vídeo da campanha');root.querySelector('.ol-slide-video')?.appendChild(replay);
-      replay.addEventListener('click',()=>{manualPause=false;const p=video();if(!p)return;p.muted=true;const promise=p.play();if(promise?.catch)promise.catch(()=>root.classList.add('ol-video-needs-play'));syncToggle();});
+      replay.addEventListener('click',()=>{manualPause=false;restart();syncToggle();});
       root.querySelector('.ol-campaign-video')?.addEventListener('click',()=>{if(current!==0)return;manualPause=false;restart();});
       root.addEventListener('click',e=>{
         const el=e.target.closest('button');if(!el)return;
@@ -183,7 +199,7 @@
         else if(el.hasAttribute('data-next')){manualPause=false;syncToggle();show(current+1,true);}
         else if(el.hasAttribute('data-toggle')){
           if(reduced.matches){show(current+1,true);return;}
-          manualPause=!manualPause;
+          manualPause=current===0&&video()?.paused?false:!manualPause;
           if(!manualPause&&current===0)root.classList.remove('ol-video-needs-play');
           syncToggle();restart();
         }else if(el.id==='homeCampaignRead'){
@@ -194,7 +210,7 @@
       const stage=root.querySelector('.ol-stage');let touchStart=null;
       stage.addEventListener('touchstart',e=>{touchStart=e.touches[0].clientX;},{passive:true});
       stage.addEventListener('touchend',e=>{if(touchStart===null)return;const delta=e.changedTouches[0].clientX-touchStart;if(Math.abs(delta)>45)show(current+(delta<0?1:-1),true);touchStart=null;},{passive:true});
-      if('IntersectionObserver' in window){new IntersectionObserver(entries=>{visibleInPage=!!entries[0]?.isIntersecting;restart();},{threshold:.1}).observe(root);}
+      // A página ativa controla o vídeo: observar o carrossel inteiro causava pausas indevidas no desktop.
       root.addEventListener('focusin',e=>{if(e.target.closest('[data-sound]'))return;clearInterval(timer);timer=null;});
       root.addEventListener('focusout',()=>setTimeout(()=>{if(!root.contains(document.activeElement))restart();},0));
       head.classList.add('home-campaign-enabled');
