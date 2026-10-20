@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v167-faithful-home";
+const CACHE="meu-acompanhamento-v168-estore-navigation";
 const ASSETS=[
   "./flash-detail-core-v1.js?v=1",
   "./flash-details-v1.js?v=1",
@@ -44,7 +44,7 @@ const ASSETS=[
   "./adaptive-header-v2.css?v=24",
   "./app.js?v=33",
   "./enhancements-v9.js?v=14",
-  "./premium-v22.js?v=11",
+  "./premium-v22.js?v=12",
   "./clarity-v1.js?v=45",
   "./mobile-experience-v1.js?v=41",
   "./responsive-device-v1.js?v=1",
