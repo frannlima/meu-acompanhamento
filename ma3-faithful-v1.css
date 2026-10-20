@@ -323,3 +323,73 @@
     font-size:10px!important;
   }
 }
+
+
+/* Navegação CE+PI 3.0 — menus completos sem ocultar Cockpit/Radar. */
+@media(max-width:900px){
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:1px!important;
+  align-items:center!important;
+  padding:5px 5px!important;
+  height:72px!important;
+  min-height:72px!important;
+  max-width:calc(100vw - 16px)!important;
+  box-sizing:border-box!important;
+ }
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete[data-ma2-role="manager-cockpit-v3"]{
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+ }
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete>.dock-item{
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:center!important;
+  align-items:center!important;
+  gap:3px!important;
+  min-width:0!important;
+  width:100%!important;
+  height:61px!important;
+  min-height:61px!important;
+  padding:5px 1px!important;
+  margin:0!important;
+  border-radius:12px!important;
+  overflow:hidden!important;
+ }
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item .dock-icon,
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item .dock-realistic-icon,
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item .nav-icon{
+  display:grid!important;
+  place-items:center!important;
+  width:24px!important;
+  min-width:24px!important;
+  height:24px!important;
+  max-height:24px!important;
+  padding:0!important;
+  margin:0 auto!important;
+ }
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item svg{
+  width:21px!important;
+  height:21px!important;
+  max-width:21px!important;
+  max-height:21px!important;
+ }
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item .dock-label{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  font-size:9px!important;
+  line-height:1.15!important;
+  font-weight:750!important;
+  letter-spacing:0!important;
+  transform:none!important;
+  text-align:center!important;
+  overflow:hidden!important;
+  white-space:nowrap!important;
+  text-overflow:ellipsis!important;
+ }
+}
+@media(max-width:350px){
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item .dock-label{font-size:8px!important}
+ html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item svg{width:19px!important;height:19px!important}
+}
