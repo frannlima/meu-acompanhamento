@@ -89,6 +89,57 @@ function lineChart(out){
 function navButton(label,action,active=false){
  return '<button type="button" class="ma2-tab" data-ma2="'+action+'" aria-selected="'+active+'">'+safe(label)+'</button>';
 }
+function navIcon(key){
+ const icons={
+  hoje:'<path d="m3 11 9-8 9 8v9h-6v-6H9v6H3z"/>',
+  radar:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12 19 5"/>',
+  mundos:'<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="9" width="5" height="11" rx="1"/><rect x="17" y="6" width="4" height="14" rx="1"/>',
+  equipe:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2"/><path d="M16 6a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 5"/>',
+  mais:'<circle cx="5" cy="5" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="19" cy="19" r="1"/>'
+ };
+ return '<svg class="ma2-navicon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(icons[key]||icons.mais)+'</svg>';
+}
+function ensureNavigation(){
+ const dock=document.querySelector(".mobile-dock");
+ if(dock){
+  const role=isManager()?"manager":"staff";
+  if(dock.dataset.ma2Role!==role){
+   const links=isManager()?[["hoje","Hoje"],["radar","Radar"],["mundos","Mundos"],["equipe","Equipe"],["mais","Mais"]]:
+                               [["hoje","Hoje"],["mundos","Meu mundo"],["mais","Mais"]];
+   dock.innerHTML=links.map(([key,label])=>
+    '<button type="button" class="dock-item ma2-dock-item" data-ma2="'+key+'" aria-label="'+label+'">'+navIcon(key)+'<span class="dock-label">'+label+'</span></button>').join("");
+   dock.dataset.ma2Role=role;
+  }
+  const section=state.section;
+  dock.querySelectorAll("[data-ma2]").forEach(b=>{
+   const key=b.dataset.ma2;
+   const active=section==="inicio"&&(key===activeTab)||
+    section==="grupos"&&key==="mundos"||
+    section==="comerciais"&&key==="equipe"||
+    (section==="mais"||section==="admin"||section==="estore"||section==="descontos"||section==="flash-pilot"||section==="regional")&&key==="mais";
+   b.classList.toggle("active",!!active);
+   b.setAttribute("aria-current",active?"page":"false");
+  });
+ }
+ const sidebar=document.getElementById("nav");
+ if(sidebar){
+  const main=sidebar.querySelector('[data-section="inicio"]');
+  const oldLabel=main?.querySelector(".nav-label");if(oldLabel)oldLabel.textContent="Hoje";
+  const commercialLabel=sidebar.querySelector('[data-section="comerciais"] .nav-label');if(commercialLabel)commercialLabel.textContent="Equipe comercial";
+  let radar=sidebar.querySelector("#ma2SidebarRadar");
+  if(isManager()&&!radar&&main){
+   radar=document.createElement("button");
+   radar.type="button";radar.id="ma2SidebarRadar";radar.className="nav-item ma2-sidebar-item";
+   radar.dataset.ma2="radar";
+   radar.innerHTML=navIcon("radar")+'<span class="nav-label">Radar de Prioridades</span>';
+   main.insertAdjacentElement("afterend",radar);
+  }
+  if(radar){
+   radar.hidden=!isManager();
+   radar.classList.toggle("active",state.section==="inicio"&&activeTab==="radar");
+  }
+ }
+}
 function ensure(){
  const home=document.getElementById("section-inicio"),groups=document.getElementById("section-grupos");
  if(!home||!groups)return false;
@@ -185,6 +236,7 @@ function render(){
   if(!state.logged||!ensure())return;
   const identity=state.matricula+":"+state.role+":"+state.storeCode;
   if(lastIdentity!==identity){activeTab="hoje";lastIdentity=identity;document.getElementById("section-inicio")?.classList.remove("ma2-expanded");document.getElementById("section-grupos")?.classList.remove("ma2-expanded")}
+  ensureNavigation();
   const out=outlook(),items=worlds(out);
   const tabs='<div class="ma2-tabs" role="tablist" aria-label="Acompanhamento">'+navButton("Hoje","hoje",activeTab==="hoje")+
    (isManager()?navButton("Radar","radar",activeTab==="radar"):"")+
@@ -220,6 +272,8 @@ document.addEventListener("click",ev=>{
 });
 document.addEventListener("change",ev=>{if(ev.target?.id==="ma2Store"&&state.role==="administrador")window.changeAdminStore?.(ev.target.value)});
 document.addEventListener("ma:dashboard-ready",render);
+document.addEventListener("ma:world-selected",render);
+document.addEventListener("ma:section-change",render);
 document.addEventListener("ma:flash-update",render);
 document.addEventListener("ma:flash-clear",render);
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",render);else render();
