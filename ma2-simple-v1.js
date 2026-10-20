@@ -155,15 +155,14 @@ function ensure(){
  return true;
 }
 function stageHeader(out){
- const now=hasInput()?stamp(state.day.captured_at):"Sem parcial";
- const options=Array.isArray(window.STORE_CODES)?window.STORE_CODES:["073","084","108","113","138","142","146","175","177","222","238","258","262","314","318","344","350","552"];
- const stores=state.role==="administrador"?
-   '<div class="ma2-storepick"><label for="ma2Store">Filial em análise</label><select id="ma2Store" aria-label="Selecionar filial">'+
-   options.map(s=>'<option value="'+s+'"'+(String(state.storeCode)===s?" selected":"")+'>Loja '+s+'</option>').join("")+'</select></div>':"";
- const name=safe(state.employeeName||"Equipe");
- return '<div class="ma2-hero"><div class="ma2-top"><span class="ma2-brand">RIACHUELO · MEU ACOMPANHAMENTO 2.0</span><span class="ma2-meta">🕒 '+now+'</span></div>'+
-  '<h1>'+ (isManager()?'O resultado na palma da mão':'Meu mundo, meu resultado')+'</h1>'+
-  '<p>Olá, '+name+' · '+roleName()+' · Loja '+safe(state.storeCode)+' · O simples é incrível.</p>'+stores+'</div>';
+ const updated=hasInput()?"Parcial "+stamp(state.day.captured_at):"Aguardando primeira parcial";
+ const codes=Array.isArray(window.STORE_CODES)?window.STORE_CODES:
+  ["073","084","108","113","138","142","146","175","177","222","238","258","262","314","318","344","350","552"];
+ const selector=state.role==="administrador"?
+  '<label class="ma2-radar-select"><span>Filial</span><select id="ma2Store" aria-label="Selecionar filial no Radar">'+
+  codes.map(code=>'<option value="'+code+'"'+(String(state.storeCode)===code?' selected':'')+'>Loja '+code+'</option>').join('')+'</select></label>':"";
+ return '<div class="ma2-radar-heading"><div><h2>Radar de Prioridades</h2><p>Loja '+
+  safe(state.storeCode)+' · '+updated+' · Venda Automação Web</p></div>'+selector+'</div>';
 }
 function today(out,items){
  if(!isManager()){
