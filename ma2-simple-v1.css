@@ -1,0 +1,64 @@
+
+/* Meu Acompanhamento 2.0 - camada visual progressiva, sem interferir nos formulários e dados existentes. */
+#section-inicio.ma2-active:not(.ma2-expanded)>:not(#ma2Stage),
+#section-grupos.ma2-worlds-active:not(.ma2-expanded)>:not(#ma2Worlds){display:none!important}
+#ma2Stage,#ma2Worlds{--ma2-green:#173F35;--ma2-sage:#466964;--ma2-orange:#DE7C00;--ma2-muted:#65776f;--ma2-border:#E7EBE7;color:#173F35;font-family:inherit;max-width:1200px;margin:0 auto 28px;min-width:0}
+#ma2Stage *,#ma2Worlds *{box-sizing:border-box}
+#ma2Stage .ma2-hero{background:linear-gradient(122deg,#173F35,#2D6453);color:#fff;border-radius:22px;padding:21px 23px;box-shadow:0 14px 32px rgba(23,63,53,.12);margin-bottom:15px}
+#ma2Stage .ma2-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+#ma2Stage .ma2-brand{font-size:12px;letter-spacing:.06em;font-weight:800;color:#d9f0e5}
+#ma2Stage .ma2-hero h1{font-size:clamp(21px,3vw,30px);color:#fff;font-weight:750;margin:9px 0 4px}
+#ma2Stage .ma2-hero p{font-size:13px;color:#e5f1eb;margin:0}
+#ma2Stage .ma2-meta{font-size:12px;color:#e1ede6}
+#ma2Stage .ma2-storepick{display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+#ma2Stage .ma2-storepick select{background:#fff;color:#173F35;border:0;border-radius:10px;font-size:13px;padding:9px;max-width:185px}
+#ma2Stage .ma2-tabs{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:0 0 15px}
+#ma2Stage .ma2-tab{font:inherit;font-size:13px;font-weight:750;padding:10px 16px;background:#f1f5f1;color:#476356;border:1px solid transparent;border-radius:99px;cursor:pointer;transition:background .16s,transform .16s}
+#ma2Stage .ma2-tab:hover,#ma2Stage button:hover,#ma2Worlds button:hover{transform:translateY(-1px)}
+#ma2Stage .ma2-tab[aria-selected="true"]{background:#173F35;color:white}
+#ma2Stage .ma2-card,#ma2Worlds .ma2-card{border-radius:19px;border:1px solid var(--ma2-border);background:#fff;box-shadow:0 5px 22px rgba(17,56,43,.04);padding:17px;min-width:0}
+#ma2Stage .ma2-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+#ma2Stage .ma2-sectiontitle,#ma2Worlds .ma2-sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 12px}
+#ma2Stage .ma2-sectiontitle strong,#ma2Worlds .ma2-sectiontitle strong{font-size:16px}
+#ma2Stage .ma2-sectiontitle span,#ma2Worlds .ma2-sectiontitle span{font-size:11px;color:var(--ma2-muted)}
+#ma2Stage .ma2-source{display:flex;gap:8px;align-items:center;font-size:12px;color:#466964;font-weight:700;flex-wrap:wrap}
+#ma2Stage .ma2-pip{display:inline-block;border-radius:7px;background:#E4F4ED;padding:4px 7px;font-size:10px;color:#20614A}
+#ma2Stage .ma2-pip.flash{background:#FFF0E3;color:#975409}
+#ma2Stage .ma2-number{display:block;font-size:clamp(22px,3vw,33px);line-height:1.18;font-weight:800;letter-spacing:-.03em;margin:12px 0 7px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#ma2Stage .ma2-hint{color:var(--ma2-muted);font-size:11px;line-height:1.5}
+#ma2Stage .ma2-four{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}
+#ma2Stage .ma2-four .ma2-card{padding:15px 13px}
+#ma2Stage .ma2-label{font-size:11px;color:var(--ma2-muted);display:block;margin-bottom:6px}
+#ma2Stage .ma2-value{font-size:clamp(17px,2.3vw,24px);font-weight:800;line-height:1.15;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+#ma2Stage .ma2-proj{background:#E9F7F0;border-color:#BDE4D3}
+#ma2Stage .ma2-proj .ma2-value{color:#10613f}
+#ma2Stage .ma2-danger{color:#B34338}
+#ma2Stage .ma2-actions{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}
+#ma2Stage .ma2-btn,#ma2Worlds .ma2-btn{border-radius:12px;padding:12px 16px;border:1px solid #C9D9CF;background:#fff;color:#173F35;font:inherit;font-weight:750;font-size:13px;cursor:pointer}
+#ma2Stage .ma2-btn.primary{background:#173F35;border-color:#173F35;color:#fff}
+#ma2Stage .ma2-banner{background:#E8F5ED;border:1px solid #C0E6D3;border-radius:17px;padding:16px;display:flex;justify-content:space-between;gap:9px;align-items:center;margin-bottom:13px}
+#ma2Stage .ma2-banner .ma2-value{font-size:28px;color:#0D6744}
+#ma2Stage .ma2-priorities{display:grid;gap:10px}
+#ma2Stage .ma2-priority{padding:14px 15px;border:1px solid #e9eae7;border-radius:16px;background:#fff;text-align:left;color:#173F35;cursor:pointer;width:100%;font:inherit}
+#ma2Stage .ma2-priorityhead{display:flex;align-items:center;justify-content:space-between;gap:9px;margin-bottom:10px}
+#ma2Stage .ma2-rank{display:inline-grid;place-items:center;min-width:27px;height:27px;background:#ECF5EE;border-radius:9px;font-weight:800;color:#185b46}
+#ma2Stage .ma2-status{display:inline-block;padding:5px 9px;background:#FFF0E5;border-radius:99px;color:#99561b;font-size:11px;font-weight:800}
+#ma2Stage .ma2-minirow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#ma2Stage .ma2-minirow div span{display:block;font-size:11px;color:#65776f;margin-bottom:5px}
+#ma2Stage .ma2-minirow div b{font-size:clamp(13px,1.8vw,16px);overflow-wrap:anywhere}
+#ma2Stage .ma2-advice{background:#FFF7EE;padding:10px 11px;border-radius:11px;font-size:12px;color:#6f4a23;margin-top:12px}
+#ma2Stage .ma2-priority:focus-visible,#ma2Stage button:focus-visible,#ma2Worlds button:focus-visible{outline:3px solid #D78F38;outline-offset:2px}
+#ma2Stage .ma2-curve{height:95px;width:100%;display:block;margin:8px 0}
+#ma2Stage .ma2-foot{color:#74857c;font-size:11px;line-height:1.5;margin-top:10px}
+#ma2Stage .ma2-progress,#ma2Worlds .ma2-progress{height:8px;background:#e9eeea;border-radius:20px;overflow:hidden}
+#ma2Stage .ma2-progress i,#ma2Worlds .ma2-progress i{display:block;height:100%;background:#18815b;border-radius:20px}
+#ma2Worlds .ma2-worldlist{display:grid;gap:10px}
+#ma2Worlds .ma2-worlditem{width:100%;border:1px solid #e1e9e3;background:#fff;border-radius:16px;padding:15px;text-align:left;color:#173F35;cursor:pointer;font:inherit}
+#ma2Worlds .ma2-worlditem .ma2-name{font-size:16px;font-weight:800}
+#ma2Worlds .ma2-worldcols{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0}
+#ma2Worlds .ma2-worldcols span{font-size:11px;color:#6d7e73}
+#ma2Worlds .ma2-worldcols b{display:block;font-size:15px;color:#173F35}
+#ma2Worlds .ma2-worlditem:focus-visible{outline:3px solid #D78F38;outline-offset:2px}
+@media(max-width:780px){#ma2Stage .ma2-four{grid-template-columns:repeat(2,minmax(0,1fr))}#ma2Stage .ma2-card{padding:14px}#ma2Stage .ma2-number{font-size:24px}}
+@media(max-width:420px){#ma2Stage .ma2-hero{padding:17px}#ma2Stage .ma2-card{padding:12px}#ma2Stage .ma2-four .ma2-card{padding:11px}#ma2Stage .ma2-value{font-size:18px}#ma2Stage .ma2-minirow div b{font-size:13px}#ma2Stage .ma2-tabs{gap:5px}#ma2Stage .ma2-tab{padding:9px 11px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){#ma2Stage .ma2-tab,#ma2Stage button,#ma2Worlds button{transition:none!important;transform:none!important}}
