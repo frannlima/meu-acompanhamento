@@ -275,9 +275,14 @@ function ensureHomePlacement(){
 function homeQuick(out){
  const forecast=out.projected!==null?percent(out.projected):"—";
  const amount=out.projectedDeviation===null?"Aguardando a primeira parcial":("Desvio projetado "+signed(out.projectedDeviation));
- return '<div class="ma2-quick" role="group" aria-label="Projeção resumida da venda pura Web">'+
-  '<div class="ma2-quick-text"><span class="ma2-quick-icon" aria-hidden="true">◎</span><div><span class="ma2-hint">Atingimento projetado · venda pura Web</span>'+
+ const flash=flashSnapshot();
+ const flashText=flash?money(flash.total):"—";
+ const flashTime=flash?"Coleta às "+stamp(flash.captured_at):"Aguardando coleta da loja";
+ return '<div class="ma2-quick" role="group" aria-label="Referências do dia e projeção">'+
+  '<div class="ma2-quick-text"><span class="ma2-quick-icon" aria-hidden="true">◎</span><div>'+
+  '<span class="ma2-hint">Venda pura Web · atingimento projetado</span>'+
   '<strong>'+forecast+'</strong><small>'+safe(amount)+' · Curva estimada</small></div></div>'+
+  '<div class="ma2-quick-flash"><span>Flash · venda operacional</span><strong>'+flashText+'</strong><small>'+safe(flashTime)+'</small></div>'+
   '<button class="ma2-btn primary" type="button" data-ma2="radar">Abrir Radar →</button></div>';
 }
 function render(){
