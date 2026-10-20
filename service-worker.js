@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v177-menus-restore";
+const CACHE="meu-acompanhamento-v178-video-autoplay";
 const ASSETS=[
   "./flash-detail-core-v1.js?v=1",
   "./flash-details-v1.js?v=1",
@@ -18,7 +18,7 @@ const ASSETS=[
   "./cards-visible-preview-v1.css?v=1",
   "./campaign-music-v1.js?v=1",
   "./home-campaign-v1.css?v=2",
-  "./home-campaign-v1.js?v=8",
+  "./home-campaign-v1.js?v=9",
   "./estore-operations-v3.css?v=1",
   "./estore-operations-v3.js?v=1",
   "./decision-guide-v1.css?v=1",
