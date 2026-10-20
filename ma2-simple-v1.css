@@ -109,3 +109,9 @@
  #section-inicio #clarityHome > section.home-group-panel .card-head .ma2-group-tools{width:100%}
  #section-inicio #clarityHome > section.home-group-panel .card-head .ma2-group-tools .btn{flex:1 1 130px}
 }
+
+#section-inicio #ma2Stage .ma2-quick-flash{padding:9px 14px;border-left:1px solid #D5E5D9;flex:0 1 210px;min-width:150px}
+#section-inicio #ma2Stage .ma2-quick-flash span{font-size:11px;color:#65776f;display:block}
+#section-inicio #ma2Stage .ma2-quick-flash strong{font-size:18px;color:#173F35;display:block;margin:4px 0}
+#section-inicio #ma2Stage .ma2-quick-flash small{color:#65776f;font-size:10px;display:block}
+@media(max-width:620px){#section-inicio #ma2Stage .ma2-quick-flash{flex:1 1 125px;padding:8px 0;border-left:0;border-top:1px solid #D5E5D9}#section-inicio #ma2Stage .ma2-quick>.ma2-btn{width:100%}}
