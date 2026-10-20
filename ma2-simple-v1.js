@@ -151,7 +151,7 @@ function ensure(){
   const panel=document.createElement("div");panel.id="ma2Worlds";
   groups.prepend(panel);
  }
- home.classList.add("ma2-active");groups.classList.add("ma2-worlds-active");
+ home.classList.toggle("ma2-radar",activeTab==="radar");groups.classList.add("ma2-worlds-active");
  return true;
 }
 function stageHeader(out){
@@ -231,6 +231,55 @@ function renderWorlds(out,items){
  '<div class="ma2-actions"><button type="button" class="ma2-btn" data-ma2="advanced-worlds">'+
  (document.getElementById("section-grupos")?.classList.contains("ma2-expanded")?"Ocultar detalhes dos DCOs":"Ver análise detalhada por DCO →")+'</button></div>';
 }
+function ensureHomePlacement(){
+ const home=document.getElementById("section-inicio"),stage=document.getElementById("ma2Stage");
+ if(!home||!stage)return;
+ home.classList.toggle("ma2-radar",activeTab==="radar");
+ if(activeTab==="radar"){
+  if(stage.parentElement!==home||stage!==home.firstElementChild)home.prepend(stage);
+  return;
+ }
+ // A Home original, incluindo o carrossel institucional e os painéis, permanece visível.
+ const clarity=document.getElementById("clarityHome");
+ const summary=clarity?.querySelector(".clarity-summary");
+ if(summary){
+  if(summary.nextElementSibling!==stage)summary.insertAdjacentElement("afterend",stage);
+ }else{
+  const head=home.querySelector(":scope > .section-head");
+  if(head&&head.nextElementSibling!==stage)head.insertAdjacentElement("afterend",stage);
+ }
+ const official=home.querySelector(".home-group-panel");
+ const chart=clarity?.querySelector(".clarity-curve");
+ if(official&&chart&&chart.nextElementSibling!==official)chart.insertAdjacentElement("afterend",official);
+ if(official&&!official.dataset.ma2ActionsReady){
+  const actions=official.querySelector(".group-panel-app-head");
+  if(actions){
+   const tools=document.createElement("div");tools.className="ma2-group-tools";
+   const preview=document.createElement("button");preview.type="button";preview.className="btn secondary";
+   preview.textContent="Visualizar card";
+   preview.addEventListener("click",()=>{
+    if(typeof window.openGroupPanel==="function")window.openGroupPanel();
+    else{window.renderGroupSharePanel?.();document.getElementById("groupPanelModal")?.classList.remove("hidden");}
+   });
+   const download=document.createElement("button");download.type="button";download.className="btn secondary";
+   download.textContent="Baixar imagem";
+   download.addEventListener("click",()=>window.maDownloadGroupCard?.());
+   const share=official.querySelector("#shareGroupPanelHome");
+   if(share)share.textContent="Compartilhar card";
+   tools.append(preview,download);
+   actions.appendChild(tools);
+   official.dataset.ma2ActionsReady="1";
+  }
+ }
+}
+function homeQuick(out){
+ const forecast=out.projected!==null?percent(out.projected):"—";
+ const amount=out.projectedDeviation===null?"Aguardando a primeira parcial":("Desvio projetado "+signed(out.projectedDeviation));
+ return '<div class="ma2-quick" role="group" aria-label="Projeção resumida da venda pura Web">'+
+  '<div class="ma2-quick-text"><span class="ma2-quick-icon" aria-hidden="true">◎</span><div><span class="ma2-hint">Atingimento projetado · venda pura Web</span>'+
+  '<strong>'+forecast+'</strong><small>'+safe(amount)+' · Curva estimada</small></div></div>'+
+  '<button class="ma2-btn primary" type="button" data-ma2="radar">Abrir Radar →</button></div>';
+}
 function render(){
  try{
   if(!state.logged||!ensure())return;
@@ -242,11 +291,12 @@ function render(){
    (isManager()?navButton("Radar","radar",activeTab==="radar"):"")+
    navButton("Mundos","mundos")+ (isManager()?navButton("Equipe","equipe"):"")+
    navButton("Mais","mais")+'</div>';
-  document.getElementById("ma2Stage").innerHTML=stageHeader(out)+tabs+
-    '<section role="tabpanel">'+(activeTab==="radar"?radar(out,items):today(out,items))+'</section>'+
-    '<div class="ma2-actions"><button class="ma2-btn" data-ma2="advanced-home">'+
-    (document.getElementById("section-inicio").classList.contains("ma2-expanded")?"Ocultar painéis adicionais":"Ver painéis detalhados")+'</button></div>'+
-    '<div class="ma2-foot">Flash = venda operacional. Web = venda pura e referência para metas, mundos e projeções. Resultados dependem da última coleta de cada fonte.</div>';
+  ensureHomePlacement();
+  document.getElementById("ma2Stage").innerHTML=activeTab==="radar"
+    ?stageHeader(out)+tabs+'<section role="tabpanel">'+radar(out,items)+'</section>'+
+     '<div class="ma2-actions"><button type="button" class="ma2-btn" data-ma2="hoje">← Voltar aos painéis da Home</button></div>'+
+     '<div class="ma2-foot">Radar baseado na venda pura Web e nas metas cadastradas por mundo.</div>'
+    :homeQuick(out);
   renderWorlds(out,items);
  }catch(error){console.error("Interface Meu Acompanhamento 2.0:",error);
   document.getElementById("section-inicio")?.classList.remove("ma2-active");document.getElementById("section-grupos")?.classList.remove("ma2-worlds-active");}
