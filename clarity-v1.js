@@ -513,7 +513,7 @@
 
     ctx.textBaseline="alphabetic";
     ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 56px Larsseit, Arial";
-    ctx.fillText(isDailyClosure()?"FECHAMENTO | RESULTADO DO DIA":"HORA A HORA | RESULTADO DO DIA",width/2,90);
+    ctx.fillText(isDailyClosure()?"FECHAMENTO | LOJA "+state.storeCode:"PARCIAL HORA HORA | LOJA "+state.storeCode,width/2,90,1490);
     ctx.font="600 23px Larsseit, Arial";ctx.fillStyle="#D6D2C4";
     ctx.fillText(
       "Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+
@@ -781,6 +781,8 @@
     const sale=d.has_input?Number(d.sales_financial||0):null;
     const target=Number(d.target_financial)>0?Number(d.target_financial):null;
     const actualPct=sale!==null&&target!==null?sale/target*100:null;
+    const previousYear=Number(d.ly_financial)>0?Number(d.ly_financial):null;
+    const evolution=sale!==null&&previousYear!==null?(sale/previousYear-1)*100:null;
     const projected=sale!==null&&target!==null&&weight>=.08?sale/weight:null;
     const projectedPct=projected!==null&&target!==null?projected/target*100:null;
     const gap=projected!==null&&target!==null?projected-target:null;
@@ -810,7 +812,7 @@
     const weak=[...pressures].sort((a,b)=>a.gap-b.gap).slice(0,3).map(g=>g.name);
     const share=estore?.captured!==null&&estore?.captured!==undefined&&sale>0?estore.captured/sale*100:null;
     const storeHours=STREET_STORES.has(String(state.storeCode).padStart(3,"0"))?10:12;
-    return {closed,sale,target,actualPct,projected,projectedPct,gap,last,rates,declines,peaks,star,weak,
+    return {closed,sale,target,actualPct,evolution,projected,projectedPct,gap,last,rates,declines,peaks,star,weak,
       avg:sale!==null?sale/storeHours:null,estore,share,
       estoreSaleAtt:estore?.captured!==null&&estore?.captured!==undefined&&estore.target>0?estore.captured/estore.target*100:null,
       estoreOrdersAtt:estore?.orders!==null&&estore?.orders!==undefined&&estore.orderTarget>0?estore.orders/estore.orderTarget*100:null,
@@ -818,7 +820,7 @@
       estoreOrderGap:estore?.orders!==null&&estore?.orders!==undefined&&estore.orderTarget>0?estore.orders-estore.orderTarget:null
     };
   }
-  function shareTitle(model){return (model.closed?"FECHAMENTO":"HORA A HORA")+" | LOJA "+state.storeCode;}
+  function shareTitle(model){return (model.closed?"FECHAMENTO":"PARCIAL HORA HORA")+" | LOJA "+state.storeCode;}
   function summaryShareText(model){
     const row=[
       "📊 *"+shareTitle(model)+"*",
@@ -864,21 +866,25 @@
     rr(45,y0+10,W-90,extra-22,22,"#FFFFFF","#DFE7E0");
     rr(45,y0+10,14,extra-22,7,orange);
     txt(shareTitle(model),83,y0+58,38,true,green,1220);
-    txt("REFERÊNCIA: AUTOMAÇÃO WEB  •  "+(close?"FECHAMENTO":"PARCIAL DO DIA"),1570,y0+55,22,true,muted,840);
+    txt("VENDA AUTOMAÇÃO WEB",1840,y0+55,22,true,muted,610);
     // Primeira linha: 3 KPIs em uma única faixa.
     const cols=[83,925,1700],cw=[785,725,760],headY=y0+100,valueY=y0+137;
-    ["VENDA • ATINGIMENTO","PROJEÇÃO • % PROJETADO","DESVIO PROJETADO"].forEach((x,i)=>tiny(x,cols[i],headY,cw[i]));
-    val(shareMoney(model.sale)+"  |  "+sharePct(model.actualPct),cols[0],valueY,cw[0]);
-    val(shareMoney(model.projected)+"  |  "+sharePct(model.projectedPct),cols[1],valueY,cw[1]);
-    val(shareSigned(model.gap),cols[2],valueY,cw[2],color(model.gap));
+    const metric=(label,result,x,y,width,shade=green)=>{
+      tiny(label,x,y,width);
+      val(result,x,y+37,width,shade);
+    };
+    metric("VENDA / ATINGIMENTO",shareMoney(model.sale)+"  |  "+sharePct(model.actualPct),cols[0],headY,cw[0]);
+    metric("PROJEÇÃO / ATING. PROJ.",shareMoney(model.projected)+"  |  "+sharePct(model.projectedPct),cols[1],headY,cw[1]);
+    metric("DESVIO",shareSigned(model.gap),cols[2],headY,cw[2],color(model.gap));
     ctx.strokeStyle="#E1E8E2";ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(80,y0+158);ctx.lineTo(W-80,y0+158);ctx.stroke();
     // Segunda faixa, sem números fictícios: só períodos efetivamente comparáveis.
     if(close){
-      tiny("MÉDIA DE VENDA POR HORA",83,y0+190,590);val(shareMoney(model.avg),83,y0+232,600);
-      tiny("HORÁRIOS DE RETRAÇÃO",925,y0+190,1450);
+      metric("MÉDIA / HORA",shareMoney(model.avg),cols[0],y0+190,cw[0]);
       const decreases=model.declines.length?model.declines.map(p=>fmtH(p.h)+" ▼ "+sharePct(p.growth)).join("   ·   "):"Sem horários comparáveis";
-      val(decreases,925,y0+232,1500,model.declines.length?red:muted);
+      metric("HORÁRIOS DE RETRAÇÃO",decreases,cols[1],y0+190,cw[1],model.declines.length?red:muted);
+      const trend=model.evolution===null?"—":(model.evolution<0?"▼ ":"▲ ")+sharePct(model.evolution);
+      metric("EVOLUÇÃO VS. A.A.",trend,cols[2],y0+190,cw[2],color(model.evolution));
     }else{
       tiny("RITMO VS HORA ANTERIOR",83,y0+190,650);
       const l=model.last,have=!!(l&&l.growth!==null);
@@ -895,17 +901,21 @@
     if(close){
       tiny("3 PRINCIPAIS HORAS DE PICO • CURVA HISTÓRICA",83,y0+270,1200);
       model.peaks.forEach((p,i)=>{
-        const x=83+i*800;
-        txt(fmtH(p.h)+" • "+shareMoney(p.required)+" (meta da curva)",x,y0+310,28,true,green,750);
+        const x=cols[i],width=cw[i];
+        txt(fmtH(p.h)+" • META HISTÓRICA",x,y0+284,20,false,muted,width);
+        txt(shareMoney(p.required),x,y0+318,30,true,green,width);
       });
     }
     const ey=y0+(close?342:284),e=model.estore;
     rr(78,ey,W-156,109,17,"#ECF5FA","#D7E5EE");
-    txt("eSTORE  •  SHARE "+sharePct(model.share),99,ey+32,27,true,"#1D5679",800);
-    txt("VENDA "+shareMoney(e?.captured)+"   "+sharePct(model.estoreSaleAtt)+" meta",99,ey+70,28,true,green,980);
-    txt("PEDIDOS "+(e?.orders===null||e?.orders===undefined?"—":Math.trunc(e.orders))+"   "+sharePct(model.estoreOrdersAtt)+" meta",1080,ey+70,28,true,green,780);
-    txt("DESVIO "+shareSigned(model.estoreSaleGap)+"  |  "+shareSigned(model.estoreOrderGap,"count")+" pedidos",
-      1850,ey+70,25,true,color(model.estoreSaleGap),620);
+    txt("eSTORE  •  SHARE "+sharePct(model.share),99,ey+28,26,true,"#1D5679",800);
+    const estoreCols=[99,1080,1850],estoreWidths=[920,700,620];
+    tiny("VENDA / % ENTREGA",estoreCols[0],ey+57,estoreWidths[0]);
+    tiny("PEDIDOS / % ENTREGA",estoreCols[1],ey+57,estoreWidths[1]);
+    tiny("DESVIO FINANCEIRO / PEDIDOS",estoreCols[2],ey+57,estoreWidths[2]);
+    txt(shareMoney(e?.captured)+"  |  "+sharePct(model.estoreSaleAtt),estoreCols[0],ey+91,28,true,green,estoreWidths[0]);
+    txt((e?.orders===null||e?.orders===undefined?"—":Math.trunc(e.orders))+"  |  "+sharePct(model.estoreOrdersAtt),estoreCols[1],ey+91,28,true,green,estoreWidths[1]);
+    txt(shareSigned(model.estoreSaleGap)+"  |  "+shareSigned(model.estoreOrderGap,"count"),estoreCols[2],ey+91,25,true,color(model.estoreSaleGap),estoreWidths[2]);
     const iy=ey+140;
     const highlight=model.star?model.star.name+" "+sharePct(model.star.att):"—";
     txt("★ DESTAQUE: "+highlight,83,iy,26,true,green,960);
