@@ -724,6 +724,10 @@
     finally{if(btn){btn.disabled=false;btn.textContent=old||"Compartilhar card";}}
   }
 
+  // Fonte única: o card renderizado na Home e os arquivos compartilháveis usam o mesmo canvas.
+  window.maGetDailyCardBlob=()=>createDailyCardBlob();
+  window.maShareDailyGroupCard=()=>shareDailyCard();
+
   // Baixar o MESMO card institucional que o botão Compartilhar utiliza.
   window.maDownloadGroupCard=async function(){
     try{
