@@ -239,51 +239,90 @@ function ensureHomePlacement(){
   if(stage.parentElement!==home||stage!==home.firstElementChild)home.prepend(stage);
   return;
  }
- // A Home original, incluindo o carrossel institucional e os painéis, permanece visível.
- const clarity=document.getElementById("clarityHome");
- const summary=clarity?.querySelector(".clarity-summary");
- if(summary){
-  if(summary.nextElementSibling!==stage)summary.insertAdjacentElement("afterend",stage);
- }else{
-  const head=home.querySelector(":scope > .section-head");
-  if(head&&head.nextElementSibling!==stage)head.insertAdjacentElement("afterend",stage);
+ // O carrossel original permanece na section-head. Os componentes de negócios
+ // anteriores continuam montados, com seus IDs e eventos originais preservados.
+ let main=document.getElementById("ma2Essential");
+ if(!main){
+  main=document.createElement("div");main.id="ma2Essential";main.className="ma2-essential";
+  const heading=home.querySelector(":scope > .section-head");
+  if(heading)heading.insertAdjacentElement("afterend",main);else home.prepend(main);
  }
+ if(stage.parentElement!==main||main.firstElementChild!==stage)main.prepend(stage);
+ const original=document.getElementById("clarityHome");
+ const curve=document.getElementById("clarityCurveChart")?.closest(".clarity-curve");
+ if(curve && curve.parentElement!==main)main.appendChild(curve);
  const official=home.querySelector(".home-group-panel");
- const chart=clarity?.querySelector(".clarity-curve");
- if(official&&chart&&chart.nextElementSibling!==official)chart.insertAdjacentElement("afterend",official);
+ if(official && official.parentElement!==main)main.appendChild(official);
  if(official&&!official.dataset.ma2ActionsReady){
   const actions=official.querySelector(".group-panel-app-head");
   if(actions){
    const tools=document.createElement("div");tools.className="ma2-group-tools";
    const preview=document.createElement("button");preview.type="button";preview.className="btn secondary";
-   preview.textContent="Visualizar card";
-   preview.addEventListener("click",()=>{
+   preview.textContent="Visualizar card";preview.addEventListener("click",()=>{
     if(typeof window.openGroupPanel==="function")window.openGroupPanel();
-    else{window.renderGroupSharePanel?.();document.getElementById("groupPanelModal")?.classList.remove("hidden");}
+    else {window.renderGroupSharePanel?.();document.getElementById("groupPanelModal")?.classList.remove("hidden")}
    });
    const download=document.createElement("button");download.type="button";download.className="btn secondary";
    download.textContent="Baixar imagem";
    download.addEventListener("click",()=>window.maDownloadGroupCard?.());
    const share=official.querySelector("#shareGroupPanelHome");
    if(share)share.textContent="Compartilhar card";
-   tools.append(preview,download);
-   actions.appendChild(tools);
+   tools.append(preview,download);actions.appendChild(tools);
    official.dataset.ma2ActionsReady="1";
   }
  }
+ // Os painéis históricos não são excluídos: ficam acessíveis no mesmo
+ // formato original, mas não competem com a leitura prioritária da Home.
+ let legacy=document.getElementById("ma2LegacyPanels");
+ if(!legacy){
+  legacy=document.createElement("details");legacy.id="ma2LegacyPanels";legacy.className="ma2-legacy";
+  const sum=document.createElement("summary");sum.innerHTML=
+   '<span>▦ Painéis detalhados da operação</span><small>Indicadores, análises e ferramentas da versão anterior</small>';
+  legacy.appendChild(sum);
+  main.insertAdjacentElement("afterend",legacy);
+ }
+ if(original && original.parentElement!==legacy)legacy.appendChild(original);
 }
-function homeQuick(out){
+function modernHome(out,items){
+ const flash=flashSnapshot(),stampFlash=flash?stamp(flash.captured_at):null;
  const forecast=out.projected!==null?percent(out.projected):"—";
- const amount=out.projectedDeviation===null?"Aguardando a primeira parcial":("Desvio projetado "+signed(out.projectedDeviation));
- const flash=flashSnapshot();
- const flashText=flash?money(flash.total):"—";
- const flashTime=flash?"Coleta às "+stamp(flash.captured_at):"Aguardando coleta da loja";
- return '<div class="ma2-quick" role="group" aria-label="Referências do dia e projeção">'+
-  '<div class="ma2-quick-text"><span class="ma2-quick-icon" aria-hidden="true">◎</span><div>'+
-  '<span class="ma2-hint">Venda pura Web · atingimento projetado</span>'+
-  '<strong>'+forecast+'</strong><small>'+safe(amount)+' · Curva estimada</small></div></div>'+
-  '<div class="ma2-quick-flash"><span>Flash · venda operacional</span><strong>'+flashText+'</strong><small>'+safe(flashTime)+'</small></div>'+
-  '<button class="ma2-btn primary" type="button" data-ma2="radar">Abrir Radar →</button></div>';
+ const flashText=flash?money(flash.total):"Aguardando Flash";
+ const completed=out.projected!==null?Math.max(0,Math.min(100,out.projected)):0;
+ const user=safe(state.employeeName||"Equipe");
+ const isLeader=isManager();
+ const own=items.find(w=>w.code===state.world)||null;
+ if(!isLeader){
+  const sales=own&&out.has?money(own.sale):"—";
+  const attainment=own&&out.has?percent(own.attainment):"—";
+  return '<div class="ma2-new-welcome"><span>MEU ACOMPANHAMENTO · HOJE</span><h2>Olá, '+user+'!</h2>'+
+    '<p>Seu mundo, sua evolução. O simples é incrível.</p></div>'+
+    '<div class="ma2-new-layout"><article class="ma2-new-main"><div class="ma2-new-eyebrow">◎ VENDA PURA WEB</div>'+
+    '<span class="ma2-new-mainval">'+sales+'</span><p>Venda acumulada de '+safe(own?.name||"seu mundo")+'</p>'+
+    '<div class="ma2-new-meta"><span>Minha meta <b>'+(own?money(own.target):"—")+'</b></span><span>Atingimento <b>'+attainment+'</b></span></div></article>'+
+    '<article class="ma2-new-forecast"><span>🎯 Meu desafio</span><strong>'+attainment+'</strong><small>Meta do meu mundo</small>'+
+    '<button type="button" class="ma2-btn" data-ma2="mundos">Explorar meus DCOs →</button></article></div>';
+ }
+ return '<div class="ma2-new-welcome"><div><span>MEU ACOMPANHAMENTO · HOJE</span>'+
+    '<h2>Boa leitura do resultado, '+user+'!</h2><p>Loja '+safe(state.storeCode)+' · Atualizado '+
+    (out.has?stamp(state.day.captured_at):"após o primeiro input")+' · O simples é incrível.</p></div>'+
+    '<button type="button" class="ma2-new-refresh" data-ma2="paste">↻ Atualizar parcial</button></div>'+
+    '<div class="ma2-new-layout">'+
+      '<article class="ma2-new-main"><div class="ma2-new-eyebrow">◎ VENDA PURA <span>WEB</span></div>'+
+      '<strong class="ma2-new-mainval">'+(out.has?money(out.sale):"—")+'</strong>'+
+      '<p>Resultado oficial contabilizado para o acompanhamento e mundos</p>'+
+      '<div class="ma2-new-meta"><span>Meta do dia <b>'+money(out.target)+'</b></span>'+
+      '<span>Atingimento atual <b>'+(out.attainment!==null?percent(out.attainment):"—")+'</b></span></div></article>'+
+      '<article class="ma2-new-forecast" style="--ma2-p:'+completed+'%"><div class="ma2-new-f-top"><span>◎ Atingimento projetado</span><small>Estimativa pela curva Web</small></div>'+
+      '<div class="ma2-new-ring"><strong>'+forecast+'</strong></div>'+
+      '<div class="ma2-new-forecast-foot"><span>Previsão '+(out.projection!==null?money(out.projection):"—")+'</span>'+
+      '<b class="'+(out.projectedDeviation!==null&&out.projectedDeviation<0?"is-negative":"")+'">'+(out.projectedDeviation!==null?signed(out.projectedDeviation):"Aguardando ritmo")+'</b></div>'+
+      '<button type="button" class="ma2-btn primary" data-ma2="radar">Abrir Radar de Prioridades →</button></article></div>'+
+    '<div class="ma2-new-secondary"><article class="ma2-new-flash"><span>▣ FLASH · VENDA OPERACIONAL</span>'+
+    '<strong>'+flashText+'</strong><small>'+(stampFlash?"Última coleta "+stampFlash:"Sem coleta disponível da filial")+'</small>'+
+    '</article><article class="ma2-new-next"><span>⚡ PRÓXIMA HORA</span><strong>'+
+    (out.nextNeed!==null?money(out.nextNeed):"—")+'</strong><small>Para alcançar a meta proporcional à curva até '+(out.nextHour?out.nextHour+"h":"a próxima parcial")+'</small></article></div>'+
+    '<div class="ma2-new-shortcuts"><button type="button" data-ma2="groups-card">▤ Ver card dos grupos ↓</button>'+
+    '<button type="button" data-ma2="radar">◎ Minhas prioridades →</button></div>';
 }
 function render(){
  try{
@@ -301,7 +340,7 @@ function render(){
     ?stageHeader(out)+tabs+'<section role="tabpanel">'+radar(out,items)+'</section>'+
      '<div class="ma2-actions"><button type="button" class="ma2-btn" data-ma2="hoje">← Voltar aos painéis da Home</button></div>'+
      '<div class="ma2-foot">Radar baseado na venda pura Web e nas metas cadastradas por mundo.</div>'
-    :homeQuick(out);
+    :modernHome(out,items);
   renderWorlds(out,items);
  }catch(error){console.error("Interface Meu Acompanhamento 2.0:",error);
   document.getElementById("section-inicio")?.classList.remove("ma2-active");document.getElementById("section-grupos")?.classList.remove("ma2-worlds-active");}
@@ -318,6 +357,7 @@ document.addEventListener("click",ev=>{
  }
  const action=btn.dataset.ma2;
  if(action==="paste"){window.showPaste?.();return}
+ if(action==="groups-card"){document.querySelector("#ma2Essential .home-group-panel")?.scrollIntoView({behavior:"smooth",block:"start"});return}
  if(action==="hoje"||action==="radar"){activeTab=action;window.setSection?.("inicio");render();return}
  if(action==="mundos"){window.setSection?.("grupos");render();return}
  if(action==="equipe"){if(isManager()){window.setSection?.("comerciais");render()}return}
