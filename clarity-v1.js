@@ -865,10 +865,15 @@
     ctx.fillStyle=light;ctx.fillRect(0,y0,W,extra);
     rr(45,y0+10,W-90,extra-22,22,"#FFFFFF","#DFE7E0");
     rr(45,y0+10,14,extra-22,7,orange);
-    txt(shareTitle(model),83,y0+58,38,true,green,1220);
-    txt("VENDA AUTOMAÇÃO WEB",1840,y0+55,22,true,muted,610);
-    // Primeira linha: 3 KPIs em uma única faixa.
-    const cols=[83,925,1700],cw=[785,725,760],headY=y0+100,valueY=y0+137;
+    // Título centralizado sobre toda a largura útil do card.
+    ctx.textAlign="center";ctx.textBaseline="alphabetic";
+    ctx.font="800 38px Larsseit, Arial";ctx.fillStyle=green;
+    ctx.fillText(shareTitle(model),W/2,y0+57,W-260);
+    ctx.textAlign="right";ctx.font="800 19px Larsseit, Arial";ctx.fillStyle=muted;
+    ctx.fillText("VENDA AUTOMAÇÃO WEB",W-86,y0+92,570);
+    ctx.textAlign="left";
+    // Três colunas com mesma largura, garantindo alinhamento entre rótulo e resultado.
+    const cols=[95,925,1755],cw=[720,720,700],headY=y0+102,valueY=y0+139;
     const metric=(label,result,x,y,width,shade=green)=>{
       tiny(label,x,y,width);
       val(result,x,y+37,width,shade);
@@ -909,7 +914,7 @@
     const ey=y0+(close?342:284),e=model.estore;
     rr(78,ey,W-156,109,17,"#ECF5FA","#D7E5EE");
     txt("eSTORE  •  SHARE "+sharePct(model.share),99,ey+28,26,true,"#1D5679",800);
-    const estoreCols=[99,1080,1850],estoreWidths=[920,700,620];
+    const estoreCols=[104,935,1765],estoreWidths=[720,720,690];
     tiny("VENDA / % ENTREGA",estoreCols[0],ey+57,estoreWidths[0]);
     tiny("PEDIDOS / % ENTREGA",estoreCols[1],ey+57,estoreWidths[1]);
     tiny("DESVIO FINANCEIRO / PEDIDOS",estoreCols[2],ey+57,estoreWidths[2]);
