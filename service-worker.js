@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v166-faithful-home";
+const CACHE="meu-acompanhamento-v167-faithful-home";
 const ASSETS=[
   "./flash-detail-core-v1.js?v=1",
   "./flash-details-v1.js?v=1",
@@ -6,8 +6,8 @@ const ASSETS=[
   "./flash-pilot-v1.js?v=5",
   "./ma2-simple-v1.css?v=6",
   "./ma2-simple-v1.js?v=5",
-  "./ma3-faithful-v1.css?v=1",
-  "./ma3-faithful-v1.js?v=1",
+  "./ma3-faithful-v1.css?v=2",
+  "./ma3-faithful-v1.js?v=2",
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
   "./layout-balance-v1.css?v=1",
