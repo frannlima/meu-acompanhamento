@@ -513,7 +513,7 @@
 
     ctx.textBaseline="alphabetic";
     ctx.fillStyle=C.white;ctx.textAlign="center";ctx.font="800 56px Larsseit, Arial";
-    ctx.fillText("HORA A HORA | RESULTADO DO DIA",width/2,90);
+    ctx.fillText(isDailyClosure()?"FECHAMENTO | RESULTADO DO DIA":"HORA A HORA | RESULTADO DO DIA",width/2,90);
     ctx.font="600 23px Larsseit, Arial";ctx.fillStyle="#D6D2C4";
     ctx.fillText(
       "Loja "+state.storeCode+" • "+new Date(localDate()+"T12:00:00-03:00").toLocaleDateString("pt-BR")+
@@ -683,44 +683,260 @@
     ));
   }
 
-  function buildDailyShareSummary(){
-    const d=state.day||{},groups=officialDailyCardGroups();
-    const curve=curveForStore(),tp=timeParts(d.captured_at||null),expectedPct=expectedPctAt(curve,tp.h,tp.m,"fin");
-    const meta=Number(d.target_financial||0),venda=Number(d.sales_financial||0);
-    const att=meta?venda/meta*100:0,dev=venda-meta;
-    const proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
 
-    const ranked=[...groups].map(g=>({
-      name:g.gg_label||GROUP_LABELS[g.group_code]||g.group_code,
-      dev:Number(g.sales_financial||0)-Number(g.target_financial||0),
-      att:Number(g.target_financial||0)?Number(g.sales_financial||0)/Number(g.target_financial||0)*100:0
-    }));
-    const best=[...ranked].sort((a,b)=>b.att-a.att)[0]||null;
-    const pressures=[...ranked].sort((a,b)=>a.dev-b.dev).slice(0,3).map(x=>x.name).join(", ");
+  // Faixa visual compacta acrescida abaixo do card Riachuelo original (intocado).
+  // Fonte de eStore: a mesma action hourly_get usada pela tela eStore CE+PI.
+  const ESTORE_HOURLY_ENDPOINT="https://fndkjgveeojlywkdrtxe.supabase.co/functions/v1/estore-api";
+  let estoreShareCache=null,estoreSharePending=null;
 
-    return '📊 *HORA A HORA | LOJA '+state.storeCode+'*\n'+
-      'Venda: *'+money(venda,2)+'* | *'+pct(att)+' da meta*\n'+
-      'Projeção: *'+(proj?money(proj,2):"—")+'* | Desvio: *'+signedMoney(dev,2)+'*\n\n'+
-      '🏆 *Destaque:* '+(best?best.name+' *'+pct(best.att)+'*':"—")+'\n'+
-      '🔻 *Maiores pressões:* '+(pressures||"—");
+  function businessDateOf(iso){
+    if(!iso||!Number.isFinite(Date.parse(iso)))return "";
+    const p=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Fortaleza",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date(iso));
+    const value=k=>p.find(part=>part.type===k)?.value||"";
+    return value("year")+"-"+value("month")+"-"+value("day");
   }
+  function isDailyClosure(){
+    const d=state.day||{},date=localDate(),t=timeParts(d.captured_at||null);
+    // Fechamento só com parcial válida da data, não transforma leitura antiga em fechamento.
+    return Boolean(d.has_input&&d.captured_at&&businessDateOf(d.captured_at)===date&&(t.h*60+t.m)>=21*60+50);
+  }
+  const sharePct=value=>value===null||!Number.isFinite(value)?"—":value.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%";
+  const shareMoney=value=>value===null||!Number.isFinite(value)?"—":money(value,2);
+  const shareSigned=(value,unit="money")=>value===null||!Number.isFinite(value)?"—":
+    (value<0?"− ":value>0?"+ ":"")+(unit==="money"?money(Math.abs(value),2):Math.abs(value).toLocaleString("pt-BR"));
+  function storeShareContext(){return {store:String(state.storeCode||"").padStart(3,"0"),date:localDate(),matricula:String(state.matricula||"")};}
+  function sameShareContext(a,b){return Boolean(a&&b&&a.store===b.store&&a.date===b.date&&a.matricula===b.matricula);}
+  async function getOfficialEstoreForShare(force=false){
+    const c=storeShareContext();
+    if(!state.logged||!c.matricula||!c.store)return null;
+    if(!force&&estoreShareCache&&sameShareContext(estoreShareCache.context,c)&&Date.now()-estoreShareCache.checkedAt<90000)return estoreShareCache.value;
+    if(estoreSharePending&&sameShareContext(estoreSharePending.context,c))return estoreSharePending.promise;
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),6500);
+    const req=(async()=>{
+      try{
+        const response=await fetch(ESTORE_HOURLY_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({action:"hourly_get",matricula:c.matricula,result_date:c.date}),cache:"no-store",signal:controller.signal});
+        const payload=await response.json();
+        if(!response.ok||payload.ok!==true||!Array.isArray(payload.stores))throw Error("eStore indisponível");
+        if(payload.result_date&&String(payload.result_date)!==c.date)throw Error("Data eStore diferente");
+        const row=payload.stores.find(x=>String(x.st||"").padStart(3,"0")===c.store);
+        if(!row||!row.updated_at||businessDateOf(row.updated_at)!==c.date)throw Error("Sem parcial eStore válida");
+        const numberOrNull=v=>v===null||v===undefined||v===""||!Number.isFinite(Number(v))?null:Number(v);
+        const data={
+          captured:numberOrNull(row.captured),orders:numberOrNull(row.orders),
+          target:numberOrNull(row.metaValue),orderTarget:numberOrNull(row.orderTarget),
+          updated_at:row.updated_at
+        };
+        if(!sameShareContext(c,storeShareContext()))return null;
+        estoreShareCache={context:c,checkedAt:Date.now(),value:data};
+        return data;
+      }catch(e){
+        if(sameShareContext(c,storeShareContext()))estoreShareCache={context:c,checkedAt:Date.now()-70000,value:null};
+        return null;
+      }finally{
+        clearTimeout(timer);
+        if(estoreSharePending&&sameShareContext(estoreSharePending.context,c))estoreSharePending=null;
+      }
+    })();
+    estoreSharePending={context:c,promise:req};
+    return req;
+  }
+  // Atualização discreta na Home: o clique Compartilhar já encontra a última parcial oficial.
+  function queueEstoreSharePrefetch(){
+    if(!state.logged||!["administrador","supervisor","gerente"].includes(state.role))return;
+    void getOfficialEstoreForShare();
+  }
+  document.addEventListener("ma:dashboard-ready",queueEstoreSharePrefetch);
+  document.addEventListener("ma:estore-hourly-loaded",queueEstoreSharePrefetch);
 
+  function comparableHourlyRates(){
+    const day=localDate(),history=Array.isArray(state.history)?state.history:[];
+    const pts=history.filter(x=>businessDateOf(x.captured_at)===day&&Number.isFinite(Number(x.sales_financial)))
+      .map(x=>({at:x.captured_at,sale:Number(x.sales_financial)}))
+      .sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
+    const d=state.day||{};
+    if(d.has_input&&businessDateOf(d.captured_at)===day&&!pts.some(p=>p.at===d.captured_at))
+      pts.push({at:d.captured_at,sale:Number(d.sales_financial||0)});
+    pts.sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
+    const rates=[];
+    for(let i=1;i<pts.length;i++){
+      const mins=(Date.parse(pts[i].at)-Date.parse(pts[i-1].at))/60000;
+      const diff=pts[i].sale-pts[i-1].sale;
+      if(mins<40||mins>80||diff<0)continue; // Intervalos incomparáveis ou correção acumulada.
+      const h=timeParts(pts[i].at).h;
+      const rate=diff*60/mins;
+      const prev=rates.at(-1);
+      const comparable=prev&&Math.abs(Date.parse(pts[i-1].at)-Date.parse(prev.at))<120000&&
+        Math.abs(mins-prev.duration)<=20;
+      const delta=comparable?rate-prev.rate:null;
+      const growth=comparable&&prev.rate>0?(rate/prev.rate-1)*100:null;
+      rates.push({h,at:pts[i].at,duration:mins,rate,delta,growth});
+    }
+    return rates;
+  }
+  function shareModel(estore){
+    const d=state.day||{},curve=curveForStore(),closed=isDailyClosure();
+    const tp=timeParts(d.captured_at||null),weight=expectedPctAt(curve,tp.h,tp.m,"fin");
+    const sale=d.has_input?Number(d.sales_financial||0):null;
+    const target=Number(d.target_financial)>0?Number(d.target_financial):null;
+    const actualPct=sale!==null&&target!==null?sale/target*100:null;
+    const projected=sale!==null&&target!==null&&weight>=.08?sale/weight:null;
+    const projectedPct=projected!==null&&target!==null?projected/target*100:null;
+    const gap=projected!==null&&target!==null?projected-target:null;
+    const rates=comparableHourlyRates(),last=rates.at(-1)||null;
+    const declines=rates.filter(r=>r.growth!==null&&r.growth<0)
+      .sort((a,b)=>a.growth-b.growth).slice(0,3);
+    const hours=curve.map(row=>({h:row.h,weight:Number(row.fin)||0})).filter(r=>r.weight>0);
+    const high=[...hours].sort((a,b)=>b.weight-a.weight).slice(0,3).sort((a,b)=>a.h-b.h);
+    const future=hours.filter(r=>r.h>=tp.h);
+    const futureWeight=future.reduce((a,b)=>a+b.weight,0);
+    const remaining=sale!==null&&target!==null?Math.max(0,target-sale):null;
+    const peaks=high.map(row=>{
+      const byHour=rates.filter(r=>r.h===row.h);
+      const lastHour=byHour.at(-1);
+      // Horário encerrado: mostra meta proporcional da curva, não inventa realizado.
+      const upcoming=!closed&&row.h>=tp.h&&futureWeight>0&&remaining!==null;
+      const required=upcoming?remaining*row.weight/futureWeight:(target!==null?target*row.weight:null);
+      const label=closed?"Meta curva":upcoming?"Necessário":"Meta curva";
+      return {h:row.h,label,required,realized:lastHour?lastHour.rate:null};
+    });
+    const positive=rate=>rate!==null&&rate>0;
+    const pressures=officialDailyCardGroups().map(g=>({
+      name:g.gg_label||g.group_code||"Grupo",gap:Number(g.sales_financial||0)-Number(g.target_financial||0),
+      att:Number(g.target_financial)>0?Number(g.sales_financial||0)/Number(g.target_financial)*100:0
+    }));
+    const star=[...pressures].sort((a,b)=>b.att-a.att)[0]||null;
+    const weak=[...pressures].sort((a,b)=>a.gap-b.gap).slice(0,3).map(g=>g.name);
+    const share=estore?.captured!==null&&estore?.captured!==undefined&&sale>0?estore.captured/sale*100:null;
+    const storeHours=String(state.storeCode).padStart(3,"0")&&(["084","113","146"].includes(String(state.storeCode).padStart(3,"0"))?10:12);
+    return {closed,sale,target,actualPct,projected,projectedPct,gap,last,rates,declines,peaks,star,weak,
+      avg:sale!==null?sale/storeHours:null,estore,share,
+      estoreSaleAtt:estore?.captured!==null&&estore?.captured!==undefined&&estore.target>0?estore.captured/estore.target*100:null,
+      estoreOrdersAtt:estore?.orders!==null&&estore?.orders!==undefined&&estore.orderTarget>0?estore.orders/estore.orderTarget*100:null,
+      estoreSaleGap:estore?.captured!==null&&estore?.captured!==undefined&&estore.target>0?estore.captured-estore.target:null,
+      estoreOrderGap:estore?.orders!==null&&estore?.orders!==undefined&&estore.orderTarget>0?estore.orders-estore.orderTarget:null
+    };
+  }
+  function shareTitle(model){return (model.closed?"FECHAMENTO":"HORA A HORA")+" | LOJA "+state.storeCode;}
+  function summaryShareText(model){
+    const row=[
+      "📊 *"+shareTitle(model)+"*",
+      "Venda *"+shareMoney(model.sale)+"* · Ating. *"+sharePct(model.actualPct)+"*",
+      "Projeção *"+shareMoney(model.projected)+"* ("+sharePct(model.projectedPct)+") · Desvio *"+shareSigned(model.gap)+"*"
+    ];
+    if(model.last&&model.last.growth!==null)row.push("Ritmo "+(model.last.growth>=0?"▲ ":"▼ ")+shareSigned(model.last.growth,"pct")+"% ("+shareSigned(model.last.delta)+" R$/h)");
+    if(model.estore)row.push("eStore: share "+sharePct(model.share)+" · "+shareMoney(model.estore.captured)+" · "+(model.estore.orders===null?"—":Math.trunc(model.estore.orders))+" pedidos");
+    return row.join("\n");
+  }
+  async function shareCompositeImage(cardBlob,model){
+    const picture=typeof createImageBitmap==="function"?await createImageBitmap(cardBlob):await new Promise((resolve,reject)=>{
+      const url=URL.createObjectURL(cardBlob),img=new Image();
+      img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};
+      img.onerror=()=>{URL.revokeObjectURL(url);reject(Error("Falha na montagem do card"))};
+      img.src=url;
+    });
+    const W=picture.width,close=model.closed,extra=close?530:460;
+    const canvas=document.createElement("canvas");
+    canvas.width=W;canvas.height=picture.height+extra;
+    const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";
+    ctx.drawImage(picture,0,0);
+    if(typeof picture.close==="function")picture.close();
+    const y0=canvas.height-extra,light="#F7F4ED",green="#173F35",muted="#60736B";
+    const red="#B94039",positive="#126B4A",orange="#DE7C00";
+    const color=n=>n===null||!Number.isFinite(n)?muted:n<0?red:positive;
+    const rr=(x,y,w,h,rad,bg,border=null)=>{
+      ctx.beginPath();ctx.roundRect(x,y,w,h,rad);ctx.fillStyle=bg;ctx.fill();
+      if(border){ctx.strokeStyle=border;ctx.lineWidth=2;ctx.stroke()}
+    };
+    const txt=(t,x,y,size=27,bold=false,fill=green,max=Infinity)=>{
+      ctx.font=(bold?"800 ":"600 ")+size+"px Larsseit, Arial";
+      ctx.fillStyle=fill;ctx.textAlign="left";ctx.textBaseline="alphabetic";
+      ctx.fillText(String(t),x,y,max);
+    };
+    const tiny=(t,x,y,w)=>{txt(t,x,y,22,false,muted,w)};
+    const val=(t,x,y,w,shade=green)=>txt(t,x,y,34,true,shade,w);
+    const fmtH=h=>String(h).padStart(2,"0")+"h";
+    const centerText=(t,x,y,w,size=25,shade=green)=>{
+      ctx.textAlign="center";ctx.fillStyle=shade;ctx.font="800 "+size+"px Larsseit, Arial";ctx.fillText(String(t),x+w/2,y,w-25);ctx.textAlign="left";
+    };
+    ctx.fillStyle=light;ctx.fillRect(0,y0,W,extra);
+    rr(45,y0+10,W-90,extra-22,22,"#FFFFFF","#DFE7E0");
+    rr(45,y0+10,14,extra-22,7,orange);
+    txt(shareTitle(model),83,y0+58,38,true,green,1220);
+    txt("REFERÊNCIA: AUTOMAÇÃO WEB  •  "+(close?"FECHAMENTO":"PARCIAL DO DIA"),1570,y0+55,22,true,muted,840);
+    // Primeira linha: 3 KPIs em uma única faixa.
+    const cols=[83,925,1700],cw=[785,725,760],headY=y0+100,valueY=y0+137;
+    ["VENDA • ATINGIMENTO","PROJEÇÃO • % PROJETADO","DESVIO PROJETADO"].forEach((x,i)=>tiny(x,cols[i],headY,cw[i]));
+    val(shareMoney(model.sale)+"  |  "+sharePct(model.actualPct),cols[0],valueY,cw[0]);
+    val(shareMoney(model.projected)+"  |  "+sharePct(model.projectedPct),cols[1],valueY,cw[1]);
+    val(shareSigned(model.gap),cols[2],valueY,cw[2],color(model.gap));
+    ctx.strokeStyle="#E1E8E2";ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(80,y0+158);ctx.lineTo(W-80,y0+158);ctx.stroke();
+    // Segunda faixa, sem números fictícios: só períodos efetivamente comparáveis.
+    if(close){
+      tiny("MÉDIA DE VENDA POR HORA",83,y0+190,590);val(shareMoney(model.avg),83,y0+232,600);
+      tiny("HORÁRIOS DE RETRAÇÃO",925,y0+190,1450);
+      const decreases=model.declines.length?model.declines.map(p=>fmtH(p.h)+" ▼ "+sharePct(p.growth)).join("   ·   "):"Sem horários comparáveis";
+      val(decreases,925,y0+232,1500,model.declines.length?red:muted);
+    }else{
+      tiny("RITMO VS HORA ANTERIOR",83,y0+190,650);
+      const l=model.last,have=!!(l&&l.growth!==null);
+      val(have?(l.growth>=0?"▲ +":"▼ ")+sharePct(l.growth)+" ("+shareSigned(l.delta)+" R$/h)":"Aguardando 2 horas comparáveis",
+        83,y0+233,900,have?color(l.growth):muted);
+      tiny("3 PRINCIPAIS PICOS • CURVA HISTÓRICA",1120,y0+190,1300);
+      model.peaks.forEach((p,i)=>{
+        const x=1120+i*445;
+        txt(fmtH(p.h)+"  "+shareMoney(p.required),x,y0+230,25,true,green,426);
+        txt(p.label,x,y0+253,19,false,muted,410);
+      });
+    }
+    // Fechamento tem linha própria para apresentar os três picos sem alongar demais.
+    if(close){
+      tiny("3 PRINCIPAIS HORAS DE PICO • CURVA HISTÓRICA",83,y0+270,1200);
+      model.peaks.forEach((p,i)=>{
+        const x=83+i*800;
+        txt(fmtH(p.h)+" • "+shareMoney(p.required)+" (meta da curva)",x,y0+310,28,true,green,750);
+      });
+    }
+    const ey=y0+(close?342:284),e=model.estore;
+    rr(78,ey,W-156,109,17,"#ECF5FA","#D7E5EE");
+    txt("eSTORE  •  SHARE "+sharePct(model.share),99,ey+32,27,true,"#1D5679",800);
+    txt("VENDA "+shareMoney(e?.captured)+"   "+sharePct(model.estoreSaleAtt)+" meta",99,ey+70,28,true,green,980);
+    txt("PEDIDOS "+(e?.orders===null||e?.orders===undefined?"—":Math.trunc(e.orders))+"   "+sharePct(model.estoreOrdersAtt)+" meta",1080,ey+70,28,true,green,780);
+    txt("DESVIO "+shareSigned(model.estoreSaleGap)+"  |  "+shareSigned(model.estoreOrderGap,"count")+" pedidos",
+      1850,ey+70,25,true,color(model.estoreSaleGap),620);
+    const iy=ey+140;
+    const highlight=model.star?model.star.name+" "+sharePct(model.star.att):"—";
+    txt("★ DESTAQUE: "+highlight,83,iy,26,true,green,960);
+    txt("▼ MAIORES PRESSÕES: "+(model.weak.join(", ")||"—"),1090,iy,24,true,red,1330);
+    return await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error("Não foi possível gerar a legenda.")),"image/png",.96));
+  }
   async function shareDailyCard(){
     const btn=$("clarityShareDaily"),old=btn?.textContent;
     if(btn){btn.disabled=true;btn.textContent="Gerando...";}
     try{
-      const blob=await createDailyCardBlob();
-      const file=new File([blob],"Hora_a_Hora_Loja_"+state.storeCode+"_"+localDate()+".png",{type:"image/png"});
-      const textMsg=buildDailyShareSummary();
+      const context=storeShareContext();
+      if(!state.day?.has_input||businessDateOf(state.day.captured_at)!==context.date)throw Error("Atualize a venda Automação Web antes de compartilhar.");
+      // Consulta oficial; a ausência de eStore nunca gera valor hipotético.
+      const estore=await getOfficialEstoreForShare();
+      if(!sameShareContext(context,storeShareContext()))throw Error("A filial mudou durante a preparação do card. Tente novamente.");
+      const model=shareModel(estore);
+      const image=await createDailyCardBlob();
+      const blob=await shareCompositeImage(image,model);
+      const prefix=model.closed?"Fechamento":"Hora_a_Hora";
+      const file=new File([blob],prefix+"_Loja_"+state.storeCode+"_"+localDate()+".png",{type:"image/png"});
+      const textMsg=summaryShareText(model);
       if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({title:"Hora a Hora • Resultado do Dia",text:textMsg,files:[file]});
+        await navigator.share({title:shareTitle(model),text:textMsg,files:[file]});
         window.registrarCompartilhamentoParcial?.();
       }else{
-        const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
-        if(navigator.clipboard) await navigator.clipboard.writeText(textMsg).catch(()=>{});
-        toast("Card gerado e resumo copiado.");
+        const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),30000);
+        if(navigator.clipboard)await navigator.clipboard.writeText(textMsg).catch(()=>{});
+        toast("Card e legenda compacta gerados; resumo copiado.");
       }
-    }catch(e){if(e?.name!=="AbortError") toast(e.message||"Não foi possível compartilhar.",true);}
+    }catch(e){if(e?.name!=="AbortError")toast(e.message||"Não foi possível compartilhar.",true);}
     finally{if(btn){btn.disabled=false;btn.textContent=old||"Compartilhar card";}}
   }
 
