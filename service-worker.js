@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v169-five-adjustments";
+const CACHE="meu-acompanhamento-v170-hh-share-compact-box";
 const ASSETS=[
   "./flash-detail-core-v1.js?v=1",
   "./flash-details-v1.js?v=1",
@@ -45,7 +45,7 @@ const ASSETS=[
   "./app.js?v=33",
   "./enhancements-v9.js?v=14",
   "./premium-v22.js?v=12",
-  "./clarity-v1.js?v=45",
+  "./clarity-v1.js?v=46",
   "./mobile-experience-v1.js?v=41",
   "./responsive-device-v1.js?v=1",
   "./execution-v1.js?v=6",
