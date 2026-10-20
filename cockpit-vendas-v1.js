@@ -78,6 +78,9 @@
     const attainment=has&&target>0?sale/target*100:null;
     const projectedAtt=projection!==null&&target>0?projection/target*100:null;
     const dev=has&&target>0?sale-target:null;
+    // EV. da Venda Real: evolução financeira frente à venda do ano anterior.
+    const ly=Number(d.ly_financial||0);
+    const evolution=has&&ly>0?(sale/ly-1)*100:null;
     const growth=has&&d.interval_growth_pct!=null&&Number.isFinite(Number(d.interval_growth_pct))?Number(d.interval_growth_pct):null;
     const delta=has&&growth!==null&&Number.isFinite(Number(d.interval_delta_financial))?Number(d.interval_delta_financial):null;
     const peaks=rows.slice().sort((a,b)=>b.w-a.w||a.h-b.h).slice(0,3).sort((a,b)=>a.h-b.h);
@@ -91,7 +94,7 @@
     const eAtt=cap!==null&&eTarget>0?cap/eTarget*100:null;
     const oAtt=orders!==null&&orderTarget>0?orders/orderTarget*100:null;
     const share=cap!==null&&sale!==null&&sale>0?cap/sale*100:null;
-    return {target,has,sale,attainment,dev,growth,delta,projection,projectedAtt,peaks,rows,fraction,
+    return {target,has,sale,attainment,dev,evolution,growth,delta,projection,projectedAtt,peaks,rows,fraction,
       best:group.best,pressures:group.pressures,e,cap,eTarget,orders,orderTarget,eAtt,oAtt,share,updated:d.captured_at};
   }
   function meter(value,tone="green"){
@@ -101,6 +104,38 @@
     return '<article class="cp-tile"><div class="cp-tile-label"><span class="cp-tile-icon">'+icon+'</span><b>'+label+'</b></div>'+
       '<strong class="cp-tile-value">'+value+'</strong><span class="cp-tile-sub">'+subtitle+'</span>'+
       (progress!==null?meter(progress,color):'<div class="cp-meter-void"></div>')+'</article>';
+  }
+  // Símbolo de sacola com assinatura vertical Ria / Chu / Elo.
+  function riaShoppingBag(){
+    return '<svg class="cp-ria-bag" viewBox="0 0 64 76" role="img" aria-label="Sacola de compras Ria Chu Elo">'+
+      '<path d="M10 21H54L51 69H13Z" fill="#f3f6f3" stroke="#173f35" stroke-width="3" stroke-linejoin="round"/>'+
+      '<path d="M23 22V16a9 9 0 0 1 18 0v6" fill="none" stroke="#173f35" stroke-width="3" stroke-linecap="round"/>'+
+      '<text x="32" y="39" text-anchor="middle" font-size="12" font-weight="900" fill="#173f35">Ria</text>'+
+      '<text x="32" y="51" text-anchor="middle" font-size="12" font-weight="900" fill="#173f35">Chu</text>'+
+      '<text x="32" y="63" text-anchor="middle" font-size="12" font-weight="900" fill="#173f35">Elo</text>'+
+    '</svg>';
+  }
+  function saleRealTile(x){
+    const value=x.has?cash(x.sale):"—";
+    const attainment=x.attainment!==null?percent(x.attainment):"—";
+    const ratio=bound(x.attainment);
+    const ev=x.evolution,trend=ev===null?"cp-ev-unavailable":ev>0?"cp-ev-up":ev<0?"cp-ev-down":"cp-ev-neutral";
+    const evDisplay=ev===null?"—":(ev>0?"+ ":"")+percent(ev);
+    const arrow=ev===null?"":ev>0?"▲":ev<0?"▼":"◆";
+    return '<article class="cp-tile cp-sale-tile">'+
+      '<div class="cp-sale-details">'+
+        '<div class="cp-tile-label"><span class="cp-bag-mark">'+riaShoppingBag()+'</span><b>VENDA REAL</b></div>'+
+        '<strong class="cp-tile-value">'+value+'</strong>'+
+        '<span class="cp-tile-sub">'+(x.has?"Venda Web acumulada":"Aguardando venda Web")+'</span>'+
+      '</div>'+
+      '<div class="cp-sale-analytics">'+
+        '<div class="cp-pie" role="img" aria-label="Atingimento de '+attainment+' da meta" style="--cp-progress:'+ratio+'">'+
+          '<div class="cp-pie-inner"><strong>'+attainment+'</strong><span>DA META</span></div>'+
+        '</div>'+
+        '<div class="cp-evolution '+trend+'"><span class="cp-evolution-title">EV. <small>vs A.A.</small></span>'+
+          '<strong><span aria-hidden="true">'+arrow+'</span> '+evDisplay+'</strong></div>'+
+      '</div>'+
+    '</article>';
   }
   function render(){
     const root=$("cockpitContent");
@@ -117,7 +152,7 @@
     const oDeviation=x.orders!==null&&x.orderTarget>0?x.orders-x.orderTarget:null;
     root.innerHTML=
       '<div class="cp-main-tiles">'+
-        mainTile("🛒","VENDA REAL",x.has?cash(x.sale):"—",x.attainment!==null?percent(x.attainment)+" da meta":"Aguardando venda Web",x.attainment,"orange")+
+        saleRealTile(x)+
         mainTile("◎","META DO DIA",x.target>0?cash(x.target):"—",x.target>0?"Meta financeira oficial":"Meta ainda não cadastrada",null)+
         mainTile("▥","PROJEÇÃO",x.projection!==null?cash(x.projection):"—",x.projectedAtt!==null?percent(x.projectedAtt)+" da meta":"Aguardando curva e ritmo",x.projectedAtt,"green")+
       '</div>'+
@@ -188,6 +223,7 @@
       "\n\n🎯 Meta: "+(x.target?cash(x.target):"—")+
       "\n🛒 Venda real: "+(x.has?cash(x.sale):"—")+
       "\n📈 Atingimento: "+percent(x.attainment)+
+      "\n▲▼ EV. vs A.A.: "+(x.evolution===null?"—":signedPct(x.evolution))+
       "\n🎯 Projeção: "+(x.projection!==null?cash(x.projection):"—")+
       "\n↕️ Desvio: "+(x.dev!==null?signedMoney(x.dev):"—")+
       "\n⏱️ Ritmo: "+signedPct(x.growth)+
