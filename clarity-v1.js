@@ -784,7 +784,8 @@
     const projected=sale!==null&&target!==null&&weight>=.08?sale/weight:null;
     const projectedPct=projected!==null&&target!==null?projected/target*100:null;
     const gap=projected!==null&&target!==null?projected-target:null;
-    const rates=comparableHourlyRates(),last=rates.at(-1)||null;
+    const rates=comparableHourlyRates(),recentRate=rates.at(-1)||null;
+    const last=recentRate&&d.captured_at&&Math.abs(Date.parse(d.captured_at)-Date.parse(recentRate.at))<=600000?recentRate:null;
     const declines=rates.filter(r=>r.growth!==null&&r.growth<0)
       .sort((a,b)=>a.growth-b.growth).slice(0,3);
     const hours=curve.map(row=>({h:row.h,weight:Number(row.fin)||0})).filter(r=>r.weight>0);
@@ -801,7 +802,6 @@
       const label=closed?"Meta curva":upcoming?"Necessário":"Meta curva";
       return {h:row.h,label,required,realized:lastHour?lastHour.rate:null};
     });
-    const positive=rate=>rate!==null&&rate>0;
     const pressures=officialDailyCardGroups().map(g=>({
       name:g.gg_label||g.group_code||"Grupo",gap:Number(g.sales_financial||0)-Number(g.target_financial||0),
       att:Number(g.target_financial)>0?Number(g.sales_financial||0)/Number(g.target_financial)*100:0
@@ -809,7 +809,7 @@
     const star=[...pressures].sort((a,b)=>b.att-a.att)[0]||null;
     const weak=[...pressures].sort((a,b)=>a.gap-b.gap).slice(0,3).map(g=>g.name);
     const share=estore?.captured!==null&&estore?.captured!==undefined&&sale>0?estore.captured/sale*100:null;
-    const storeHours=String(state.storeCode).padStart(3,"0")&&(["084","113","146"].includes(String(state.storeCode).padStart(3,"0"))?10:12);
+    const storeHours=STREET_STORES.has(String(state.storeCode).padStart(3,"0"))?10:12;
     return {closed,sale,target,actualPct,projected,projectedPct,gap,last,rates,declines,peaks,star,weak,
       avg:sale!==null?sale/storeHours:null,estore,share,
       estoreSaleAtt:estore?.captured!==null&&estore?.captured!==undefined&&estore.target>0?estore.captured/estore.target*100:null,
@@ -825,7 +825,7 @@
       "Venda *"+shareMoney(model.sale)+"* · Ating. *"+sharePct(model.actualPct)+"*",
       "Projeção *"+shareMoney(model.projected)+"* ("+sharePct(model.projectedPct)+") · Desvio *"+shareSigned(model.gap)+"*"
     ];
-    if(model.last&&model.last.growth!==null)row.push("Ritmo "+(model.last.growth>=0?"▲ ":"▼ ")+shareSigned(model.last.growth,"pct")+"% ("+shareSigned(model.last.delta)+" R$/h)");
+    if(!model.closed&&model.last&&model.last.growth!==null)row.push("Ritmo "+(model.last.growth>=0?"▲ +":"▼ ")+sharePct(Math.abs(model.last.growth))+" ("+shareSigned(model.last.delta)+"/h)");
     if(model.estore)row.push("eStore: share "+sharePct(model.share)+" · "+shareMoney(model.estore.captured)+" · "+(model.estore.orders===null?"—":Math.trunc(model.estore.orders))+" pedidos");
     return row.join("\n");
   }
@@ -882,7 +882,7 @@
     }else{
       tiny("RITMO VS HORA ANTERIOR",83,y0+190,650);
       const l=model.last,have=!!(l&&l.growth!==null);
-      val(have?(l.growth>=0?"▲ +":"▼ ")+sharePct(l.growth)+" ("+shareSigned(l.delta)+" R$/h)":"Aguardando 2 horas comparáveis",
+      val(have?(l.growth>=0?"▲ +":"▼ ")+sharePct(Math.abs(l.growth))+" ("+shareSigned(l.delta)+"/h)":"Aguardando 2 horas comparáveis",
         83,y0+233,900,have?color(l.growth):muted);
       tiny("3 PRINCIPAIS PICOS • CURVA HISTÓRICA",1120,y0+190,1300);
       model.peaks.forEach((p,i)=>{
