@@ -231,3 +231,38 @@
 #homeCampaignSlot.ol-video-active .ol-campaign-copy{opacity:0;pointer-events:none}
 #homeCampaignSlot.ol-video-active .ol-shade{background:linear-gradient(180deg,rgba(5,28,23,.16),transparent 35%,rgba(5,28,23,.10))!important}
 #homeCampaignSlot .ol-dot[hidden]{display:none!important}
+
+
+/* Vídeo editorial responsivo: palco proporcional ao dispositivo sem corte do filme. */
+#section-inicio #homeCampaignSlot .ol-stage{
+ width:100%;
+ height:auto!important;
+ aspect-ratio:16/9;
+ min-height:220px;
+ max-height:min(65vh,520px);
+}
+#section-inicio #homeCampaignSlot .ol-slide-video{
+ position:absolute;inset:0;overflow:hidden;
+}
+#section-inicio #homeCampaignSlot .ol-slide-video .ol-campaign-video{
+ position:absolute;inset:0;display:block;
+ width:100%;height:100%;
+ max-width:100%;max-height:100%;
+ object-fit:contain;
+ object-position:center;
+}
+@media(max-width:900px){
+ #section-inicio #homeCampaignSlot .ol-stage{
+  aspect-ratio:4/3;min-height:200px;max-height:440px;
+ }
+}
+@media(max-width:600px){
+ #section-inicio #homeCampaignSlot .ol-stage{
+  aspect-ratio:9/10;min-height:230px;max-height:min(58vh,460px);
+ }
+}
+@media(max-width:380px){
+ #section-inicio #homeCampaignSlot .ol-stage{
+  aspect-ratio:1/1;min-height:210px;max-height:370px;
+ }
+}
