@@ -62,3 +62,14 @@
 @media(max-width:780px){#ma2Stage .ma2-four{grid-template-columns:repeat(2,minmax(0,1fr))}#ma2Stage .ma2-card{padding:14px}#ma2Stage .ma2-number{font-size:24px}}
 @media(max-width:420px){#ma2Stage .ma2-hero{padding:17px}#ma2Stage .ma2-card{padding:12px}#ma2Stage .ma2-four .ma2-card{padding:11px}#ma2Stage .ma2-value{font-size:18px}#ma2Stage .ma2-minirow div b{font-size:13px}#ma2Stage .ma2-tabs{gap:5px}#ma2Stage .ma2-tab{padding:9px 11px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){#ma2Stage .ma2-tab,#ma2Stage button,#ma2Worlds button{transition:none!important;transform:none!important}}
+
+/* Navegação real 2.0: garantir ícones visíveis também no PWA instalado. */
+.mobile-dock .ma2-dock-item{display:flex!important;flex:1 1 0;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-width:0;padding:8px 2px!important}
+.mobile-dock .ma2-dock-item .ma2-navicon{width:21px;height:21px;display:block;flex-shrink:0}
+.mobile-dock .ma2-dock-item .dock-label{font-size:10px!important;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-weight:650}
+.mobile-dock .ma2-dock-item.active{color:#173F35!important}
+.mobile-dock .ma2-dock-item.active .ma2-navicon{stroke-width:2.3}
+#nav #ma2SidebarRadar .ma2-navicon{width:21px;height:21px;flex-shrink:0}
+#nav #ma2SidebarRadar{display:flex;align-items:center;gap:10px}
+#nav #ma2SidebarRadar[hidden]{display:none!important}
+#ma2Stage .ma2-tab[aria-selected=true]{background:#173F35!important;color:#fff!important}
