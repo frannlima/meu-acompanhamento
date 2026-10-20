@@ -96,6 +96,7 @@ function navIcon(key){
    cockpit:'<rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><path d="m14 19 2-3 2 1 3-5"/>',
   mundos:'<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="9" width="5" height="11" rx="1"/><rect x="17" y="6" width="4" height="14" rx="1"/>',
   equipe:'<circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2"/><path d="M16 6a3 3 0 0 1 0 6M18 15a5 5 0 0 1 3 5"/>',
+  estore:'<path d="M4 7h16v13H4z"/><path d="M8 7V5a4 4 0 0 1 8 0v2"/><path d="M8 14h8"/>',
   mais:'<circle cx="5" cy="5" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="12" cy="19" r="1"/><circle cx="19" cy="19" r="1"/>'
  };
  return '<svg class="ma2-navicon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(icons[key]||icons.mais)+'</svg>';
@@ -103,22 +104,25 @@ function navIcon(key){
 function ensureNavigation(){
  const dock=document.querySelector(".mobile-dock");
  if(dock){
-  const role=isManager()?"manager-cockpit-v2":"staff-cockpit-v2";
-  if(dock.dataset.ma2Role!==role||!dock.querySelector('[data-ma2="cockpit"]')){
-   const links=isManager()?[["hoje","Hoje"],["cockpit","Cockpit"],["radar","Radar"],["mundos","Mundos"],["equipe","Equipe"],["mais","Mais"]]:
-                               [["hoje","Hoje"],["cockpit","Cockpit"],["mundos","Meu mundo"],["mais","Mais"]];
+  const role=isManager()?"manager-cockpit-v3":"staff-cockpit-v3";
+  // Respeita a navegação premium que já contém os menus principais.
+  if(dock.dataset.ma2Role!==role||!dock.querySelector('[data-section="cockpit"],[data-ma2="cockpit"]')){
+   const links=isManager()?[["hoje","Início"],["cockpit","Cockpit"],["radar","Radar"],["mundos","Mundos"],["equipe","Equipe"],["estore","eStore"],["mais","Mais"]]:
+                               [["hoje","Início"],["cockpit","Cockpit"],["mundos","Mundos"],["estore","eStore"],["mais","Mais"]];
    dock.innerHTML=links.map(([key,label])=>
     '<button type="button" class="dock-item ma2-dock-item" data-ma2="'+key+'" aria-label="'+label+'">'+navIcon(key)+'<span class="dock-label">'+label+'</span></button>').join("");
    dock.dataset.ma2Role=role;
+   dock.classList.add("ma-nav-complete");
   }
   const section=state.section;
-  dock.querySelectorAll("[data-ma2]").forEach(b=>{
-   const key=b.dataset.ma2;
-   const active=section==="inicio"&&(key===activeTab)||
-    section==="cockpit"&&key==="cockpit"||
-     section==="grupos"&&key==="mundos"||
-    section==="comerciais"&&key==="equipe"||
-    (section==="mais"||section==="admin"||section==="estore"||section==="descontos"||section==="flash-pilot"||section==="regional")&&key==="mais";
+  dock.querySelectorAll(".dock-item").forEach(b=>{
+   const key=b.dataset.ma2||b.dataset.section;
+   const active=(section==="inicio"&&(activeTab==="radar"?key==="radar":key==="hoje"||key==="inicio"))||
+    (section==="cockpit"&&key==="cockpit")||
+    (section==="grupos"&&(key==="mundos"||key==="grupos"))||
+    (section==="comerciais"&&(key==="equipe"||key==="comerciais"))||
+    (section==="estore"&&key==="estore")||
+    (["mais","admin","descontos","flash-pilot","regional"].includes(section)&&key==="mais");
    b.classList.toggle("active",!!active);
    b.setAttribute("aria-current",active?"page":"false");
   });
@@ -365,6 +369,7 @@ document.addEventListener("click",ev=>{
  if(action==="cockpit"){window.setSection?.("cockpit");render();return}
  if(action==="mundos"){window.setSection?.("grupos");render();return}
  if(action==="equipe"){if(isManager()){window.setSection?.("comerciais");render()}return}
+ if(action==="estore"){window.setSection?.("estore");render();return}
  if(action==="mais"){window.setSection?.("mais");render();return}
  if(action==="advanced-home"){document.getElementById("section-inicio")?.classList.toggle("ma2-expanded");render();return}
  if(action==="advanced-worlds"){document.getElementById("section-grupos")?.classList.toggle("ma2-expanded");render()}
