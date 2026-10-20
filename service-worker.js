@@ -1,4 +1,4 @@
-const CACHE="meu-acompanhamento-v171-share-title-alignment";
+const CACHE="meu-acompanhamento-v172-cockpit-vendas";
 const ASSETS=[
   "./flash-detail-core-v1.js?v=1",
   "./flash-details-v1.js?v=1",
@@ -8,6 +8,8 @@ const ASSETS=[
   "./ma2-simple-v1.js?v=6",
   "./ma3-faithful-v1.css?v=3",
   "./ma3-faithful-v1.js?v=3",
+  "./cockpit-vendas-v1.css?v=1",
+  "./cockpit-vendas-v1.js?v=1",
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
   "./layout-balance-v1.css?v=1",
