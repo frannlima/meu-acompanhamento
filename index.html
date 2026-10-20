@@ -44,6 +44,7 @@
   <link rel="stylesheet" href="./pwa-install-assistant-v1.css?v=2">
   <link rel="stylesheet" href="./ma2-simple-v1.css?v=7">
   <link rel="stylesheet" href="./ma3-faithful-v1.css?v=3">
+  <link rel="stylesheet" href="./cockpit-vendas-v1.css?v=1">
 </head>
 <body>
   <div id="toast" class="toast" aria-live="polite"></div>
@@ -105,6 +106,7 @@
       </div>
       <nav id="nav" class="nav ria-nav">
         <button data-section="inicio" class="nav-item active"><span class="nav-icon nav-icon-home" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 10.8 12 3.8l8.5 7v8.7a1 1 0 0 1-1 1H15v-6h-6v6H4.5a1 1 0 0 1-1-1z"/><path class="accent" d="M9 20.5h6"/></svg></span><span class="nav-label">Início</span></button>
+        <button data-section="cockpit" class="nav-item"><span class="nav-icon nav-icon-regional" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><path class="accent" d="m14 20 3-5 3 3"/></svg></span><span class="nav-label">Cockpit de Vendas</span></button>
         <button data-section="grupos" class="nav-item"><span class="nav-icon nav-icon-world" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 7.5 12 4l7 3.5-7 3.5z"/><path d="M5 11.5 12 15l7-3.5"/><path class="accent" d="M5 15.5 12 19l7-3.5"/></svg></span><span class="nav-label">Mundos / DCOs</span></button>
         <button data-section="comerciais" class="nav-item"><span class="nav-icon nav-icon-commercial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.7 19v-1.8a5.3 5.3 0 0 1 10.6 0V19"/><path class="accent" d="M16 8.5a3 3 0 0 1 0 6M18 15a4.5 4.5 0 0 1 2.3 4"/></svg></span><span class="nav-label">Comerciais</span></button>
         <button data-section="descontos" class="nav-item"><span class="nav-icon nav-icon-discount" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.2 3.8H5.8a2 2 0 0 0-2 2v6.4l8.1 8.1a1.8 1.8 0 0 0 2.5 0l5.9-5.9a1.8 1.8 0 0 0 0-2.5z"/><circle cx="8.1" cy="8.1" r="1.2"/><path class="accent" d="m10.6 15 4.8-4.8"/></svg></span><span class="nav-label">Painel de Descontos</span></button>
@@ -146,6 +148,7 @@
             <div class="hero-primary-actions">
               <button id="resetDayBtn" class="btn danger reset-capable hidden">↺ Zerar acompanhamento</button>
               <button id="pasteBtn" class="btn accent">＋ Colar venda da web</button>
+              <button type="button" class="cp-home-shortcut" data-section="cockpit">▦ Abrir Cockpit</button>
             </div>
           </div>
           <div id="homeAdminStoreBar" class="home-admin-store hidden">
@@ -197,6 +200,32 @@
             <div class="card-head"><div><span class="eyebrow">MOVIMENTO</span><h2>Ganhos e perdas</h2></div><span class="icon-dot">◔</span></div>
             <div id="movementBox" class="empty-box">Após o segundo input, o app mostra a variação do intervalo.</div>
           </section>
+        </div>
+      </section>
+
+
+      <section id="section-cockpit" class="section" aria-label="Cockpit de Vendas da filial">
+        <div class="cp-frame">
+          <header class="cp-hero">
+            <div class="cp-brandline">
+              <img src="./assets/riachuelo-logo.svg" alt="Riachuelo">
+              <span>Moda que inspira o Brasil</span>
+            </div>
+            <div class="cp-titleline">
+              <span class="cp-emblem" aria-hidden="true">▥</span>
+              <div><h1>COCKPIT DE VENDAS</h1><strong id="cockpitStore">LOJA —</strong></div>
+            </div>
+            <p class="cp-stamp" id="cockpitTimestamp">Carregando a parcial da loja…</p>
+            <div class="cp-hero-actions">
+              <button id="cockpitRefresh" type="button">↻ Atualizar</button>
+              <button id="cockpitShare" type="button">↗ Compartilhar resumo</button>
+            </div>
+          </header>
+          <div class="cp-surface">
+            <div id="cockpitContent" aria-live="polite"><p class="cp-empty">Aguardando a consolidação dos dados oficiais.</p></div>
+            <div class="cp-fineprint" id="cockpitEstoreUpdated">Consultando eStore CE+PI…</div>
+          </div>
+          <footer class="cp-footer"><span>MEU ACOMPANHAMENTO</span><span>RIACHUELO • Moda que inspira o Brasil</span></footer>
         </div>
       </section>
 
@@ -497,6 +526,7 @@
           <button id="closeMobileMore" type="button" class="mobile-more-close" aria-label="Fechar">×</button>
         </div>
         <div class="mobile-more-grid">
+          <button data-section="cockpit" class="mobile-more-item"><span>▥</span><b>Cockpit de Vendas</b><small>Indicadores do dia</small></button>
           <button data-section="descontos" class="mobile-more-item"><span class="nav-icon nav-icon-discount" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="2.2"/><circle cx="16" cy="16" r="2.2"/><path class="accent" d="m7 17 10-10"/></svg></span><b>Descontos</b><small>Painel e desvios</small></button>
           <button data-section="regional" class="mobile-more-item admin-only hidden"><span class="nav-icon nav-icon-regional" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 18V12"/><path d="M10 18V9"/><path d="M15 18V6"/><path class="accent" d="M20 18V3"/></svg></span><b>Regional</b><small>Consolidado CE+PI</small></button>
           <button data-section="admin" class="mobile-more-item admin-only hidden"><span class="nav-icon nav-icon-admin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 14 5l2.4-.2.8 2.2 2 1.3-.8 2.3.8 2.3-2 1.3-.8 2.2-2.4-.2-2 1.5-2-1.5-2.4.2-.8-2.2-2-1.3.8-2.3-.8-2.3 2-1.3.8-2.2L10 5z"/><circle class="accent" cx="12" cy="10.6" r="2.6"/></svg></span><b>Administração</b><small>Gestão do app</small></button>
@@ -675,10 +705,11 @@
   <script src="./flash-details-v1.js?v=1" defer></script>
   <script src="./ma2-simple-v1.js?v=6" defer></script>
   <script src="./ma3-faithful-v1.js?v=3" defer></script>
+  <script src="./cockpit-vendas-v1.js?v=1" defer></script>
   <script>
   (function(){
     if(!("serviceWorker" in navigator))return;
-    const release="ma7-share-title-alignment-20261020";
+    const release="ma8-cockpit-vendas-20261020";
     navigator.serviceWorker.addEventListener("controllerchange",function(){
       try{
         const key="ma2-controller-reload-"+release;
