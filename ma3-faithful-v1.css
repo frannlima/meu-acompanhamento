@@ -225,3 +225,101 @@
  #section-inicio.ma3-clean #ma2Stage .ma3-kpi>strong{font-size:14px}
  #section-inicio.ma3-clean #ma2Stage .ma3-kpi.ma3-negative>strong{font-size:13px}
 }
+
+
+/* Home mobile compacta: evita cabeçalho duplicado e controles encobertos.
+   Escopo restrito à tela Início, sem modificar os indicadores. */
+@media (max-width:700px){
+  html body #section-inicio > .section-head.home-campaign-enabled{
+    padding:12px!important;
+    gap:9px!important;
+    border-radius:19px!important;
+    min-height:0!important;
+    margin-bottom:11px!important;
+    overflow:visible!important;
+  }
+  html body #section-inicio:not(.ma3-clean) > .section-head.home-campaign-enabled #adaptiveHomeIdentity{
+    padding:9px 11px!important;
+    margin:0!important;
+    gap:10px!important;
+    min-height:0!important;
+    border-radius:14px!important;
+  }
+  html body #section-inicio:not(.ma3-clean) > .section-head.home-campaign-enabled .adaptive-home-avatar{
+    width:43px!important;
+    height:43px!important;
+    flex:0 0 43px!important;
+  }
+  html body #section-inicio:not(.ma3-clean) > .section-head.home-campaign-enabled .adaptive-home-person strong{
+    font-size:16px!important;
+    line-height:1.2!important;
+  }
+  html body #section-inicio:not(.ma3-clean) > .section-head.home-campaign-enabled .adaptive-home-person small,
+  html body #section-inicio:not(.ma3-clean) > .section-head.home-campaign-enabled .adaptive-home-person em{
+    font-size:10.5px!important;
+    line-height:1.25!important;
+  }
+  /* Identificação e filial já estão no cartão de usuário; evitar segundo título enorme. */
+  html body #section-inicio:not(.ma3-clean) > .section-head.home-campaign-enabled .home-campaign-heading{
+    display:none!important;
+  }
+  html body #section-inicio:not(.ma3-clean) > .section-head.home-campaign-enabled .hero-actions{
+    margin:0!important;
+    padding:0!important;
+    gap:7px!important;
+  }
+  html body #section-inicio:not(.ma3-clean) > .section-head.home-campaign-enabled .hero-context .badge{
+    font-size:10px!important;
+    min-height:28px!important;
+    padding:5px 9px!important;
+  }
+  /* Altura baseada na largura disponível: vídeo inteiro por object-fit:contain. */
+  html body #section-inicio #homeCampaignSlot .ol-stage{
+    height:clamp(205px,59vw,255px)!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+    border-radius:15px!important;
+  }
+  html body #section-inicio #homeCampaignSlot .ol-controls{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    min-height:44px!important;
+    gap:3px!important;
+    padding:6px 0 9px!important;
+    margin-bottom:5px!important;
+  }
+  html body #section-inicio #homeCampaignSlot .ol-play-controls{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:2px!important;
+    min-width:0!important;
+  }
+  html body #section-inicio #homeCampaignSlot .ol-play-controls button{
+    min-height:36px!important;
+    padding:5px 7px!important;
+    font-size:11px!important;
+  }
+  html body #section-inicio #homeCampaignSlot .ol-dots{flex-shrink:0!important;}
+  html body #section-inicio #homeCampaignSlot .ol-dot{
+    min-width:19px!important;
+    padding:5px 3px!important;
+  }
+  html body #section-inicio #homeCampaignSlot .ol-notice{
+    min-height:0!important;
+    margin-top:0!important;
+  }
+}
+@media (max-width:360px){
+  html body #section-inicio #homeCampaignSlot .ol-stage{
+    height:205px!important;
+  }
+  html body #section-inicio #homeCampaignSlot .ol-play-controls button{
+    padding:5px!important;
+    font-size:10px!important;
+  }
+}
