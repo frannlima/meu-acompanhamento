@@ -24,15 +24,25 @@ function snap(){
  const projected=has&&meta>0&&ratio>=.08?sale/ratio:null;
  const projectedPct=projected===null?null:projected/meta*100;
  const flash=typeof window.getMA2FlashSnapshot==="function"?window.getMA2FlashSnapshot():null;
- return {has,meta,sale,att:has&&meta>0?sale/meta*100:null,projected,projectedPct,
+ const ly=Number(d.ly_financial||0);
+ const evolution=has&&ly>0?(sale/ly-1)*100:null;
+ return {has,meta,sale,ly,evolution,att:has&&meta>0?sale/meta*100:null,projected,projectedPct,
   projectedGap:projected===null?null:projected-meta,flash,d,ratio};
 }
-function stat(label,value,detail,type=""){
- return '<article class="ma3-kpi '+type+'"><span>'+label+'</span><strong>'+value+'</strong><small>'+detail+'</small></article>';
+function stat(label,value,detail,type="",extra=""){
+ return '<article class="ma3-kpi '+type+'"><span>'+label+'</span><strong>'+value+'</strong><small>'+detail+'</small>'+extra+'</article>';
 }
 function homeMarkup(data){
  const m=data.meta>0?fmt(data.meta):"—",v=data.has?fmt(data.sale):"—";
  const a=data.att!==null?pct(data.att):"—",proj=data.projectedPct!==null?pct(data.projectedPct):"—";
+ const evolution=data.evolution;
+ const aaTrend=evolution===null
+   ?'<span class="ma5-trend neutral">Vs A.A.: indisponível</span>'
+   :evolution>0
+    ?'<span class="ma5-trend positive" aria-label="Evolução positiva versus ano anterior">▲ +'+pct(evolution)+' vs A.A.</span>'
+    :evolution<0
+      ?'<span class="ma5-trend negative" aria-label="Retração versus ano anterior">▼ '+pct(evolution)+' vs A.A.</span>'
+      :'<span class="ma5-trend neutral">● 0,0% vs A.A.</span>';
  const gap=data.projectedGap!==null?(data.projectedGap<0?"− ": "+ ")+fmt(Math.abs(data.projectedGap)):"—";
  const flash=data.flash?.total!=null?fmt(data.flash.total):"—";
  const sourceFlash=data.flash?.captured_at?"Coleta "+stamp(data.flash.captured_at):"Sem coleta disponível";
@@ -46,7 +56,7 @@ function homeMarkup(data){
  const header='<div class="ma3-context"><div class="ma3-context-text"><span class="ma3-context-icon">▤</span><div>'+
    '<strong>'+who+'</strong><small>Resultado do dia · '+date(data.d.captured_at)+' · Atualizado '+stamp(data.d.captured_at)+'</small></div></div>'+
    '<div class="ma3-sources"><span title="Indicadores Flash dependem de coleta válida">▥ Flash: venda operacional <b>'+flash+'</b></span>'+
-   '<span title="Base de metas, grupos e projeção">▣ Web: venda pura</span>'+storeSelector+'</div></div>';
+   '<span title="Base de metas, grupos e projeção">▣ Venda Automação Web</span>'+storeSelector+'</div></div>';
  if(!manager()){
   const worlds=typeof window.getOfficialGgSummaries==="function"?window.getOfficialGgSummaries():[];
   const worldCode=String(state.world||"");
@@ -61,17 +71,43 @@ function homeMarkup(data){
   const gm=matches.reduce((n,g)=>n+Number(g.target_financial||0),0);
   const gv=matches.reduce((n,g)=>n+Number(g.sales_financial||0),0);
   const worldLabel={feminino:"Feminino",masculino:"Masculino",infantil:"Infantil",casa:"Casa",beleza_relogios:"Beleza"}[worldCode]||"meu mundo";
-  return header+'<div class="ma3-kpis ma3-staff">'+stat("Meu mundo",esc(worldLabel),"Venda pura Web")+
+  return header+'<div class="ma3-kpis ma3-staff">'+stat("Meu mundo",esc(worldLabel),"Venda Automação Web")+
     stat("Venda do mundo",data.has?fmt(gv):"—","Meta "+(gm>0?fmt(gm):"—"))+
     stat("Atingimento",data.has&&gm>0?pct(gv/gm*100):"—","Meu desempenho")+'</div>'+
     '<div class="ma3-inline"><button type="button" data-ma3="mundos">Ver meu mundo e DCOs →</button></div>';
  }
  return header+'<div class="ma3-kpis">'+
-   stat("Venda pura Web",v,"Meta do dia: "+m)+
+   stat("Venda Automação Web",v,"Meta do dia: "+m,"",aaTrend)+
    stat("Atingimento atual",a,"Venda Web ÷ meta")+
    stat("Atingimento projetado",proj,"Tendência de fechamento","ma3-projected")+
    stat("Desvio projetado",gap,"Previsão − meta",data.projectedGap<0?"ma3-negative":"")+
   '</div>';
+}
+function displayFirstName(){
+ const raw=String(state.employeeName||state.user?.name||"").trim();
+ if(!raw)return "equipe";
+ const first=raw.split(/\s+/)[0];
+ return first.substring(0,1).toLocaleUpperCase("pt-BR")+first.substring(1).toLocaleLowerCase("pt-BR");
+}
+function greetingForStore(){
+ const time=new Intl.DateTimeFormat("en-GB",{timeZone:"America/Fortaleza",hour:"2-digit",hourCycle:"h23"}).format(new Date());
+ const hour=Number(time);
+ return hour<12?"Bom dia":hour<18?"Boa tarde":"Boa noite";
+}
+function greetingAboveCarousel(){
+ const slot=$("homeCampaignSlot");
+ if(!slot||!state.logged)return;
+ let card=$("ma5Greeting");
+ if(!card){
+  card=document.createElement("div");
+  card.id="ma5Greeting";card.className="ma5-greeting";
+  card.setAttribute("aria-label","Saudação personalizada");
+  card.innerHTML='<span class="ma5-ria-symbol"><img src="./assets/ria-logo-approved.svg" alt="Símbolo RIA"></span>'+
+    '<div class="ma5-greeting-text"><strong id="ma5GreetingText"></strong><small>O simples é incrível.</small></div>';
+  slot.prepend(card);
+ }
+ const line=$("ma5GreetingText");
+ if(line)line.textContent=greetingForStore()+", "+displayFirstName()+"!";
 }
 function prepareLayout(){
  const home=$("section-inicio"),shell=$("ma2Essential"),stage=$("ma2Stage");
@@ -174,6 +210,7 @@ function render(){
  if(!state.logged||!$("ma2Stage"))return;
  const obj=prepareLayout();
  if(!obj)return;
+ greetingAboveCarousel();
  const data=snap();
  obj.stage.innerHTML=homeMarkup(data);
  const show=manager();
