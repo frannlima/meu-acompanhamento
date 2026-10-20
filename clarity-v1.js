@@ -870,7 +870,7 @@
     ctx.font="800 38px Larsseit, Arial";ctx.fillStyle=green;
     ctx.fillText(shareTitle(model),W/2,y0+57,W-260);
     ctx.textAlign="right";ctx.font="800 19px Larsseit, Arial";ctx.fillStyle=muted;
-    ctx.fillText("VENDA AUTOMAÇÃO WEB",W-86,y0+92,570);
+    ctx.fillText("VENDA AUTOMAÇÃO WEB",W-86,y0+57,570);
     ctx.textAlign="left";
     // Três colunas com mesma largura, garantindo alinhamento entre rótulo e resultado.
     const cols=[95,925,1755],cw=[720,720,700],headY=y0+102,valueY=y0+139;
