@@ -619,6 +619,14 @@
         btn.onclick=()=>setSection("estore");
         list.prepend(btn);
       }
+      if(list&&!existing.querySelector('[data-more-section="cockpit"]')){
+        const btn=document.createElement("button");
+        btn.type="button";
+        btn.setAttribute("data-more-section","cockpit");
+        btn.innerHTML='<span class="more-icon">▥</span><div><strong>Cockpit de Vendas</strong><small>Venda, ritmo, projeção, eStore e pressões</small></div><b>›</b>';
+        btn.onclick=()=>setSection("cockpit");
+        list.prepend(btn);
+      }
       existing.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
       return;
     }
@@ -633,6 +641,7 @@
         '<div><span class="eyebrow">MEU ACOMPANHAMENTO</span><h1>Mais</h1><p>Acesse outras áreas e funcionalidades do app.</p></div>'+
       '</div>'+
       '<div class="premium-more-list">'+
+        '<button type="button" data-more-section="cockpit"><span class="more-icon">▥</span><div><strong>Cockpit de Vendas</strong><small>Venda, ritmo, projeção, eStore e pressões</small></div><b>›</b></button>'+
         '<button type="button" data-more-section="estore"><span class="more-icon">▣</span><div><strong>eStore CE+PI</strong><small>Venda, pedidos, Hora a Hora e resultado regional</small></div><b>›</b></button>'+
         '<button data-more-section="descontos"><span class="more-icon">%</span><div><strong>Painel de Descontos</strong><small>Incidência, participação e DCOs</small></div><b>›</b></button>'+
         '<button data-more-section="regional" class="admin-only hidden"><span class="more-icon">▦</span><div><strong>Consolidado Regional</strong><small>Visão CE+PI por filial</small></div><b>›</b></button>'+
