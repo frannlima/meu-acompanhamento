@@ -1,11 +1,11 @@
-const CACHE="meu-acompanhamento-v162-home-carousel-groups";
+const CACHE="meu-acompanhamento-v163-home-final";
 const ASSETS=[
   "./flash-detail-core-v1.js?v=1",
   "./flash-details-v1.js?v=1",
   "./flash-core-v1.js?v=2",
   "./flash-pilot-v1.js?v=5",
-  "./ma2-simple-v1.css?v=3",
-  "./ma2-simple-v1.js?v=3",
+  "./ma2-simple-v1.css?v=4",
+  "./ma2-simple-v1.js?v=4",
   "./brand-sharecards-2025.js?v=3",
   "./brand-riachuelo-2025.css?v=3",
   "./layout-balance-v1.css?v=1",
