@@ -282,6 +282,8 @@ function ensureHomePlacement(){
   main.insertAdjacentElement("afterend",legacy);
  }
  if(original && original.parentElement!==legacy)legacy.appendChild(original);
+ const hourly=document.getElementById("dailyEvolutionPanel");
+ if(hourly&&hourly.parentElement!==legacy)legacy.appendChild(hourly);
 }
 function modernHome(out,items){
  const flash=flashSnapshot(),stampFlash=flash?stamp(flash.captured_at):null;
