@@ -201,3 +201,19 @@
 #section-inicio #ma2Essential .ma2-legend i.forecast{background:repeating-linear-gradient(90deg,#DE7C00 0 5px,transparent 5px 8px)}
 #section-inicio #ma2Essential .clarity-curve-chart{border-radius:15px;overflow:hidden}
 @media(max-width:620px){#section-inicio #ma2Essential .ma2-chart-highlights{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Ajuste 03: Radar sem o hero redundante e sem saudação/branding repetidos. */
+#section-inicio.ma2-radar #ma2Stage .ma2-radar-heading{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+ padding:10px 2px 14px;margin:0 0 10px;
+ border-bottom:1px solid #D8E5DA;background:transparent;color:#173F35;
+}
+#section-inicio.ma2-radar #ma2Stage .ma2-radar-heading h2{
+ margin:0 0 3px;font-size:clamp(19px,3vw,26px);color:#173F35;font-weight:850;
+}
+#section-inicio.ma2-radar #ma2Stage .ma2-radar-heading p{margin:0;color:#5F7468;font-size:12px}
+#section-inicio.ma2-radar #ma2Stage .ma2-radar-select{display:flex;align-items:center;gap:7px;color:#526C5B;font-size:12px;font-weight:800}
+#section-inicio.ma2-radar #ma2Stage .ma2-radar-select select{
+ min-height:37px;border:1px solid #C8D9CE;background:#fff;color:#173F35;
+ border-radius:9px;padding:6px 10px;min-width:110px;font:inherit;font-size:12px;
+}
