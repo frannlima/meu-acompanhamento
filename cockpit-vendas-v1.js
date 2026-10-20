@@ -107,13 +107,9 @@
   }
   // Símbolo de sacola com assinatura vertical Ria / Chu / Elo.
   function riaShoppingBag(){
-    return '<svg class="cp-ria-bag" viewBox="0 0 64 76" role="img" aria-label="Sacola de compras Ria Chu Elo">'+
-      '<path d="M10 21H54L51 69H13Z" fill="#f3f6f3" stroke="#173f35" stroke-width="3" stroke-linejoin="round"/>'+
-      '<path d="M23 22V16a9 9 0 0 1 18 0v6" fill="none" stroke="#173f35" stroke-width="3" stroke-linecap="round"/>'+
-      '<text x="32" y="39" text-anchor="middle" font-size="12" font-weight="900" fill="#173f35">Ria</text>'+
-      '<text x="32" y="51" text-anchor="middle" font-size="12" font-weight="900" fill="#173f35">Chu</text>'+
-      '<text x="32" y="63" text-anchor="middle" font-size="12" font-weight="900" fill="#173f35">Elo</text>'+
-    '</svg>';
+    // A arte reutiliza o logotipo vertical vetorizado da referência enviada.
+    // Imagem local e cacheada pelo PWA; não depende de uma fonte externa.
+    return '<img class="cp-ria-bag" src="./assets/cockpit-sacola-reciclavel-grafite.svg" width="54" height="70" alt="Sacola de papel reciclável grafite com logotipo vertical RIA CHU ELO" loading="eager" decoding="async">';
   }
   function saleRealTile(x){
     const value=x.has?cash(x.sale):"—";
