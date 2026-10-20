@@ -144,3 +144,40 @@
 #section-inicio.ma3-clean .ma3-switch select{appearance:auto;border:0;background:transparent;color:#173F35;font-size:12px;font-weight:750;min-width:105px;padding:5px 2px;cursor:pointer;max-width:180px}
 #section-inicio.ma3-clean #ma2Essential .clarity-curve[hidden]{display:none!important}
 #section-inicio.ma3-clean #ma3Card[hidden],#section-inicio.ma3-clean #ma3Actions[hidden]{display:none!important}
+
+/* Ajustes aprovados 01/02/05: nomenclatura, sinalização A.A. e saudação compacta com RIA. */
+#section-inicio.ma3-clean #ma2Stage .ma3-kpi .ma5-trend{
+ display:inline-flex;align-items:center;align-self:flex-start;gap:5px;
+ margin-top:2px;padding:5px 9px;border-radius:9px;
+ font-size:12px;line-height:1.25;font-weight:850;
+ font-variant-numeric:tabular-nums;white-space:normal;
+}
+#section-inicio.ma3-clean #ma2Stage .ma3-kpi .ma5-trend.positive{color:#18694A;background:#E1F3E9}
+#section-inicio.ma3-clean #ma2Stage .ma3-kpi .ma5-trend.negative{color:#BC3E36;background:#FDE9E7}
+#section-inicio.ma3-clean #ma2Stage .ma3-kpi .ma5-trend.neutral{color:#69776F;background:#F0F3F1}
+#section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting{
+ display:flex!important;align-items:center;gap:13px;
+ width:100%;min-width:0;padding:11px 15px;margin:0 0 12px;
+ border:1px solid #D8E5DC;border-radius:16px;
+ background:#FFFFFF;color:#173F35;
+ box-shadow:0 4px 15px rgba(20,65,48,.055);
+ text-align:left;
+}
+#section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting .ma5-ria-symbol{
+ display:grid;place-items:center;width:54px;height:54px;flex:0 0 54px;
+ border-radius:13px;background:#F0F5F0;border:1px solid #E2EAE2;
+}
+#section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting .ma5-ria-symbol img{
+ display:block;width:46px;height:46px;object-fit:contain;
+}
+#section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting .ma5-greeting-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+#section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting .ma5-greeting-text strong{
+ font-size:clamp(16px,2.6vw,21px);font-weight:850;color:#173F35;line-height:1.25;
+}
+#section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting .ma5-greeting-text small{font-size:11px;color:#567266}
+@media(max-width:480px){
+ #section-inicio.ma3-clean #ma2Stage .ma3-kpi .ma5-trend{font-size:10.5px;padding:5px 6px}
+ #section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting{padding:10px 11px;gap:10px;margin-bottom:9px}
+ #section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting .ma5-ria-symbol{width:45px;height:45px;flex-basis:45px}
+ #section-inicio.ma3-clean #homeCampaignSlot #ma5Greeting .ma5-ria-symbol img{width:39px;height:39px}
+}
