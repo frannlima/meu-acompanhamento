@@ -266,3 +266,13 @@
   aspect-ratio:1/1;min-height:210px;max-height:370px;
  }
 }
+
+/* Ação explícita quando o navegador bloqueia o início automático do vídeo. */
+#homeCampaignSlot .ol-slide-video .ol-video-replay{
+ position:absolute;z-index:6;left:50%;top:50%;transform:translate(-50%,-50%);
+ padding:12px 19px;border-radius:999px;border:1px solid rgba(255,255,255,.65);
+ background:rgba(23,63,53,.88);color:#fff;font:800 14px Larsseit,Arial,sans-serif;
+ box-shadow:0 8px 22px rgba(0,0,0,.24);cursor:pointer;display:none;
+}
+#homeCampaignSlot.ol-video-needs-play .ol-slide-video.active .ol-video-replay{display:block}
+#homeCampaignSlot .ol-slide-video .ol-video-replay:focus-visible{outline:3px solid #DE7C00;outline-offset:3px}
