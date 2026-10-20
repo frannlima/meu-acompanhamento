@@ -26,6 +26,38 @@
     return videoSlide?[videoSlide,...slides.filter(el=>el!==videoSlide)]:slides;
   }
   function video(){return root?.querySelector('.ol-campaign-video');}
+
+  // Moldura editorial: uma fotografia CONGELADA do próprio vídeo preenche as laterais.
+  // É extraída uma única vez por estágio, sem criar um segundo player nem repetir
+  // captura durante o carrossel. A imagem original serve de fallback se indisponível.
+  let frozenFrameStage=0;
+  function captureFrozenVideoFrame(player,preferScene=false){
+    const slide=root?.querySelector('.ol-slide-video');
+    if(!slide||!player||player.readyState<2||!player.videoWidth||!player.videoHeight)return;
+    if(preferScene){
+      if(frozenFrameStage>=2||player.currentTime<.65)return;
+    }else if(frozenFrameStage>=1)return;
+    try{
+      // Miniatura 16:9: recorte central do vídeo (também em formato retrato).
+      // A miniatura não aparece como segundo vídeo, apenas como plano de fundo.
+      const w=480,h=270,vw=player.videoWidth,vh=player.videoHeight;
+      const scale=Math.max(w/vw,h/vh);
+      const dw=vw*scale,dh=vh*scale;
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      const ctx=canvas.getContext('2d',{alpha:false});
+      if(!ctx)return;
+      ctx.drawImage(player,(w-dw)/2,(h-dh)/2,dw,dh);
+      const frozen=canvas.toDataURL('image/jpeg',.72);
+      if(!frozen||frozen.length<100)return;
+      // CSS utiliza a mesma imagem paralisada nas duas laterais.
+      slide.style.setProperty('--ol-frozen-frame','url("'+frozen+'")');
+      slide.classList.add('ol-video-frame-ready');
+      frozenFrameStage=preferScene?2:1;
+    }catch(_){
+      // Alguns aparelhos restringem leitura de frames; o poster permanece funcional.
+    }
+  }
   function visibleSlides(){return photos().map((_,i)=>i).filter(i=>!failed.has(i));}
   function restart(){
     clearTimeout(timer);timer=null;
@@ -117,6 +149,10 @@
       });
       const player=video();
       if(player){
+        player.addEventListener('loadeddata',()=>captureFrozenVideoFrame(player));
+        player.addEventListener('timeupdate',()=>captureFrozenVideoFrame(player,true));
+        player.addEventListener('seeked',()=>captureFrozenVideoFrame(player,player.currentTime>=.65));
+        if(player.readyState>=2)captureFrozenVideoFrame(player);
         player.addEventListener('ended',()=>{if(current===0&&!manualPause)show(1);});
         player.addEventListener('error',()=>{
           failed.add(0);
