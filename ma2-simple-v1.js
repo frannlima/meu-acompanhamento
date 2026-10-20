@@ -265,12 +265,29 @@ document.addEventListener("click",ev=>{
  if(action==="paste"){window.showPaste?.();return}
  if(action==="hoje"||action==="radar"){activeTab=action;window.setSection?.("inicio");render();return}
  if(action==="mundos"){window.setSection?.("grupos");render();return}
- if(action==="equipe"){if(isManager())window.setSection?.("comerciais");return}
- if(action==="mais"){window.setSection?.("mais");return}
+ if(action==="equipe"){if(isManager()){window.setSection?.("comerciais");render()}return}
+ if(action==="mais"){window.setSection?.("mais");render();return}
  if(action==="advanced-home"){document.getElementById("section-inicio")?.classList.toggle("ma2-expanded");render();return}
  if(action==="advanced-worlds"){document.getElementById("section-grupos")?.classList.toggle("ma2-expanded");render()}
 });
 document.addEventListener("change",ev=>{if(ev.target?.id==="ma2Store"&&state.role==="administrador")window.changeAdminStore?.(ev.target.value)});
+// A seleção de mundo e a navegação legada também precisam redesenhar a nova experiência.
+if(typeof window.setSection==="function"){
+ const originalSetSection=window.setSection;
+ window.setSection=function(){
+  const res=originalSetSection.apply(this,arguments);
+  if(state.logged)queueMicrotask(render);
+  return res;
+ };
+}
+if(typeof window.chooseWorld==="function"){
+ const originalChooseWorld=window.chooseWorld;
+ window.chooseWorld=function(){
+  const res=originalChooseWorld.apply(this,arguments);
+  if(state.logged)queueMicrotask(render);
+  return res;
+ };
+}
 document.addEventListener("ma:dashboard-ready",render);
 document.addEventListener("ma:world-selected",render);
 document.addEventListener("ma:section-change",render);
