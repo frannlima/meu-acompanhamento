@@ -321,33 +321,81 @@
   }
 
   function svgCurve(expected,actual,maxVal){
-    const W=920,H=270,p={l:54,r:18,t:20,b:40};
-    const innerW=W-p.l-p.r,innerH=H-p.t-p.b;
-    const allLabels=expected.map(x=>x.label);
-    const x=i=>p.l+(allLabels.length<=1?0:i/(allLabels.length-1))*innerW;
-    const y=v=>p.t+innerH-(maxVal?Math.max(0,v)/maxVal:0)*innerH;
-    const expPts=expected.map((d,i)=>x(i)+","+y(d.value)).join(" ");
-    const actualMapped=[];
-    for(const a of actual){
-      let idx=expected.findIndex(e=>e.h===a.h);
-      if(idx<0) idx=Math.max(0,Math.min(expected.length-1,a.h-expected[0].h));
-      actualMapped.push({idx,value:a.value});
+    // Série real: snapshots com o minuto original. Curva: meta da Web ponderada por horário.
+    const d=state.day||{},rows=curveForStore(),target=Number(d.target_financial||0);
+    if(!rows.length||!target)return '<p class="ma2-hint">Cadastre a meta e a curva horária para visualizar a evolução.</p>';
+    const first=rows[0].h,last=rows[rows.length-1].h+1;
+    const W=920,H=305,L=80,R=22,T=20,B=50;
+    const innerW=W-L-R,innerH=H-T-B;
+    const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+    const clock=iso=>timeParts(iso);
+    const timeNum=t=>clamp(t.h+t.m/60,first,last);
+    const sameDay=iso=>{
+      if(!iso||!Number.isFinite(Date.parse(iso)))return false;
+      return new Intl.DateTimeFormat("en-CA",{timeZone:"America/Fortaleza"}).format(new Date(iso))===localDate();
+    };
+    const pts=(Array.isArray(state.history)?state.history:[])
+      .filter(r=>sameDay(r.captured_at)&&Number.isFinite(Number(r.sales_financial)))
+      .map(r=>({iso:r.captured_at,t:timeNum(clock(r.captured_at)),sale:Number(r.sales_financial)}))
+      .filter(p=>p.t>=first&&p.t<=last);
+    if(d.has_input&&sameDay(d.captured_at)){
+      const t=timeNum(clock(d.captured_at));
+      if(!pts.some(p=>p.iso===d.captured_at))pts.push({iso:d.captured_at,t,sale:Number(d.sales_financial||0)});
     }
-    const actPts=actualMapped.map(d=>x(d.idx)+","+y(d.value)).join(" ");
-    const grids=[0,.25,.5,.75,1].map(f=>{
-      const yy=p.t+innerH-innerH*f;
-      return '<line x1="'+p.l+'" x2="'+(W-p.r)+'" y1="'+yy+'" y2="'+yy+'" stroke="#E7E4DB" stroke-width="1"/>'+
-        '<text x="'+(p.l-8)+'" y="'+(yy+4)+'" text-anchor="end" font-size="10" fill="#7A8580">'+Math.round(maxVal*f/1000)+'k</text>';
+    pts.sort((a,b)=>a.t-b.t);
+    const ref=[{t:first,value:0}],values=[];
+    rows.forEach(r=>{
+      const value=target*expectedPctAt(rows,r.h+1,0,"fin");
+      ref.push({t:Math.min(last,r.h+1),value});
+      values.push(value);
+    });
+    const recent=pts.at(-1)||null;
+    const expectedCurrent=recent?target*expectedPctAt(rows,clock(recent.iso).h,clock(recent.iso).m,"fin"):null;
+    const currentShare=recent&&target>0?expectedPctAt(rows,clock(recent.iso).h,clock(recent.iso).m,"fin"):null;
+    const projection=recent&&currentShare>=.08?recent.sale/currentShare:null;
+    const max=Math.max(1,target,projection||0,...pts.map(p=>p.sale),...values)*1.13;
+    const x=t=>L+(t-first)/Math.max(.001,last-first)*innerW;
+    const y=v=>T+(1-clamp(v/max,0,1))*innerH;
+    const path=series=>series.map((p,i)=>(i?"L":"M")+x(p.t).toFixed(1)+","+y(p.value??p.sale).toFixed(1)).join(" ");
+    const lineRef=path(ref),lineReal=path(pts);
+    const steps=[0,.25,.5,.75,1].map(fr=>{
+      const yy=y(max*fr),value=(max*fr/1000);
+      return '<line x1="'+L+'" x2="'+(W-R)+'" y1="'+yy+'" y2="'+yy+'" stroke="#E6EDE7" stroke-width="1"/>'+
+        '<text x="'+(L-11)+'" y="'+(yy+4)+'" text-anchor="end" font-size="12" fill="#63766B">'+
+        value.toLocaleString("pt-BR",{maximumFractionDigits:0})+' mil</text>';
     }).join("");
-    const ticks=expected.map((d,i)=>'<text x="'+x(i)+'" y="'+(H-13)+'" text-anchor="middle" font-size="10" fill="#6F7C77">'+d.label+'</text>').join("");
-    const circles=actualMapped.map(d=>'<circle cx="'+x(d.idx)+'" cy="'+y(d.value)+'" r="4.5" fill="#173F35"/>').join("");
-    return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Curva de vendas">'+
-      grids+
-      '<polyline fill="none" stroke="#9BA7A3" stroke-width="3" stroke-dasharray="7 7" points="'+expPts+'"/>'+
-      (actPts?'<polyline fill="none" stroke="#173F35" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" points="'+actPts+'"/>'+circles:"")+
-      ticks+
-      '</svg>'+
-      '<div class="clarity-curve-legend"><span><i class="real"></i>Venda acumulada</span><span><i class="expected"></i>Meta acumulada pela curva</span></div>';
+    const tickHours=rows.map(r=>r.h).filter((h,i)=>i%2===0||h===rows.at(-1).h);
+    const ticks=[...new Set(tickHours)].map(h=>'<text x="'+x(h)+'" y="'+(H-15)+'" text-anchor="middle" fill="#5B7166" font-size="13">'+String(h).padStart(2,"0")+'h</text>').join("");
+    const mark=pts.map(p=>'<circle cx="'+x(p.t)+'" cy="'+y(p.sale)+'" r="4.3" fill="#176747" stroke="#fff" stroke-width="2">'+
+      '<title>'+localTime(p.iso)+' • '+money(p.sale,2)+'</title></circle>').join("");
+    const fill=pts.length>=2?'<path d="'+lineReal+' L'+x(pts.at(-1).t)+','+y(0)+' L'+x(pts[0].t)+','+y(0)+' Z" fill="url(#ma2Area)" opacity=".6"/>':"";
+    const goalMarker=recent&&expectedCurrent!==null?
+      '<line x1="'+x(recent.t)+'" x2="'+x(recent.t)+'" y1="'+y(recent.sale)+'" y2="'+y(expectedCurrent)+'" stroke="'+(recent.sale<expectedCurrent?"#B44E45":"#23845F")+'" stroke-width="2" stroke-dasharray="3 4"/>'+
+      '<circle cx="'+x(recent.t)+'" cy="'+y(expectedCurrent)+'" r="4" fill="#fff" stroke="#9BA7A3" stroke-width="2"/>':"";
+    const extrapolation=projection!==null&&recent&&recent.t<last?
+      '<path d="M'+x(recent.t)+','+y(recent.sale)+' L'+x(last)+','+y(projection)+'" fill="none" stroke="#DE7C00" stroke-width="3" stroke-dasharray="7 6"/>':"";
+    const lastBadge=recent?
+      '<circle cx="'+x(recent.t)+'" cy="'+y(recent.sale)+'" r="6.5" fill="#176747" stroke="white" stroke-width="3">'+
+        '<title>Última parcial: '+money(recent.sale,2)+' às '+localTime(recent.iso)+'</title></circle>':"";
+    const actualLabel=recent?money(recent.sale,0):"—";
+    const expectedLabel=recent&&expectedCurrent!==null?money(expectedCurrent,0):"—";
+    const gapLabel=recent&&expectedCurrent!==null?signedMoney(recent.sale-expectedCurrent,0):"—";
+    const forecastLabel=projection!==null&&target>0?pct(projection/target*100):"—";
+    const stat=(label,value,cls="")=>'<div class="ma2-chart-stat '+cls+'"><span>'+label+'</span><strong>'+value+'</strong></div>';
+    const highlights='<div class="ma2-chart-highlights">'+
+      stat("Venda pura Web",actualLabel)+
+      stat("Esperado neste horário",expectedLabel)+
+      stat("Diferença vs curva",gapLabel,recent&&expectedCurrent!==null&&recent.sale<expectedCurrent?"warning":"")+
+      stat("% projetado",forecastLabel)+'</div>';
+    const graphic='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Venda pura Web acumulada por horário, comparada à meta proporcional; projeção estimada em laranja">'+
+      '<defs><linearGradient id="ma2Area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A9DEBC" stop-opacity=".6"/><stop offset="100%" stop-color="#EAF6EB" stop-opacity=".08"/></linearGradient></defs>'+
+      steps+'<path d="'+lineRef+'" fill="none" stroke="#9BA7A3" stroke-width="3" stroke-dasharray="7 6"/>'+
+      fill+(pts.length>=2?'<path d="'+lineReal+'" fill="none" stroke="#176747" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/>':"")+
+      extrapolation+mark+goalMarker+lastBadge+ticks+'</svg>';
+    return highlights+(recent?"":'<p class="ma2-hint">Aguardando primeira parcial para traçar a venda real.</p>')+
+      graphic+'<div class="ma2-legend"><span><i></i>Venda pura Web</span><span><i class="goal"></i>Meta pela curva</span>'+
+      '<span><i class="forecast"></i>Projeção de fechamento</span></div>'+
+      '<p class="ma2-hint">Pontos reais correspondem aos horários dos inputs. Meta e projeção são referências estimadas, não vendas registradas.</p>';
   }
 
   function renderCurve(){
