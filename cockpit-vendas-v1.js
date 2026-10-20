@@ -129,7 +129,7 @@
         '<span class="cp-tile-sub">'+(x.has?"Venda Web acumulada":"Aguardando venda Web")+'</span>'+
       '</div>'+
       '<div class="cp-sale-analytics">'+
-        '<div class="cp-pie" role="img" aria-label="Atingimento de '+attainment+' da meta" style="--cp-progress:'+ratio+'">'+
+        '<div class="cp-pie" role="img" aria-label="Atingimento de '+attainment+' da meta" style="--cp-progress:'+ratio.toFixed(1)+'%">'+
           '<div class="cp-pie-inner"><strong>'+attainment+'</strong><span>DA META</span></div>'+
         '</div>'+
         '<div class="cp-evolution '+trend+'"><span class="cp-evolution-title">EV. <small>vs A.A.</small></span>'+
