@@ -1,6 +1,6 @@
 
 /* Meu Acompanhamento 2.0 - camada visual progressiva, sem interferir nos formulários e dados existentes. */
-#section-inicio.ma2-active:not(.ma2-expanded)>:not(#ma2Stage),
+#section-inicio.ma2-radar > :not(#ma2Stage),
 #section-grupos.ma2-worlds-active:not(.ma2-expanded)>:not(#ma2Worlds){display:none!important}
 #ma2Stage,#ma2Worlds{--ma2-green:#173F35;--ma2-sage:#466964;--ma2-orange:#DE7C00;--ma2-muted:#65776f;--ma2-border:#E7EBE7;color:#173F35;font-family:inherit;max-width:1200px;margin:0 auto 28px;min-width:0}
 #ma2Stage *,#ma2Worlds *{box-sizing:border-box}
@@ -73,3 +73,39 @@
 #nav #ma2SidebarRadar{display:flex;align-items:center;gap:10px}
 #nav #ma2SidebarRadar[hidden]{display:none!important}
 #ma2Stage .ma2-tab[aria-selected=true]{background:#173F35!important;color:#fff!important}
+
+/* Integração 2.1: a Home original permanece íntegra e o carrossel fica visível. */
+#section-inicio:not(.ma2-radar) > .section-head{display:flex!important}
+#section-inicio:not(.ma2-radar) #homeCampaignSlot{display:block!important}
+#section-inicio #clarityHome > section.home-group-panel{display:block!important;width:100%;min-width:0;margin:2px 0 10px}
+#section-inicio #clarityHome > section.home-group-panel .group-share-scroll{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+#section-inicio #clarityHome > section.home-group-panel .card-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+#section-inicio #clarityHome > section.home-group-panel .card-head h2{font-size:clamp(19px,3vw,25px)}
+#section-inicio #clarityHome > section.home-group-panel .group-share-panel{margin:0}
+#section-inicio #clarityHome > .clarity-groups{display:none!important}/* visão repetida pelo card oficial */
+#section-inicio #ma2Stage .ma2-quick{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border:1px solid #D5E6D9;border-radius:18px;padding:14px 17px;background:linear-gradient(125deg,#EFF8F1,#FFFFFF);color:#173F35}
+#section-inicio #ma2Stage .ma2-quick-text{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 230px}
+#section-inicio #ma2Stage .ma2-quick-text strong{display:block;font-size:clamp(19px,3vw,27px);line-height:1.2;color:#176747}
+#section-inicio #ma2Stage .ma2-quick-text small{display:block;color:#65776f;font-size:11px;margin-top:3px}
+#section-inicio #ma2Stage .ma2-quick-icon{font-size:23px}
+#section-inicio:not(.ma2-radar) #ma2Stage{margin:8px 0}
+#section-inicio .ma2-group-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+#section-inicio .ma2-group-tools .btn{font:inherit;font-weight:750;font-size:12px;min-height:39px;padding:8px 13px}
+#section-inicio #clarityHome .clarity-curve-chart{background:#fff;border:1px solid #E1E8E1;border-radius:18px;padding:10px 12px;overflow:hidden}
+#section-inicio #clarityHome .clarity-curve-chart svg{width:100%;height:auto;display:block}
+#section-inicio #clarityHome .ma2-chart-highlights{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 10px}
+#section-inicio #clarityHome .ma2-chart-stat{border-radius:10px;background:#F6F9F6;padding:10px 9px;min-width:0}
+#section-inicio #clarityHome .ma2-chart-stat span{display:block;color:#65776f;font-size:10px}
+#section-inicio #clarityHome .ma2-chart-stat strong{display:block;margin-top:4px;color:#173F35;font-weight:800;font-size:clamp(12px,1.65vw,17px);overflow-wrap:anywhere}
+#section-inicio #clarityHome .ma2-chart-stat.warning strong{color:#B1453D}
+#section-inicio #clarityHome .ma2-legend{display:flex;gap:15px;flex-wrap:wrap;color:#66796d;font-size:11px;margin-top:7px}
+#section-inicio #clarityHome .ma2-legend span{display:flex;align-items:center;gap:5px}
+#section-inicio #clarityHome .ma2-legend i{display:inline-block;width:19px;height:3px;background:#176747}
+#section-inicio #clarityHome .ma2-legend i.goal{background:repeating-linear-gradient(90deg,#9AA69D 0 5px,transparent 5px 8px)}
+#section-inicio #clarityHome .ma2-legend i.forecast{background:repeating-linear-gradient(90deg,#DE7C00 0 5px,transparent 5px 8px)}
+@media(max-width:680px){
+ #section-inicio #clarityHome .ma2-chart-highlights{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #section-inicio #ma2Stage .ma2-quick{padding:12px}
+ #section-inicio #clarityHome > section.home-group-panel .card-head .ma2-group-tools{width:100%}
+ #section-inicio #clarityHome > section.home-group-panel .card-head .ma2-group-tools .btn{flex:1 1 130px}
+}
