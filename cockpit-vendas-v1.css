@@ -290,3 +290,47 @@
   #section-cockpit .cp-evolution strong{font-size:11px}
   #section-cockpit .cp-sale-analytics{padding-left:3px}
 }
+
+/* Cockpit: leitura real por faixas de pico, com comparacao a meta proporcional. */
+#section-cockpit .cp-peak-result{
+  border-top:1px solid #eee6da;margin-top:12px;padding-top:10px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;
+}
+#section-cockpit .cp-peak .cp-peak-result>span{
+  color:#445c53;font-size:10px;margin:0;font-weight:750;
+}
+#section-cockpit .cp-peak-result>b{
+  display:block;font-size:clamp(12px,1.55vw,17px);font-weight:900;line-height:1.25;
+  overflow-wrap:anywhere;font-variant-numeric:tabular-nums;
+}
+#section-cockpit .cp-peak-trend{font-size:12px;font-weight:900;line-height:1.35}
+#section-cockpit .cp-peak-trend span{display:inline!important;margin:0!important;font-size:13px!important;color:inherit!important}
+#section-cockpit .cp-peak-result small{
+  font-size:10px;font-weight:750;line-height:1.35;max-width:100%;
+  overflow-wrap:anywhere;
+}
+#section-cockpit .cp-peak-result .cp-peak-window{font-size:9px;color:#63756a;font-weight:650}
+#section-cockpit .cp-peak-below>b,#section-cockpit .cp-peak-below .cp-peak-trend,
+#section-cockpit .cp-peak-below .cp-peak-gap{color:#c92c37}
+#section-cockpit .cp-peak-above>b,#section-cockpit .cp-peak-above .cp-peak-trend,
+#section-cockpit .cp-peak-above .cp-peak-gap{color:#127548}
+#section-cockpit .cp-peak-neutral>b,#section-cockpit .cp-peak-neutral .cp-peak-trend{color:#586d61}
+#section-cockpit .cp-peak-unavailable em{
+  display:block;font-size:10px;line-height:1.4;color:#657067;font-style:normal;
+}
+#section-cockpit .cp-hero-actions #cockpitShareCard{
+  background:#de7c00;color:#fff;border-color:#de7c00
+}
+@media(max-width:520px){
+  #section-cockpit .cp-peaks{grid-template-columns:1fr;gap:8px}
+  #section-cockpit .cp-peak{
+    padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  #section-cockpit .cp-peak b{font-size:15px}
+  #section-cockpit .cp-peak span{font-size:11px;margin-top:6px}
+  #section-cockpit .cp-peak strong{font-size:17px}
+  #section-cockpit .cp-peak-result{width:100%;margin-top:8px;padding-top:8px}
+  #section-cockpit .cp-peak-result>b{font-size:17px}
+  #section-cockpit .cp-peak-result .cp-peak-trend{font-size:12px}
+  #section-cockpit .cp-peak-result small{font-size:10px}
+}
