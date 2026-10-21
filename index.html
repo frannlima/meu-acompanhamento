@@ -45,8 +45,36 @@
   <link rel="stylesheet" href="./ma2-simple-v1.css?v=7">
   <link rel="stylesheet" href="./ma3-faithful-v1.css?v=5">
   <link rel="stylesheet" href="./cockpit-vendas-v1.css?v=4">
+  <style>
+    /* Exibir o aplicativo apenas quando a interface 3.0 estiver totalmente montada. */
+    html.ma-booting #appShell { visibility:hidden!important; pointer-events:none!important; }
+    #maStartup { display:none; position:fixed; inset:0; z-index:2147483000; box-sizing:border-box;
+      padding:24px; min-height:100dvh; align-items:center; justify-content:center;
+      flex-direction:column; gap:16px; text-align:center; background:#173F35; color:#fff; }
+    html.ma-booting #maStartup { display:flex; }
+    #maStartup img { display:block; width:min(210px,68vw); max-height:82px; object-fit:contain; }
+    #maStartup .ma-startup-spinner { width:30px; height:30px; border-radius:50%;
+      border:3px solid rgba(255,255,255,.26); border-top-color:#DE7C00; animation:ma-startup-spin .75s linear infinite; }
+    #maStartup strong {font-size:17px;line-height:1.4;letter-spacing:.01em}
+    #maStartup p {font-size:13px;line-height:1.5;opacity:.8;max-width:270px;margin:0}
+    @keyframes ma-startup-spin {to{transform:rotate(360deg)}}
+    @media (prefers-reduced-motion:reduce) {#maStartup .ma-startup-spinner{animation:none}}
+  </style>
+  <script>
+    // Evita um frame da interface antiga antes da restauração automática da sessão.
+    try {
+      if(localStorage.getItem("meu_acompanhamento_session"))
+        document.documentElement.classList.add("ma-booting");
+    } catch (_) {}
+  </script>
 </head>
 <body>
+  <div id="maStartup" role="status" aria-live="polite" aria-label="Preparando aplicativo">
+    <img src="./assets/ria-signature-horizontal.svg" alt="Riachuelo">
+    <div class="ma-startup-spinner" aria-hidden="true"></div>
+    <strong>Preparando seu acompanhamento</strong>
+    <p>Carregando diretamente a versão mais recente.</p>
+  </div>
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <section id="loginScreen" class="login-screen login-premium">
