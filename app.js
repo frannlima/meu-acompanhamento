@@ -1959,7 +1959,7 @@ function bind(){
 
 async function boot(){
   bind();
-  if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}))}
+  if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js",{updateViaCache:"none"}).then(reg=>reg.update().catch(()=>{})).catch(e=>console.warn("Falha ao registrar atualização PWA",e)))}
   const saved=localStorage.getItem("meu_acompanhamento_session");
   if(saved){
     try{
