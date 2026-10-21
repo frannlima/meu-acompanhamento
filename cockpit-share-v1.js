@@ -1,144 +1,186 @@
-/* Cockpit: compartilhar a tela inteira como PNG, com fallback sem rede. */
+/* Cockpit | card compartilhável compacto e resumo textual consistente. */
 (function(){
-"use strict";
-const $=id=>document.getElementById(id);
-let engine=null,busy=false;
-function message(s,bad=false){if(typeof toast==="function")toast(s,bad);else console[bad?"warn":"log"](s);}
-function text(root,selector){return root.querySelector(selector)?.textContent?.trim().replace(/\s+/g," ")||"—";}
-function loadCapture(){
- if(typeof window.html2canvas==="function")return Promise.resolve(window.html2canvas);
- if(engine)return engine;
- engine=(async()=>{
-   for(const url of [
-     "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
-     "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"
-   ]){
-     try{
-       await new Promise((ok,fail)=>{
-         const tag=document.createElement("script");
-         const timer=setTimeout(()=>{tag.remove();fail(new Error("timeout"));},5000);
-         tag.async=true;tag.crossOrigin="anonymous";tag.src=url;
-         tag.onload=()=>{clearTimeout(timer);ok();};
-         tag.onerror=()=>{clearTimeout(timer);tag.remove();fail(new Error("unavailable"));};
-         document.head.appendChild(tag);
-       });
-       if(typeof window.html2canvas==="function")return window.html2canvas;
-     }catch(e){console.warn("Cockpit: biblioteca de captura indisponível",e);}
-   }
-   throw new Error("Motor de captura indisponível");
- })();
- return engine;
-}
-function backup(root){
- // Backup autônomo: imagem com os mesmos indicadores, mesmo offline.
- const canvas=document.createElement("canvas");canvas.width=1200;canvas.height=1440;
- const c=canvas.getContext("2d");if(!c)throw new Error("Canvas indisponível");
- const green="#173F35",gray="#68766e";
- const rect=(x,y,w,h,bg="#fff")=>{c.fillStyle=bg;c.fillRect(x,y,w,h);};
- const write=(str,x,y,size=22,color=green,bold=false,width=1000)=>{
-   c.fillStyle=color;c.font=(bold?"bold ":"normal ")+size+"px Arial";
-   c.fillText(String(str).slice(0,100),x,y,width);
- };
- rect(0,0,1200,1440,"#f7faf7");rect(0,0,1200,178,green);
- write("COCKPIT DE VENDAS",45,63,37,"#fff",true);
- write(text(root,"#cockpitStore"),45,111,26,"#fff",true);
- write(text(root,"#cockpitTimestamp"),45,148,20,"#fff");
- [...root.querySelectorAll(".cp-main-tiles .cp-tile")].slice(0,3).forEach((el,i)=>{
-   const x=36+i*382;rect(x,205,366,172);
-   write(text(el,".cp-tile-label b"),x+14,242,18,gray,true,338);
-   write(text(el,".cp-tile-value"),x+14,300,28,green,true,335);
-   write(text(el,".cp-tile-sub"),x+14,344,16,gray,false,335);
- });
- [...root.querySelectorAll(".cp-signals .cp-signal")].slice(0,2).forEach((el,i)=>{
-   const x=36+i*575,bad=el.classList.contains("cp-bad");
-   rect(x,397,557,123,bad?"#ffe8e8":"#e5f6e9");
-   write(text(el,"div"),x+16,432,20,green,true,515);
-   write(text(el,"strong"),x+16,485,30,bad?"#c92c37":"#18764c",true,515);
- });
- write("HORÁRIOS DE PICO • CURVA HISTÓRICA",43,574,27,green,true);
- [...root.querySelectorAll(".cp-peaks .cp-peak")].slice(0,3).forEach((el,i)=>{
-   const x=36+i*382,below=!!el.querySelector(".cp-peak-below"),above=!!el.querySelector(".cp-peak-above");
-   rect(x,602,366,295,"#fff7ed");
-   write(text(el,":scope > b"),x+14,638,25,green,true);
-   write("Meta da faixa",x+14,676,17,gray);
-   write(text(el,":scope > strong"),x+14,710,25,"#de7c00",true,330);
-   write("Venda entre parciais",x+14,758,17,gray);
-   write(text(el,".cp-peak-result > b"),x+14,799,24,below?"#c92c37":above?"#18764c":gray,true,337);
-   write(text(el,".cp-peak-trend"),x+14,839,17,below?"#c92c37":above?"#18764c":gray,true,337);
-   write(text(el,".cp-peak-gap"),x+14,866,13,gray,false,337);
-   write(text(el,".cp-peak-window"),x+14,888,11,gray,false,337);
- });
- const estore=root.querySelector(".cp-estore");
- write("eSTORE CE+PI",43,954,27,green,true);rect(36,977,1128,188,"#eef8ff");
- if(estore){
-   write("SHARE eSTORE: "+text(estore,".cp-estore-share b"),54,1017,22,"#18764c",true);
-   [...estore.querySelectorAll(".cp-estore-metrics > div")].slice(0,3).forEach((el,i)=>{
-     const x=54+i*374;
-     write(text(el,"span"),x,1062,18,gray,true);
-     write(text(el,"strong"),x,1111,25,green,true,345);
-   });
-   write(text(estore,".cp-estore-goal strong"),54,1150,16,gray,false,1000);
- }
- [...root.querySelectorAll(".cp-bottom-tile")].slice(0,2).forEach((el,i)=>{
-   const x=36+i*575;rect(x,1200,557,145,i===0?"#e6f6eb":"#ffeeed");
-   write(text(el,"h2"),x+14,1237,21,green,true,518);
-   write(text(el,":scope > strong")!=="—"?text(el,":scope > strong"):text(el,"li"),x+14,1280,23,green,true,520);
-   write(text(el,":scope > b"),x+14,1320,21,i===0?"#18764c":"#c92c37",true,520);
- });
- rect(0,1370,1200,70,green);
- write("MEU ACOMPANHAMENTO • Moda que inspira o Brasil",43,1412,20,"#fff",true);
- return canvas;
-}
-async function capture(){
- const root=document.querySelector("#section-cockpit .cp-frame");
- if(!root)throw new Error("Cockpit não encontrado");
- try{
-   const html2canvas=await loadCapture();
-   await Promise.race([document.fonts?.ready||Promise.resolve(),new Promise(ok=>setTimeout(ok,1500))]);
-   const width=Math.max(1,root.scrollWidth),height=Math.max(1,root.scrollHeight);
-   const scale=Math.max(.7,Math.min(2,1900/width,4800/height));
-   return await html2canvas(root,{
-     backgroundColor:"#fff",scale,useCORS:true,allowTaint:false,logging:false,
-     scrollX:0,scrollY:-window.scrollY,
-     onclone:d=>d.querySelectorAll("#cockpitRefresh,#cockpitShare,#cockpitShareCard,#cockpitDownloadCard").forEach(el=>el.style.display="none")
-   });
- }catch(e){console.warn("Cockpit: usando imagem local sem CDN",e);return backup(root);}
-}
-function toBlob(canvas){
- return new Promise((ok,fail)=>canvas.toBlob(blob=>blob?ok(blob):fail(new Error("Falha na criação da imagem")),"image/png",1));
-}
-function save(blob,name){
- const url=URL.createObjectURL(blob),a=document.createElement("a");
- a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
- setTimeout(()=>URL.revokeObjectURL(url),2500);
-}
-async function action(mode){
- if(busy)return;
- const btn=$(mode==="share"?"cockpitShareCard":"cockpitDownloadCard");
- const label=btn?.textContent;
- busy=true;if(btn){btn.disabled=true;btn.textContent="Gerando PNG…";}
- try{
-   const blob=await toBlob(await capture());
-   const store=String(text(document,"#cockpitStore")).replace(/\D/g,"").padStart(3,"0");
-   const date=new Date().toLocaleDateString("en-CA",{timeZone:"America/Fortaleza"});
-   const name="Cockpit_Loja_"+store+"_"+date+".png";
-   const file=new File([blob],name,{type:"image/png"});
-   if(mode==="share"&&navigator.share&&navigator.canShare?.({files:[file]})){
-     await navigator.share({title:"Cockpit de Vendas • Loja "+store,files:[file]});
-   }else{
-     save(blob,name);
-     message(mode==="share"?"Imagem gerada para enviar no WhatsApp.":"Imagem do Cockpit salva.");
-   }
- }catch(e){if(e?.name!=="AbortError")message(e.message||"Não foi possível compartilhar o Cockpit.",true);}
- finally{busy=false;if(btn){btn.disabled=false;btn.textContent=label;}}
-}
-function init(){
- $("cockpitShareCard")?.addEventListener("click",()=>void action("share"));
- $("cockpitDownloadCard")?.addEventListener("click",()=>void action("download"));
- document.addEventListener("click",e=>{
-   if(e.target.closest('[data-section="cockpit"]'))void loadCapture().catch(()=>{});
- });
-}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
-else init();
+  "use strict";
+  const $=id=>document.getElementById(id);
+  const GREEN="#173F35", SAGE="#466964", ORANGE="#DE7C00",
+    BG="#F5F7F3", MUTED="#64766D", RED="#C4333E", GOOD="#15794E",
+    WHITE="#FFFFFF", LINE="#DFE7DF";
+  let busy=false;
+  const brl=(value)=>Number(value).toLocaleString("pt-BR",{
+    style:"currency",currency:"BRL",minimumFractionDigits:2,maximumFractionDigits:2
+  });
+  const percentage=(value,dec=1)=>Number.isFinite(value)
+    ?value.toLocaleString("pt-BR",{minimumFractionDigits:dec,maximumFractionDigits:dec})+"%":"—";
+  const signed=(value)=>value==null?"—":(value<0?"− ":"+ ")+brl(Math.abs(value));
+  const signedPercent=(value)=>value==null?"—":(value>0?"+ ":"")+percentage(value);
+  function inform(message,error=false){
+    if(typeof toast==="function")toast(message,error);
+    else console[error?"warn":"info"](message);
+  }
+  function shareState(){
+    const api=window.maCockpit;
+    const data=api?.getShareData?.();
+    const summary=api?.getShareText?.();
+    if(!data||!summary)throw new Error("Abra o Cockpit para gerar o card atualizado.");
+    return {data,summary};
+  }
+  function type(ctx,text,x,y,size=28,color=GREEN,weight=700,maxWidth=900,align="left"){
+    ctx.save();
+    ctx.fillStyle=color;
+    ctx.textAlign=align;
+    ctx.textBaseline="alphabetic";
+    ctx.font=weight+" "+size+"px Larsseit, Arial, sans-serif";
+    ctx.fillText(String(text??"—"),x,y,maxWidth);
+    ctx.restore();
+  }
+  function rounded(ctx,x,y,w,h,r,fill,stroke=null){
+    const radius=Math.min(r,w/2,h/2);
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(x,y,w,h,radius);
+    else{
+      ctx.moveTo(x+radius,y);
+      ctx.arcTo(x+w,y,x+w,y+h,radius);
+      ctx.arcTo(x+w,y+h,x,y+h,radius);
+      ctx.arcTo(x,y+h,x,y,radius);
+      ctx.closePath();
+    }
+    ctx.fillStyle=fill;ctx.fill();
+    if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+  }
+  function cell(ctx,x,y,label,value,{fill=WHITE,tone=GREEN,note="",big=false}={}){
+    const width=472,height=big?155:120;
+    rounded(ctx,x,y,width,height,19,fill,LINE);
+    type(ctx,label.toUpperCase(),x+23,y+39,21,MUTED,750,424);
+    type(ctx,value,x+23,y+(big?101:84),big?38:31,tone,850,426);
+    if(note)type(ctx,note,x+23,y+height-17,16,MUTED,600,420);
+  }
+  function logo(){
+    return new Promise(resolve=>{
+      const img=new Image();
+      const timer=setTimeout(()=>resolve(null),2200);
+      img.onload=()=>{clearTimeout(timer);resolve(img);};
+      img.onerror=()=>{clearTimeout(timer);resolve(null);};
+      img.src="./assets/ria-signature-horizontal.svg";
+    });
+  }
+  async function buildCard(data){
+    // Resumo executivo em uma arte própria; sem reproduzir a tela extensa do aplicativo.
+    const canvas=document.createElement("canvas");
+    canvas.width=1080;canvas.height=1080;
+    const c=canvas.getContext("2d",{alpha:false});
+    if(!c)throw new Error("Este dispositivo não permite gerar imagem PNG.");
+    c.fillStyle=BG;c.fillRect(0,0,1080,1080);
+    c.fillStyle=GREEN;c.fillRect(0,0,1080,204);
+    rounded(c,48,27,245,57,12,"#F6F3EC");
+    const officialLogo=await logo();
+    if(officialLogo){
+      const w=226,h=Math.min(50,226*officialLogo.naturalHeight/officialLogo.naturalWidth);
+      c.drawImage(officialLogo,57,55-h/2,w,h);
+    }else{
+      type(c,"RIA",65,67,40,GREEN,900,210);
+    }
+    type(c,"MODA QUE INSPIRA O BRASIL",1033,64,18,"#D9E8DD",750,660,"right");
+    type(c,"COCKPIT DE VENDAS",48,137,41,WHITE,900,976);
+    type(c,"LOJA "+data.store+"  •  "+data.date,48,178,24,"#E3EEE5",750,570);
+    const current=data.has?"PARCIAL "+data.status:"SEM PARCIAL";
+    rounded(c,752,151,280,37,15,data.has?"#DDF4E6":"#E9E9DF");
+    type(c,current,892,177,17,data.has?GREEN:SAGE,850,250,"center");
+
+    // Resumo visual com tamanho fixo e legível mesmo quando ainda não há vendas.
+    cell(c,48,228,"Meta do dia",data.meta>0?brl(data.meta):"—",{fill:"#FFF7EB",tone:GREEN,big:true});
+    cell(c,560,228,"Venda real",data.has?brl(data.sale):"—",{fill:"#EDF7F0",tone:GOOD,big:true});
+    cell(c,48,403,"Atingimento",percentage(data.attainment),{fill:WHITE});
+    cell(c,560,403,"Evolução vs A.A.",signedPercent(data.evolution),{
+      tone:data.evolution==null?GREEN:data.evolution<0?RED:GOOD
+    });
+    cell(c,48,539,"Projeção",data.projection==null?"—":brl(data.projection),{
+      fill:WHITE
+    });
+    cell(c,560,539,"Desvio da meta",signed(data.dev),{
+      tone:data.dev==null?GREEN:data.dev<0?RED:GOOD
+    });
+    cell(c,48,675,"Ritmo vs hora anterior",signedPercent(data.growth),{
+      tone:data.growth==null?GREEN:data.growth<0?RED:GOOD
+    });
+    cell(c,560,675,"Share eStore",percentage(data.share,2),{
+      fill:"#EEF7FC",tone:GOOD
+    });
+    cell(c,48,811,"eStore CE+PI",data.estore==null?"—":brl(data.estore),{
+      fill:"#EEF7FC",tone:GREEN,
+      note:data.orders==null?"Sem parcial eStore":data.orders+" pedidos"
+    });
+    cell(c,560,811,"Destaque",data.best?.name||"—",{
+      fill:"#ECF7EF",tone:GREEN,
+      note:data.best?percentage(data.best.attainment)+" da meta":"Aguardando resultado"
+    });
+
+    c.fillStyle=GREEN;c.fillRect(0,960,1080,120);
+    type(c,"MEU ACOMPANHAMENTO",48,1011,25,WHITE,800,600);
+    type(c,"Resultado da loja • "+data.date,48,1047,18,"#DDEAE0",500,670);
+    type(c,"Moda que inspira o Brasil",1033,1040,19,"#DDEAE0",750,380,"right");
+    return canvas;
+  }
+  function png(canvas){
+    return new Promise((resolve,reject)=>canvas.toBlob(
+      blob=>blob?resolve(blob):reject(new Error("Falha ao criar a imagem do card.")),
+      "image/png",1));
+  }
+  function save(blob,filename){
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }
+  async function copySummary(summary){
+    if(!navigator.clipboard?.writeText)return false;
+    try{await navigator.clipboard.writeText(summary);return true;}
+    catch(error){console.warn("Resumo não pôde ser copiado",error);return false;}
+  }
+  async function action(mode){
+    if(busy)return;
+    const button=$(mode==="share"?"cockpitShareCard":"cockpitDownloadCard");
+    const previous=button?.textContent;
+    busy=true;
+    if(button){button.disabled=true;button.textContent="Preparando card…";}
+    try{
+      const {data,summary}=shareState();
+      const image=await png(await buildCard(data));
+      const filename="Cockpit_Loja_"+data.store+"_"+new Date().toLocaleDateString(
+        "en-CA",{timeZone:"America/Fortaleza"})+".png";
+      if(mode==="download"){
+        save(image,filename);
+        inform("Card resumido do Cockpit salvo.");
+        return;
+      }
+      const file=new File([image],filename,{type:"image/png"});
+      // WhatsApp e alguns alvos podem tratar mídia e legenda de maneiras distintas.
+      // Entregar os dois campos juntos quando o compartilhamento nativo permitir.
+      if(navigator.share&&navigator.canShare?.({files:[file]})){
+        try{
+          await navigator.share({title:"Cockpit de Vendas • Loja "+data.store,
+            text:summary,files:[file]});
+          return;
+        }catch(error){
+          if(error?.name==="AbortError")return;
+          console.warn("Falha no compartilhamento com arquivo",error);
+        }
+      }
+      save(image,filename);
+      const copied=await copySummary(summary);
+      inform(copied?"Card baixado e resumo copiado para o WhatsApp.":
+        "Card baixado. Use Enviar resumo para compartilhar o texto.",!copied);
+    }catch(error){
+      if(error?.name!=="AbortError")inform(error.message||"Falha ao preparar o card.",true);
+    }finally{
+      busy=false;
+      if(button){button.disabled=false;button.textContent=previous;}
+    }
+  }
+  function init(){
+    $("cockpitShareCard")?.addEventListener("click",()=>void action("share"));
+    $("cockpitDownloadCard")?.addEventListener("click",()=>void action("download"));
+  }
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
+  else init();
+  window.maCockpitShareCard={buildCard};
 })();
