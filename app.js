@@ -354,24 +354,43 @@ async function doLogin(matricula, storeCode, save=true){
   const ownerName=String(person.full_name||"").trim().toUpperCase();
   if(ownerName==="FRANCIMAR LIMA DE ABREU") state.role="administrador";
   state.user=person;
-  if(save) localStorage.setItem("meu_acompanhamento_session",JSON.stringify({matricula:m,storeCode:s}));
-  $("loginScreen").classList.add("hidden");
-  $("appShell").classList.remove("hidden");
-  $("identityName").textContent=state.employeeName;
-  if($("identityRole")) $("identityRole").textContent=person.job_title||roleLabel(state.role);
-  if($("identityStore")) $("identityStore").textContent=person.store_name||("Loja "+state.storeCode);
-  document.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
-  $("adminStoreBar").classList.toggle("hidden",state.role!=="administrador");
-  if($("homeAdminStoreBar")) $("homeAdminStoreBar").classList.toggle("hidden",state.role!=="administrador");
-  document.querySelectorAll(".reset-capable").forEach(el=>el.classList.toggle("hidden",!["administrador","gerente","supervisor"].includes(state.role)));
-  buildAdminStoreSelect();
-  await loadAll();
-  // Após uma atualização/reabertura do PWA, voltar ao último menu utilizado,
-  // sem obrigar o usuário a passar novamente pela tela Início.
-  const restoredSection=getSavedSection();
-  if(restoredSection) setSection(restoredSection);
-  if(typeof window.afterMeuAcompanhamentoLogin==="function") await window.afterMeuAcompanhamentoLogin(person);
-  else showWorldModal();
+  // A antiga Home era mostrada antes do download dos dados e do redesenho MA2/MA3.
+  // Manter a tela de abertura visível até que os painéis e o menu final estejam prontos.
+  document.documentElement.classList.add("ma-booting");
+  try {
+    if(save) localStorage.setItem("meu_acompanhamento_session",JSON.stringify({matricula:m,storeCode:s}));
+    $("loginScreen").classList.add("hidden");
+    $("appShell").classList.remove("hidden");
+    $("identityName").textContent=state.employeeName;
+    if($("identityRole")) $("identityRole").textContent=person.job_title||roleLabel(state.role);
+    if($("identityStore")) $("identityStore").textContent=person.store_name||("Loja "+state.storeCode);
+    document.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
+    $("adminStoreBar").classList.toggle("hidden",state.role!=="administrador");
+    if($("homeAdminStoreBar")) $("homeAdminStoreBar").classList.toggle("hidden",state.role!=="administrador");
+    document.querySelectorAll(".reset-capable").forEach(el=>el.classList.toggle("hidden",!["administrador","gerente","supervisor"].includes(state.role)));
+    buildAdminStoreSelect();
+    await loadAll();
+    // Preserva o último menu visitado e aguarda os componentes modernos do app.
+    const restoredSection=getSavedSection();
+    if(restoredSection) setSection(restoredSection);
+    if(typeof window.afterMeuAcompanhamentoLogin==="function") await window.afterMeuAcompanhamentoLogin(person);
+    else showWorldModal();
+    if(typeof window.renderMA2==="function") window.renderMA2();
+    if(typeof window.renderMA3==="function") window.renderMA3();
+    // Dois frames permitem concluir renderizações agrupadas em requestAnimationFrame.
+    await Promise.race([
+      new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))),
+      new Promise(resolve=>setTimeout(resolve,1000))
+    ]);
+  } catch(error) {
+    // Não deixar uma tela incompleta nem esconder a mensagem de erro de login.
+    state.logged=false;
+    $("appShell").classList.add("hidden");
+    $("loginScreen").classList.remove("hidden");
+    throw error;
+  } finally {
+    document.documentElement.classList.remove("ma-booting");
+  }
 }
 
 function showWorldModal(){
