@@ -23,6 +23,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Validate Cockpit scripts and image sharing
+        run: |
+          node --check cockpit-vendas-v1.js
+          node --check cockpit-share-v1.js
+          node --check app.js
+          python3 - <<'PY'
+          from pathlib import Path
+          html = Path("index.html").read_text(encoding="utf-8")
+          cockpit = Path("cockpit-vendas-v1.js").read_text(encoding="utf-8")
+          sharing = Path("cockpit-share-v1.js").read_text(encoding="utf-8")
+          css = Path("cockpit-vendas-v1.css").read_text(encoding="utf-8")
+          checks = {
+              "share action": 'id="cockpitShareCard"' in html,
+              "download action": 'id="cockpitDownloadCard"' in html,
+              "image script": "cockpit-share-v1.js" in html,
+              "peak real sales calculation": "function peakComparison(" in cockpit,
+              "peak proportional target": "peak.w*minutes/60" in cockpit,
+              "red below-expected state": ".cp-peak-below" in css,
+              "green above-expected state": ".cp-peak-above" in css,
+              "image native fallback": "function backup(root)" in sharing,
+          }
+          for name, ok in checks.items():
+              if not ok:
+                  raise SystemExit("Cockpit regression: " + name)
+              print("PASS:", name)
+          PY
       - name: Version assets and PWA for every deployment
         run: |
           python3 - <<'PY'
@@ -101,11 +127,17 @@ jobs:
                       raise RuntimeError("O script principal do PWA nao foi atualizado")
                   if 'document.documentElement.classList.add("ma-booting")' not in js or 'window.renderMA3()' not in js:
                       raise RuntimeError("Sincronizacao da interface na abertura nao publicada")
-                  for asset in ("styles.css", "responsive-device-v1.css", "cockpit-vendas-v1.js"):
+                  for asset in ("styles.css", "responsive-device-v1.css", "cockpit-vendas-v1.js", "cockpit-vendas-v1.css", "cockpit-share-v1.js"):
                       url = next((x for x in re.findall(r'(?:src|href)="(\./[^"]+)"', html) if x.startswith("./" + asset + "?")), None)
                       if not url or ("build=" + build) not in url:
                           raise RuntimeError("Asset nao versionado: " + asset)
                       read(base + url.removeprefix("./"))
+                  if 'id="cockpitShareCard"' not in html or 'id="cockpitDownloadCard"' not in html:
+                      raise RuntimeError("Botoes de compartilhar e baixar imagem ausentes")
+                  if "function peakComparison(" not in read(base + "cockpit-vendas-v1.js"):
+                      raise RuntimeError("Comparativo real dos horarios de pico nao publicado")
+                  if "function backup(root)" not in read(base + "cockpit-share-v1.js"):
+                      raise RuntimeError("Captura de imagem do cockpit nao publicada")
                   print("Release verificado no GitHub Pages:", build)
                   print("HTML, service worker, app.js, CSS responsivo e cockpit disponiveis.")
                   break
