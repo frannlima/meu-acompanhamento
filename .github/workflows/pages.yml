@@ -92,8 +92,15 @@ jobs:
                       raise RuntimeError("GitHub Pages ainda entrega um release anterior")
                   if 'name="viewport"' not in html or "mobile-experience-v1.css" not in html:
                       raise RuntimeError("HTML responsivo ausente do deploy")
-                  if 'updateViaCache:"none"' not in read(base + "app.js"):
+                  if 'id="maStartup"' not in html or 'classList.add("ma-booting")' not in html:
+                      raise RuntimeError("Protecao contra a interface antiga nao foi publicada")
+                  if html.count('class="dock-label"') < 7 or '>Cockpit</span>' not in html or '>Radar</span>' not in html:
+                      raise RuntimeError("Menu mobile inicial nao corresponde a versao 3.0")
+                  js = read(base + "app.js")
+                  if 'updateViaCache:"none"' not in js:
                       raise RuntimeError("O script principal do PWA nao foi atualizado")
+                  if 'document.documentElement.classList.add("ma-booting")' not in js or 'window.renderMA3()' not in js:
+                      raise RuntimeError("Sincronizacao da interface na abertura nao publicada")
                   for asset in ("styles.css", "responsive-device-v1.css", "cockpit-vendas-v1.js"):
                       url = next((x for x in re.findall(r'(?:src|href)="(\./[^"]+)"', html) if x.startswith("./" + asset + "?")), None)
                       if not url or ("build=" + build) not in url:
