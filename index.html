@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="./pwa-install-assistant-v1.css?v=2">
   <link rel="stylesheet" href="./ma2-simple-v1.css?v=7">
   <link rel="stylesheet" href="./ma3-faithful-v1.css?v=5">
-  <link rel="stylesheet" href="./cockpit-vendas-v1.css?v=4">
+  <link rel="stylesheet" href="./cockpit-vendas-v1.css?v=5">
   <style>
     /* Exibir o aplicativo apenas quando a interface 3.0 estiver totalmente montada. */
     html.ma-booting #appShell { visibility:hidden!important; pointer-events:none!important; }
@@ -246,7 +246,9 @@
             <p class="cp-stamp" id="cockpitTimestamp">Carregando a parcial da loja…</p>
             <div class="cp-hero-actions">
               <button id="cockpitRefresh" type="button">↻ Atualizar</button>
-              <button id="cockpitShare" type="button">↗ Compartilhar resumo</button>
+              <button id="cockpitShareCard" type="button">↗ Compartilhar imagem</button>
+              <button id="cockpitDownloadCard" type="button">⇩ Baixar imagem</button>
+              <button id="cockpitShare" type="button">↗ Enviar resumo</button>
             </div>
           </header>
           <div class="cp-surface">
@@ -735,7 +737,8 @@
   <script src="./flash-details-v1.js?v=1" defer></script>
   <script src="./ma2-simple-v1.js?v=8" defer></script>
   <script src="./ma3-faithful-v1.js?v=3" defer></script>
-  <script src="./cockpit-vendas-v1.js?v=3" defer></script>
+  <script src="./cockpit-vendas-v1.js?v=4" defer></script>
+  <script src="./cockpit-share-v1.js?v=1" defer></script>
   <script>
   (function(){
     if(!("serviceWorker" in navigator))return;
