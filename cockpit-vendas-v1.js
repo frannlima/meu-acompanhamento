@@ -97,6 +97,54 @@
     return {target,has,sale,attainment,dev,evolution,growth,delta,projection,projectedAtt,peaks,rows,fraction,
       best:group.best,pressures:group.pressures,e,cap,eTarget,orders,orderTarget,eAtt,oAtt,share,updated:d.captured_at};
   }
+  // Somente diferenças entre inputs efetivamente registrados na MESMA faixa.
+  // Uma única parcial ou uma diferença que atravessa duas faixas não constitui
+  // venda apurada daquela hora: nesse caso, não estimar valores como venda real.
+  function peakComparison(peak,day){
+    if(!day.has||!(day.target>0))return null;
+    const begin=peak.h*60,end=(peak.h+1)*60;
+    const raw=Array.isArray(state.history)?state.history:[];
+    const samples=raw.filter(r=>todayStamp(r.captured_at)&&Number.isFinite(Number(r.sales_financial)))
+      .map(r=>{const t=hour(r.captured_at);return {at:r.captured_at,minute:t.h*60+t.m,value:Number(r.sales_financial)};});
+    if(todayStamp(day.updated)&&Number.isFinite(Number(day.sale))&&!samples.some(s=>s.at===day.updated)){
+      const t=hour(day.updated);
+      samples.push({at:day.updated,minute:t.h*60+t.m,value:day.sale});
+    }
+    const points=samples
+      .filter(s=>s.minute>=begin&&s.minute<=end)
+      .sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));
+    if(points.length<2)return null;
+    // Um input na fronteira exata da hora pertence ao fechamento da hora anterior.
+    // Duplicatas ou timestamps sem avanço temporal não são comparáveis.
+    const first=points[0],last=points[points.length-1],minutes=(Date.parse(last.at)-Date.parse(first.at))/60000;
+    if(!(minutes>0&&minutes<=60))return null;
+    const real=last.value-first.value;
+    const expected=day.target*peak.w*minutes/60;
+    if(!Number.isFinite(real)||!Number.isFinite(expected))return null;
+    const gap=real-expected;
+    const closeEnough=Math.abs(gap)<0.005;
+    const tone=closeEnough?"neutral":gap<0?"below":"above";
+    return {real,expected,gap,tone,minutes,first:time(first.at),last:time(last.at),full:minutes>=59.5};
+  }
+  function peakCard(peak,x){
+    const comparison=peakComparison(peak,x),start=String(peak.h).padStart(2,"0")+"h";
+    const finish=String(peak.h+1).padStart(2,"0")+"h";
+    const estimated=x.target*peak.w;
+    let result='<div class="cp-peak-result cp-peak-unavailable"><span>Venda na faixa</span>'+
+      '<em>Aguardando 2 parciais dentro deste horário</em></div>';
+    if(comparison){
+      const status=comparison.tone==="below"?"Abaixo do esperado":comparison.tone==="above"?"Acima do esperado":"Dentro do esperado";
+      const arrow=comparison.tone==="below"?"▼":comparison.tone==="above"?"▲":"◆";
+      result='<div class="cp-peak-result cp-peak-'+comparison.tone+'">'+
+        '<span>Vendido entre parciais</span><b>'+cash(comparison.real)+'</b>'+
+        '<div class="cp-peak-trend"><span aria-hidden="true">'+arrow+'</span> '+status+'</div>'+
+        '<small class="cp-peak-gap">'+signedMoney(comparison.gap)+' vs esperado na janela</small>'+
+        '<small class="cp-peak-window">'+comparison.first+'–'+comparison.last+' • Esperado: '+cash(comparison.expected)+'</small>'+
+        '</div>';
+    }
+    return '<div class="cp-peak"><b>'+start+' - '+finish+'</b>'+
+      '<span>Meta estimada da faixa</span><strong>'+cash(estimated)+'</strong>'+result+'</div>';
+  }
   function meter(value,tone="green"){
     return '<div class="cp-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+bound(value).toFixed(1)+'"><i class="'+tone+'" style="width:'+bound(value).toFixed(1)+'%"></i></div>';
   }
@@ -140,9 +188,7 @@
     $("cockpitStore").textContent="LOJA "+store();
     $("cockpitTimestamp").textContent=dayLabel()+" • "+(x.has?"Atualizado às "+time(x.updated):"Aguardando a primeira parcial");
     $("cockpitEstoreUpdated").textContent=x.e?.updated_at&&todayStamp(x.e.updated_at)?"eStore atualizado às "+time(x.e.updated_at):estoreStatus;
-    const peaks=x.target>0&&x.peaks.length?'<div class="cp-peaks">'+x.peaks.map(r=>
-      '<div class="cp-peak"><b>'+String(r.h).padStart(2,"0")+'h - '+String(r.h+1).padStart(2,"0")+'h</b>'+
-      '<span>Meta estimada da faixa</span><strong>'+cash(x.target*r.w)+'</strong></div>').join("")+'</div>':
+    const peaks=x.target>0&&x.peaks.length?'<div class="cp-peaks">'+x.peaks.map(r=>peakCard(r,x)).join("")+'</div>':
       '<p class="cp-empty">Cadastre a meta e a curva horária para visualizar os picos de venda.</p>';
     const eDeviation=x.cap!==null&&x.eTarget>0?x.cap-x.eTarget:null;
     const oDeviation=x.orders!==null&&x.orderTarget>0?x.orders-x.orderTarget:null;
