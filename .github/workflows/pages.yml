@@ -23,6 +23,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Version assets and PWA for every deployment
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          build = os.environ["GITHUB_SHA"][:12] + "-" + os.environ["GITHUB_RUN_NUMBER"]
+          html_path = Path("index.html")
+          html = html_path.read_text(encoding="utf-8")
+          asset_re = r'((?:src|href)=")(\./[^"?]+\.(?:js|css|webmanifest))(\?[^"]*)?(")'
+
+          def stamp(match):
+              query = match.group(3) or ""
+              separator = "&" if query else "?"
+              return match.group(1) + match.group(2) + query + separator + "build=" + build + match.group(4)
+
+          html, count = re.subn(asset_re, stamp, html)
+          if count < 20:
+              raise SystemExit("Asset versioning failed: too few JS/CSS references")
+          html_path.write_text(html, encoding="utf-8")
+
+          sw_path = Path("service-worker.js")
+          sw = sw_path.read_text(encoding="utf-8")
+          if sw.count("__BUILD_ID__") != 1:
+              raise SystemExit("Service worker version placeholder is missing or duplicated")
+          sw_path.write_text(sw.replace("__BUILD_ID__", build), encoding="utf-8")
+          print("Published PWA build:", build, "versioned assets:", count)
+          PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
