@@ -258,10 +258,10 @@
     try{await Promise.all([loadAll(),fetchEstore(true)]);}catch(e){toast("Não foi possível atualizar o cockpit.",true)}
     finally{btn.disabled=false;btn.textContent="↻ Atualizar";render();}
   }
-  async function share(){
-    if(!model)return;
-    const x=model;
-    const text="📊 COCKPIT DE VENDAS | LOJA "+store()+"\n"+dayLabel()+" • "+(x.has?time(x.updated):"Sem parcial")+
+  // Uma única fonte para o texto compartilhado, inclusive junto com o PNG.
+  function shareText(x){
+    if(!x)return "";
+    return "📊 COCKPIT DE VENDAS | LOJA "+store()+"\n"+dayLabel()+" • "+(x.has?time(x.updated):"Sem parcial")+
       "\n\n🎯 Meta: "+(x.target?cash(x.target):"—")+
       "\n🛒 Venda real: "+(x.has?cash(x.sale):"—")+
       "\n📈 Atingimento: "+percent(x.attainment)+
@@ -272,9 +272,21 @@
       "\n🛍️ eStore: "+(x.cap!==null?cash(x.cap):"—")+" • "+(x.orders!==null?x.orders+" pedidos":"sem parcial")+
       "\n📊 Share eStore: "+percent(x.share,2)+
       "\n🏆 Destaque: "+(x.best?x.best.name+" "+percent(x.best.sale/x.best.target*100):"—");
+  }
+  function shareSnapshot(){
+    const x=model||data();
+    return {store:store(),date:dayLabel(),status:x.has?time(x.updated):"Sem parcial",
+      has:x.has,meta:x.target,sale:x.sale,attainment:x.attainment,
+      evolution:x.evolution,projection:x.projection,dev:x.dev,growth:x.growth,
+      estore:x.cap,orders:x.orders,share:x.share,
+      best:x.best?{name:x.best.name,attainment:x.best.sale/x.best.target*100}:null};
+  }
+  async function share(){
+    const text=shareText(model||data());
+    if(!text)return;
     try{
       if(navigator.share)await navigator.share({title:"Cockpit de Vendas • Loja "+store(),text});
-      else if(navigator.clipboard){await navigator.clipboard.writeText(text);toast("Resumo do cockpit copiado.");}
+      else if(navigator.clipboard){await navigator.clipboard.writeText(text);toast("Resumo do Cockpit copiado.");}
       else toast("Compartilhamento não disponível neste dispositivo.",true);
     }catch(e){if(e.name!=="AbortError")toast("Não foi possível compartilhar o resumo.",true);}
   }
@@ -307,5 +319,5 @@
     setTimeout(open,500);
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
-  window.maCockpit={render,refresh:refreshAll};
+  window.maCockpit={render,refresh:refreshAll,getShareText:()=>shareText(model||data()),getShareData:shareSnapshot};
 })();
