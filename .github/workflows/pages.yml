@@ -61,3 +61,50 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify published PWA release
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import time
+          from urllib.error import URLError
+          from urllib.request import Request, urlopen
+
+          base = "https://frannlima.github.io/meu-acompanhamento/"
+          build = os.environ["EXPECTED_SHA"][:12] + "-" + os.environ["RUN_NUMBER"]
+          headers = {"Cache-Control": "no-cache", "User-Agent": "MeuAcompanhamento-DeploySmoke/1.0"}
+
+          def read(url):
+              with urlopen(Request(url, headers=headers), timeout=20) as response:
+                  if response.status != 200:
+                      raise RuntimeError(f"HTTP {response.status}: {url}")
+                  return response.read().decode("utf-8", errors="replace")
+
+          for attempt in range(1, 19):
+              try:
+                  html = read(base)
+                  sw = read(base + "service-worker.js")
+                  if ("build=" + build) not in html or ("meu-acompanhamento-" + build) not in sw:
+                      raise RuntimeError("GitHub Pages ainda entrega um release anterior")
+                  if 'name="viewport"' not in html or "mobile-experience-v1.css" not in html:
+                      raise RuntimeError("HTML responsivo ausente do deploy")
+                  if 'updateViaCache:"none"' not in read(base + "app.js"):
+                      raise RuntimeError("O script principal do PWA nao foi atualizado")
+                  for asset in ("styles.css", "responsive-device-v1.css", "cockpit-vendas-v1.js"):
+                      url = next((x for x in re.findall(r'(?:src|href)="(\./[^"]+)"', html) if x.startswith("./" + asset + "?")), None)
+                      if not url or ("build=" + build) not in url:
+                          raise RuntimeError("Asset nao versionado: " + asset)
+                      read(base + url.removeprefix("./"))
+                  print("Release verificado no GitHub Pages:", build)
+                  print("HTML, service worker, app.js, CSS responsivo e cockpit disponiveis.")
+                  break
+              except (URLError, TimeoutError, RuntimeError) as exc:
+                  if attempt == 18:
+                      raise SystemExit(f"Validacao do Pages nao concluida: {exc}")
+                  print(f"Tentativa {attempt}/18: {exc}")
+                  time.sleep(10)
+          PY
