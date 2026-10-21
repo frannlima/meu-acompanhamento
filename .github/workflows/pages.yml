@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  statuses: write
 
 concurrency:
   group: pages
@@ -89,6 +90,7 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - name: Verify published PWA release
+        id: production_validation
         env:
           EXPECTED_SHA: ${{ github.sha }}
           RUN_NUMBER: ${{ github.run_number }}
@@ -147,3 +149,23 @@ jobs:
                   print(f"Tentativa {attempt}/18: {exc}")
                   time.sleep(10)
           PY
+
+      - name: Report production verification to GitHub
+        if: ${{ always() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEPLOY_STATE: ${{ steps.deployment.outcome }}
+          VERIFY_STATE: ${{ steps.production_validation.outcome }}
+        run: |
+          if [ "$DEPLOY_STATE" = "success" ] && [ "$VERIFY_STATE" = "success" ]; then
+            result="success"
+            description="Pages publicado; PWA, Cockpit e compartilhamento verificados."
+          else
+            result="failure"
+            description="Publicacao ou verificacao do app falhou; consultar Actions."
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -f state="$result" \
+            -f context="Meu Acompanhamento / Pages" \
+            -f description="$description" \
+            -f target_url="https://github.com/$GITHUB_REPOSITORY/actions"
