@@ -709,19 +709,29 @@
   <script>
   (function(){
     if(!("serviceWorker" in navigator))return;
-    const release="ma15-video-autoplay-desktop-20261020";
+    let reloading=false;
+    // Uma atualização ativada deve substituir a interface antiga nesta sessão.
     navigator.serviceWorker.addEventListener("controllerchange",function(){
-      try{
-        const key="ma2-controller-reload-"+release;
-        if(sessionStorage.getItem(key))return;
-        sessionStorage.setItem(key,"1");
-      }catch(_){}
+      if(reloading)return;
+      reloading=true;
       window.location.reload();
     });
-    window.addEventListener("load",function(){
-      navigator.serviceWorker.getRegistration().then(function(reg){
-        if(reg)reg.update().catch(function(){});
+    function checkAppVersion(){
+      navigator.serviceWorker.getRegistration("./").then(function(reg){
+        if(reg) return reg.update();
       }).catch(function(){});
+    }
+    window.addEventListener("load",function(){
+      checkAppVersion();
+      // PWA em segundo plano: verificar ao voltar, sem esperar pelo proximo acesso.
+      document.addEventListener("visibilitychange",function(){
+        if(document.visibilityState==="visible")checkAppVersion();
+      });
+      window.addEventListener("pageshow",function(event){
+        if(event.persisted)checkAppVersion();
+      });
+      window.addEventListener("online",checkAppVersion);
+      setInterval(checkAppVersion,5*60*1000);
     });
   })();
   </script>
