@@ -43,7 +43,11 @@ jobs:
               "peak proportional target": "peak.w*minutes/60" in cockpit,
               "red below-expected state": ".cp-peak-below" in css,
               "green above-expected state": ".cp-peak-above" in css,
-              "image native fallback": "function backup(root)" in sharing,
+              "compact canvas card": "async function buildCard(data)" in sharing,
+              "share text with PNG": "text:summary,files:[file]" in sharing,
+              "offline generator": "document.createElement(\"canvas\")" in sharing,
+              "fallback copies summary": "copySummary(summary)" in sharing,
+              "same cockpit source": "getShareText:" in cockpit and "getShareData:" in cockpit,
           }
           for name, ok in checks.items():
               if not ok:
@@ -138,8 +142,12 @@ jobs:
                       raise RuntimeError("Botoes de compartilhar e baixar imagem ausentes")
                   if "function peakComparison(" not in read(base + "cockpit-vendas-v1.js"):
                       raise RuntimeError("Comparativo real dos horarios de pico nao publicado")
-                  if "function backup(root)" not in read(base + "cockpit-share-v1.js"):
-                      raise RuntimeError("Captura de imagem do cockpit nao publicada")
+                  share_js = read(base + "cockpit-share-v1.js")
+                  if "async function buildCard(data)" not in share_js or "text:summary,files:[file]" not in share_js:
+                      raise RuntimeError("Card compacto e resumo compartilhado nao publicados")
+                  cockpit_js = read(base + "cockpit-vendas-v1.js")
+                  if "getShareText:" not in cockpit_js or "getShareData:" not in cockpit_js:
+                      raise RuntimeError("Resumo do cockpit nao unificado")
                   print("Release verificado no GitHub Pages:", build)
                   print("HTML, service worker, app.js, CSS responsivo e cockpit disponiveis.")
                   break
