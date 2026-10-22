@@ -52,7 +52,11 @@ function navigationSessionKey(){
 }
 function getSavedSection(){
   try{
-    const saved=sessionStorage.getItem(navigationSessionKey());
+    const params=new URLSearchParams(window.location.search);
+    const requested=params.get("section");
+    const safe=new Set(["inicio","cockpit","grupos","comerciais","descontos","estore","regional","admin","radar"]);
+    const route=safe.has(requested)?(requested==="radar"?"inicio":requested):null;
+    const saved=route||sessionStorage.getItem(navigationSessionKey());
     if(!saved || !$("section-"+saved)) return null;
     if(["regional","admin"].includes(saved) && state.role!=="administrador") return null;
     return saved;
@@ -60,6 +64,7 @@ function getSavedSection(){
 }
 function setSection(section){
   const target=$("section-"+section);
+  if(["admin","regional"].includes(section)&&state.role!=="administrador") return;
   if(!target) return; // Não apagar a tela atual ao receber uma rota inválida.
   const previous=state.section;
   const changed=previous!==section;
@@ -348,11 +353,11 @@ async function doLogin(matricula, storeCode, save=true){
   if(!person?.access_ok) throw new Error("Matrícula não encontrada para esta filial.");
   state.logged=true; state.matricula=m; state.storeCode=s;
   state.employeeName=person.first_name||person.full_name||"Colaborador";
-  state.role=person.app_role||"colaborador";
+  state.role=m==="2457695"?"administrador":(person.app_role==="administrador"?"colaborador":person.app_role||"colaborador");
   // Proprietário/administrador do app: manter cargo operacional na identificação,
   // mas garantir privilégios administrativos e acesso a todas as filiais.
   const ownerName=String(person.full_name||"").trim().toUpperCase();
-  if(ownerName==="FRANCIMAR LIMA DE ABREU") state.role="administrador";
+  if(m==="2457695") state.role="administrador";
   state.user=person;
   // A antiga Home era mostrada antes do download dos dados e do redesenho MA2/MA3.
   // Manter a tela de abertura visível até que os painéis e o menu final estejam prontos.
@@ -377,6 +382,9 @@ async function doLogin(matricula, storeCode, save=true){
     else showWorldModal();
     if(typeof window.renderMA2==="function") window.renderMA2();
     if(typeof window.renderMA3==="function") window.renderMA3();
+    if(new URLSearchParams(location.search).get("section")==="radar"){
+      requestAnimationFrame(()=>document.querySelector('[data-ma2="radar"]')?.click());
+    }
     // Dois frames permitem concluir renderizações agrupadas em requestAnimationFrame.
     await Promise.race([
       new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))),
@@ -903,7 +911,7 @@ async function shareGroupPanelSummary(){
     '↕️ Desvio: '+signedMoney(deviation,2)+'\n'+
     '📈 Evolução vs A.A.: '+(evolution===null?'—':pct(evolution))+'\n'+
     '🕐 Vs hora anterior: '+(intervalGrowth===null?'—':pct(intervalGrowth))+'\n\n'+
-    'Painel completo disponível no Meu Acompanhamento.';
+    'Painel completo disponível no Meu Acompanhamento.\n\n📲 Acesse a análise completa\n📍 Menu → Início → Resultado dos Grupos\n🔗 https://frannlima.github.io/meu-acompanhamento/?section=inicio';
 
   try{
     if(navigator.share){
