@@ -143,7 +143,8 @@
     busy=true;
     if(button){button.disabled=true;button.textContent="Preparando card…";}
     try{
-      const {data,summary}=shareState();
+      const {data,summary:rawSummary}=shareState();
+      const summary=typeof window.maShareTextWithLink==="function"?window.maShareTextWithLink(rawSummary,"cockpit"):rawSummary;
       const image=await png(await buildCard(data));
       const filename="Cockpit_Loja_"+data.store+"_"+new Date().toLocaleDateString(
         "en-CA",{timeZone:"America/Fortaleza"})+".png";
