@@ -393,3 +393,16 @@
  html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item .dock-label{font-size:8px!important}
  html body .mobile-dock.ria-mobile-dock.ma-nav-complete .dock-item svg{width:19px!important;height:19px!important}
 }
+
+
+/* 22-10-2026 · Compartilhamento dos grupos: CTA evidente; ampliar apenas no mobile. */
+#ma3Actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)!important;gap:10px!important}
+#ma3Actions>[data-ma3="radar"],#ma3Actions>[data-ma3="download"]{display:none!important}
+#ma3Actions>.ma3-share-primary{background:#173F35!important;color:#fff!important;border:2px solid #173F35!important;box-shadow:inset 0 -3px #DE7C00,0 8px 18px #173f3529!important;font-weight:850!important;white-space:normal;min-width:0;line-height:1.35}
+#ma3Actions>button{min-width:0;white-space:normal}
+#ma3Card [data-ma3="preview"]{display:none!important}
+@media(max-width:767px){
+ #ma3Card [data-ma3="preview"]{display:inline-flex!important}
+ #ma3Actions{grid-template-columns:minmax(0,1fr)!important}
+ #ma3Actions>.ma3-share-primary{order:-1;min-height:55px;font-size:clamp(14px,4vw,17px)!important}
+}
