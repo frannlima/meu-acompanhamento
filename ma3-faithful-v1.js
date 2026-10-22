@@ -136,9 +136,9 @@ function prepareLayout(){
  if(!actions){
   actions=document.createElement("div");actions.id="ma3Actions";actions.className="ma3-actions";
   actions.innerHTML='<button type="button" class="primary" data-ma3="paste">↻ Atualizar parcial</button>'+
-   '<button type="button" data-ma3="radar">◎ Ver Radar</button>'+
-   '<button type="button" data-ma3="share">↗ Compartilhar card</button>'+
-   '<button type="button" data-ma3="download">⇩ Baixar imagem</button>';
+
+   '<button type="button" class="ma3-share-primary" data-ma3="share">↗ Compartilhar parcial grupos</button>'+
+   '';
  }
  if(preview&&preview.nextElementSibling!==actions)preview.insertAdjacentElement("afterend",actions);
  return {home,shell,stage,chart,legacy,preview};
