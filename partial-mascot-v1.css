@@ -115,3 +115,58 @@ body.ma-mascot-active #maLateAlert{display:none!important}
 }
 .ma-partial-mascot.ma-mascot--waiting .ma-mascot-tag{color:#96611c}
 .ma-partial-mascot.ma-mascot--waiting .ma-mascot-action{background:#173f35}
+
+/* v6 — Avatar íntegro (sem esticar) e arraste por toque do conjunto todo. */
+.ma-partial-mascot{
+ width:min(294px,calc(100vw - 12px));
+ height:245px;
+ overflow:visible;
+}
+.ma-partial-mascot .ma-mascot-portrait{
+ width:190px;height:246px;
+ cursor:grab;
+ touch-action:none;
+ -webkit-user-select:none;user-select:none;
+}
+.ma-partial-mascot .ma-mascot-portrait:active{cursor:grabbing}
+.ma-partial-mascot .ma-mascot-message{
+ cursor:grab;
+ touch-action:none;
+ -webkit-user-select:none;user-select:none;
+}
+.ma-partial-mascot .ma-mascot-message:active{cursor:grabbing}
+.ma-partial-mascot .ma-mascot-action{
+ cursor:pointer;
+ touch-action:manipulation;
+}
+.ma-partial-mascot .ma-mascot-sad{
+ width:100%;height:100%;
+ object-fit:contain!important;
+ object-position:center bottom!important;
+ image-rendering:auto;
+ max-width:none;
+}
+.ma-partial-mascot .ma-mascot-happy,
+.ma-partial-mascot .ma-mascot-art{
+ aspect-ratio:1122 / 1402;
+ max-width:100%;max-height:100%;
+ object-fit:contain;
+}
+.ma-mascot-drag-hint{
+ display:block;margin-top:7px;
+ font-size:9px;line-height:1.1;
+ color:#60736b;font-weight:700;
+ text-align:center;letter-spacing:.02em
+}
+.ma-mascot-moved{
+ transition:none!important;
+}
+@media(max-width:900px){
+ .ma-partial-mascot{width:min(285px,calc(100vw - 12px));height:238px}
+ .ma-partial-mascot .ma-mascot-portrait{width:178px;height:230px}
+}
+@media(max-width:370px){
+ .ma-partial-mascot.ma-mascot-moved{transform:none!important}
+ .ma-partial-mascot.ma-mascot-moved .ma-mascot-message{width:155px}
+ .ma-partial-mascot.ma-mascot-moved .ma-mascot-portrait{width:166px;height:216px}
+}
