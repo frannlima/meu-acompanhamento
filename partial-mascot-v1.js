@@ -138,7 +138,7 @@ function enableDrag(){
  if(!node||dragEnabled)return;
  dragEnabled=true;
  node.addEventListener("pointerdown",e=>{
-  if(!e.isPrimary||e.button>0||e.target.closest("#maMascotInput"))return;
+  if(node.classList.contains("ma-mascot-docked")||!e.isPrimary||e.button>0||e.target.closest("#maMascotInput"))return;
   const r=node.getBoundingClientRect();
   drag={id:e.pointerId,startX:e.clientX,startY:e.clientY,
    x:r.left,y:r.top,active:false};
@@ -240,11 +240,30 @@ function render(){
   metrics.textContent=feedback.metrics||"Consulte os indicadores detalhados no Cockpit.";
   input.innerHTML="Ver resultado <span aria-hidden='true'>→</span>";
  }
+ scheduleGroupDock();
+}
+/* Ao ler o painel de grupos no mobile, recolher o lembrete para liberar os indicadores. */
+let dockScheduled=false;
+function updateGroupDock(){
+ if(!node)return;
+ const panel=document.querySelector("#ma3LiveGroup .gl-panel");
+ const mobile=window.matchMedia?window.matchMedia("(max-width: 900px)").matches:window.innerWidth<=900;
+ const r=panel?.getBoundingClientRect();
+ const visible=Boolean(!node.hidden&&mobile&&r&&r.bottom>94&&r.top<window.innerHeight-110);
+ node.classList.toggle("ma-mascot-docked",visible);
+ node.setAttribute("aria-label",visible?"Assistente compacto para não cobrir o resultado dos grupos":"Assistente da parcial da loja");
+}
+function scheduleGroupDock(){
+ if(dockScheduled)return;
+ dockScheduled=true;requestAnimationFrame(()=>{dockScheduled=false;updateGroupDock()});
 }
 function init(){
  ensure();if(timer)return;
  timer=setInterval(render,15000);
  document.addEventListener("ma:dashboard-ready",render);
+ window.addEventListener("scroll",scheduleGroupDock,{passive:true});
+ window.addEventListener("resize",scheduleGroupDock,{passive:true});
+ document.addEventListener("ma:dashboard-ready",()=>setTimeout(scheduleGroupDock,150));
  document.addEventListener("visibilitychange",()=>{if(!document.hidden)render()});
  window.addEventListener("focus",render);
  window.addEventListener("pageshow",render);
