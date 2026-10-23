@@ -98,14 +98,15 @@ function mobileHorizontalRow(g){
  const evo=g.evo===null?"—":(g.evo>=0?"▲ ":"▼ ")+pct(g.evo);
  const projection=g.projection===null?"—":money(g.projection);
  const physical=Number(g.physical).toLocaleString("pt-BR");
- const value=(full,short)=>'<span class="gl-hval" title="'+esc(full)+'">'+esc(short)+'</span>';
+ // Valor integral, sem 'mil', sem arredondar centavos; largura controlada pela tabela horizontal.
+ const value=full=>'<span class="gl-hval" title="'+esc(full)+'">'+esc(full)+'</span>';
  return '<button type="button" class="gl-hrow gi-mobile-trigger'+(g.isDay?" gl-hday":"")+(g.isHour?" gl-hhour":"")+'" data-gi-group="'+id+'" aria-label="Abrir Raio-X do grupo '+name+'">'+
  '<span class="gl-hname"><strong>'+name+'</strong>'+(badges?'<span class="gl-halerts">'+badges+'</span>':"")+'</span>'+
- '<span class="gl-hmoney"><small>'+value(meta,abbreviated(g.meta))+'</small><b>'+value(sale,g.att===null?"—":abbreviated(g.sale))+'</b></span>'+
+ '<span class="gl-hmoney"><small>'+value(meta)+'</small><b>'+value(sale)+'</b></span>'+
  '<span class="gl-hatt"><b class="'+(g.att===null?"neutral":g.att>=100?"good":g.att>=90?"warn":"bad")+'">'+esc(att)+'</b></span>'+
- '<span class="gl-hgap '+(g.abs!==null&&g.abs<0?"gl-negative":"gl-positive")+'">'+value(gap,g.abs===null?"—":abbreviated(g.abs))+'</span>'+
+ '<span class="gl-hgap '+(g.abs!==null&&g.abs<0?"gl-negative":"gl-positive")+'">'+value(gap)+'</span>'+
  '<span class="gl-hevo '+(g.evo!==null&&g.evo<0?"gl-negative":"gl-positive")+'">'+esc(evo)+'</span>'+
- '<span class="gl-hproject">'+value(projection,g.projection===null?"—":abbreviated(g.projection))+'</span>'+
+ '<span class="gl-hproject">'+value(projection)+'</span>'+
  '<span class="gl-hphysical">'+esc(physical)+'</span>'+
  '</button>';
 }
@@ -114,11 +115,11 @@ function mobileHorizontalTotal(m){
  const att=m.attainment===null?"—":pct(m.attainment);
  return '<div class="gl-hrow gl-htotal">'+
  '<span class="gl-hname"><strong>TOTAL LOJA</strong></span>'+
- '<span class="gl-hmoney"><small>'+esc(abbreviated(m.totalMeta))+'</small><b>'+(m.effectiveSale===null?"—":esc(abbreviated(m.effectiveSale)))+'</b></span>'+
+ '<span class="gl-hmoney"><small>'+esc(money(m.totalMeta))+'</small><b>'+(m.effectiveSale===null?"—":esc(money(m.effectiveSale)))+'</b></span>'+
  '<span class="gl-hatt"><b class="'+(m.attainment===null?"neutral":m.attainment>=100?"good":"bad")+'">'+att+'</b></span>'+
- '<span class="gl-hgap '+(diff!==null&&diff<0?"gl-negative":"gl-positive")+'">'+(diff===null?"—":esc(abbreviated(diff)))+'</span>'+
+ '<span class="gl-hgap '+(diff!==null&&diff<0?"gl-negative":"gl-positive")+'">'+(diff===null?"—":esc(signed(diff)))+'</span>'+
  '<span class="gl-hevo">—</span>'+
- '<span class="gl-hproject">'+(m.projection===null?"—":esc(abbreviated(m.projection)))+'</span>'+
+ '<span class="gl-hproject">'+(m.projection===null?"—":esc(money(m.projection)))+'</span>'+
  '<span class="gl-hphysical">—</span></div>';
 }
 function mobileHorizontal(m){
