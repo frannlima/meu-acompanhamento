@@ -406,3 +406,31 @@
   #section-cockpit .cp-peak .cp-forecast-amount{font-size:20px}
   #section-cockpit .cp-forecast-top b{font-size:15px}
 }
+
+/* Recuperação do desvio proporcional à curva restante: cockpit v8. */
+#section-cockpit .cp-forecast-deviation{
+  display:flex;flex-direction:column;gap:3px;margin-top:4px;padding:9px 11px;
+  border-radius:10px;background:#fff4f2;border:1px solid #f7d1cf;
+  text-align:left;line-height:1.3
+}
+#section-cockpit .cp-forecast-deviation span{
+  margin:0;color:#9b2631;font-size:11px;font-weight:750
+}
+#section-cockpit .cp-forecast-deviation b{
+  font-size:clamp(15px,2vw,19px);font-variant-numeric:tabular-nums
+}
+#section-cockpit .cp-forecast-deviation.is-negative b{color:#c92c37}
+#section-cockpit .cp-forecast-deviation.is-positive{background:#edfaf2;border-color:#c1e7ce}
+#section-cockpit .cp-forecast-deviation.is-positive span,
+#section-cockpit .cp-forecast-deviation.is-positive b{color:#127548}
+#section-cockpit .cp-forecast-deviation.is-neutral{background:#f1f4f1;border-color:#d8dfd8}
+#section-cockpit .cp-forecast-deviation.is-neutral span,
+#section-cockpit .cp-forecast-deviation.is-neutral b{color:#556c61}
+#section-cockpit .cp-forecast-recovery{
+  display:flex;flex-direction:column;gap:4px;padding:9px 11px;
+  border-radius:10px;background:#fff6e8;border:1px solid #f1d8ad;
+  color:#a35b14;text-align:left
+}
+#section-cockpit .cp-forecast-recovery>b{font-size:12px;line-height:1.35}
+#section-cockpit .cp-forecast-recovery>small{font-size:10px;line-height:1.35;color:#735b40}
+#section-cockpit .cp-forecast-no-input{font-size:11px;color:#826851;margin-top:4px}

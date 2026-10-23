@@ -88,6 +88,16 @@
     const liveClock=hour(Date.now());
     const closing=["084","113","146"].includes(store())?18:22;
     const upcoming=rows.filter(r=>r.h>=liveClock.h&&r.h<closing).slice(0,3);
+    // Compara a venda da última parcial com a curva NO HORÁRIO DO INPUT,
+    // sem presumir venda zero entre a parcial e o relógio atual.
+    const expectedToPartial=has&&target>0&&fraction!==null?target*fraction:null;
+    const curveDeviation=expectedToPartial!==null?sale-expectedToPartial:null;
+    // A recuperação é planejada sobre TODAS as horas futuras, não somente
+    // os três cartões visíveis, evitando distribuir o mesmo déficit a cada rolagem.
+    const futureWeight=rows.filter(r=>r.h>liveClock.h&&r.h<closing)
+      .reduce((sum,r)=>sum+r.w,0);
+    const recoverable=curveDeviation!==null&&curveDeviation<0&&futureWeight>0?
+      -curveDeviation:0;
     const group=groupPerformance(has,fraction);
     const e=estoreKey===context()?estoreRow:null;
     const eHas=!!e?.updated_at&&todayStamp(e.updated_at);
@@ -99,6 +109,7 @@
     const oAtt=orders!==null&&orderTarget>0?orders/orderTarget*100:null;
     const share=cap!==null&&sale!==null&&sale>0?cap/sale*100:null;
     return {target,has,sale,attainment,dev,evolution,growth,delta,projection,projectedAtt,upcoming,liveClock,closing,rows,fraction,
+      curveDeviation,futureWeight,recoverable,
       best:group.best,pressures:group.pressures,e,cap,eTarget,orders,orderTarget,eAtt,oAtt,share,updated:d.captured_at};
   }
   // Somente diferenças entre inputs efetivamente registrados na MESMA faixa.
@@ -132,16 +143,31 @@
   }
   function forecastCard(slot,x){
     const current=x.liveClock.h===slot.h;
+    const future=slot.h>x.liveClock.h;
     const beforeOpening=x.liveClock.h<x.rows[0].h;
     const status=current?"EM ANDAMENTO":beforeOpening&&slot.h===x.rows[0].h?"ABERTURA":"PRÓXIMA FAIXA";
+    const base=x.target*slot.w;
+    const extra=future&&x.futureWeight>0?x.recoverable*slot.w/x.futureWeight:0;
+    const adjusted=base+extra;
     const maxWeight=Math.max(...x.rows.filter(r=>r.h<x.closing).map(r=>r.w),0.01);
     const bar=Math.max(2,Math.min(100,slot.w/maxWeight*100));
     const start=String(slot.h).padStart(2,"0")+"h";
     const finish=String(slot.h+1).padStart(2,"0")+"h";
+    // O desvio representa o acumulado registrado até a última parcial,
+    // não uma venda hipotética até o horário atual.
+    const deviation=current?(x.curveDeviation===null?
+      '<small class="cp-forecast-no-input">Aguardando parcial para calcular o desvio acumulado</small>':
+      '<div class="cp-forecast-deviation '+(x.curveDeviation<-.005?'is-negative':x.curveDeviation>.005?'is-positive':'is-neutral')+'">'+
+        '<span>Desvio acumulado da curva • até '+time(x.updated)+'</span>'+
+        '<b>'+signedMoney(x.curveDeviation)+'</b></div>'):'';
+    const recovery=extra>.005?
+      '<div class="cp-forecast-recovery"><b>+'+cash(extra)+' para recuperar o desvio</b>'+
+        '<small>Meta-base: '+cash(base)+' • '+percent(slot.w/x.futureWeight*100)+' da recuperação</small></div>':'';
     return '<article class="cp-peak cp-forecast-card'+(current?' cp-forecast-current':'')+'">'+
       '<div class="cp-forecast-top"><b>'+start+' - '+finish+'</b><small class="cp-forecast-status">'+status+'</small></div>'+
-      '<span class="cp-forecast-label">Meta estimada do intervalo</span>'+
-      '<strong class="cp-forecast-amount">'+cash(x.target*slot.w)+'</strong>'+
+      '<span class="cp-forecast-label">'+(extra>.005?'Meta ajustada do intervalo':'Meta estimada do intervalo')+'</span>'+
+      '<strong class="cp-forecast-amount">'+cash(adjusted)+'</strong>'+
+      deviation+recovery+
       '<div class="cp-forecast-track" role="img" aria-label="Intensidade prevista da curva: '+percent(slot.w*100)+' da meta diária"><i style="width:'+bar.toFixed(1)+'%"></i></div>'+
       '<small class="cp-forecast-percent">'+percent(slot.w*100)+' da meta diária • curva histórica</small>'+
       '</article>';
