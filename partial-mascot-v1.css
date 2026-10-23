@@ -45,3 +45,65 @@ body.ma-mascot-due #maLateAlert{display:none!important}
 @media(prefers-reduced-motion:reduce){
  .ma-ria-flag-wave{animation:none}
 }
+
+
+/* Reações RIA 2026-10: pendente em vermelho, comemoração e atenção à curva. */
+.ma-partial-mascot .ma-mascot-happy{display:block;width:100%;height:100%}
+.ma-partial-mascot .ma-mascot-sad{display:none;position:absolute;inset:0;width:100%;height:100%;
+ object-fit:contain;object-position:center bottom;user-select:none;-webkit-user-drag:none}
+.ma-partial-mascot .ma-mascot-effects{display:none;position:absolute;top:4px;right:3px;
+ font-size:19px;filter:drop-shadow(0 1px 2px #ffffff)}
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-happy{display:none}
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-sad{display:block}
+.ma-partial-mascot.ma-mascot--good .ma-mascot-effects,
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-effects{display:block}
+.ma-partial-mascot.ma-mascot--good .ma-mascot-effects::before{content:"✨ 🎊"}
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-effects::before{content:"⚠"}
+.ma-mascot-message .ma-mascot-elapsed{
+ display:inline-flex;align-items:center;gap:4px;background:#fff0ef;color:#bc2630;
+ font-size:21px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+ line-height:1;margin:6px 0 10px;padding:7px 9px;border-radius:10px;
+ border:1px solid #f5cccc;box-shadow:0 1px 3px #b5232922
+}
+.ma-mascot-message .ma-mascot-elapsed::before{content:"⏱";font-size:15px}
+.ma-mascot-message .ma-mascot-elapsed[hidden],
+.ma-mascot-message .ma-mascot-metrics[hidden]{display:none!important}
+.ma-partial-mascot .ma-mascot-message{width:167px}
+.ma-mascot-message .ma-mascot-metrics{
+ display:block;font-size:10px;line-height:1.4;font-weight:700;
+ background:#eff7ef;color:#25543b;padding:8px;border-radius:9px;margin:8px 0
+}
+.ma-partial-mascot.ma-mascot--good .ma-mascot-message{
+ border-color:#21a052;background:#f9fff9;box-shadow:0 7px 23px #25a35a55
+}
+.ma-partial-mascot.ma-mascot--good .ma-mascot-tag{color:#176e3b}
+.ma-partial-mascot.ma-mascot--good .ma-mascot-action{background:#197744}
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-message{
+ border-color:#c44442;background:#fffafa;box-shadow:0 7px 23px #a2272850
+}
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-tag,
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-message strong{color:#aa2c31}
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-metrics{color:#9b3233;background:#fff1f0}
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-action{background:#a93c3e}
+.ma-partial-mascot.ma-mascot--neutral .ma-mascot-message{border-color:#d99237;background:#fffdf8}
+body.ma-mascot-active #maLateAlert{display:none!important}
+/* Piscada leve no feedback; o valor vermelho de atraso também pulsa, sem flashes intensos. */
+.ma-partial-mascot.ma-mascot--good .ma-mascot-message,
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-message,
+.ma-partial-mascot.ma-mascot--neutral .ma-mascot-message{
+ animation:ma-ria-feedback-flash 2.1s ease-in-out infinite
+}
+.ma-partial-mascot.ma-mascot--good .ma-mascot-effects{animation:ma-ria-confetti 2.1s ease-in-out infinite}
+.ma-partial-mascot.ma-mascot--bad .ma-mascot-sad{animation:ma-ria-sad-bob 3s ease-in-out infinite}
+.ma-partial-mascot.ma-mascot--pending .ma-mascot-elapsed{animation:ma-ria-pending-pulse 1.85s ease-in-out infinite}
+@keyframes ma-ria-feedback-flash{0%,100%{filter:brightness(1)}50%{filter:brightness(1.08)}}
+@keyframes ma-ria-confetti{0%,100%{transform:translateY(0);opacity:.7}50%{transform:translateY(-7px);opacity:1}}
+@keyframes ma-ria-sad-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(3px)}}
+@keyframes ma-ria-pending-pulse{0%,100%{opacity:1}50%{opacity:.58}}
+@media(max-width:900px){.ma-partial-mascot .ma-mascot-message{width:162px}
+ .ma-mascot-message .ma-mascot-elapsed{font-size:19px}}
+@media(prefers-reduced-motion:reduce){
+ .ma-partial-mascot .ma-mascot-message,
+ .ma-partial-mascot .ma-mascot-effects,.ma-partial-mascot .ma-mascot-sad,
+ .ma-partial-mascot .ma-mascot-elapsed{animation:none!important}
+}
