@@ -83,7 +83,11 @@
     const evolution=has&&ly>0?(sale/ly-1)*100:null;
     const growth=has&&d.interval_growth_pct!=null&&Number.isFinite(Number(d.interval_growth_pct))?Number(d.interval_growth_pct):null;
     const delta=has&&growth!==null&&Number.isFinite(Number(d.interval_delta_financial))?Number(d.interval_delta_financial):null;
-    const peaks=rows.slice().sort((a,b)=>b.w-a.w||a.h-b.h).slice(0,3).sort((a,b)=>a.h-b.h);
+    // Janela móvel das três próximas faixas (inclui a hora em andamento).
+    // Respeita o horário da filial; a curva contém uma faixa residual pós-fechamento.
+    const liveClock=hour(Date.now());
+    const closing=["084","113","146"].includes(store())?18:22;
+    const upcoming=rows.filter(r=>r.h>=liveClock.h&&r.h<closing).slice(0,3);
     const group=groupPerformance(has,fraction);
     const e=estoreKey===context()?estoreRow:null;
     const eHas=!!e?.updated_at&&todayStamp(e.updated_at);
@@ -94,7 +98,7 @@
     const eAtt=cap!==null&&eTarget>0?cap/eTarget*100:null;
     const oAtt=orders!==null&&orderTarget>0?orders/orderTarget*100:null;
     const share=cap!==null&&sale!==null&&sale>0?cap/sale*100:null;
-    return {target,has,sale,attainment,dev,evolution,growth,delta,projection,projectedAtt,peaks,rows,fraction,
+    return {target,has,sale,attainment,dev,evolution,growth,delta,projection,projectedAtt,upcoming,liveClock,closing,rows,fraction,
       best:group.best,pressures:group.pressures,e,cap,eTarget,orders,orderTarget,eAtt,oAtt,share,updated:d.captured_at};
   }
   // Somente diferenças entre inputs efetivamente registrados na MESMA faixa.
@@ -126,24 +130,21 @@
     const tone=closeEnough?"neutral":gap<0?"below":"above";
     return {real,expected,gap,tone,minutes,first:time(first.at),last:time(last.at),full:minutes>=59.5};
   }
-  function peakCard(peak,x){
-    const comparison=peakComparison(peak,x),start=String(peak.h).padStart(2,"0")+"h";
-    const finish=String(peak.h+1).padStart(2,"0")+"h";
-    const estimated=x.target*peak.w;
-    let result='<div class="cp-peak-result cp-peak-unavailable"><span>Venda na faixa</span>'+
-      '<em>Aguardando 2 parciais dentro deste horário</em></div>';
-    if(comparison){
-      const status=comparison.tone==="below"?"Abaixo do esperado":comparison.tone==="above"?"Acima do esperado":"Dentro do esperado";
-      const arrow=comparison.tone==="below"?"▼":comparison.tone==="above"?"▲":"◆";
-      result='<div class="cp-peak-result cp-peak-'+comparison.tone+'">'+
-        '<span>Vendido entre parciais</span><b>'+cash(comparison.real)+'</b>'+
-        '<div class="cp-peak-trend"><span aria-hidden="true">'+arrow+'</span> '+status+'</div>'+
-        '<small class="cp-peak-gap">'+signedMoney(comparison.gap)+' vs esperado na janela</small>'+
-        '<small class="cp-peak-window">'+comparison.first+'–'+comparison.last+' • Esperado: '+cash(comparison.expected)+'</small>'+
-        '</div>';
-    }
-    return '<div class="cp-peak"><b>'+start+' - '+finish+'</b>'+
-      '<span>Meta estimada da faixa</span><strong>'+cash(estimated)+'</strong>'+result+'</div>';
+  function forecastCard(slot,x){
+    const current=x.liveClock.h===slot.h;
+    const beforeOpening=x.liveClock.h<x.rows[0].h;
+    const status=current?"EM ANDAMENTO":beforeOpening&&slot.h===x.rows[0].h?"ABERTURA":"PRÓXIMA FAIXA";
+    const maxWeight=Math.max(...x.rows.filter(r=>r.h<x.closing).map(r=>r.w),0.01);
+    const bar=Math.max(2,Math.min(100,slot.w/maxWeight*100));
+    const start=String(slot.h).padStart(2,"0")+"h";
+    const finish=String(slot.h+1).padStart(2,"0")+"h";
+    return '<article class="cp-peak cp-forecast-card'+(current?' cp-forecast-current':'')+'">'+
+      '<div class="cp-forecast-top"><b>'+start+' - '+finish+'</b><small class="cp-forecast-status">'+status+'</small></div>'+
+      '<span class="cp-forecast-label">Meta estimada do intervalo</span>'+
+      '<strong class="cp-forecast-amount">'+cash(x.target*slot.w)+'</strong>'+
+      '<div class="cp-forecast-track" role="img" aria-label="Intensidade prevista da curva: '+percent(slot.w*100)+' da meta diária"><i style="width:'+bar.toFixed(1)+'%"></i></div>'+
+      '<small class="cp-forecast-percent">'+percent(slot.w*100)+' da meta diária • curva histórica</small>'+
+      '</article>';
   }
   function meter(value,tone="green"){
     return '<div class="cp-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+bound(value).toFixed(1)+'"><i class="'+tone+'" style="width:'+bound(value).toFixed(1)+'%"></i></div>';
@@ -188,8 +189,13 @@
     $("cockpitStore").textContent="LOJA "+store();
     $("cockpitTimestamp").textContent=dayLabel()+" • "+(x.has?"Atualizado às "+time(x.updated):"Aguardando a primeira parcial");
     $("cockpitEstoreUpdated").textContent=x.e?.updated_at&&todayStamp(x.e.updated_at)?"eStore atualizado às "+time(x.e.updated_at):estoreStatus;
-    const peaks=x.target>0&&x.peaks.length?'<div class="cp-peaks">'+x.peaks.map(r=>peakCard(r,x)).join("")+'</div>':
-      '<p class="cp-empty">Cadastre a meta e a curva horária para visualizar os picos de venda.</p>';
+    const forecast=x.target>0&&x.rows.length?
+      (x.upcoming.length?'<div class="cp-peaks">'+x.upcoming.map(r=>forecastCard(r,x)).join("")+'</div>':
+        '<p class="cp-empty">Previsão dos intervalos concluída. Encerramento da filial às '+x.closing+'h.</p>'):
+      '<p class="cp-empty">Cadastre a meta financeira e a curva horária para visualizar as estimativas.</p>';
+    const forecastHint=x.rows.length&&x.liveClock.h<x.rows[0].h?
+      'A partir da abertura ('+String(x.rows[0].h).padStart(2,"0")+'h) • até '+x.closing+'h':
+      'Próximas faixas conforme o relógio da filial • até '+x.closing+'h';
     const eDeviation=x.cap!==null&&x.eTarget>0?x.cap-x.eTarget:null;
     const oDeviation=x.orders!==null&&x.orderTarget>0?x.orders-x.orderTarget:null;
     root.innerHTML=
@@ -203,7 +209,8 @@
         '<article class="cp-signal '+(x.growth===null?"cp-neutral":x.growth>=0?"cp-good":"cp-bad")+'"><div>▲ <b>RITMO VS HORA ANTERIOR</b></div><strong>'+(x.growth===null?"—":signedPct(x.growth))+'</strong>'+
           (x.delta!==null?'<span>('+signedMoney(x.delta)+' /h)</span>':'<span>Aguardando comparação válida</span>')+'</article>'+
       '</div>'+
-      '<section class="cp-peakbox"><h2>⚡ HORÁRIOS DE PICO <small>(CURVA HISTÓRICA)</small></h2>'+peaks+'</section>'+
+      '<section class="cp-peakbox"><h2>⏱️ PRÓXIMOS INTERVALOS <small>(CURVA DE VENDA ESPERADA)</small></h2>'+
+        '<p class="cp-forecast-note">'+forecastHint+'</p>'+forecast+'</section>'+
       '<section class="cp-estore"><div class="cp-estore-head"><h2>🛍️ eStore <small>(acumulado do dia)</small></h2>'+
         '<div class="cp-estore-share"><span>SHARE eSTORE</span><b>'+(x.share===null?"—":percent(x.share,2))+'</b></div></div>'+
         '<div class="cp-estore-body"><div class="cp-estore-goal"><strong>'+(x.eAtt===null?"Aguardando parcial eStore":percent(x.eAtt)+" da meta financeira")+'</strong>'+meter(x.eAtt)+

@@ -35,3 +35,6 @@
     pointer-events:none;
   }
 }
+
+/* A RIA permanece acessível somente pelo menu Mais; sem botão flutuante. */
+#riaFloat{display:none!important}

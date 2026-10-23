@@ -640,6 +640,14 @@
         btn.onclick=()=>setSection("cockpit");
         list.prepend(btn);
       }
+      if(list&&!existing.querySelector('[data-more-support="ria"]')){
+        const btn=document.createElement("button");
+        btn.type="button";
+        btn.setAttribute("data-more-support","ria");
+        btn.innerHTML='<span class="more-icon">✦</span><div><strong>RIA 24h • Suporte</strong><small>Orientações e ajuda com o aplicativo</small></div><b>›</b>';
+        btn.onclick=()=>{const nav=document.querySelector('.sidebar-nav [data-section="ria-suporte"]');if(nav)nav.click();else setSection("ria-suporte");};
+        list.append(btn);
+      }
       existing.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
       return;
     }
@@ -656,6 +664,7 @@
       '<div class="premium-more-list">'+
         '<button type="button" data-more-section="cockpit"><span class="more-icon">▥</span><div><strong>Cockpit de Vendas</strong><small>Venda, ritmo, projeção, eStore e pressões</small></div><b>›</b></button>'+
         '<button type="button" data-more-section="estore"><span class="more-icon">▣</span><div><strong>eStore CE+PI</strong><small>Venda, pedidos, Hora a Hora e resultado regional</small></div><b>›</b></button>'+
+        '<button type="button" data-more-support="ria"><span class="more-icon">✦</span><div><strong>RIA 24h • Suporte</strong><small>Orientações e ajuda com o aplicativo</small></div><b>›</b></button>'+
         '<button data-more-section="descontos"><span class="more-icon">%</span><div><strong>Painel de Descontos</strong><small>Incidência, participação e DCOs</small></div><b>›</b></button>'+
         '<button data-more-section="regional" class="admin-only hidden"><span class="more-icon">▦</span><div><strong>Consolidado Regional</strong><small>Visão CE+PI por filial</small></div><b>›</b></button>'+
         '<button data-more-section="admin" class="admin-only hidden"><span class="more-icon">⚙</span><div><strong>Administração</strong><small>Metas, comerciais, inputs e acessos</small></div><b>›</b></button>'+
@@ -669,6 +678,10 @@
     main.appendChild(section);
     section.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
     section.querySelectorAll("[data-more-section]").forEach(btn=>btn.onclick=()=>setSection(btn.dataset.moreSection));
+    section.querySelector('[data-more-support="ria"]')?.addEventListener("click",()=>{
+      const nav=document.querySelector('.sidebar-nav [data-section="ria-suporte"]');
+      if(nav)nav.click();else setSection("ria-suporte");
+    });
     const install=$("premiumInstallApp"); if(install) install.onclick=requestInstallApp;
     const logoutBtn=$("premiumLogout"); if(logoutBtn) logoutBtn.onclick=()=>window.logout();
   }
