@@ -1,0 +1,28 @@
+/* Assistente da parcial: discreto, responsivo e sem bloquear indicadores. */
+.ma-partial-mascot[hidden]{display:none!important}
+.ma-partial-mascot{position:fixed;right:clamp(6px,2vw,24px);bottom:24px;width:294px;height:235px;z-index:1240;pointer-events:none;isolation:isolate}
+.ma-partial-mascot button{font:inherit;cursor:pointer;touch-action:manipulation}
+.ma-mascot-portrait{position:absolute;right:0;bottom:0;width:194px;height:220px;padding:0;border:0;background:transparent;pointer-events:auto;filter:drop-shadow(0 4px 4px #173f3522);transition:width .2s,height .2s}
+.ma-mascot-portrait img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom;user-select:none;-webkit-user-drag:none}
+.ma-mascot-message{position:absolute;left:0;top:37px;width:165px;padding:12px 10px 11px;background:#fffef9;border:2px solid #236d4e;color:#173f35;border-radius:19px 19px 4px 19px;box-shadow:0 8px 26px #163c3333;box-sizing:border-box;pointer-events:auto;transform:rotate(-3deg)}
+.ma-mascot-tag{display:block;font-weight:900;font-size:9px;letter-spacing:.06em;color:#27734e;margin:0 0 6px}
+.ma-mascot-message strong{display:block;font-size:15px;line-height:1.12;letter-spacing:-.035em}
+.ma-mascot-message em{font-style:normal;color:#24874e}
+.ma-mascot-message small{display:block;color:#687a71;font-size:10px;line-height:1.25;margin:9px 0}
+.ma-mascot-action{display:flex;align-items:center;justify-content:space-between;width:100%;background:#173f35;border:0;border-radius:10px;color:white;padding:9px 8px;font-size:11px!important;font-weight:800;white-space:nowrap}
+.ma-mascot-action:hover,.ma-mascot-action:focus-visible{background:#267553}
+.ma-mascot-min{position:absolute;right:11px;top:0;width:29px;height:29px;border:1px solid #b9d6c5;border-radius:50%;background:white;color:#235d43;font-size:23px!important;line-height:1;pointer-events:auto;box-shadow:0 2px 7px #183b3029}
+body.ma-mascot-due #maLateAlert{display:none!important}
+.ma-partial-mascot.ma-mascot-collapsed{width:94px;height:106px}
+.ma-partial-mascot.ma-mascot-collapsed .ma-mascot-portrait{width:94px;height:106px}
+.ma-partial-mascot.ma-mascot-collapsed .ma-mascot-message,.ma-partial-mascot.ma-mascot-collapsed .ma-mascot-min{display:none}
+.ma-partial-mascot.ma-mascot-collapsed .ma-mascot-portrait{border-radius:12px;background:#f8fdf8d9;box-shadow:0 4px 16px #143d3130}
+@media(max-width:900px){
+ .ma-partial-mascot{right:8px;bottom:calc(90px + env(safe-area-inset-bottom,0px));width:278px;height:222px}
+ .ma-mascot-portrait{height:205px;width:185px}
+ .ma-mascot-message{top:27px;width:159px}
+ .ma-partial-mascot.ma-mascot-collapsed{width:87px;height:96px}
+ .ma-partial-mascot.ma-mascot-collapsed .ma-mascot-portrait{width:87px;height:96px}
+}
+@media(max-width:370px){.ma-partial-mascot{transform:scale(.86);transform-origin:bottom right}}
+@media(prefers-reduced-motion:reduce){.ma-mascot-portrait{transition:none}}
