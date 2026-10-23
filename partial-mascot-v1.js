@@ -13,7 +13,7 @@ function nowFortaleza(now=new Date()){
   weekday:new Intl.DateTimeFormat("en-US",{weekday:"short",timeZone:"America/Fortaleza"}).format(now)};
 }
 function status(now=new Date()){
- if(!window.state?.logged||!state.storeCode||state.section!=="inicio")return null;
+ if(!(typeof state!=="undefined"&&state.logged)||!state.storeCode||state.section!=="inicio")return null;
  const n=nowFortaleza(now);
  const code=String(state.storeCode).padStart(3,"0");
  const street=STREET.has(code);
@@ -57,7 +57,7 @@ function ensure(){
 function render(){
  const box=ensure();if(!box)return;
  const data=status();
- const isTest=Date.now()<simUntil&&window.state?.logged&&state.section==="inicio";
+ const isTest=Date.now()<simUntil&&(typeof state!=="undefined"&&state.logged)&&state.section==="inicio";
  const due=Boolean(data?.due||isTest);
  if(!due){
    box.hidden=true;document.body.classList.remove("ma-mascot-due");pendingKey="";min=false;return;
