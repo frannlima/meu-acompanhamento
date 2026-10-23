@@ -28,6 +28,8 @@ jobs:
         run: |
           node --check cockpit-vendas-v1.js
           node --check cockpit-share-v1.js
+          node --check sales-curve-tech-v1.js
+          node --test tests/sales-curve-tech.test.cjs
           node --check app.js
           python3 - <<'PY'
           from pathlib import Path
@@ -48,6 +50,7 @@ jobs:
               "offline generator": "document.createElement(\"canvas\")" in sharing,
               "fallback copies summary": "copy(summary)" in sharing,
               "same cockpit source": "getShareText:" in cockpit and "getShareData:" in cockpit,
+              "curve tech JS and CSS": "sales-curve-tech-v1.js" in html and "sales-curve-tech-v1.css" in html,
           }
           for name, ok in checks.items():
               if not ok:
@@ -133,7 +136,7 @@ jobs:
                       raise RuntimeError("O script principal do PWA nao foi atualizado")
                   if 'document.documentElement.classList.add("ma-booting")' not in js or 'window.renderMA3()' not in js:
                       raise RuntimeError("Sincronizacao da interface na abertura nao publicada")
-                  for asset in ("styles.css", "responsive-device-v1.css", "cockpit-vendas-v1.js", "cockpit-vendas-v1.css", "cockpit-share-v1.js"):
+                  for asset in ("styles.css", "responsive-device-v1.css", "cockpit-vendas-v1.js", "cockpit-vendas-v1.css", "cockpit-share-v1.js", "sales-curve-tech-v1.js", "sales-curve-tech-v1.css"):
                       url = next((x for x in re.findall(r'(?:src|href)="(\./[^"]+)"', html) if x.startswith("./" + asset + "?")), None)
                       if not url or ("build=" + build) not in url:
                           raise RuntimeError("Asset nao versionado: " + asset)
