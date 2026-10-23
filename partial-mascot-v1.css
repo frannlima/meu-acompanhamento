@@ -107,3 +107,11 @@ body.ma-mascot-active #maLateAlert{display:none!important}
  .ma-partial-mascot .ma-mascot-effects,.ma-partial-mascot .ma-mascot-sad,
  .ma-partial-mascot .ma-mascot-elapsed{animation:none!important}
 }
+
+
+/* Assistente sempre contextualizado durante o expediente: antes do primeiro input. */
+.ma-partial-mascot.ma-mascot--waiting .ma-mascot-message{
+ border-color:#d99237;background:#fffdf6
+}
+.ma-partial-mascot.ma-mascot--waiting .ma-mascot-tag{color:#96611c}
+.ma-partial-mascot.ma-mascot--waiting .ma-mascot-action{background:#173f35}
