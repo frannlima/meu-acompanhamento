@@ -177,13 +177,13 @@
  }
  #ma3LiveGroup .gl-landscape-scroll:focus-visible{outline:2px solid #DE7C00}
  #ma3LiveGroup .gl-landscape-width{
-  width:908px;min-width:908px;max-width:none;
+  width:1053px;min-width:1053px;max-width:none;
   background:#fff
  }
  #ma3LiveGroup .gl-hhead,#ma3LiveGroup .gl-hrow{
   display:grid!important;
-  grid-template-columns:140px 185px 88px 155px 105px 155px 80px;
-  width:908px;min-width:908px;max-width:none;
+  grid-template-columns:140px 165px 165px 88px 155px 105px 155px 80px;
+  width:1053px;min-width:1053px;max-width:none;
   align-items:stretch;gap:0;box-sizing:border-box;
  }
  #ma3LiveGroup .gl-hhead{
@@ -202,7 +202,7 @@
   justify-content:flex-start;padding-left:12px;
   background:#DE7C00;box-shadow:2px 0 5px rgba(23,63,53,.16)
  }
- #ma3LiveGroup .gl-hbody{display:block;width:908px;min-width:908px}
+ #ma3LiveGroup .gl-hbody{display:block;width:1053px;min-width:1053px}
  #ma3LiveGroup .gl-hrow{
   min-height:52px;margin:0;padding:0;border:0;
   border-bottom:1px solid #E3EAE4;border-radius:0;
@@ -318,10 +318,10 @@
  #ma3LiveGroup .gl-landscape-width,
  #ma3LiveGroup .gl-hhead,
  #ma3LiveGroup .gl-hbody,
- #ma3LiveGroup .gl-hrow{width:908px;min-width:908px;max-width:none}
+ #ma3LiveGroup .gl-hrow{width:1053px;min-width:1053px;max-width:none}
  #ma3LiveGroup .gl-hhead,
  #ma3LiveGroup .gl-hrow{
-  grid-template-columns:140px 185px 88px 155px 105px 155px 80px
+  grid-template-columns:140px 165px 165px 88px 155px 105px 155px 80px
  }
  #ma3LiveGroup .gl-hrow .gl-hmoney{align-items:flex-start;gap:5px;padding-left:12px}
  #ma3LiveGroup .gl-hmoney small,
@@ -336,4 +336,42 @@
  #ma3LiveGroup .gl-hmoney small{font-size:11px}
  #ma3LiveGroup .gl-hmoney b{font-size:12px}
  #ma3LiveGroup .gl-hgap,#ma3LiveGroup .gl-hproject{font-size:12px}
+}
+
+
+/* v7 — META e VENDA em colunas distintas, mantendo números integrais. */
+@media(max-width:1020px){
+ #ma3LiveGroup .gl-landscape-width,
+ #ma3LiveGroup .gl-hhead,
+ #ma3LiveGroup .gl-hbody,
+ #ma3LiveGroup .gl-hrow{
+  width:1053px;min-width:1053px;max-width:none
+ }
+ #ma3LiveGroup .gl-hhead,
+ #ma3LiveGroup .gl-hrow{
+  grid-template-columns:140px 165px 165px 88px 155px 105px 155px 80px
+ }
+ #ma3LiveGroup .gl-hrow .gl-hmeta,
+ #ma3LiveGroup .gl-hrow .gl-hsale{
+  display:flex;align-items:center;justify-content:flex-start;
+  padding:7px 10px;white-space:nowrap!important;
+  font-variant-numeric:tabular-nums;letter-spacing:-.015em;
+  overflow-wrap:normal!important;word-break:normal!important;
+  font-size:12px;line-height:1.25
+ }
+ #ma3LiveGroup .gl-hrow .gl-hmeta{
+  color:#63786d;font-weight:760
+ }
+ #ma3LiveGroup .gl-hrow .gl-hsale{
+  color:#173F35;font-weight:950
+ }
+ #ma3LiveGroup .gl-hrow.gl-htotal .gl-hmeta,
+ #ma3LiveGroup .gl-hrow.gl-htotal .gl-hsale{
+  font-weight:950;color:#173F35
+ }
+ #ma3LiveGroup .gl-hrow .gl-hmeta .gl-hval,
+ #ma3LiveGroup .gl-hrow .gl-hsale .gl-hval{
+  white-space:nowrap!important;overflow-wrap:normal!important;
+  word-break:normal!important
+ }
 }
