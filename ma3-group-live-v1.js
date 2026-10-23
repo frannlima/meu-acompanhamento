@@ -102,7 +102,8 @@ function mobileHorizontalRow(g){
  const value=full=>'<span class="gl-hval" title="'+esc(full)+'">'+esc(full)+'</span>';
  return '<button type="button" class="gl-hrow gi-mobile-trigger'+(g.isDay?" gl-hday":"")+(g.isHour?" gl-hhour":"")+'" data-gi-group="'+id+'" aria-label="Abrir Raio-X do grupo '+name+'">'+
  '<span class="gl-hname"><strong>'+name+'</strong>'+(badges?'<span class="gl-halerts">'+badges+'</span>':"")+'</span>'+
- '<span class="gl-hmoney"><small>'+value(meta)+'</small><b>'+value(sale)+'</b></span>'+
+ '<span class="gl-hmeta">'+value(meta)+'</span>'+
+ '<span class="gl-hsale">'+value(sale)+'</span>'+
  '<span class="gl-hatt"><b class="'+(g.att===null?"neutral":g.att>=100?"good":g.att>=90?"warn":"bad")+'">'+esc(att)+'</b></span>'+
  '<span class="gl-hgap '+(g.abs!==null&&g.abs<0?"gl-negative":"gl-positive")+'">'+value(gap)+'</span>'+
  '<span class="gl-hevo '+(g.evo!==null&&g.evo<0?"gl-negative":"gl-positive")+'">'+esc(evo)+'</span>'+
@@ -115,7 +116,8 @@ function mobileHorizontalTotal(m){
  const att=m.attainment===null?"—":pct(m.attainment);
  return '<div class="gl-hrow gl-htotal">'+
  '<span class="gl-hname"><strong>TOTAL LOJA</strong></span>'+
- '<span class="gl-hmoney"><small>'+esc(money(m.totalMeta))+'</small><b>'+(m.effectiveSale===null?"—":esc(money(m.effectiveSale)))+'</b></span>'+
+ '<span class="gl-hmeta">'+esc(money(m.totalMeta))+'</span>'+
+ '<span class="gl-hsale">'+(m.effectiveSale===null?"—":esc(money(m.effectiveSale)))+'</span>'+
  '<span class="gl-hatt"><b class="'+(m.attainment===null?"neutral":m.attainment>=100?"good":"bad")+'">'+att+'</b></span>'+
  '<span class="gl-hgap '+(diff!==null&&diff<0?"gl-negative":"gl-positive")+'">'+(diff===null?"—":esc(signed(diff)))+'</span>'+
  '<span class="gl-hevo">—</span>'+
@@ -123,7 +125,7 @@ function mobileHorizontalTotal(m){
  '<span class="gl-hphysical">—</span></div>';
 }
 function mobileHorizontal(m){
- const headings=["GRUPO","META / VENDA","ATING.","DESVIO","EV. VS A.A.","PROJEÇÃO","FÍSICA"];
+ const headings=["GRUPO","META","VENDA","ATING.","DESVIO","EV. VS A.A.","PROJEÇÃO","FÍSICA"];
  return '<section class="gl-landscape-panel" aria-label="Painel horizontal de todos os grupos">'+
  '<div class="gl-landscape-top"><span>Visão horizontal · todos os grupos</span>'+
  '<button type="button" class="gl-landscape-toggle" aria-expanded="false" aria-label="Ampliar painel horizontal de grupos">⛶ Ampliar</button></div>'+
