@@ -645,7 +645,7 @@
         btn.type="button";
         btn.setAttribute("data-more-support","ria");
         btn.innerHTML='<span class="more-icon">✦</span><div><strong>RIA 24h • Suporte</strong><small>Orientações e ajuda com o aplicativo</small></div><b>›</b>';
-        btn.onclick=()=>{const nav=document.querySelector('.sidebar-nav [data-section="ria-suporte"]');if(nav)nav.click();else setSection("ria-suporte");};
+        btn.onclick=()=>{const nav=document.querySelector('#nav [data-section="ria-suporte"]');if(nav)nav.click();else setSection("ria-suporte");};
         list.append(btn);
       }
       existing.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
@@ -679,7 +679,7 @@
     section.querySelectorAll(".admin-only").forEach(el=>el.classList.toggle("hidden",state.role!=="administrador"));
     section.querySelectorAll("[data-more-section]").forEach(btn=>btn.onclick=()=>setSection(btn.dataset.moreSection));
     section.querySelector('[data-more-support="ria"]')?.addEventListener("click",()=>{
-      const nav=document.querySelector('.sidebar-nav [data-section="ria-suporte"]');
+      const nav=document.querySelector('#nav [data-section="ria-suporte"]');
       if(nav)nav.click();else setSection("ria-suporte");
     });
     const install=$("premiumInstallApp"); if(install) install.onclick=requestInstallApp;
