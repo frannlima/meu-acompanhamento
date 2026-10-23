@@ -29,6 +29,9 @@ jobs:
           node --check cockpit-vendas-v1.js
           node --check cockpit-share-v1.js
           node --check sales-curve-tech-v1.js
+          node --check group-impact-interactive-v1.js
+          node --check clarity-v1.js
+          node --test tests/group-impact-interactive.test.cjs
           node --test tests/sales-curve-tech.test.cjs
           node --check app.js
           python3 - <<'PY'
@@ -51,6 +54,7 @@ jobs:
               "fallback copies summary": "copy(summary)" in sharing,
               "same cockpit source": "getShareText:" in cockpit and "getShareData:" in cockpit,
               "curve tech JS and CSS": "sales-curve-tech-v1.js" in html and "sales-curve-tech-v1.css" in html,
+              "groups interactive mobile": "group-impact-interactive-v1.js" in html and "group-impact-interactive-v1.css" in html,
           }
           for name, ok in checks.items():
               if not ok:

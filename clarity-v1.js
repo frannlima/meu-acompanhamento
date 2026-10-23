@@ -465,6 +465,10 @@
 
   async function createDailyCardBlob(){
     const d=state.day||{},groups=officialDailyCardGroups();
+    // PNG compartilhado é estático: exibe alerta visual discreto. O toque e o pisca
+    // permanecem na tabela interativa dentro do app, nunca na imagem exportada.
+    const impact=window.maGroupImpact?.getAnalysis?.();
+    const ggKey=value=>String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
     const curve=curveForStore();
     const tp=timeParts(d.captured_at||null);
     const expectedPct=expectedPctAt(curve,tp.h,tp.m,"fin");
@@ -554,15 +558,20 @@
     });
 
     const rowValues=[];
-    const drawRow=(y,name,meta,venda,ating,aa,ev,dev,proj,physical,total=false)=>{
+    const drawRow=(y,name,meta,venda,ating,aa,ev,dev,proj,physical,total=false,alertDay=false,alertHour=false)=>{
       rr(42,y,width-84,rowH-10,total?20:16,total?C.total:C.white,C.line);
       // Verde institucional na coluna GRUPO, com texto branco em negrito.
       // Mantém a largura original e o espaço de leitura dos demais indicadores.
       rr(44,y+2,cols[0].x+cols[0].w-44,rowH-14,14,C.green);
+      if(!total&&(alertDay||alertHour)){
+        rr(44,y+4,8,rowH-18,3,alertDay?C.red:C.orange);
+        if(alertDay)drawPill(356,y+25,29,25,"D",C.white,C.red,"900 15px Larsseit, Arial");
+        if(alertHour)drawPill(386,y+25,29,25,"H",C.white,C.orange,"900 15px Larsseit, Arial");
+      }
       ctx.textBaseline="middle";
       ctx.textAlign="left";ctx.fillStyle=C.white;
       ctx.font=(total?"900 ":"800 ")+"28px Larsseit, Arial";
-      ctx.fillText(name,cols[0].x+18,y+(rowH-10)/2,cols[0].w-36);
+      ctx.fillText(name,cols[0].x+18,y+(rowH-10)/2,cols[0].w-(alertDay||alertHour?108:36));
 
       const base=[
         money(meta,2),money(venda,2),null,aa?money(aa,2):"—",
@@ -618,7 +627,9 @@
       const dev=venda-meta;
       const proj=expectedPct>0&&d.has_input?venda/expectedPct:0;
       const physical=Number(g.sales_physical||0);
-      drawRow(y,g.gg_label||GROUP_LABELS[g.group_code]||g.group_code,meta,venda,ating,aa,ev,dev,proj,physical,false);
+      const label=g.gg_label||GROUP_LABELS[g.group_code]||g.group_code;
+      const key=ggKey(label);
+      drawRow(y,label,meta,venda,ating,aa,ev,dev,proj,physical,false,!!impact?.day?.has(key),!!impact?.hour?.has(key));
       y+=rowH;
     }
 
@@ -675,6 +686,10 @@
 
     ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.fillStyle=C.green2;ctx.font="700 16px Larsseit, Arial";
     ctx.fillText("MEU ACOMPANHAMENTO",48,height-34);
+    if(impact?.valid){
+      ctx.textAlign="center";ctx.fillStyle=C.red;ctx.font="800 15px Larsseit, Arial";
+      ctx.fillText("D: maior desvio do dia   •   H: maior impacto no último intervalo",width/2,height-34);
+    }
     ctx.textAlign="right";ctx.fillText("Riachuelo • Moda que inspira o Brasil",width-48,height-34);
 
     return await new Promise((resolve,reject)=>window.RiachueloBrandCards.decorateCanvas(canvas).toBlob(
