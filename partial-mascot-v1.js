@@ -4,8 +4,6 @@
 const STREET=new Set(["084","113","146"]);
 const $m=id=>document.getElementById(id);
 let node=null,timer=0,simulate=null,simulateEnds=0;
-const observed=new Map();
-const KEY="ma_avatar_reacao_v3_";
 function fortaleza(now=new Date()){
  const parts=Object.fromEntries(new Intl.DateTimeFormat("en-CA",{timeZone:"America/Fortaleza",
   year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",
@@ -93,25 +91,6 @@ function evaluate(ctx){
  return {kind,heading,detail,metrics:metrics.join(" • "),tag:kind==="good"?"PARCIAL NA CURVA":
    kind==="bad"?"ATENÇÃO AO RESULTADO":"PARCIAL ATUALIZADA"};
 }
-function storageKey(ctx){return KEY+ctx.code+"_"+ctx.date}
-function reactionFor(ctx){
- try{
-  const r=JSON.parse(sessionStorage.getItem(storageKey(ctx))||"null");
-  if(r&&r.stamp===ctx.stamp&&r.expires>ctx.now&&["good","bad","neutral"].includes(r.kind))return r;
- }catch(_){}
- return null;
-}
-function noticeChange(ctx){
- if(!ctx)return;
- const k=ctx.code+"_"+ctx.date,prior=observed.get(k);
- if(prior===undefined){observed.set(k,ctx.stamp);return;}
- if(prior===ctx.stamp)return;
- observed.set(k,ctx.stamp);
- if(!ctx.hasInput)return;
- const r=evaluate(ctx);
- const value={...r,stamp:ctx.stamp,expires:ctx.now+90000};
- try{sessionStorage.setItem(storageKey(ctx),JSON.stringify(value))}catch(_){}
-}
 const CONTOUR="M 337 20 C 395 24 451 52 511 70 C 580 82 659 77 731 78 C 785 80 813 97 817 130 C 823 200 791 296 781 388 L 770 454 Q 756 479 721 457 C 683 433 636 411 590 401 C 537 391 482 373 439 358 C 394 344 346 354 272 359 C 277 290 288 236 304 163 C 314 100 324 47 337 20 Z";
 const ART='<svg class="ma-mascot-art" viewBox="0 0 1122 1402" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Avatar RIA sorrindo e agitando bandeira oficial">'+
  '<defs><clipPath id="maBannerCloth"><path d="'+CONTOUR+'"/></clipPath>'+
@@ -137,7 +116,7 @@ function ensure(){
     '<button class="ma-mascot-action" type="button" id="maMascotInput">Atualizar parcial <span aria-hidden="true">→</span></button>'+
   '</div>';
  root.appendChild(node);
- const action=()=>{if(node.dataset.mood==="pending"&&typeof showPaste==="function")showPaste();
+ const action=()=>{if(["pending","waiting"].includes(node.dataset.mood)&&typeof showPaste==="function")showPaste();
    else if(typeof setSection==="function")setSection("cockpit")};
  $m("maMascotToggle").addEventListener("click",action);
  $m("maMascotInput").addEventListener("click",action);
@@ -146,16 +125,17 @@ function ensure(){
 function render(){
  const box=ensure();if(!box)return;
  const ctx=context();
- if(ctx)noticeChange(ctx);
- const testing=simulate&&Date.now()<simulateEnds&&
-    typeof state!=="undefined"&&state.logged&&state.section==="inicio";
- const pending=testing&&simulate.kind==="pending" ||
-   (!testing&&ctx?.due);
+ const testing=!!(simulate&&Date.now()<simulateEnds&&
+   typeof state!=="undefined"&&state.logged&&state.section==="inicio");
+ const pending=testing?simulate.kind==="pending":Boolean(ctx?.due);
+ // Exibir o último diagnóstico até a próxima parcial ficar pendente, inclusive
+ // ao reabrir o PWA: não depender de já ter observado a atualização nesta aba.
+ const waiting=!testing&&Boolean(ctx&&!ctx.hasInput&&!ctx.due);
  const feedback=testing&&simulate.kind!=="pending"?simulate:
-   !pending&&ctx?reactionFor(ctx):null;
- const mode=pending?"pending":feedback?.kind||"";
- const visible=Boolean((pending||feedback)&&typeof state!=="undefined"&&
-   state.logged&&state.section==="inicio");
+   (!pending&&ctx?.hasInput?evaluate(ctx):null);
+ const mode=pending?"pending":waiting?"waiting":feedback?.kind||"";
+ const visible=Boolean((pending||waiting||feedback)&&
+   typeof state!=="undefined"&&state.logged&&state.section==="inicio");
  box.hidden=!visible;document.body.classList.toggle("ma-mascot-active",visible);
  if(!visible)return;
  box.dataset.mood=mode;
@@ -163,19 +143,27 @@ function render(){
  const tag=$m("maMascotTag"),title=$m("maMascotTitle"),info=$m("maMascotInfo"),
   elapsed=$m("maMascotElapsed"),metrics=$m("maMascotMetrics"),input=$m("maMascotInput");
  if(mode==="pending"){
-  tag.textContent="PARCIAL PENDENTE";title.innerHTML="Hora de atualizar<br><em>parcial, time!</em>";
-  info.textContent="Loja "+(ctx?.code||state.storeCode)+" • Sem nova parcial";
+  tag.textContent="PARCIAL PENDENTE";
+  title.innerHTML="Hora de atualizar<br><em>parcial, time!</em>";
+  info.textContent="Loja "+(ctx?.code||state.storeCode)+" • Tempo sem nova parcial";
   const mins=testing?140:ctx.minutes;
   elapsed.textContent=formatElapsed(mins);
   elapsed.setAttribute("aria-label",Math.floor(mins/60)+" horas e "+(mins%60)+" minutos sem parcial");
   elapsed.hidden=false;metrics.hidden=true;
   input.innerHTML="Atualizar parcial <span aria-hidden='true'>→</span>";
+ }else if(mode==="waiting"){
+  tag.textContent="PRIMEIRA PARCIAL";
+  title.textContent="Hora de começar, time!";
+  info.textContent="Loja "+ctx.code+" • Aguardando primeiro lançamento do dia.";
+  elapsed.hidden=true;metrics.hidden=true;
+  input.innerHTML="Registrar parcial <span aria-hidden='true'>→</span>";
  }else{
   tag.textContent=feedback.tag;
   title.textContent=feedback.heading;
-  info.textContent=feedback.detail;
+  info.textContent=feedback.detail+" • Atualizada há "+
+    (ctx?formatElapsed(ctx.minutes):"instantes")+" · Loja "+(ctx?.code||state.storeCode);
   elapsed.hidden=true;metrics.hidden=false;
-  metrics.textContent=feedback.metrics||"Acompanhamento da parcial disponível no Cockpit.";
+  metrics.textContent=feedback.metrics||"Consulte os indicadores detalhados no Cockpit.";
   input.innerHTML="Ver resultado <span aria-hidden='true'>→</span>";
  }
 }
