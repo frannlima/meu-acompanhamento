@@ -176,7 +176,7 @@ function ensure(){
  node.setAttribute("role","region");node.setAttribute("aria-label","Assistente da parcial da loja");
  node.innerHTML='<button id="maMascotToggle" type="button" class="ma-mascot-portrait" aria-label="Abrir atualização da parcial">'+
   '<span class="ma-mascot-happy">'+ART+'</span>'+
-  '<img class="ma-mascot-sad" src="./assets/avatar-parcial-triste.avif?v=2" alt="Avatar com expressão triste ao identificar vendas abaixo da curva" draggable="false">'+
+  '<img class="ma-mascot-sad" src="./assets/avatar-parcial-triste.avif?v=3" alt="Avatar com expressão triste ao identificar vendas abaixo da curva" draggable="false">'+
   '<span class="ma-mascot-effects" aria-hidden="true"></span></button>'+
   '<div id="maMascotMessage" class="ma-mascot-message" role="status" aria-live="polite">'+
     '<span id="maMascotTag" class="ma-mascot-tag">PARCIAL PENDENTE</span>'+
@@ -185,6 +185,7 @@ function ensure(){
     '<b id="maMascotElapsed" class="ma-mascot-elapsed" aria-label="Tempo sem atualização"></b>'+
     '<small id="maMascotMetrics" class="ma-mascot-metrics" hidden></small>'+
     '<button class="ma-mascot-action" type="button" id="maMascotInput">Atualizar parcial <span aria-hidden="true">→</span></button>'+
+    '<span class="ma-mascot-drag-hint" aria-hidden="true">⠿ Arraste para mover</span>'+
   '</div>';
  root.appendChild(node);
  enableDrag();
