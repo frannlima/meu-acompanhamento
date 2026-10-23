@@ -36,17 +36,17 @@ jobs:
           sharing = Path("cockpit-share-v1.js").read_text(encoding="utf-8")
           css = Path("cockpit-vendas-v1.css").read_text(encoding="utf-8")
           checks = {
-              "share action": 'id="cockpitShareCard"' in html,
-              "download action": 'id="cockpitDownloadCard"' in html,
+              "single share action": 'id="cockpitShareResult"' in html,
+              "old buttons removed": all(x not in html for x in ('id="cockpitShareCard"', 'id="cockpitDownloadCard"', 'id="cockpitShare"')),
               "image script": "cockpit-share-v1.js" in html,
               "peak real sales calculation": "function peakComparison(" in cockpit,
               "peak proportional target": "peak.w*minutes/60" in cockpit,
               "red below-expected state": ".cp-peak-below" in css,
               "green above-expected state": ".cp-peak-above" in css,
-              "compact canvas card": "async function buildCard(data)" in sharing,
+              "horizontal canvas card": "async function buildCard(d)" in sharing and "canvas.width=1600;canvas.height=900" in sharing,
               "share text with PNG": "text:summary,files:[file]" in sharing,
               "offline generator": "document.createElement(\"canvas\")" in sharing,
-              "fallback copies summary": "copySummary(summary)" in sharing,
+              "fallback copies summary": "copy(summary)" in sharing,
               "same cockpit source": "getShareText:" in cockpit and "getShareData:" in cockpit,
           }
           for name, ok in checks.items():
@@ -138,13 +138,13 @@ jobs:
                       if not url or ("build=" + build) not in url:
                           raise RuntimeError("Asset nao versionado: " + asset)
                       read(base + url.removeprefix("./"))
-                  if 'id="cockpitShareCard"' not in html or 'id="cockpitDownloadCard"' not in html:
-                      raise RuntimeError("Botoes de compartilhar e baixar imagem ausentes")
+                  if 'id="cockpitShareResult"' not in html or 'id="cockpitShareCard"' in html or 'id="cockpitDownloadCard"' in html:
+                      raise RuntimeError("Botao unico Compartilhar resultado ausente ou controles antigos presentes")
                   if "function peakComparison(" not in read(base + "cockpit-vendas-v1.js"):
                       raise RuntimeError("Comparativo real dos horarios de pico nao publicado")
                   share_js = read(base + "cockpit-share-v1.js")
-                  if "async function buildCard(data)" not in share_js or "text:summary,files:[file]" not in share_js:
-                      raise RuntimeError("Card compacto e resumo compartilhado nao publicados")
+                  if "async function buildCard(d)" not in share_js or "canvas.width=1600;canvas.height=900" not in share_js or "text:summary,files:[file]" not in share_js:
+                      raise RuntimeError("Card horizontal 16:9 e legenda nao publicados")
                   cockpit_js = read(base + "cockpit-vendas-v1.js")
                   if "getShareText:" not in cockpit_js or "getShareData:" not in cockpit_js:
                       raise RuntimeError("Resumo do cockpit nao unificado")
