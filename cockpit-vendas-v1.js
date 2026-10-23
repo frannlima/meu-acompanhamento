@@ -261,18 +261,18 @@
   // Uma única fonte para o texto compartilhado, inclusive junto com o PNG.
   function shareText(x){
     if(!x)return "";
-    return "📊 COCKPIT DE VENDAS | LOJA "+store()+"\n"+dayLabel()+" • "+(x.has?time(x.updated):"Sem parcial")+
-      "\n\n🎯 Meta: "+(x.target?cash(x.target):"—")+
-      "\n🛒 Venda real: "+(x.has?cash(x.sale):"—")+
-      "\n📈 Atingimento: "+percent(x.attainment)+
-      "\n▲▼ EV. vs A.A.: "+(x.evolution===null?"—":signedPct(x.evolution))+
-      "\n🎯 Projeção: "+(x.projection!==null?cash(x.projection):"—")+
-      "\n↕️ Desvio: "+(x.dev!==null?signedMoney(x.dev):"—")+
-      "\n⏱️ Ritmo: "+signedPct(x.growth)+
-      (x.delta!==null?" • Δ "+signedMoney(x.delta)+" no intervalo":"")+
-      "\n🛍️ eStore: "+(x.cap!==null?cash(x.cap):"—")+" • "+(x.orders!==null?x.orders+" pedidos":"sem parcial")+
-      "\n📊 Share eStore: "+percent(x.share,2)+
-      "\n🏆 Destaque: "+(x.best?x.best.name+" "+percent(x.best.sale/x.best.target*100):"—");
+    const clock=x.has?time(x.updated).replace(":","h"):"Sem parcial";
+    const rhythm=x.growth===null?"—":(x.growth>0?"▲ ":x.growth<0?"▼ ":"◆ ")+signedPct(x.growth);
+    const sale=x.has?cash(x.sale):"—";
+    const estore=x.cap===null?"Sem parcial":cash(x.cap);
+    return "📊 *COCKPIT DE VENDAS | L"+store()+"*"+
+      "\n📅 "+dayLabel().slice(0,5)+" • "+clock+
+      "\n\n🛒 *Venda:* "+sale+" | *"+percent(x.attainment)+"* da meta"+
+      "\n🎯 *Projeção:* "+(x.projection!==null?cash(x.projection):"—")+
+      "\n⏱️ *Ritmo:* "+rhythm+
+      "\n🛍️ *eStore:* "+estore+
+      "\n\n📲 *Acompanhe o resultado completo:*"+
+      "\nhttps://frannlima.github.io/meu-acompanhamento/?section=cockpit";
   }
   function shareSnapshot(){
     const x=model||data();
