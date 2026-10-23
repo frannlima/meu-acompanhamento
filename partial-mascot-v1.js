@@ -98,6 +98,77 @@ const ART='<svg class="ma-mascot-art" viewBox="0 0 1122 1402" xmlns="http://www.
  '<rect width="1122" height="1402" fill="white"/><path d="'+CONTOUR+'" fill="black"/></mask></defs>'+
  '<image href="./assets/avatar-parcial-ria.avif?v=1" width="1122" height="1402" mask="url(#maPortraitNoCloth)"/>'+
  '<g class="ma-ria-flag-wave"><image href="./assets/avatar-parcial-ria.avif?v=1" width="1122" height="1402" clip-path="url(#maBannerCloth)"/></g></svg>';
+
+/* Arraste personagem + aviso como um bloco; posição relativa à tela, persistente
+   inclusive após reiniciar PWA ou mudar de orientação. */
+const POSITION_KEY="ma_mascot_drag_xy_v2";
+let dragEnabled=false,positionApplied=false,drag=null,suppressTapUntil=0;
+function safePosition(){
+ try{const p=JSON.parse(localStorage.getItem(POSITION_KEY)||"null");
+  return p&&Number.isFinite(p.x)&&Number.isFinite(p.y)?p:null;
+ }catch(_){return null}
+}
+function dragBounds(){
+ const w=window.visualViewport?.width||window.innerWidth;
+ const h=window.visualViewport?.height||window.innerHeight;
+ return {w,h,maxX:Math.max(6,w-node.offsetWidth-6),
+  maxY:Math.max(6,h-node.offsetHeight-6)};
+}
+const clamp=(n,lo,hi)=>Math.min(hi,Math.max(lo,n));
+function placeAt(x,y,save=false){
+ if(!node)return;
+ const b=dragBounds();
+ const px=clamp(x,6,b.maxX),py=clamp(y,6,b.maxY);
+ node.style.left=px+"px";node.style.top=py+"px";
+ node.style.right="auto";node.style.bottom="auto";
+ node.classList.add("ma-mascot-moved");
+ if(save){try{localStorage.setItem(POSITION_KEY,JSON.stringify({
+  x:b.maxX>6?px/b.maxX:0,y:b.maxY>6?py/b.maxY:0
+ }))}catch(_){}}
+}
+function restorePosition(){
+ if(!node||node.hidden||positionApplied)return;
+ const p=safePosition();
+ if(p){const b=dragBounds();
+   placeAt(clamp(p.x,0,1)*b.maxX,clamp(p.y,0,1)*b.maxY);
+ }
+ positionApplied=true;
+}
+function enableDrag(){
+ if(!node||dragEnabled)return;
+ dragEnabled=true;
+ node.addEventListener("pointerdown",e=>{
+  if(!e.isPrimary||e.button>0||e.target.closest("#maMascotInput"))return;
+  const r=node.getBoundingClientRect();
+  drag={id:e.pointerId,startX:e.clientX,startY:e.clientY,
+   x:r.left,y:r.top,active:false};
+ });
+ window.addEventListener("pointermove",e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const dx=e.clientX-drag.startX,dy=e.clientY-drag.startY;
+  if(!drag.active&&Math.hypot(dx,dy)<7)return;
+  drag.active=true;
+  e.preventDefault();
+  placeAt(drag.x+dx,drag.y+dy);
+ },{passive:false});
+ function finish(e){
+  if(!drag||e.pointerId!==drag.id)return;
+  if(drag.active){
+   suppressTapUntil=Date.now()+550;
+   const r=node.getBoundingClientRect();placeAt(r.left,r.top,true);
+  }
+  drag=null;
+ }
+ window.addEventListener("pointerup",finish);
+ window.addEventListener("pointercancel",finish);
+ // Movimento nunca deve acionar a navegação da imagem nem do aviso.
+ node.addEventListener("click",e=>{
+  if(Date.now()<suppressTapUntil){e.preventDefault();e.stopImmediatePropagation();}
+ },true);
+ window.addEventListener("resize",()=>{positionApplied=false;restorePosition()});
+ window.visualViewport?.addEventListener("resize",()=>{positionApplied=false;restorePosition()});
+}
+
 function ensure(){
  if(node)return node;
  const root=$m("appShell");if(!root)return null;
@@ -105,7 +176,7 @@ function ensure(){
  node.setAttribute("role","region");node.setAttribute("aria-label","Assistente da parcial da loja");
  node.innerHTML='<button id="maMascotToggle" type="button" class="ma-mascot-portrait" aria-label="Abrir atualização da parcial">'+
   '<span class="ma-mascot-happy">'+ART+'</span>'+
-  '<img class="ma-mascot-sad" src="./assets/avatar-parcial-triste.avif?v=1" alt="Avatar com expressão triste ao identificar vendas abaixo da curva" draggable="false">'+
+  '<img class="ma-mascot-sad" src="./assets/avatar-parcial-triste.avif?v=2" alt="Avatar com expressão triste ao identificar vendas abaixo da curva" draggable="false">'+
   '<span class="ma-mascot-effects" aria-hidden="true"></span></button>'+
   '<div id="maMascotMessage" class="ma-mascot-message" role="status" aria-live="polite">'+
     '<span id="maMascotTag" class="ma-mascot-tag">PARCIAL PENDENTE</span>'+
@@ -116,6 +187,7 @@ function ensure(){
     '<button class="ma-mascot-action" type="button" id="maMascotInput">Atualizar parcial <span aria-hidden="true">→</span></button>'+
   '</div>';
  root.appendChild(node);
+ enableDrag();
  const action=()=>{if(["pending","waiting"].includes(node.dataset.mood)&&typeof showPaste==="function")showPaste();
    else if(typeof setSection==="function")setSection("cockpit")};
  $m("maMascotToggle").addEventListener("click",action);
@@ -138,6 +210,7 @@ function render(){
    typeof state!=="undefined"&&state.logged&&state.section==="inicio");
  box.hidden=!visible;document.body.classList.toggle("ma-mascot-active",visible);
  if(!visible)return;
+ restorePosition();
  box.dataset.mood=mode;
  box.className="ma-partial-mascot ma-mascot--"+mode;
  const tag=$m("maMascotTag"),title=$m("maMascotTitle"),info=$m("maMascotInfo"),
