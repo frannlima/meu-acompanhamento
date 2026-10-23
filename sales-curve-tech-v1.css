@@ -90,3 +90,87 @@
  #section-inicio .mt-modes button{transition:none}
  #section-inicio .mt-widget *{animation:none!important}
 }
+
+
+/* Responsividade dos valores financeiros • mobile/tablet, 23/10/2026.
+   Nunca dividir centavos ou cortar números no meio da quantia. */
+#section-inicio .mt-kpi-row,
+#section-inicio .mt-detail-grid{
+  min-width:0;
+}
+#section-inicio .mt-kpi-row>div,
+#section-inicio .mt-detail-grid>div{
+  min-width:0;
+  max-width:100%;
+}
+#section-inicio .mt-kpi-projection strong,
+#section-inicio .mt-kpi-gap strong,
+#section-inicio .mt-detail-grid strong{
+  display:block;
+  max-width:100%;
+  overflow-wrap:normal;
+  word-break:normal;
+  white-space:nowrap;
+  letter-spacing:-.035em;
+  line-height:1.18;
+  font-variant-numeric:tabular-nums;
+}
+#section-inicio .mt-kpi-projection strong{
+  font-size:clamp(16px,2.4vw,30px);
+}
+#section-inicio .mt-kpi-gap strong{
+  font-size:clamp(14px,2vw,25px);
+}
+#section-inicio .mt-detail-grid strong{
+  font-size:clamp(13px,1.5vw,19px);
+}
+#section-inicio .mt-detail-grid small{
+  overflow-wrap:normal;
+  word-break:normal;
+  hyphens:none;
+}
+@media(max-width:700px){
+  /* Os KPIs ocupam a largura necessária para manter a leitura completa. */
+  #section-inicio .mt-kpi-row{
+    grid-template-columns:minmax(0,1fr);
+    gap:9px;
+  }
+  #section-inicio .mt-kpi-projection,
+  #section-inicio .mt-kpi-gap{padding:14px 16px}
+  #section-inicio .mt-kpi-projection strong{
+    font-size:clamp(20px,5.5vw,29px);
+  }
+  #section-inicio .mt-kpi-gap strong{
+    font-size:clamp(18px,5vw,27px);
+  }
+  /* Recuperação: duas colunas com a terceira informação em linha inteira. */
+  #section-inicio .mt-detail-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+  #section-inicio .mt-detail-grid>div{
+    padding:11px 9px;
+    min-width:0;
+  }
+  #section-inicio .mt-detail-grid>div:last-child:nth-child(odd){
+    grid-column:1/-1;
+  }
+  #section-inicio .mt-detail-grid strong{
+    font-size:clamp(13px,3.7vw,18px);
+  }
+  #section-inicio .mt-detail-grid small{
+    font-size:clamp(10px,2.9vw,12px);
+    line-height:1.35;
+  }
+}
+@media(max-width:350px){
+  #section-inicio .mt-detail-grid{
+    grid-template-columns:minmax(0,1fr);
+  }
+  #section-inicio .mt-detail-grid>div:last-child:nth-child(odd){
+    grid-column:auto;
+  }
+  #section-inicio .mt-detail-grid strong{
+    font-size:clamp(16px,5.4vw,19px);
+  }
+}
