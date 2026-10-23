@@ -226,3 +226,14 @@
  #ma3LiveGroup .gl-card-stat strong{font-size:12px}
  #ma3LiveGroup .gl-card-score{min-width:59px;padding:6px}
 }
+
+
+/* Evitar repetir os totais no rodapé do resumo mobile. */
+@media(max-width:1020px){
+ #ma3LiveGroup .gl-summary{display:none!important}
+ #ma3LiveGroup .gl-brand{min-height:64px;padding:10px 13px;gap:10px}
+ #ma3LiveGroup .gl-logo{min-width:78px;max-width:39%;flex:0 1 135px;padding:9px 10px}
+ #ma3LiveGroup .gl-logo img{max-width:125px}
+ #ma3LiveGroup .gl-brand-title h3{font-size:clamp(12px,3.6vw,16px)}
+ #ma3LiveGroup .gl-brand-title span{font-size:10px}
+}
