@@ -170,3 +170,36 @@ body.ma-mascot-active #maLateAlert{display:none!important}
  .ma-partial-mascot.ma-mascot-moved .ma-mascot-message{width:155px}
  .ma-partial-mascot.ma-mascot-moved .ma-mascot-portrait{width:166px;height:216px}
 }
+
+
+/* Dock contextual: não sobrepor o ranking Hora a Hora enquanto estiver em leitura. */
+@media(max-width:900px){
+ .ma-partial-mascot.ma-mascot-docked{
+  width:64px!important;height:76px!important;
+  left:auto!important;top:auto!important;right:8px!important;
+  bottom:calc(91px + env(safe-area-inset-bottom,0px))!important;
+  transform:none!important;pointer-events:none!important;
+ }
+ .ma-partial-mascot.ma-mascot-docked .ma-mascot-message{display:none!important}
+ .ma-partial-mascot.ma-mascot-docked .ma-mascot-portrait{
+  display:block!important;width:64px!important;height:76px!important;
+  right:0!important;bottom:0!important;
+  border:2px solid #E2F1E7!important;border-radius:14px!important;
+  padding:1px!important;background:#FCFFFC!important;
+  box-shadow:0 3px 10px rgba(7,52,34,.22)!important;
+  pointer-events:auto!important;touch-action:manipulation!important;
+ }
+ .ma-partial-mascot.ma-mascot-docked.ma-mascot--pending .ma-mascot-portrait{
+  border-color:#D63B48!important;
+ }
+ .ma-partial-mascot.ma-mascot-docked .ma-mascot-portrait::after{
+  content:"↗";position:absolute;right:-3px;top:-4px;
+  font-size:11px;font-weight:900;display:grid;place-items:center;
+  background:#173F35;color:#fff;border:1px solid #fff;
+  border-radius:50%;width:17px;height:17px;
+ }
+ .ma-partial-mascot.ma-mascot-docked.ma-mascot--pending .ma-mascot-portrait::after{
+  content:"!";background:#C03743;
+ }
+ .ma-partial-mascot.ma-mascot-docked .ma-mascot-effects{display:none!important}
+}
