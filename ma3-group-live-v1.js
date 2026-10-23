@@ -60,18 +60,16 @@ function tr(row){
  const id=esc(row.key),name=esc(row.name);
  const sel='<button type="button" class="gi-mobile-trigger gl-select" data-gi-group="'+id+'" aria-label="Abrir Raio-X e DCOs do grupo '+name+'">'+
    '<span class="gl-label">'+name+'</span><span class="gl-alerts">'+badges+'</span><span class="gl-chevron" aria-hidden="true">›</span></button>';
- const mobileCard='<button type="button" class="gi-mobile-trigger gl-mobile-card" data-gi-group="'+id+'" aria-label="Abrir Raio-X do grupo '+name+'">'+
-  '<span class="gl-card-head"><span class="gl-card-name">'+name+
-   (badges?'<span class="gl-card-alerts">'+badges+'</span>':'')+'</span>'+
-   '<span class="gl-card-score '+(row.att===null?'neutral':row.att>=100?'good':row.att>=90?'warn':'bad')+'">'+esc(att)+'</span>'+
-   '<span class="gl-card-chevron" aria-hidden="true">›</span></span>'+
-  '<span class="gl-card-stats">'+
-   '<span class="gl-card-stat"><small>Meta do grupo</small><strong title="'+esc(meta)+'">'+esc(abbreviated(row.meta))+'</strong></span>'+
-   '<span class="gl-card-stat"><small>Venda real</small><strong title="'+esc(sale)+'">'+(row.att===null?'—':esc(abbreviated(row.sale)))+'</strong></span>'+
-   '<span class="gl-card-stat"><small>Desvio do dia</small><strong class="'+(row.abs!==null&&row.abs<0?'gl-negative':'gl-positive')+'" title="'+esc(gap)+'">'+(row.abs===null?'—':esc(abbreviated(row.abs)))+'</strong></span>'+
-   '<span class="gl-card-stat"><small>Ev. vs A.A.</small><strong class="'+(row.evo!==null&&row.evo<0?'gl-negative':'gl-positive')+'">'+esc(evo)+'</strong></span>'+
-  '</span><span class="gl-card-foot">Toque para ver projeção, evolução e maiores impactos <b aria-hidden="true">↗</b></span>'+
- '</button>';
+ const mobileCard='<button type="button" class="gi-mobile-trigger gl-mobile-compact" data-gi-group="'+id+'" aria-label="Abrir Raio-X do grupo '+name+'">'+
+  '<span class="gl-compact-name"><strong>'+name+'</strong>'+
+    (badges?'<span class="gl-compact-alerts">'+badges+'</span>':'')+
+    '<span class="gl-compact-chevron" aria-hidden="true">›</span></span>'+
+  '<span class="gl-compact-sales"><small>Meta <b title="'+esc(meta)+'">'+esc(abbreviated(row.meta))+'</b></small>'+
+    '<strong title="'+esc(sale)+'">'+(row.att===null?'—':esc(abbreviated(row.sale)))+'</strong></span>'+
+  '<span class="gl-compact-performance">'+
+    '<strong class="gl-compact-rate '+(row.att===null?'neutral':row.att>=100?'good':row.att>=90?'warn':'bad')+'">'+esc(att)+'</strong>'+
+    '<small class="'+(row.abs!==null&&row.abs<0?'gl-negative':'gl-positive')+'" title="'+esc(gap)+'">'+(row.abs===null?'—':esc(abbreviated(row.abs)))+'</small>'+
+  '</span></button>';
  const mobileAmount='<div class="gl-mobile-pair"><small>Meta <b>'+esc(abbreviated(row.meta))+'</b></small><strong title="'+esc(sale)+'">'+(row.att===null?"—":esc(abbreviated(row.sale)))+'</strong></div>';
  return '<div class="gl-row'+(row.isDay?" gl-day":"")+(row.isHour?" gl-hour":"")+'" role="row">'+
    '<div class="gl-mobile-only">'+mobileCard+'</div>'+ 
@@ -90,12 +88,13 @@ function tr(row){
 function totalRow(m){
  const totalGap=m.effectiveSale===null?'—':abbreviated(m.effectiveSale-m.totalMeta);
  const totalAtt=m.attainment===null?'—':pct(m.attainment);
- const mobileTotal='<div class="gl-mobile-total"><div class="gl-mobile-total-top"><strong>TOTAL LOJA</strong><span class="gl-card-score '+(m.attainment!==null&&m.attainment>=100?'good':'bad')+'">'+totalAtt+'</span></div>'+
- '<div class="gl-card-stats">'+
- '<span class="gl-card-stat"><small>Meta do dia</small><strong title="'+money(m.totalMeta)+'">'+abbreviated(m.totalMeta)+'</strong></span>'+
- '<span class="gl-card-stat"><small>Venda parcial</small><strong>'+(m.effectiveSale===null?'—':abbreviated(m.effectiveSale))+'</strong></span>'+
- '<span class="gl-card-stat"><small>Desvio total</small><strong class="'+(m.effectiveSale!==null&&m.effectiveSale-m.totalMeta<0?'gl-negative':'gl-positive')+'">'+totalGap+'</strong></span>'+
- '<span class="gl-card-stat"><small>Projeção</small><strong>'+(m.projection===null?'—':abbreviated(m.projection))+'</strong></span></div></div>';
+ const mobileTotal='<div class="gl-mobile-total-compact">'+
+  '<span class="gl-compact-name"><strong>TOTAL LOJA</strong></span>'+
+  '<span class="gl-compact-sales"><small>Meta <b>'+abbreviated(m.totalMeta)+'</b></small>'+
+    '<strong>'+(m.effectiveSale===null?'—':abbreviated(m.effectiveSale))+'</strong></span>'+
+  '<span class="gl-compact-performance"><strong class="gl-compact-rate '+(m.attainment===null?'neutral':m.attainment>=100?'good':m.attainment>=90?'warn':'bad')+'">'+totalAtt+'</strong>'+
+    '<small class="'+(m.effectiveSale!==null&&m.effectiveSale-m.totalMeta<0?'gl-negative':'gl-positive')+'">'+totalGap+'</small></span>'+
+ '</div>';
  return '<div class="gl-row gl-total" role="row">'+
   '<div class="gl-mobile-only">'+mobileTotal+'</div>'+ 
   '<div class="gl-name" role="cell"><strong>TOTAL LOJA</strong></div>'+
@@ -115,8 +114,8 @@ function markup(m){
    '<span>Loja '+esc(m.store)+' • '+esc(prettyDate)+' • '+esc(time(m.updated))+'</span></div></div>';
  const headings=['GRUPO','META','VENDA','ATING.','VENDA A.A.','EVOLUÇÃO','DESVIO','PROJEÇÃO','FÍSICA'];
  const desktopHead=headings.map((v,i)=>'<span class="gl-heading gl-head-'+i+'" role="columnheader">'+v+'</span>').join("");
- const mobileTip='<p class="gl-mobile-tip">Toque em um grupo para abrir os detalhes. <span>▲ Acima da meta · ▼ Abaixo da meta</span></p>';
- const mobileHead='<div class="gl-mobile-head" aria-hidden="true"><span>GRUPO</span><span>META / VENDA</span><span>ATING.</span><span>DESVIO</span></div>';
+ const mobileTip='';
+ const mobileHead='<div class="gl-mobile-head" aria-hidden="true"><span>GRUPO</span><span>META / VENDA</span><span>ATING. / DESVIO</span></div>';
  const list='<div class="gl-live-table" role="table" aria-label="Resultado interativo por grupo de venda">'+
    '<div class="gl-table-head" role="row">'+desktopHead+'</div>'+mobileTip+mobileHead+
    '<div class="gl-live-body" role="rowgroup">'+(m.rows.length?m.rows.map(tr).join(""):'<p class="gl-empty">Aguardando metas oficiais dos grupos.</p>')+totalRow(m)+'</div></div>';
