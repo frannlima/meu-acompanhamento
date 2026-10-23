@@ -269,6 +269,7 @@
       "\n🎯 Projeção: "+(x.projection!==null?cash(x.projection):"—")+
       "\n↕️ Desvio: "+(x.dev!==null?signedMoney(x.dev):"—")+
       "\n⏱️ Ritmo: "+signedPct(x.growth)+
+      (x.delta!==null?" • Δ "+signedMoney(x.delta)+" no intervalo":"")+
       "\n🛍️ eStore: "+(x.cap!==null?cash(x.cap):"—")+" • "+(x.orders!==null?x.orders+" pedidos":"sem parcial")+
       "\n📊 Share eStore: "+percent(x.share,2)+
       "\n🏆 Destaque: "+(x.best?x.best.name+" "+percent(x.best.sale/x.best.target*100):"—");
@@ -278,17 +279,9 @@
     return {store:store(),date:dayLabel(),status:x.has?time(x.updated):"Sem parcial",
       has:x.has,meta:x.target,sale:x.sale,attainment:x.attainment,
       evolution:x.evolution,projection:x.projection,dev:x.dev,growth:x.growth,
+      delta:x.delta,updated:x.updated,
       estore:x.cap,orders:x.orders,share:x.share,
       best:x.best?{name:x.best.name,attainment:x.best.sale/x.best.target*100}:null};
-  }
-  async function share(){
-    const text=shareText(model||data());
-    if(!text)return;
-    try{
-      if(navigator.share)await navigator.share({title:"Cockpit de Vendas • Loja "+store(),text});
-      else if(navigator.clipboard){await navigator.clipboard.writeText(text);toast("Resumo do Cockpit copiado.");}
-      else toast("Compartilhamento não disponível neste dispositivo.",true);
-    }catch(e){if(e.name!=="AbortError")toast("Não foi possível compartilhar o resumo.",true);}
   }
   function open(){
     if(!isVisible())return;
@@ -298,7 +291,6 @@
   function init(){
     if(!$("section-cockpit"))return;
     $("cockpitRefresh")?.addEventListener("click",refreshAll);
-    $("cockpitShare")?.addEventListener("click",share);
     document.addEventListener("ma:dashboard-ready",()=>{render();setTimeout(render,1700);if(isVisible())void fetchEstore();});
     document.addEventListener("ma:estore-hourly-loaded",e=>{
       const d=e.detail||{},c=d.context||{},key=String(c.store||"").padStart(3,"0")+"|"+c.date;
