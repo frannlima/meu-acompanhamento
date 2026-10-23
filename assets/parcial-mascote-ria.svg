@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 370" role="img" aria-labelledby="t d">
+<title id="t">Avatar RIA agitando bandeira verde</title><desc id="d">Colaboradora sorridente com blusa branca e bandeira RIA em movimento.</desc>
+<defs>
+<linearGradient id="hair" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1e1618"/><stop offset=".6" stop-color="#3c2625"/><stop offset="1" stop-color="#130f13"/></linearGradient>
+<linearGradient id="skin" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#ffd1aa"/><stop offset=".5" stop-color="#e6a679"/><stop offset="1" stop-color="#cb835d"/></linearGradient>
+<linearGradient id="cloth" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".65" stop-color="#eeeae4"/><stop offset="1" stop-color="#d1d4d0"/></linearGradient>
+<linearGradient id="flag" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#286a51"/><stop offset=".55" stop-color="#123e34"/><stop offset="1" stop-color="#0a332d"/></linearGradient>
+<filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#102d27" flood-opacity=".20"/></filter>
+</defs>
+<style>
+#aria-flag{transform-box:view-box;transform-origin:244px 55px;animation:ria-wave 1.7s ease-in-out infinite}
+#aria-flag .cloth-ripple{animation:ria-ripple 1.7s ease-in-out infinite;transform-origin:246px 58px;transform-box:view-box}
+#aria-body{animation:ria-bob 2.9s ease-in-out infinite}
+@keyframes ria-wave{0%,100%{transform:rotate(-4deg) skewY(1deg)}50%{transform:rotate(6deg) skewY(-3deg)}}
+@keyframes ria-ripple{0%,100%{transform:scaleX(.98)}50%{transform:scaleX(1.05)}}
+@keyframes ria-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(2px)}}
+@media(prefers-reduced-motion:reduce){#aria-flag,#aria-flag .cloth-ripple,#aria-body{animation:none}}
+</style>
+<g filter="url(#shadow)" stroke="#fff" stroke-width="9" stroke-linejoin="round" stroke-linecap="round">
+<!-- cabelo, torso e braço do avatar adesivo -->
+<path d="M116 224c-18-67 1-131 75-141 71-11 111 34 99 119-6 47 18 91 11 131H94c-2-34 21-75 22-109z" fill="url(#hair)"/>
+<path d="M95 338c-6-30-2-58 19-76 20-18 40-18 62-26l45 1 60 20c20 10 28 33 29 81z" fill="url(#cloth)"/>
+<path d="M271 263c1-31-4-60-10-93l-2-23 7-10 18 20 11 96-8 40z" fill="url(#skin)"/>
+<path d="M266 281l-5-58 26-10 16 63-10 42z" fill="url(#cloth)"/>
+<path d="M162 224h72l-3 41-27 25-37-25z" fill="url(#skin)"/>
+<path d="M151 126c5-35 21-55 53-58 42-3 66 23 68 64l-7 66c-12 30-37 45-60 45-29-1-52-26-58-61z" fill="url(#skin)"/>
+<path d="M142 151c-8-54 19-90 63-92 44-2 67 34 70 71-16-4-29-11-41-26-28 24-50 22-70 29l-12 32z" fill="url(#hair)"/>
+<path d="M109 257c-19 16-22 46-12 81h215c-1-44-11-69-32-76l-39-16-36 51-46-51z" fill="url(#cloth)"/>
+<path d="M224 293l4 45" fill="none" stroke="#cdd3cc" stroke-width="3"/>
+</g>
+<!-- detalhes faciais -->
+<path d="M166 155q12-10 26-2m29 0q14-8 28 0" fill="none" stroke="#54392e" stroke-width="3.4" stroke-linecap="round"/>
+<path d="M170 164q10 8 20 0m35 0q10 7 20-1" fill="none" stroke="#322c2b" stroke-width="3" stroke-linecap="round"/>
+<ellipse cx="182" cy="166" rx="3.2" ry="4" fill="#211a1a"/><ellipse cx="234" cy="166" rx="3.2" ry="4" fill="#211a1a"/>
+<path d="M205 168l-5 26 9 2" fill="none" stroke="#b98160" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M184 209q23 21 47-1-22 29-47 1" fill="#9b4c45"/><path d="M190 210q17 8 34 0" fill="none" stroke="#fff" stroke-width="3"/>
+<path d="M159 120q-23 45-11 92-4 25-16 47m119-146q25 29 18 79-4 34 3 52" fill="none" stroke="#211719" stroke-width="15" stroke-linecap="round" opacity=".92"/>
+<path d="M144 154q-6 40-2 64m114-96q8 28 9 58" fill="none" stroke="#67453f" stroke-width="4" opacity=".55" stroke-linecap="round"/>
+<path d="M168 264l34 23 28-23" fill="none" stroke="#d9ded9" stroke-width="4"/>
+<path d="M198 273l6 4" stroke="#bda387" stroke-width="2"/><circle cx="205" cy="281" r="3" fill="#d9bc87"/>
+<!-- braço elevado, mão segurando a haste -->
+<path d="M270 239c-10-23-10-47-17-69l-5-25 4-26c3-9 8-13 14-8 6 4 7 19 6 27l-1 19 10 44 11 30" fill="url(#skin)" stroke="#fff" stroke-width="9" stroke-linejoin="round"/>
+<path d="M244 128c0-10 12-16 20-9 8 9-4 22-7 29l-11-6z" fill="url(#skin)" stroke="#935c40" stroke-width="1.5"/>
+<!-- haste: desde a mão até a ponta -->
+<path d="M249 185L244 50" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+<path d="M249 185L244 50" fill="none" stroke="#b4bbb7" stroke-width="4.8" stroke-linecap="round"/>
+<circle cx="244" cy="49" r="5" fill="#d9dedb" stroke="#fff" stroke-width="2"/>
+<!-- bandeira animada com a marca RIA -->
+<g id="aria-flag">
+<g class="cloth-ripple" filter="url(#shadow)">
+<path d="M246 53C275 44 287 70 312 62c18-6 27-7 36-3v75c-16-9-28-4-46-8-22-5-33-1-56 5z" fill="url(#flag)" stroke="#fff" stroke-width="6" stroke-linejoin="round"/>
+<path d="M251 61q45 22 91 5M253 123q42-11 85 5" fill="none" stroke="#559077" stroke-width="3" opacity=".6"/>
+<!-- Logo oficial RIA (contorno extraído do asset aprovado no repositório), em marfim institucional -->
+<g transform="translate(257 73) scale(.159)" fill="#e6e2d2">
+<path d="M 400 120 L 393 134 L 393 136 L 386 149 L 386 151 L 379 164 L 379 166 L 374 175 L 374 177 L 367 190 L 367 192 L 356 214 L 356 216 L 349 229 L 349 231 L 342 244 L 342 246 L 331 268 L 331 270 L 324 283 L 324 285 L 319 294 L 319 296 L 306 322 L 307 323 L 343 323 L 349 311 L 349 309 L 354 300 L 354 298 L 360 287 L 360 285 L 364 278 L 454 278 L 458 285 L 458 287 L 463 296 L 463 298 L 467 305 L 467 307 L 469 309 L 469 311 L 475 323 L 511 323 L 510 318 L 496 290 L 496 288 L 491 279 L 491 277 L 478 251 L 478 249 L 473 240 L 473 238 L 466 225 L 466 223 L 460 212 L 460 210 L 454 199 L 454 197 L 448 186 L 448 184 L 441 171 L 441 169 L 436 160 L 436 158 L 429 145 L 429 143 L 423 132 L 423 130 L 418 120 Z M 409 179 L 418 197 L 418 199 L 424 210 L 424 212 L 434 232 L 434 234 L 439 243 L 439 245 L 440 246 L 439 247 L 379 247 L 378 246 L 381 240 L 381 238 L 387 227 L 387 225 L 391 218 L 391 216 L 397 205 L 397 203 L 403 192 L 403 190 L 407 183 L 407 181 Z M 225 120 L 225 323 L 260 323 L 260 120 Z M 0 120 L 0 323 L 33 323 L 34 322 L 34 244 L 35 243 L 75 243 L 86 247 L 96 257 L 110 278 L 111 281 L 153 344 L 172 364 L 189 376 L 203 383 L 205 383 L 208 385 L 210 385 L 217 388 L 220 388 L 221 389 L 231 390 L 232 391 L 257 391 L 258 390 L 269 389 L 270 388 L 281 386 L 284 384 L 289 383 L 306 374 L 317 365 L 315 362 L 314 362 L 307 355 L 306 355 L 291 342 L 282 348 L 274 352 L 272 352 L 265 355 L 262 355 L 261 356 L 257 356 L 256 357 L 240 358 L 239 357 L 232 357 L 231 356 L 223 355 L 222 354 L 217 353 L 214 351 L 212 351 L 200 344 L 191 336 L 190 336 L 178 322 L 120 233 L 125 230 L 127 230 L 130 228 L 134 227 L 147 218 L 153 212 L 158 205 L 159 202 L 161 200 L 161 198 L 164 192 L 165 183 L 166 182 L 166 172 L 165 171 L 164 162 L 161 156 L 161 154 L 159 152 L 158 149 L 153 142 L 146 135 L 132 126 L 130 126 L 127 124 L 125 124 L 121 122 L 113 121 L 112 120 Z M 34 152 L 35 151 L 106 151 L 107 152 L 113 153 L 118 156 L 125 163 L 130 172 L 130 174 L 131 175 L 131 180 L 132 181 L 130 191 L 127 197 L 122 203 L 115 208 L 108 211 L 35 211 L 34 210 Z"/>
+</g>
+</g></g>
+<!-- mãos e smartwatch -->
+<path d="M247 139q-4 12 1 26l15 5 4-14-5-16z" fill="url(#skin)" stroke="#9d6547" stroke-width="1.5"/>
+<path d="M281 250l-3 19" stroke="#173f35" stroke-width="8" stroke-linecap="round"/>
+<circle cx="280" cy="258" r="7.5" fill="#161d20" stroke="#eee" stroke-width="2.5"/>
+<path d="M119 339h189" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+</svg>
