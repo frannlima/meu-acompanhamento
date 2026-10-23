@@ -26,3 +26,22 @@ body.ma-mascot-due #maLateAlert{display:none!important}
 }
 @media(max-width:370px){.ma-partial-mascot{transform:scale(.86);transform-origin:bottom right}}
 @media(prefers-reduced-motion:reduce){.ma-mascot-portrait{transition:none}}
+
+/* Avatar original aprovado: haste e mão imóveis; somente o tecido da bandeira oscila. */
+.ma-mascot-portrait .ma-mascot-art{
+ display:block;width:100%;height:100%;overflow:visible;
+ pointer-events:none;user-select:none;max-width:none;
+}
+.ma-ria-flag-wave{
+ transform-box:view-box;
+ transform-origin:29.6% 24.8%;
+ animation:ma-ria-wave 1.7s ease-in-out infinite;
+ will-change:transform;
+}
+@keyframes ma-ria-wave{
+ 0%,100%{transform:rotate(-3deg) skewY(-.5deg)}
+ 50%{transform:rotate(4deg) skewY(1.2deg)}
+}
+@media(prefers-reduced-motion:reduce){
+ .ma-ria-flag-wave{animation:none}
+}
