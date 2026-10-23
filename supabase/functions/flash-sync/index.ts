@@ -63,7 +63,19 @@ Deno.serve(async req=>{
  rows.sort((a,b)=>a.store.localeCompare(b.store));
  const bytes=new TextEncoder().encode(JSON.stringify([p.business_date,rows]));const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),n=>n.toString(16).padStart(2,'0')).join('');
  const {error}=await sb.from('flash_snapshots').upsert({business_date:p.business_date,collected_at:p.collected_at,rows,content_hash:hash,collected_by:user.matricula},{onConflict:'business_date,content_hash'});
- if(error)throw error;return response({data:{ok:true}});
+ if(error)throw error;
+ // Envia ao eStore somente a última coleta Flash persistida e autenticada.
+ let estore_sync:any={ok:false,reason:"Ponte eStore indisponível."};
+ try{
+   const bridge=await fetch('https://fndkjgveeojlywkdrtxe.supabase.co/functions/v1/estore-flash-sales',{
+     method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+     body:JSON.stringify({action:'sync',matricula:user.matricula}),signal:AbortSignal.timeout(15000)
+   });
+   const result=await bridge.json();
+   estore_sync=bridge.ok&&result.ok?{ok:true,coverage:result.coverage,updated:result.updated,result_date:result.result_date,collected_at:result.flash_collected_at}:
+      {ok:false,reason:String(result.error||'Falha de comunicação com o eStore').slice(0,160)};
+ }catch(e){console.error('Integração Flash→eStore:',String(e));}
+ return response({data:{ok:true,estore_sync}});
  }
  if(body.action==='latest'||body.action==='history'){
  if(!/^\d{4}-\d{2}-\d{2}$/.test(body.business_date))return response({error:'Data inválida.'},400);

@@ -1,6 +1,6 @@
 /* eStore CE+PI • performance operacional v3.
  * Única fonte da captação: hourly_get oficial.
- * Denominador do share: venda REAL registrada no Meu Acompanhamento.
+ * Denominador do share: Total Flash da mesma data e filial, importado por ponte autenticada.
  * Nunca utilizar a meta da loja como substituta da venda.
  */
 (function(){
@@ -47,8 +47,8 @@
     const fed=!!r.updated_at,cap=Number(r.captured)||0,meta=Number(r.metaValue)||0,
       n=Math.trunc(Number(r.orders)||0),orderGoal=Math.trunc(Number(r.orderTarget)||0),
       att=meta>0?cap/meta*100:null,dev=meta>0?cap-meta:null,
-      shopDay=ownRetail(),shopAmount=shopDay?Number(shopDay.sales_financial):0,
-      share=fed&&shopAmount>0?shareFor(cap,shopAmount):null,
+      flashAmount=r.shareSource==='flash'&&Number(r.storeSales)>0?Number(r.storeSales):0,
+      share=fed&&flashAmount>0?shareFor(cap,flashAmount):null,
       ticket=n>0?cap/n:null,base=Number(tickets?.[c.store])||0,
       orderAtt=orderGoal>0?n/orderGoal*100:null,
       p=Math.max(0,Math.min(100,att||0));
@@ -61,8 +61,8 @@
       '<div class="eo-feature-foot"><span>Meta eStore: '+(meta>0?currency(meta):"não cadastrada")+'</span><b>'+percent(att)+'</b></div></div>'+
       '<div class="eo-side">'+stat("Atingimento",percent(att),att!==null&&att>=100?"eo-ok":"")+
       stat("Desvio financeiro",dev===null?"—":signedMoney(dev),dev!==null&&dev<0?"eo-bad":"eo-ok")+
-      '<div class="eo-share"><span>SHARE SOBRE VENDA REAL DA LOJA</span><b>'+percent(share,2)+'</b>'+
-      '<small>'+(share===null?"Aguardando venda válida da loja e captação eStore":'eStore '+currency(cap)+' ÷ loja '+currency(shopAmount))+'</small></div></div></div>';
+      '<div class="eo-share"><span>SHARE SOBRE TOTAL FLASH DA LOJA</span><b>'+percent(share,2)+'</b>'+
+      '<small>'+(share===null?"Aguardando coleta Flash e captação eStore":'eStore '+currency(cap)+' ÷ loja '+currency(flashAmount))+'</small></div></div></div>';
     orders.innerHTML='<div class="eo-card-heading"><div><span class="eyebrow">DESEMPENHO COMERCIAL</span><h2>Pedidos e ticket médio</h2></div>'+
       '<span class="eo-update">Meta de pedidos oficial</span></div>'+
       '<div class="eo-orders-grid">'+stat("Meta de pedidos",orderGoal?count(orderGoal):"—")+
@@ -75,12 +75,8 @@
   }
 
   function getRealSales(st){
-    if(regionSales){
-      const x=regionSales.get(st);
-      if(x?.has_input&&validTime(x.captured_at,context().date)&&Number(x.sales_financial)>0)return Number(x.sales_financial);
-    }
-    if(st===context().store)return Number(ownRetail()?.sales_financial)||0;
-    return 0;
+    const r=rows?.find(x=>code(x.st)===st);
+    return r?.shareSource==="flash"&&Number(r.storeSales)>0?Number(r.storeSales):0;
   }
   function paintRegion(){
     const pane=$("estoreOpsRegional"),host=$("estoreOpsRegionalBody");
@@ -95,7 +91,7 @@
       if(sale>0){acc.retail+=sale;acc.matched++;acc.matchedCap+=v;}else if(v>0)acc.unmatched++;
       return acc;
     },{meta:0,captured:0,orders:0,orderGoal:0,retail:0,matched:0,matchedCap:0,unmatched:0});
-    const share=total.retail>0&&total.unmatched===0?total.matchedCap/total.retail*100:null;
+    const share=total.retail>0&&total.matched===all.length?total.matchedCap/total.retail*100:null;
     host.innerHTML='<div class="eo-region-head"><div><span class="eyebrow">CE+PI • '+context().date.split("-").reverse().join("/")+'</span><h2>Acumulado regional por loja</h2></div>'+
       '<span class="eo-update">'+all.filter(r=>!!r.updated_at).length+' de '+all.length+' lojas atualizaram</span></div>'+
       '<div class="eo-region-kpis">'+stat("Meta regional",currency(total.meta))+
@@ -103,9 +99,9 @@
       stat("Desvio",signedMoney(total.captured-total.meta),total.captured<total.meta?"eo-bad":"eo-ok")+
       stat("Pedidos",count(total.orders)+" / "+count(total.orderGoal))+
       stat("Ticket entregue",total.orders>0?currency(total.captured/total.orders):"—")+
-      stat("Share real regional",percent(share,2))+'</div>'+
+      stat("Share Flash regional",percent(share,2))+'</div>'+
       '<div class="eo-table-wrap"><table class="eo-table"><thead><tr>'+
-      '<th>Loja</th><th>Meta eStore</th><th>Venda eStore</th><th>Desvio</th><th>Share real</th><th>Pedidos</th><th>Ticket entregue</th><th>Ticket base</th></tr></thead><tbody>'+
+      '<th>Loja</th><th>Meta eStore</th><th>Venda eStore</th><th>Desvio</th><th>Share Flash</th><th>Pedidos</th><th>Ticket entregue</th><th>Ticket base</th></tr></thead><tbody>'+
       all.map(r=>{
         const st=code(r.st),meta=Number(r.metaValue)||0,cap=Number(r.captured)||0,
           storeSale=getRealSales(st),ticket=Number(tickets?.[st])||0,order=Number(r.orders)||0;
@@ -118,8 +114,8 @@
           '<td>'+(order>0?currency(cap/order):"—")+'</td>'+
           '<td>'+(ticket>0?currency(ticket):"—")+'</td></tr>';
       }).join("")+'</tbody></table></div>'+
-      '<p class="eo-footnote">Share = captação eStore ÷ venda real do Hora a Hora da loja. Uma loja sem venda real válida exibe “—”. O share regional só aparece quando não há captação sem denominador disponível; as lojas sem input não são tratadas como venda zero confirmada.</p>'+
-      (state.role!=="administrador"?'<p class="eo-footnote">As vendas reais das demais filiais exigem permissão administrativa na base do Meu Acompanhamento; seus shares ficam indisponíveis neste perfil.</p>':'');
+      '<p class="eo-footnote">Share = captação eStore ÷ Total Flash da mesma data/filial. Coleta Flash: '+total.matched+'/18 lojas. Sem coleta, o share da filial é “—”; share regional só com 18/18 lojas.</p>';
+
   }
 
   function renderAll(){

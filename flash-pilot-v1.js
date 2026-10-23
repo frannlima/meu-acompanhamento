@@ -21,8 +21,16 @@
   history=history.sort((a,b)=>Date.parse(b.collected_at)-Date.parse(a.collected_at)).slice(0,96);paint();document.dispatchEvent(new CustomEvent('ma:flash-update'));
  }
  async function sharePacket(){
-  if(!packet||!admin()||!token())return;
-  try{await cloud('save',{packet});syncStatus='Coleta salva no histórico compartilhado.';}catch(e){syncStatus=e.message;}paint();
+  if(!packet||!admin())return;
+  if(!token()){syncStatus='Flash recebido localmente. Confirme seu e-mail para sincronizar o share eStore.';paint();return;}
+  try{
+    const result=await cloud('save',{packet});
+    const bridge=result?.estore_sync;
+    syncStatus=bridge?.ok
+      ?'Flash salvo e sincronizado com o eStore: '+bridge.coverage+'/18 filiais • atualização '+(bridge.updated||0)+'.'
+      :'Coleta Flash salva. Share eStore pendente: '+String(bridge?.reason||'tente salvar novamente.');
+  }catch(e){syncStatus='Flash não sincronizado: '+e.message;}
+  paint();
  }
  async function loadShared(){
   if(!allowed()||!token()||busy)return;busy=true;const who=identity;
