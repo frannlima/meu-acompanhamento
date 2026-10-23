@@ -15,7 +15,7 @@ function fortaleza(now=new Date()){
   weekday:new Intl.DateTimeFormat("en-US",{weekday:"short",timeZone:"America/Fortaleza"}).format(now)};
 }
 function clock(iso){
- const v=Date.parse(iso||"");if(!Number.isFinite(v))return null;
+ const v=typeof iso==="number"?iso:Date.parse(iso||"");if(!Number.isFinite(v))return null;
  const t=fortaleza(new Date(v));return {date:t.date,minute:t.minute,time:v};
 }
 function context(now=new Date()){
