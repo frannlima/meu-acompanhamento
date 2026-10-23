@@ -234,6 +234,7 @@ function mountMarkup(m){
      selected=items[ix].key;renderVisual();
    });
  }
+ fitFinancialValues();
  return true;
 }
 function onTouch(e){
@@ -248,6 +249,27 @@ function onTouch(e){
  const key=items[idx].key;
  if(key!==selected){selected=key;renderVisual();}
 }
+/* Mantém valores monetários completos dentro dos cards em qualquer viewport. */
+function fitFinancialValues(){
+ const root=get("clarityCurveChart");
+ if(!root)return;
+ root.querySelectorAll(".mt-kpi-projection strong,.mt-kpi-gap strong,.mt-detail-grid strong")
+  .forEach(value=>{
+   value.style.removeProperty("font-size");
+   const normal=Number.parseFloat(getComputedStyle(value).fontSize);
+   const available=value.clientWidth,required=value.scrollWidth;
+   if(!(available>0&&required>available+1&&Number.isFinite(normal)))return;
+   // Ajuste local: não altera os demais indicadores nem a hierarquia visual.
+   let font=Math.max(11,Math.floor(normal*(available-2)/required*10)/10);
+   value.style.fontSize=font+"px";
+   // Refinar a medida após a primeira redução, caso haja variação de fonte.
+   if(value.scrollWidth>value.clientWidth+1&&font>11){
+    font=Math.max(11,Math.floor(font*(value.clientWidth-2)/value.scrollWidth*10)/10);
+    value.style.fontSize=font+"px";
+   }
+  });
+}
+
 function renderVisual(){
  const m=currentData,plot=get("mtTechPlot"),detailBox=get("mtTechDetail");
  if(!m||!plot||!detailBox)return;
@@ -257,6 +279,7 @@ function renderVisual(){
    '<div class="mt-graph-empty">Aguardando meta e curva histórica válidas.</div>':
    svgGraph(m,activeMode,selected);
  detailBox.innerHTML=detail(m,activeMode,active);
+ fitFinancialValues();
  get("clarityCurveChart")?.querySelectorAll("[data-mt-mode]").forEach(btn=>{
    btn.classList.toggle("active",btn.dataset.mtMode===activeMode);
    btn.setAttribute("aria-pressed",String(btn.dataset.mtMode===activeMode));
