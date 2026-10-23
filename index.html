@@ -45,7 +45,7 @@
   <link rel="stylesheet" href="./ma2-simple-v1.css?v=7">
   <link rel="stylesheet" href="./ma3-faithful-v1.css?v=5">
   <link rel="stylesheet" href="./cockpit-vendas-v1.css?v=6">
-  <link rel="stylesheet" href="./partial-mascot-v1.css?v=3">
+  <link rel="stylesheet" href="./partial-mascot-v1.css?v=4">
   <style>
     /* Exibir o aplicativo apenas quando a interface 3.0 estiver totalmente montada. */
     html.ma-booting #appShell { visibility:hidden!important; pointer-events:none!important; }
@@ -573,6 +573,8 @@
           <button data-section="regional" class="mobile-more-item admin-only hidden"><span class="nav-icon nav-icon-regional" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 18V12"/><path d="M10 18V9"/><path d="M15 18V6"/><path class="accent" d="M20 18V3"/></svg></span><b>Regional</b><small>Consolidado CE+PI</small></button>
           <button data-section="admin" class="mobile-more-item admin-only hidden"><span class="nav-icon nav-icon-admin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 14 5l2.4-.2.8 2.2 2 1.3-.8 2.3.8 2.3-2 1.3-.8 2.2-2.4-.2-2 1.5-2-1.5-2.4.2-.8-2.2-2-1.3.8-2.3-.8-2.3 2-1.3.8-2.2L10 5z"/><circle class="accent" cx="12" cy="10.6" r="2.6"/></svg></span><b>Administração</b><small>Gestão do app</small></button>
           <button id="testPartialDelayBtn" type="button" class="mobile-more-item" onclick="window.testarAvatarParcial?.()"><span>🚩</span><b>Testar avatar da parcial</b><small>Bandeira RIA em movimento · 12 segundos</small></button>
+          <button id="testMascotSuccessBtn" type="button" class="mobile-more-item" onclick="window.testarReacaoAvatarParcial?.('good')"><span>🎉</span><b>Testar avatar feliz</b><small>Comemoração por boa entrega</small></button>
+          <button id="testMascotAlertBtn" type="button" class="mobile-more-item" onclick="window.testarReacaoAvatarParcial?.('bad')"><span>📉</span><b>Testar avatar de atenção</b><small>Reação ao resultado abaixo da curva</small></button>
           <button id="installAppBtn" type="button" class="mobile-more-item"><span>⇩</span><b>Instalar no celular</b><small>Abrir em tela cheia, como app</small></button>
           <button id="mobileLogoutBtn" type="button" class="mobile-more-item danger-more"><span>↪</span><b>Sair</b><small>Encerrar sessão</small></button>
         </div>
@@ -751,7 +753,7 @@
   <script src="./cockpit-share-v1.js?v=6" defer></script>
   <script src="./share-navigation-v215.js?v=215" defer></script>
   <script src="./estore-sync-v215.js?v=215" defer></script>
-  <script src="./partial-mascot-v1.js?v=4" defer></script>
+  <script src="./partial-mascot-v1.js?v=5" defer></script>
   <script>
   (function(){
     if(!("serviceWorker" in navigator))return;
