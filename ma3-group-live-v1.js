@@ -60,19 +60,8 @@ function tr(row){
  const id=esc(row.key),name=esc(row.name);
  const sel='<button type="button" class="gi-mobile-trigger gl-select" data-gi-group="'+id+'" aria-label="Abrir Raio-X e DCOs do grupo '+name+'">'+
    '<span class="gl-label">'+name+'</span><span class="gl-alerts">'+badges+'</span><span class="gl-chevron" aria-hidden="true">›</span></button>';
- const mobileCard='<button type="button" class="gi-mobile-trigger gl-mobile-compact" data-gi-group="'+id+'" aria-label="Abrir Raio-X do grupo '+name+'">'+
-  '<span class="gl-compact-name"><strong>'+name+'</strong>'+
-    (badges?'<span class="gl-compact-alerts">'+badges+'</span>':'')+
-    '<span class="gl-compact-chevron" aria-hidden="true">›</span></span>'+
-  '<span class="gl-compact-sales"><small>Meta <b title="'+esc(meta)+'">'+esc(abbreviated(row.meta))+'</b></small>'+
-    '<strong title="'+esc(sale)+'">'+(row.att===null?'—':esc(abbreviated(row.sale)))+'</strong></span>'+
-  '<span class="gl-compact-performance">'+
-    '<strong class="gl-compact-rate '+(row.att===null?'neutral':row.att>=100?'good':row.att>=90?'warn':'bad')+'">'+esc(att)+'</strong>'+
-    '<small class="'+(row.abs!==null&&row.abs<0?'gl-negative':'gl-positive')+'" title="'+esc(gap)+'">'+(row.abs===null?'—':esc(abbreviated(row.abs)))+'</small>'+
-  '</span></button>';
  const mobileAmount='<div class="gl-mobile-pair"><small>Meta <b>'+esc(abbreviated(row.meta))+'</b></small><strong title="'+esc(sale)+'">'+(row.att===null?"—":esc(abbreviated(row.sale)))+'</strong></div>';
  return '<div class="gl-row'+(row.isDay?" gl-day":"")+(row.isHour?" gl-hour":"")+'" role="row">'+
-   '<div class="gl-mobile-only">'+mobileCard+'</div>'+ 
    '<div class="gl-name" role="cell">'+sel+'</div>'+
    '<div class="gl-data gl-target" role="cell">'+cell("Meta",meta,abbreviated(row.meta))+'</div>'+
    '<div class="gl-data gl-sale" role="cell">'+cell("Venda",sale,row.att===null?"—":abbreviated(row.sale))+'</div>'+
@@ -88,15 +77,7 @@ function tr(row){
 function totalRow(m){
  const totalGap=m.effectiveSale===null?'—':abbreviated(m.effectiveSale-m.totalMeta);
  const totalAtt=m.attainment===null?'—':pct(m.attainment);
- const mobileTotal='<div class="gl-mobile-total-compact">'+
-  '<span class="gl-compact-name"><strong>TOTAL LOJA</strong></span>'+
-  '<span class="gl-compact-sales"><small>Meta <b>'+abbreviated(m.totalMeta)+'</b></small>'+
-    '<strong>'+(m.effectiveSale===null?'—':abbreviated(m.effectiveSale))+'</strong></span>'+
-  '<span class="gl-compact-performance"><strong class="gl-compact-rate '+(m.attainment===null?'neutral':m.attainment>=100?'good':m.attainment>=90?'warn':'bad')+'">'+totalAtt+'</strong>'+
-    '<small class="'+(m.effectiveSale!==null&&m.effectiveSale-m.totalMeta<0?'gl-negative':'gl-positive')+'">'+totalGap+'</small></span>'+
- '</div>';
  return '<div class="gl-row gl-total" role="row">'+
-  '<div class="gl-mobile-only">'+mobileTotal+'</div>'+ 
   '<div class="gl-name" role="cell"><strong>TOTAL LOJA</strong></div>'+
   '<div class="gl-data gl-target" role="cell">'+cell("Meta",money(m.totalMeta),abbreviated(m.totalMeta))+'</div>'+
   '<div class="gl-data gl-sale" role="cell">'+cell("Venda",m.effectiveSale===null?"—":money(m.effectiveSale),m.effectiveSale===null?"—":abbreviated(m.effectiveSale))+'</div>'+
@@ -107,6 +88,52 @@ function totalRow(m){
   '<div class="gl-data gl-projection" role="cell">'+(m.projection===null?"—":esc(abbreviated(m.projection)))+'</div>'+
   '<div class="gl-data gl-physical" role="cell">—</div></div>';
 }
+/* Mobile: painel horizontal completo com os grupos na mesma tabela e coluna fixa. */
+function mobileHorizontalRow(g){
+ const badges=indicator(g);
+ const id=esc(g.key),name=esc(g.name);
+ const att=g.att===null?"—":pct(g.att);
+ const meta=money(g.meta),sale=g.att===null?"—":money(g.sale);
+ const gap=g.abs===null?"—":signed(g.abs);
+ const evo=g.evo===null?"—":(g.evo>=0?"▲ ":"▼ ")+pct(g.evo);
+ const projection=g.projection===null?"—":money(g.projection);
+ const physical=Number(g.physical).toLocaleString("pt-BR");
+ const value=(full,short)=>'<span class="gl-hval" title="'+esc(full)+'">'+esc(short)+'</span>';
+ return '<button type="button" class="gl-hrow gi-mobile-trigger'+(g.isDay?" gl-hday":"")+(g.isHour?" gl-hhour":"")+'" data-gi-group="'+id+'" aria-label="Abrir Raio-X do grupo '+name+'">'+
+ '<span class="gl-hname"><strong>'+name+'</strong>'+(badges?'<span class="gl-halerts">'+badges+'</span>':"")+'</span>'+
+ '<span class="gl-hmoney"><small>'+value(meta,abbreviated(g.meta))+'</small><b>'+value(sale,g.att===null?"—":abbreviated(g.sale))+'</b></span>'+
+ '<span class="gl-hatt"><b class="'+(g.att===null?"neutral":g.att>=100?"good":g.att>=90?"warn":"bad")+'">'+esc(att)+'</b></span>'+
+ '<span class="gl-hgap '+(g.abs!==null&&g.abs<0?"gl-negative":"gl-positive")+'">'+value(gap,g.abs===null?"—":abbreviated(g.abs))+'</span>'+
+ '<span class="gl-hevo '+(g.evo!==null&&g.evo<0?"gl-negative":"gl-positive")+'">'+esc(evo)+'</span>'+
+ '<span class="gl-hproject">'+value(projection,g.projection===null?"—":abbreviated(g.projection))+'</span>'+
+ '<span class="gl-hphysical">'+esc(physical)+'</span>'+
+ '</button>';
+}
+function mobileHorizontalTotal(m){
+ const diff=m.effectiveSale===null?null:m.effectiveSale-m.totalMeta;
+ const att=m.attainment===null?"—":pct(m.attainment);
+ return '<div class="gl-hrow gl-htotal">'+
+ '<span class="gl-hname"><strong>TOTAL LOJA</strong></span>'+
+ '<span class="gl-hmoney"><small>'+esc(abbreviated(m.totalMeta))+'</small><b>'+(m.effectiveSale===null?"—":esc(abbreviated(m.effectiveSale)))+'</b></span>'+
+ '<span class="gl-hatt"><b class="'+(m.attainment===null?"neutral":m.attainment>=100?"good":"bad")+'">'+att+'</b></span>'+
+ '<span class="gl-hgap '+(diff!==null&&diff<0?"gl-negative":"gl-positive")+'">'+(diff===null?"—":esc(abbreviated(diff)))+'</span>'+
+ '<span class="gl-hevo">—</span>'+
+ '<span class="gl-hproject">'+(m.projection===null?"—":esc(abbreviated(m.projection)))+'</span>'+
+ '<span class="gl-hphysical">—</span></div>';
+}
+function mobileHorizontal(m){
+ const headings=["GRUPO","META / VENDA","ATING.","DESVIO","EV. VS A.A.","PROJEÇÃO","FÍSICA"];
+ return '<section class="gl-landscape-panel" aria-label="Painel horizontal de todos os grupos">'+
+ '<div class="gl-landscape-top"><span>Visão horizontal · todos os grupos</span>'+
+ '<button type="button" class="gl-landscape-toggle" aria-expanded="false" aria-label="Ampliar painel horizontal de grupos">⛶ Ampliar</button></div>'+
+ '<p class="gl-landscape-hint">Deslize a tabela para os lados. Toque em um grupo para abrir o Raio-X.</p>'+
+ '<div class="gl-landscape-scroll" tabindex="0" aria-label="Tabela de grupos; deslize horizontalmente para ver mais indicadores">'+
+ '<div class="gl-landscape-width"><div class="gl-hhead">'+headings.map((h,i)=>'<span class="'+(i===0?"gl-hsticky":"")+'">'+h+'</span>').join("")+'</div>'+
+ '<div class="gl-hbody">'+m.rows.map(mobileHorizontalRow).join("")+mobileHorizontalTotal(m)+'</div></div></div>'+
+ '<div class="gl-landscape-foot"><span><b class="gl-d-key">D</b> Desvio dia · <b class="gl-h-key">H</b> Impacto hora</span><span>'+m.rows.length+' grupos · atualização '+esc(time(m.updated))+'</span></div>'+
+ '</section>';
+}
+
 function markup(m){
  const prettyDate=m.day.split("-").reverse().join("/");
  const top='<div class="gl-brand"><div class="gl-logo"><img src="./assets/riachuelo-logo.svg" alt="Riachuelo"></div>'+
@@ -124,7 +151,7 @@ function markup(m){
    '<div><small>PROJEÇÃO</small><b>'+(m.projection===null?"—":money(m.projection))+'</b></div></div>';
  const footer='<div class="gl-footer"><span>MEU ACOMPANHAMENTO</span><span><b class="gl-d-key">D</b> Desvio dia&nbsp; <b class="gl-h-key">H</b> Impacto hora</span></div>'+
  '<p class="gl-help">Toque no nome de qualquer grupo para consultar evolução, atingimento, desvio e os DCOs de maior impacto.</p>';
- return '<section class="gl-panel" aria-label="Parcial Hora Hora interativa">'+top+list+summary+footer+'</section>';
+ return '<section class="gl-panel" aria-label="Parcial Hora Hora interativa">'+top+mobileHorizontal(m)+list+summary+footer+'</section>';
 }
 function container(){
  const card=$("ma3Card");if(!card)return null;
@@ -144,13 +171,41 @@ function render(force=false){
  const stamp=[result.store,result.day,result.updated,result.effectiveSale,result.totalMeta,
    result.rows.map(r=>[r.key,r.sale,r.meta,r.abs,r.evo,r.actualInterval,r.hourGap,r.isDay,r.isHour].join("|")).join(";")].join(":");
  if(!force&&root.dataset.glStamp===stamp&&root.querySelector(".gl-panel"))return;
+ const previousScroll=root.querySelector(".gl-landscape-scroll")?.scrollLeft||0;
+ const expanded=root.querySelector(".gl-landscape-panel")?.classList.contains("gl-landscape-expanded")||false;
  root.innerHTML=markup(result);root.dataset.glStamp=stamp;
+ const horizontalRoot=root.querySelector(".gl-landscape-panel");
+ const horizontalScroller=root.querySelector(".gl-landscape-scroll");
+ if(horizontalScroller)horizontalScroller.scrollLeft=previousScroll;
+ if(expanded&&horizontalRoot){horizontalRoot.classList.add("gl-landscape-expanded");
+  horizontalRoot.querySelector(".gl-landscape-toggle")?.setAttribute("aria-expanded","true");
+  const btn=horizontalRoot.querySelector(".gl-landscape-toggle");if(btn)btn.textContent="✕ Fechar";}
+
  root.hidden=false;root.closest("#ma3Card")?.classList.add("gl-live-active");
 }
 function schedule(){if(pending)return;pending=true;requestAnimationFrame(()=>{pending=false;render();});}
 function boot(){
  document.addEventListener("ma:dashboard-ready",()=>setTimeout(schedule,100));
  document.addEventListener("ma:section-change",schedule);
+ document.addEventListener("click",e=>{
+  const toggle=e.target.closest(".gl-landscape-toggle");
+  if(!toggle)return;
+  const panel=toggle.closest(".gl-landscape-panel");
+  if(!panel)return;
+  const expand=panel.classList.toggle("gl-landscape-expanded");
+  document.body.classList.toggle("gl-landscape-open",expand);
+  toggle.textContent=expand?"✕ Fechar":"⛶ Ampliar";
+  toggle.setAttribute("aria-expanded",String(expand));
+  if(expand)panel.querySelector(".gl-landscape-scroll")?.focus({preventScroll:true});
+ });
+ document.addEventListener("keydown",e=>{
+  if(e.key!=="Escape")return;
+  const panel=document.querySelector(".gl-landscape-expanded");
+  if(!panel)return;panel.classList.remove("gl-landscape-expanded");
+  document.body.classList.remove("gl-landscape-open");
+  const btn=panel.querySelector(".gl-landscape-toggle");
+  if(btn){btn.textContent="⛶ Ampliar";btn.setAttribute("aria-expanded","false");btn.focus();}
+ });
  document.addEventListener("click",e=>{
    if(e.target.closest('[data-section="inicio"],[data-ma2="hoje"]'))setTimeout(schedule,150);
  });
