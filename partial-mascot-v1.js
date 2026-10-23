@@ -27,6 +27,23 @@ function status(now=new Date()){
  const minutes=Math.floor((now.getTime()-last)/60000);
  return {due:minutes>=60,minutes,code,original:valid?original:"abertura",last:valid?stamp:null};
 }
+
+/* O arquivo de arte é o avatar aprovado com a bandeira segurada na mão levantada.
+   A imagem base permanece imóvel. Apenas o tecido da bandeira é animado. */
+const RIA_FLAG_CONTOUR="M 337 20 C 395 24 451 52 511 70 C 580 82 659 77 731 78 C 785 80 813 97 817 130 C 823 200 791 296 781 388 L 770 454 Q 756 479 721 457 C 683 433 636 411 590 401 C 537 391 482 373 439 358 C 394 344 346 354 272 359 C 277 290 288 236 304 163 C 314 100 324 47 337 20 Z";
+const RIA_AVATAR_MARKUP=`<svg class="ma-mascot-art" viewBox="0 0 1122 1402" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Avatar ilustrado RIA, sorrindo e levantando a bandeira verde com a mão direita">
+ <defs>
+  <clipPath id="maRiaFlagCloth"><path d="${RIA_FLAG_CONTOUR}"/></clipPath>
+  <mask id="maRiaPortraitWithoutCloth" x="0" y="0" width="1122" height="1402" maskUnits="userSpaceOnUse">
+   <rect width="1122" height="1402" fill="white"/><path d="${RIA_FLAG_CONTOUR}" fill="black"/>
+  </mask>
+ </defs>
+ <image href="./assets/avatar-parcial-ria.avif?v=1" x="0" y="0" width="1122" height="1402" mask="url(#maRiaPortraitWithoutCloth)"/>
+ <g class="ma-ria-flag-wave">
+  <image href="./assets/avatar-parcial-ria.avif?v=1" x="0" y="0" width="1122" height="1402" clip-path="url(#maRiaFlagCloth)"/>
+ </g>
+</svg>`;
+
 function ensure(){
  if(node)return node;
  const root=el("appShell");if(!root)return null;
@@ -35,7 +52,7 @@ function ensure(){
  node.setAttribute("role","region");
  node.setAttribute("aria-label","Lembrete de atualização da parcial");
  node.innerHTML='<button type="button" id="maMascotToggle" class="ma-mascot-portrait" aria-label="Recolher lembrete de parcial" aria-expanded="true">'+
-   '<img src="./assets/parcial-mascote-ria.svg?v=2" alt="Avatar ilustrado original de cabelos longos e blusa branca, com bandeira verde RIA animada" draggable="false"></button>'+
+   RIA_AVATAR_MARKUP+'</button>'+
    '<div class="ma-mascot-message" id="maMascotMessage" role="status" aria-live="polite">'+
      '<span class="ma-mascot-tag">PARCIAL PENDENTE</span>'+
      '<strong>Hora de atualizar<br><em>parcial, time!</em></strong>'+
