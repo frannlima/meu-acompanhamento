@@ -35,7 +35,7 @@ function ensure(){
  node.setAttribute("role","region");
  node.setAttribute("aria-label","Lembrete de atualização da parcial");
  node.innerHTML='<button type="button" id="maMascotToggle" class="ma-mascot-portrait" aria-label="Recolher lembrete de parcial" aria-expanded="true">'+
-   '<img src="./assets/parcial-mascote-ria.svg" alt="Avatar com bandeira verde e o logo oficial RIA" draggable="false"></button>'+
+   '<img src="./assets/parcial-mascote-ria.svg?v=2" alt="Avatar ilustrado original de cabelos longos e blusa branca, com bandeira verde RIA animada" draggable="false"></button>'+
    '<div class="ma-mascot-message" id="maMascotMessage" role="status" aria-live="polite">'+
      '<span class="ma-mascot-tag">PARCIAL PENDENTE</span>'+
      '<strong>Hora de atualizar<br><em>parcial, time!</em></strong>'+
