@@ -30,6 +30,9 @@ jobs:
           node --check cockpit-share-v1.js
           node --check sales-curve-tech-v1.js
           node --check group-impact-interactive-v1.js
+          node --check ma3-group-live-v1.js
+          node --check ma3-faithful-v1.js
+          node --test tests/ma3-group-live.test.cjs
           node --check clarity-v1.js
           node --test tests/group-impact-interactive.test.cjs
           node --test tests/sales-curve-tech.test.cjs
@@ -55,6 +58,7 @@ jobs:
               "same cockpit source": "getShareText:" in cockpit and "getShareData:" in cockpit,
               "curve tech JS and CSS": "sales-curve-tech-v1.js" in html and "sales-curve-tech-v1.css" in html,
               "groups interactive mobile": "group-impact-interactive-v1.js" in html and "group-impact-interactive-v1.css" in html,
+              "live card replaces preview": "ma3-group-live-v1.js" in html and "ma3-group-live-v1.css" in html,
           }
           for name, ok in checks.items():
               if not ok:
@@ -140,7 +144,7 @@ jobs:
                       raise RuntimeError("O script principal do PWA nao foi atualizado")
                   if 'document.documentElement.classList.add("ma-booting")' not in js or 'window.renderMA3()' not in js:
                       raise RuntimeError("Sincronizacao da interface na abertura nao publicada")
-                  for asset in ("styles.css", "responsive-device-v1.css", "cockpit-vendas-v1.js", "cockpit-vendas-v1.css", "cockpit-share-v1.js", "sales-curve-tech-v1.js", "sales-curve-tech-v1.css"):
+                  for asset in ("styles.css", "responsive-device-v1.css", "cockpit-vendas-v1.js", "cockpit-vendas-v1.css", "cockpit-share-v1.js", "sales-curve-tech-v1.js", "sales-curve-tech-v1.css", "ma3-group-live-v1.js", "ma3-group-live-v1.css"):
                       url = next((x for x in re.findall(r'(?:src|href)="(\./[^"]+)"', html) if x.startswith("./" + asset + "?")), None)
                       if not url or ("build=" + build) not in url:
                           raise RuntimeError("Asset nao versionado: " + asset)

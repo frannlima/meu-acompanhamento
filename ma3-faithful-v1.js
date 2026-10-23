@@ -217,7 +217,7 @@ function render(){
  if(obj.chart)obj.chart.hidden=!show;
  if(obj.preview)obj.preview.hidden=!show;
  const actions=$("ma3Actions");if(actions)actions.hidden=!show;
- if(show){decorateChart(data,obj.chart);previewImage();}
+ if(show){decorateChart(data,obj.chart);previewImage();window.maGroupLivePanel?.render();}
 }
 function enqueue(){
  if(renderQueued)return;
