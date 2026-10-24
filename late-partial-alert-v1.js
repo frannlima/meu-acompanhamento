@@ -4,6 +4,7 @@
 const STREET=new Set(["084","113","146"]);
 const $alert=id=>document.getElementById(id);
 const TITLE=document.title;
+const ALERT_VERSION="v4";
 let timer=0,flash=0,notifyAt=0,seen="",busy=false,simulate=false,shakeTimer=0;
 const key=type=>"ma_atraso_"+type+"_"+state.storeCode+"_"+localDate();
 const saved=k=>{try{return localStorage.getItem(key(k))}catch(_){return null}};
@@ -22,8 +23,8 @@ function evaluate(now=new Date()){
   if(t.date!==localDate()||t.clock<open||t.clock>=close||(isStreet&&dayOfWeek==="Sun"))return null;
   const opened=Date.parse(t.date+"T00:00:00-03:00")+open*60000;
   const last=Date.parse(state.day?.captured_at||"");
-  const valid=Boolean(state.day?.has_input)&&Number.isFinite(last)&&last>=opened&&last<=now.getTime();
-  const minutes=Math.floor((now.getTime()-(valid?last:opened))/60000);
+  const valid=state.day?.has_input!==false&&Number.isFinite(last)&&last>=opened&&last<=now.getTime();
+  const minutes=Math.max(0,Math.floor((now.getTime()-(valid?last:opened))/60000));
   const stale=minutes>=70;
   const notShared=valid&&minutes>=15&&saved("shared")!==String(state.day.captured_at);
   return {stale,notShared,minutes,last:valid?last:null,active:stale||notShared,
@@ -31,8 +32,7 @@ function evaluate(now=new Date()){
 }
 function ensure(){
   let box=$alert("maLateAlert");
-  if(box)return box;
-  const root=$alert("appShell");if(!root)return null;
+  if(box){if(box.parentNode!==document.body)document.body.appendChild(box);return box;}
   box=document.createElement("aside");box.id="maLateAlert";box.className="ma-late-alert";box.hidden=true;
   box.setAttribute("role","status");box.setAttribute("aria-live","polite");
   box.innerHTML='<div class="ma-late-line"><b class="ma-late-icon">!</b><div><strong id="maLateTitle"></strong><p id="maLateMessage"></p></div>'+
@@ -41,7 +41,7 @@ function ensure(){
     '<button id="maLateDone" type="button">✓ Já compartilhei</button>'+
     '<button id="maLateNotif" type="button">🔔 Ativar notificações</button></div>'+
     '<small>Atualização: 60 min + 10 min de tolerância • Compartilhamento: 15 min após o input</small>';
-  root.appendChild(box);
+  document.body.appendChild(box);
   $alert("maLateSnooze").onclick=()=>{store("snooze",Date.now()+600000);render()};
   $alert("maLateInput").onclick=()=>{setSection("inicio");if(typeof showPaste==="function")showPaste()};
   $alert("maLateDone").onclick=()=>window.confirmarCompartilhamentoParcial();
@@ -90,12 +90,16 @@ function stopScreenShake(){
   document.body.classList.remove("ma-screen-shaking");
 }
 function canScreenShake(){
+  // O app mantém .modal no DOM, mas esconde o elemento PAI .overlay.
+  // Consultar apenas a classe da modal fazia esta verificação ser sempre falsa.
+  const anyVisibleDialog=Array.from(document.querySelectorAll(".overlay, [role='dialog']"))
+    .some(el=>el.getClientRects().length>0&&getComputedStyle(el).visibility!=="hidden");
   return document.visibilityState==="visible" &&
-    window.matchMedia("(min-width: 900px) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches &&
+    window.matchMedia("(min-width: 800px) and (prefers-reduced-motion: no-preference)").matches &&
     !document.documentElement.classList.contains("ma-booting") &&
     !$alert("appShell")?.classList.contains("hidden") &&
     !document.activeElement?.matches("input, textarea, select, [contenteditable='true']") &&
-    !document.querySelector(".modal:not(.hidden), [role='dialog']:not([hidden]):not(.hidden)");
+    !anyVisibleDialog;
 }
 function shakeIfOverdue(s){
   if(!simulate&&(!s||!s.stale))return;
@@ -104,10 +108,10 @@ function shakeIfOverdue(s){
   const now=Date.now();
   if(!simulate){
     let last={};
-    try{last=JSON.parse(saved("screen")||"{}")||{}}catch(_){}
+    try{last=JSON.parse(saved("screen_"+ALERT_VERSION)||"{}")||{}}catch(_){}
     if(last.token===token&&now-Number(last.at||0)<SHAKE_EVERY_MS)return;
     // Evita disparos em sequência após recarga ou em abas do mesmo computador.
-    store("screen",JSON.stringify({token,at:now}));
+    store("screen_"+ALERT_VERSION,JSON.stringify({token,at:now}));
   }
   const root=$alert("appShell");if(!root)return;
   stopScreenShake();
@@ -120,7 +124,8 @@ const elapsedLabel=minutes=>Math.floor(minutes/60)+"h "+String(minutes%60).padSt
 
 function render(){
   const box=ensure();if(!box)return;
-  const s=evaluate(),visible=(simulate||s?.active)&&Date.now()>=Number(saved("snooze")||0);
+  let s=null;try{s=evaluate()}catch(err){console.warn("[Meu Acompanhamento] Falha ao avaliar alerta",err)}
+  const visible=(simulate||s?.active)&&Date.now()>=Number(saved("snooze")||0);
   box.hidden=!visible;tabAlert(!!visible);
   if(!visible){seen="";stopScreenShake();return}
   const label=simulate?"Simulação do alerta de atualização":(s.stale?"⚠ PARCIAL ATRASADA • LOJA "+s.store:"Compartilhamento pendente • Loja "+s.store);
@@ -132,6 +137,8 @@ function render(){
   $alert("maLateInput").hidden=!simulate&&!s.stale;
   $alert("maLateDone").hidden=!simulate&&!s.notShared;
   $alert("maLateNotif").hidden=!("Notification" in window)||Notification.permission!=="default";
+  box.dataset.store=s?.store||String(state.storeCode||"");
+  box.dataset.status=simulate?"test":s?.stale?"late":"share";
   // Repetição controlada a cada 15 minutos, sem sacudir campos em edição.
   shakeIfOverdue(s);
   const next=simulate?"test":s.store+"|"+s.stamp+"|"+s.stale+"|"+s.notShared;
@@ -163,10 +170,12 @@ async function poll(){
   finally{busy=false;render()}
 }
 function init(){
-  ensure();if(timer)return;timer=setInterval(render,30000);
-  setInterval(poll,120000);
+  ensure();if(timer)return;timer=setInterval(render,15000);
+  setInterval(poll,60000);
   document.addEventListener("visibilitychange",()=>{if(document.hidden)stopScreenShake();render();if(!document.hidden)poll()});
   document.addEventListener("ma:dashboard-ready",render);
+  window.addEventListener("focus",()=>{render();poll()});
+  window.addEventListener("pageshow",render);
   window.addEventListener("storage",e=>{if(e.key?.startsWith("ma_atraso_"))render()});
   render();
 }
