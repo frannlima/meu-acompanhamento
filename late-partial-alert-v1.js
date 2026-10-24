@@ -4,7 +4,7 @@
 const STREET=new Set(["084","113","146"]);
 const $alert=id=>document.getElementById(id);
 const TITLE=document.title;
-let timer=0,flash=0,notifyAt=0,seen="",busy=false,simulate=false;
+let timer=0,flash=0,notifyAt=0,seen="",busy=false,simulate=false,shakeTimer=0;
 const key=type=>"ma_atraso_"+type+"_"+state.storeCode+"_"+localDate();
 const saved=k=>{try{return localStorage.getItem(key(k))}catch(_){return null}};
 const store=(k,v)=>{try{localStorage.setItem(key(k),String(v))}catch(_){}};
@@ -22,7 +22,7 @@ function evaluate(now=new Date()){
   if(t.date!==localDate()||t.clock<open||t.clock>=close||(isStreet&&dayOfWeek==="Sun"))return null;
   const opened=Date.parse(t.date+"T00:00:00-03:00")+open*60000;
   const last=Date.parse(state.day?.captured_at||"");
-  const valid=Number.isFinite(last)&&last>=opened&&last<=now.getTime();
+  const valid=Boolean(state.day?.has_input)&&Number.isFinite(last)&&last>=opened&&last<=now.getTime();
   const minutes=Math.floor((now.getTime()-(valid?last:opened))/60000);
   const stale=minutes>=70;
   const notShared=valid&&minutes>=15&&saved("shared")!==String(state.day.captured_at);
@@ -36,8 +36,8 @@ function ensure(){
   box=document.createElement("aside");box.id="maLateAlert";box.className="ma-late-alert";box.hidden=true;
   box.setAttribute("role","status");box.setAttribute("aria-live","polite");
   box.innerHTML='<div class="ma-late-line"><b class="ma-late-icon">!</b><div><strong id="maLateTitle"></strong><p id="maLateMessage"></p></div>'+
-    '<button id="maLateSnooze" type="button" title="Lembrar em 10 minutos">×</button></div>'+
-    '<div class="ma-late-actions"><button id="maLateInput" type="button">＋ Atualizar venda</button>'+
+    '<button id="maLateSnooze" type="button" title="Adiar alerta por 10 minutos" aria-label="Adiar alerta por 10 minutos">×</button></div>'+
+    '<div class="ma-late-actions"><button id="maLateInput" type="button">＋ ATUALIZAR PARCIAL AGORA</button>'+
     '<button id="maLateDone" type="button">✓ Já compartilhei</button>'+
     '<button id="maLateNotif" type="button">🔔 Ativar notificações</button></div>'+
     '<small>Atualização: 60 min + 10 min de tolerância • Compartilhamento: 15 min após o input</small>';
@@ -81,20 +81,59 @@ async function systemNotify(s){
     else new Notification("Alerta de parcial • Loja "+s.store,options);
   }catch(_){}
 }
+
+/* Só a página do aplicativo pode tremer. O monitor físico e outras janelas não se movem. */
+const SHAKE_EVERY_MS=15*60*1000;
+function stopScreenShake(){
+  if(shakeTimer){clearTimeout(shakeTimer);shakeTimer=0;}
+  $alert("appShell")?.classList.remove("ma-screen-shake");
+  document.body.classList.remove("ma-screen-shaking");
+}
+function canScreenShake(){
+  return document.visibilityState==="visible" &&
+    window.matchMedia("(min-width: 900px) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches &&
+    !document.documentElement.classList.contains("ma-booting") &&
+    !$alert("appShell")?.classList.contains("hidden") &&
+    !document.activeElement?.matches("input, textarea, select, [contenteditable='true']") &&
+    !document.querySelector(".modal:not(.hidden), [role='dialog']:not([hidden]):not(.hidden)");
+}
+function shakeIfOverdue(s){
+  if(!simulate&&(!s||!s.stale))return;
+  if(!canScreenShake())return;
+  const token=simulate?"simulacao":s.store+"|"+s.stamp;
+  const now=Date.now();
+  if(!simulate){
+    let last={};
+    try{last=JSON.parse(saved("screen")||"{}")||{}}catch(_){}
+    if(last.token===token&&now-Number(last.at||0)<SHAKE_EVERY_MS)return;
+    // Evita disparos em sequência após recarga ou em abas do mesmo computador.
+    store("screen",JSON.stringify({token,at:now}));
+  }
+  const root=$alert("appShell");if(!root)return;
+  stopScreenShake();
+  void root.offsetWidth;
+  root.classList.add("ma-screen-shake");
+  document.body.classList.add("ma-screen-shaking");
+  shakeTimer=setTimeout(stopScreenShake,2000);
+}
+const elapsedLabel=minutes=>Math.floor(minutes/60)+"h "+String(minutes%60).padStart(2,"0")+"min";
+
 function render(){
   const box=ensure();if(!box)return;
   const s=evaluate(),visible=(simulate||s?.active)&&Date.now()>=Number(saved("snooze")||0);
   box.hidden=!visible;tabAlert(!!visible);
-  if(!visible){seen="";return}
-  const label=simulate?"Simulação de alerta":("Parcial pendente • Loja "+s.store);
-  const message=simulate?"Teste visual: as metas e os registros não foram alterados.":
-    (s.stale?(s.last?"Última atualização há ":"Sem primeiro lançamento há ")+s.minutes+" minutos. ":"")+
+  if(!visible){seen="";stopScreenShake();return}
+  const label=simulate?"Simulação do alerta de atualização":(s.stale?"⚠ PARCIAL ATRASADA • LOJA "+s.store:"Compartilhamento pendente • Loja "+s.store);
+  const message=simulate?"Teste visual: nenhuma venda, meta ou registro foi alterado.":
+    (s.stale?(s.last?"Tempo desde a última parcial: ":"Sem a primeira parcial há ")+elapsedLabel(s.minutes)+". Atualize a venda da loja. ":"")+
     (s.notShared?"Compartilhamento não confirmado neste dispositivo.":"");
   $alert("maLateTitle").textContent=label;
   $alert("maLateMessage").textContent=message;
   $alert("maLateInput").hidden=!simulate&&!s.stale;
   $alert("maLateDone").hidden=!simulate&&!s.notShared;
   $alert("maLateNotif").hidden=!("Notification" in window)||Notification.permission!=="default";
+  // Repetição controlada a cada 15 minutos, sem sacudir campos em edição.
+  shakeIfOverdue(s);
   const next=simulate?"test":s.store+"|"+s.stamp+"|"+s.stale+"|"+s.notShared;
   if(seen===next)return;
   seen=next;box.classList.remove("ma-late-shake");void box.offsetWidth;box.classList.add("ma-late-shake");
@@ -126,7 +165,8 @@ async function poll(){
 function init(){
   ensure();if(timer)return;timer=setInterval(render,30000);
   setInterval(poll,120000);
-  document.addEventListener("visibilitychange",()=>{render();if(!document.hidden)poll()});
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)stopScreenShake();render();if(!document.hidden)poll()});
+  document.addEventListener("ma:dashboard-ready",render);
   window.addEventListener("storage",e=>{if(e.key?.startsWith("ma_atraso_"))render()});
   render();
 }
