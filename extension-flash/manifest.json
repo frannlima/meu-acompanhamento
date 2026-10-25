@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Meu Acompanhamento — Flash",
-  "version": "0.3.0",
-  "description": "Coleta de indicadores Flash na sessão aberta: lojas, grupos, produtos e trocas.",
+  "version": "0.4.0",
+  "description": "Coleta automática de vendas Flash e indicadores para o Meu Acompanhamento, a cada 5 minutos.",
   "permissions": [
     "activeTab",
     "scripting",
