@@ -3,37 +3,43 @@
  'use strict';
  const core=window.MAFlashCore,endpoint='https://vvgejviwvtnlahbyopah.supabase.co/functions/v1/flash-sync';
  const publicKey='sb_publishable_XBa55FcPfePH_roJs2ejHg_KK9lV0R6';
- let packet=null,hourly=null,identity='',history=[],filter='',sort='total',syncStatus='Coleta local; sincronização não ativada.',lastPoll=0,busy=false;
+ let packet=null,hourly=null,identity='',history=[],filter='',sort='total',syncStatus='Coleta local; sincronização não ativada.',lastPoll=0,busy=false,saving=false,retryPending=false,lastShareAt=0;
  const admin=()=>state.logged&&state.role==='administrador',allowed=()=>!!state.logged;
  const money=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),escape=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const percent=v=>v===null?'—':v.toLocaleString('pt-BR',{maximumFractionDigits:2})+'%';
  const time=iso=>new Date(iso).toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'});
- function token(){try{const a=JSON.parse(sessionStorage.getItem('ria_secure_auth')||'null');return a?.expires_at>Date.now()?a.access_token:null}catch{return null}}
+ async function token(){return await window.maFlashAuth?.getToken?.()||null}
  async function cloud(action,payload={}){
-  const jwt=token();if(!jwt)throw Error('Confirme seu e-mail para sincronizar.');
+  const jwt=await token();if(!jwt)throw Error('Confirme seu e-mail para sincronizar.');
   const r=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json',apikey:publicKey,Authorization:'Bearer '+jwt},body:JSON.stringify({action,...payload,matricula:state.matricula})});
   const b=await r.json();if(!r.ok)throw Error(b.error||'Falha na sincronização.');return b.data;
  }
  function rows(){return (packet?.rows||[]).filter(r=>(admin()||r.store===String(state.storeCode).padStart(3,'0'))&&(!filter||r.store===filter));}
  function record(next){
-  packet=next;
+  if(packet?.business_date===next.business_date&&Date.parse(packet.collected_at)>Date.parse(next.collected_at))return;
+  packet=next;retryPending=true;
   const prior=history.find(p=>p.collected_at===next.collected_at&&p.business_date===next.business_date);if(!prior)history.unshift(next);
   history=history.sort((a,b)=>Date.parse(b.collected_at)-Date.parse(a.collected_at)).slice(0,96);paint();document.dispatchEvent(new CustomEvent('ma:flash-update'));
  }
  async function sharePacket(){
-  if(!packet||!admin())return;
-  if(!token()){syncStatus='Flash recebido localmente. Confirme seu e-mail para sincronizar o share eStore.';paint();return;}
+  if(!packet||!admin()||saving)return;
+  retryPending=true;
+  const jwt=await token();
+  if(!jwt){syncStatus='Flash recebido no app. Para publicar automaticamente entre computadores, confirme seu e-mail autorizado uma única vez por sessão.';paint();return;}
+  saving=true;const requested=packet;lastShareAt=Date.now();
   try{
-    const result=await cloud('save',{packet});
+    const result=await cloud('save',{packet:requested});
     const bridge=result?.estore_sync;
+    retryPending=!bridge?.ok;
     syncStatus=bridge?.ok
-      ?'Flash salvo e sincronizado com o eStore: '+bridge.coverage+'/18 filiais • atualização '+(bridge.updated||0)+'.'
-      :'Coleta Flash salva. Share eStore pendente: '+String(bridge?.reason||'tente salvar novamente.');
-  }catch(e){syncStatus='Flash não sincronizado: '+e.message+'. Use Salvar coleta compartilhada para tentar novamente.';}
-  paint();
+      ?'Sincronizado automaticamente: '+Number(bridge.coverage||0)+'/18 filiais no eStore • coleta '+time(requested.collected_at)+'.'
+      :'Flash salvo no histórico. Integração eStore pendente: '+String(bridge?.reason||'será tentada novamente.');
+    if(packet?.collected_at!==requested.collected_at)retryPending=true;
+  }catch(e){retryPending=true;syncStatus='Flash exibido localmente. Sincronização pendente: '+e.message+'. Nova tentativa automática.';}
+  finally{saving=false;paint();}
  }
  async function loadShared(){
-  if(!allowed()||!token()||busy)return;busy=true;const who=identity;
+  if(!allowed()||busy||!await token())return;busy=true;const who=identity;
   try{const data=await cloud('history',{business_date:localDate()});if(who!==identity)return;
    if(data.length){const valid=data.map(core.validate);history=valid;const newest=valid[0];if(!packet||Date.parse(newest.collected_at)>Date.parse(packet.collected_at))packet=newest;}
    syncStatus=data.length?'Histórico compartilhado carregado.':'Nenhuma coleta compartilhada para hoje.';paint();document.dispatchEvent(new CustomEvent('ma:flash-update'));
@@ -64,10 +70,10 @@
    const style=document.createElement('style');style.textContent='.flash-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0}.flash-kpi{padding:16px;border:1px solid #DAD9D6;border-radius:14px;background:#fff}.flash-kpi span{display:block;font-size:12px;color:#466964}.flash-kpi strong{display:block;font-size:22px;color:#173f35;margin-top:6px}.flash-tools{display:flex;gap:18px;flex-wrap:wrap;margin:16px 0}.flash-tools select{padding:10px;border-radius:8px}.flash-table th,.flash-table td{font-size:12px!important;padding:12px!important;white-space:nowrap}.flash-table thead th{background:#173f35!important;color:white!important}.flash-late{color:#a34424}.flash-auth{margin:14px 0}.flash-auth input{padding:10px;max-width:100%}';document.head.append(style);
    const section=document.createElement('section');section.id='section-flash-pilot';section.className='section';section.innerHTML='<div class="section-head"><div><span class="eyebrow">FLASH • RESULTADO DAS LOJAS</span><h1>Flash • Gestão do dia</h1><p>Vendas das lojas, grupos, produtos e trocas.</p></div><button id="flashPilotClear" class="btn secondary">Limpar coleta local</button></div><section class="card"><div class="section-actions"><button id="flashSharedLoad" class="btn secondary">Consultar histórico compartilhado</button><button id="flashSharedSave" class="btn secondary">Salvar coleta compartilhada</button></div><details class="flash-auth"><summary>Confirmar e-mail para sincronização</summary><p>Use um e-mail vinculado à sua matrícula pelo administrador. A confirmação é exclusiva para as coletas Flash.</p><form id="flashEmailForm"><input name="email" type="email" required placeholder="E-mail autorizado" autocomplete="email"><button class="btn secondary">Enviar código</button></form><form id="flashOtpForm" hidden><input name="code" inputmode="numeric" autocomplete="one-time-code" required placeholder="Código recebido"><button class="btn secondary">Confirmar código</button></form><p id="flashAuthStatus" role="status"></p></details><div id="flashPilotBody" aria-live="polite"></div></section>';main.append(section);
    document.getElementById('flashPilotClear').onclick=()=>{packet=null;history=[];paint();document.dispatchEvent(new CustomEvent('ma:flash-clear'));};
-   document.getElementById('flashSharedLoad').onclick=loadShared;document.getElementById('flashSharedSave').onclick=()=>{if(!token()){syncStatus='Confirme seu e-mail para salvar a coleta.';paint();}else sharePacket();};
+   document.getElementById('flashSharedLoad').onclick=loadShared;document.getElementById('flashSharedSave').onclick=()=>{sharePacket();};
    let email='';const authStatus=document.getElementById('flashAuthStatus');
    document.getElementById('flashEmailForm').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');button.disabled=true;email=new FormData(e.target).get('email').toString().trim().toLowerCase();try{const r=await fetch('https://vvgejviwvtnlahbyopah.supabase.co/auth/v1/otp',{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},body:JSON.stringify({email,create_user:true})});if(!r.ok)throw Error('Não foi possível enviar o código.');document.getElementById('flashOtpForm').hidden=false;authStatus.textContent='Confira o código no e-mail. O acesso depende do vínculo administrativo.';}catch(e){authStatus.textContent=e.message}finally{button.disabled=false}};
-   document.getElementById('flashOtpForm').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');button.disabled=true;try{const r=await fetch('https://vvgejviwvtnlahbyopah.supabase.co/auth/v1/verify',{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},body:JSON.stringify({email,token:new FormData(e.target).get('code'),type:'email'})});const b=await r.json();if(!r.ok||!b.access_token)throw Error('Código inválido ou expirado.');sessionStorage.setItem('ria_secure_auth',JSON.stringify({access_token:b.access_token,expires_at:Date.now()+(b.expires_in-60)*1000}));authStatus.textContent='E-mail confirmado. Sincronizando a coleta Flash aberta...';await loadShared();if(packet&&packet.business_date===localDate()){await sharePacket();authStatus.textContent=syncStatus;}else{authStatus.textContent='E-mail confirmado. Faça uma coleta Flash de hoje para sincronizar o eStore.';}document.dispatchEvent(new CustomEvent('ma:flash-auth-ready'));}catch(e){authStatus.textContent=e.message}finally{button.disabled=false}};
+   document.getElementById('flashOtpForm').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');button.disabled=true;try{const r=await fetch('https://vvgejviwvtnlahbyopah.supabase.co/auth/v1/verify',{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},body:JSON.stringify({email,token:new FormData(e.target).get('code'),type:'email'})});const b=await r.json();if(!r.ok||!b.access_token)throw Error('Código inválido ou expirado.');if(!window.maFlashAuth?.saveAuth?.(b))throw Error('Resposta de autenticação incompleta.');authStatus.textContent='E-mail confirmado. Sincronizando a coleta Flash aberta...';await loadShared();if(packet&&packet.business_date===localDate()){await sharePacket();authStatus.textContent=syncStatus;}else{authStatus.textContent='E-mail confirmado. Faça uma coleta Flash de hoje para sincronizar o eStore.';}document.dispatchEvent(new CustomEvent('ma:flash-auth-ready'));}catch(e){authStatus.textContent=e.message}finally{button.disabled=false}};
   }
   for(const parent of ['#nav','.mobile-more-grid','#section-mais']){const el=document.querySelector(parent);if(!el||el.querySelector('.ma-flash-entry'))continue;const b=document.createElement('button');b.type='button';b.className='btn secondary ma-flash-entry';b.textContent='Flash • Gestão do dia';b.onclick=()=>{if(allowed()){paint();setSection('flash-pilot');loadShared();}};el.append(b);}
  }
@@ -78,7 +84,7 @@
   try{sync();const next=core.validate(event.data.payload);const age=Date.now()-Date.parse(next.collected_at);if(age< -60000||age>900000)throw Error('Coleta expirada; colete novamente.');record(next);sharePacket();toast('Coleta Flash recebida.');ack(true);}catch(e){const h=document.getElementById('flashPilotBody');if(h)h.textContent='Coleta recusada: '+e.message;toast(e.message,true);ack(false,e.message);}
  });
  document.addEventListener('ma:estore-hourly-loaded',event=>{if(allowed()&&event.detail?.context?.date===localDate()&&String(event.detail.context.store).padStart(3,'0')===String(state.storeCode).padStart(3,'0')&&Array.isArray(event.detail.stores)){hourly=event.detail;paint();}});
- function sync(){mount();const next=state.logged?String(state.matricula)+':'+state.role+':'+state.storeCode:'';if(identity!==next){packet=null;hourly=null;history=[];filter='';identity=next;paint();}document.querySelectorAll('.ma-flash-entry').forEach(e=>{e.hidden=!allowed();e.classList.toggle('hidden',!allowed());});const save=document.getElementById('flashSharedSave');if(save)save.hidden=!admin();if(allowed()&&Date.now()-lastPoll>60000){lastPoll=Date.now();loadShared();if(state.section==='flash-pilot')paint();}}
+ function sync(){mount();const next=state.logged?String(state.matricula)+':'+state.role+':'+state.storeCode:'';if(identity!==next){packet=null;hourly=null;history=[];filter='';retryPending=false;identity=next;paint();}document.querySelectorAll('.ma-flash-entry').forEach(e=>{e.hidden=!allowed();e.classList.toggle('hidden',!allowed());});const save=document.getElementById('flashSharedSave');if(save)save.hidden=!admin();if(allowed()&&Date.now()-lastPoll>60000){lastPoll=Date.now();loadShared();if(state.section==='flash-pilot')paint();if(retryPending&&admin()&&!saving&&Date.now()-lastShareAt>60000)sharePacket();}}
  // Leitura somente da filial autorizada e da data atual; nunca mistura Flash com venda pura Web.
  window.getMA2FlashSnapshot=function(){
   if(!allowed()||!packet||packet.business_date!==localDate())return null;
