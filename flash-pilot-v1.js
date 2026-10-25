@@ -95,7 +95,7 @@
   const main=document.querySelector('#appShell main');if(!main)return;
   if(!document.getElementById('section-flash-pilot')){
    const style=document.createElement('style');style.textContent='.ma-flash-live-strip{margin:14px 0;padding:15px 18px;border:1px solid #d7ded9;border-radius:15px;background:#f6f9f6;color:#173f35}.ma-flash-live-inner{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}.ma-flash-live-inner>div{display:grid;gap:4px}.ma-flash-live-label{font-size:11px;font-weight:800;letter-spacing:.08em}.ma-flash-live-inner strong{font-size:22px}.ma-flash-live-inner small{font-size:11px;color:#517067}.ma-flash-live-side{text-align:right}.ma-flash-good{font-size:12px;font-weight:800;color:#246b48}.ma-flash-wait{font-size:12px;font-weight:800;color:#ab5333}@media(max-width:680px){.ma-flash-live-side{text-align:left}}.flash-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0}.flash-kpi{padding:16px;border:1px solid #DAD9D6;border-radius:14px;background:#fff}.flash-kpi span{display:block;font-size:12px;color:#466964}.flash-kpi strong{display:block;font-size:22px;color:#173f35;margin-top:6px}.flash-tools{display:flex;gap:18px;flex-wrap:wrap;margin:16px 0}.flash-tools select{padding:10px;border-radius:8px}.flash-table th,.flash-table td{font-size:12px!important;padding:12px!important;white-space:nowrap}.flash-table thead th{background:#173f35!important;color:white!important}.flash-late{color:#a34424}.flash-auth{margin:14px 0}.flash-auth input{padding:10px;max-width:100%}';document.head.append(style);
-   const section=document.createElement('section');section.id='section-flash-pilot';section.className='section';section.innerHTML='<div class="section-head"><div><span class="eyebrow">FLASH • RESULTADO DAS LOJAS</span><h1>Flash • Gestão do dia</h1><p>Vendas das lojas, grupos, produtos e trocas.</p></div><button id="flashPilotClear" class="btn secondary">Limpar coleta local</button></div><section class="card"><div class="section-actions"><button id="flashSharedLoad" class="btn secondary">Consultar histórico compartilhado</button><button id="flashSharedSave" class="btn secondary">Salvar coleta compartilhada</button></div><details class="flash-auth"><summary>Confirmar e-mail para sincronização</summary><p>Use um e-mail vinculado à sua matrícula pelo administrador. A confirmação é exclusiva para as coletas Flash.</p><form id="flashEmailForm"><input name="email" type="email" required placeholder="E-mail autorizado" autocomplete="email"><button class="btn secondary">Enviar código</button></form><form id="flashOtpForm" hidden><input name="code" inputmode="numeric" autocomplete="one-time-code" required placeholder="Código recebido"><button class="btn secondary">Confirmar código</button></form><p id="flashAuthStatus" role="status"></p></details><div id="flashPilotBody" aria-live="polite"></div></section>';main.append(section);
+   const section=document.createElement('section');section.id='section-flash-pilot';section.className='section';section.innerHTML='<div class="section-head"><div><span class="eyebrow">FLASH • RESULTADO DAS LOJAS</span><h1>Flash • Gestão do dia</h1><p>Vendas das lojas, grupos, produtos e trocas.</p></div><button id="flashPilotClear" class="btn secondary">Limpar coleta local</button></div><section class="card"><div class="section-actions"><button id="flashSharedLoad" class="btn secondary">Consultar histórico compartilhado</button><button id="flashSharedSave" class="btn secondary">Salvar coleta compartilhada</button></div><details class="flash-auth"><summary>Confirmar e-mail para sincronização</summary><p>Use um e-mail vinculado à sua matrícula pelo administrador. A confirmação é exclusiva para as coletas Flash.</p><form id="flashEmailForm"><input name="email" type="email" required placeholder="E-mail autorizado" autocomplete="email"><button class="btn secondary">Enviar acesso por e-mail</button></form><form id="flashOtpForm" hidden><input name="code" inputmode="numeric" autocomplete="one-time-code" required placeholder="Código recebido"><button class="btn secondary">Confirmar código</button></form><p id="flashAuthStatus" role="status"></p></details><div id="flashPilotBody" aria-live="polite"></div></section>';main.append(section);
    document.getElementById('flashPilotClear').onclick=()=>{packet=null;history=[];paint();document.dispatchEvent(new CustomEvent('ma:flash-clear'));};
    document.getElementById('flashSharedLoad').onclick=loadShared;document.getElementById('flashSharedSave').onclick=()=>{sharePacket();};
 
@@ -103,6 +103,15 @@
    const authStatus=document.getElementById('flashAuthStatus');
    const emailForm=document.getElementById('flashEmailForm');
    const otpForm=document.getElementById('flashOtpForm');
+   document.addEventListener('ma:flash-auth-result',async event=>{
+     const r=event.detail;
+     if(!r)return;
+     setFlashAuthState(r.message,!r.ok);
+     if(r.ok){await loadShared();if(packet?.business_date===localDate())await sharePacket();}
+   });
+   if(window.maFlashAuth?.isConnected?.()){
+     setTimeout(async()=>{const valid=await token();if(valid)setFlashAuthState('A autenticação por e-mail está ativa nesta aba.');},250);
+   }
    const cleanResponse=async r=>{try{return await r.json()}catch(_){return{}}};
    const authError=(r,b)=>{
      const code=String(b?.error_code||b?.code||'');
@@ -131,12 +140,12 @@
        const redirect=encodeURIComponent('https://frannlima.github.io/meu-acompanhamento/');
        const r=await fetch('https://vvgejviwvtnlahbyopah.supabase.co/auth/v1/otp?redirect_to='+redirect,{
          method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},
-         body:JSON.stringify({email,create_user:true}),cache:'no-store'
+         body:JSON.stringify({email,create_user:false}),cache:'no-store'
        });
        const body=await cleanResponse(r);
        if(!r.ok)throw Error(authError(r,body));
        otpForm.hidden=false;
-       setFlashAuthState('Solicitação aceita. Confira o e-mail e a caixa de spam. Para receber um código numérico, o template “Magic Link / OTP” do Supabase precisa conter {{ .Token }}. Se chegar apenas um link, o modelo de e-mail ainda não está configurado para códigos.');
+       setFlashAuthState('Solicitação aceita. Abra o e-mail recebido e clique no link de acesso. Se o e-mail contiver um código numérico, você também pode digitá-lo abaixo. A conclusão pelo link depende do endereço do app estar autorizado nas configurações de redirecionamento do Supabase.');
      }catch(err){setFlashAuthState(String(err?.message||'Não foi possível solicitar autenticação.'),true)}
      finally{button.disabled=false}
    };
