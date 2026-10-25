@@ -94,6 +94,36 @@ jobs:
           sw_path.write_text(sw.replace("__BUILD_ID__", build), encoding="utf-8")
           print("Published PWA build:", build, "versioned assets:", count)
           PY
+      - name: Validar e empacotar a extensão Flash 0.4.0
+        run: |
+          node --check flash-auth-session-v1.js
+          node --check flash-pilot-v1.js
+          node --check flash-details-v1.js
+          node --check extension-flash/background.js
+          node --check extension-flash/popup.js
+          node --check extension-flash/transfer.js
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, zipfile
+          root = Path("extension-flash")
+          manifest = json.loads((root/"manifest.json").read_text(encoding="utf-8"))
+          if manifest["version"] != "0.4.0":
+              raise SystemExit("Versão da extensão divergente")
+          required = ["manifest.json","background.js","popup.js","popup.html","capture.js","transfer.js","flash-core-v1.js","flash-detail-core-v1.js"]
+          for filename in required:
+              if not (root/filename).is_file():
+                  raise SystemExit("Extensão incompleta: " + filename)
+          filename = Path("extension-flash-v0.4.0.zip")
+          with zipfile.ZipFile(filename, "w", zipfile.ZIP_DEFLATED) as z:
+              for file in sorted(root.iterdir()):
+                  if file.is_file():
+                      z.write(file, arcname="extension-flash/" + file.name)
+          with zipfile.ZipFile(filename) as z:
+              for item in required:
+                  if "extension-flash/" + item not in z.namelist():
+                      raise SystemExit("ZIP não inclui: " + item)
+          print("Extensão pronta:", filename, filename.stat().st_size, "bytes")
+          PY
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
