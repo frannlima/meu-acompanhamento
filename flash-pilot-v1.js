@@ -98,9 +98,69 @@
    const section=document.createElement('section');section.id='section-flash-pilot';section.className='section';section.innerHTML='<div class="section-head"><div><span class="eyebrow">FLASH • RESULTADO DAS LOJAS</span><h1>Flash • Gestão do dia</h1><p>Vendas das lojas, grupos, produtos e trocas.</p></div><button id="flashPilotClear" class="btn secondary">Limpar coleta local</button></div><section class="card"><div class="section-actions"><button id="flashSharedLoad" class="btn secondary">Consultar histórico compartilhado</button><button id="flashSharedSave" class="btn secondary">Salvar coleta compartilhada</button></div><details class="flash-auth"><summary>Confirmar e-mail para sincronização</summary><p>Use um e-mail vinculado à sua matrícula pelo administrador. A confirmação é exclusiva para as coletas Flash.</p><form id="flashEmailForm"><input name="email" type="email" required placeholder="E-mail autorizado" autocomplete="email"><button class="btn secondary">Enviar código</button></form><form id="flashOtpForm" hidden><input name="code" inputmode="numeric" autocomplete="one-time-code" required placeholder="Código recebido"><button class="btn secondary">Confirmar código</button></form><p id="flashAuthStatus" role="status"></p></details><div id="flashPilotBody" aria-live="polite"></div></section>';main.append(section);
    document.getElementById('flashPilotClear').onclick=()=>{packet=null;history=[];paint();document.dispatchEvent(new CustomEvent('ma:flash-clear'));};
    document.getElementById('flashSharedLoad').onclick=loadShared;document.getElementById('flashSharedSave').onclick=()=>{sharePacket();};
-   let email='';const authStatus=document.getElementById('flashAuthStatus');
-   document.getElementById('flashEmailForm').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');button.disabled=true;email=new FormData(e.target).get('email').toString().trim().toLowerCase();try{const r=await fetch('https://vvgejviwvtnlahbyopah.supabase.co/auth/v1/otp',{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},body:JSON.stringify({email,create_user:true})});if(!r.ok)throw Error('Não foi possível enviar o código.');document.getElementById('flashOtpForm').hidden=false;authStatus.textContent='Confira o código no e-mail. O acesso depende do vínculo administrativo.';}catch(e){authStatus.textContent=e.message}finally{button.disabled=false}};
-   document.getElementById('flashOtpForm').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');button.disabled=true;try{const r=await fetch('https://vvgejviwvtnlahbyopah.supabase.co/auth/v1/verify',{method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},body:JSON.stringify({email,token:new FormData(e.target).get('code'),type:'email'})});const b=await r.json();if(!r.ok||!b.access_token)throw Error('Código inválido ou expirado.');if(!window.maFlashAuth?.saveAuth?.(b))throw Error('Resposta de autenticação incompleta.');authStatus.textContent='E-mail confirmado. Sincronizando a coleta Flash aberta...';await loadShared();if(packet&&packet.business_date===localDate()){await sharePacket();authStatus.textContent=syncStatus;}else{authStatus.textContent='E-mail confirmado. Faça uma coleta Flash de hoje para sincronizar o eStore.';}document.dispatchEvent(new CustomEvent('ma:flash-auth-ready'));}catch(e){authStatus.textContent=e.message}finally{button.disabled=false}};
+
+   let email='';
+   const authStatus=document.getElementById('flashAuthStatus');
+   const emailForm=document.getElementById('flashEmailForm');
+   const otpForm=document.getElementById('flashOtpForm');
+   const cleanResponse=async r=>{try{return await r.json()}catch(_){return{}}};
+   const authError=(r,b)=>{
+     const code=String(b?.error_code||b?.code||'');
+     if(r.status===429||code==='over_email_send_rate_limit')
+       return 'Envio temporariamente bloqueado pelo limite de e-mails do Supabase (erro 429). Não insista agora: aguarde a liberação do limite do projeto. Para mais envios, configure SMTP próprio.';
+     if(code==='over_request_rate_limit')
+       return 'Muitas solicitações consecutivas. Aguarde antes de tentar novamente.';
+     if(code==='email_address_not_authorized')
+       return 'O servidor de e-mail do Supabase restringiu o destinatário. Verifique a configuração SMTP ou a lista de destinatários permitidos.';
+     if(r.status===400||r.status===422)return 'Não foi possível processar o pedido: '+String(b?.msg||b?.error_description||b?.message||b?.error||'verifique a configuração de autenticação.').slice(0,180);
+     return 'Serviço de e-mail indisponível (HTTP '+r.status+'). Confira a configuração do Supabase antes de tentar novamente.';
+   };
+   function setFlashAuthState(message,warning=false){
+     authStatus.textContent=message;
+     authStatus.style.color=warning?'#a33342':'#246447';
+     authStatus.setAttribute('role','status');
+     authStatus.setAttribute('aria-live','polite');
+   }
+   emailForm.onsubmit=async e=>{
+     e.preventDefault();
+     const button=e.target.querySelector('button');button.disabled=true;
+     email=String(new FormData(e.target).get('email')||'').trim().toLowerCase();
+     try{
+       if(!email||!email.includes('@'))throw Error('Informe um e-mail válido.');
+       setFlashAuthState('Solicitando autenticação ao Supabase...');
+       const redirect=encodeURIComponent('https://frannlima.github.io/meu-acompanhamento/');
+       const r=await fetch('https://vvgejviwvtnlahbyopah.supabase.co/auth/v1/otp?redirect_to='+redirect,{
+         method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},
+         body:JSON.stringify({email,create_user:true}),cache:'no-store'
+       });
+       const body=await cleanResponse(r);
+       if(!r.ok)throw Error(authError(r,body));
+       otpForm.hidden=false;
+       setFlashAuthState('Solicitação aceita. Confira o e-mail e a caixa de spam. Para receber um código numérico, o template “Magic Link / OTP” do Supabase precisa conter {{ .Token }}. Se chegar apenas um link, o modelo de e-mail ainda não está configurado para códigos.');
+     }catch(err){setFlashAuthState(String(err?.message||'Não foi possível solicitar autenticação.'),true)}
+     finally{button.disabled=false}
+   };
+   otpForm.onsubmit=async e=>{
+     e.preventDefault();
+     const button=e.target.querySelector('button');button.disabled=true;
+     try{
+       const code=String(new FormData(e.target).get('code')||'').replace(/\s/g,'');
+       if(!/^\d{6,8}$/.test(code))throw Error('Digite o código numérico de 6 a 8 dígitos recebido por e-mail.');
+       const r=await fetch('https://vvgejviwvtnlahbyopah.supabase.co/auth/v1/verify',{
+         method:'POST',headers:{apikey:publicKey,'Content-Type':'application/json'},
+         body:JSON.stringify({email,token:code,type:'email'}),cache:'no-store'
+       });
+       const b=await cleanResponse(r);
+       if(!r.ok||!b.access_token)throw Error(r.ok?'Não foi possível validar o código.':authError(r,b));
+       if(!window.maFlashAuth?.saveAuth?.(b))throw Error('A sessão retornada pelo Supabase está incompleta.');
+       setFlashAuthState('E-mail confirmado. Sincronizando as coletas Flash...');
+       await loadShared();
+       if(packet&&packet.business_date===localDate())await sharePacket();
+       document.dispatchEvent(new CustomEvent('ma:flash-auth-ready'));
+       setFlashAuthState('Identidade confirmada. '+(packet&&packet.business_date===localDate()?syncStatus:'Aguarde a próxima coleta automática da extensão.'));
+     }catch(err){setFlashAuthState(String(err?.message||'Não foi possível confirmar o código.'),true)}
+     finally{button.disabled=false}
+   };
   }
   for(const parent of ['#nav','.mobile-more-grid','#section-mais']){const el=document.querySelector(parent);if(!el||el.querySelector('.ma-flash-entry'))continue;const b=document.createElement('button');b.type='button';b.className='btn secondary ma-flash-entry';b.textContent='Flash • Gestão do dia';b.onclick=()=>{if(allowed()){paint();setSection('flash-pilot');loadShared();}};el.append(b);}
  }
