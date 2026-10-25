@@ -45,7 +45,34 @@
    syncStatus=data.length?'Histórico compartilhado carregado.':'Nenhuma coleta compartilhada para hoje.';paint();document.dispatchEvent(new CustomEvent('ma:flash-update'));
   }catch(e){syncStatus=e.message;paint();}finally{busy=false;}
  }
+ function paintHomeFlash(){
+  const home=document.getElementById('section-inicio');
+  if(!home)return;
+  let box=document.getElementById('maFlashLiveStrip');
+  if(!box){
+    box=document.createElement('section');box.id='maFlashLiveStrip';
+    box.className='ma-flash-live-strip';box.setAttribute('aria-label','Flash atualizado automaticamente');
+    const kpis=home.querySelector('#kpiGrid');
+    if(kpis)kpis.insertAdjacentElement('afterend',box);
+    else home.querySelector('.section-head')?.insertAdjacentElement('afterend',box);
+  }
+  const code=String(state.storeCode||'').padStart(3,'0');
+  const row=packet?.business_date===localDate()?(packet.rows||[]).find(r=>r.store===code):null;
+  const current=Number.isFinite(Date.parse(packet?.collected_at||''))?Date.parse(packet.collected_at):null;
+  const elapsed=current===null?null:Math.max(0,Math.floor((Date.now()-current)/60000));
+  if(!state.logged){box.hidden=true;return}
+  box.hidden=false;
+  const stateLabel=row?(elapsed>15?'Coleta desatualizada':'Atualização automática Flash'):'Aguardando Flash autenticado';
+  const amount=row?money(row.total):'—';
+  const timeLabel=row?'Coletado '+time(packet.collected_at)+(row.source_time?' • Fonte '+row.source_time:''):'Coleta disponível após conectar a extensão e confirmar o e-mail autorizado';
+  const sourceStatus=row?(elapsed>15?' • '+elapsed+' min sem atualização':' • '+elapsed+' min desde coleta'):'';
+  box.innerHTML='<div class="ma-flash-live-inner"><div><span class="ma-flash-live-label">FLASH • VENDA OPERACIONAL (REFERÊNCIA)</span>'+
+    '<strong>'+escape(amount)+'</strong><small>Loja '+escape(code)+' • '+escape(timeLabel)+escape(sourceStatus)+'</small></div>'+
+    '<div class="ma-flash-live-side"><span class="'+(row&&elapsed<=15?'ma-flash-good':'ma-flash-wait')+'">'+escape(stateLabel)+'</span>'+
+    '<small>Não substitui a venda oficial do Automação Web</small></div></div>';
+ }
  function paint(){
+  paintHomeFlash();
   const host=document.getElementById('flashPilotBody');if(!host||!allowed())return;
   if(!packet){host.innerHTML='<p>Aguardando coleta do Flash. Administrador: abra Total Lojas e use a extensão.</p><p>'+escape(syncStatus)+'</p>';return;}
   const visible=rows(),total=visible.reduce((a,r)=>a+r.total,0),omni=visible.reduce((a,r)=>a+r.omni,0),target=visible.reduce((a,r)=>a+r.target,0),coupons=visible.reduce((a,r)=>a+r.coupons,0);
@@ -67,7 +94,7 @@
  function mount(){
   const main=document.querySelector('#appShell main');if(!main)return;
   if(!document.getElementById('section-flash-pilot')){
-   const style=document.createElement('style');style.textContent='.flash-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0}.flash-kpi{padding:16px;border:1px solid #DAD9D6;border-radius:14px;background:#fff}.flash-kpi span{display:block;font-size:12px;color:#466964}.flash-kpi strong{display:block;font-size:22px;color:#173f35;margin-top:6px}.flash-tools{display:flex;gap:18px;flex-wrap:wrap;margin:16px 0}.flash-tools select{padding:10px;border-radius:8px}.flash-table th,.flash-table td{font-size:12px!important;padding:12px!important;white-space:nowrap}.flash-table thead th{background:#173f35!important;color:white!important}.flash-late{color:#a34424}.flash-auth{margin:14px 0}.flash-auth input{padding:10px;max-width:100%}';document.head.append(style);
+   const style=document.createElement('style');style.textContent='.ma-flash-live-strip{margin:14px 0;padding:15px 18px;border:1px solid #d7ded9;border-radius:15px;background:#f6f9f6;color:#173f35}.ma-flash-live-inner{display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px}.ma-flash-live-inner>div{display:grid;gap:4px}.ma-flash-live-label{font-size:11px;font-weight:800;letter-spacing:.08em}.ma-flash-live-inner strong{font-size:22px}.ma-flash-live-inner small{font-size:11px;color:#517067}.ma-flash-live-side{text-align:right}.ma-flash-good{font-size:12px;font-weight:800;color:#246b48}.ma-flash-wait{font-size:12px;font-weight:800;color:#ab5333}@media(max-width:680px){.ma-flash-live-side{text-align:left}}.flash-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:18px 0}.flash-kpi{padding:16px;border:1px solid #DAD9D6;border-radius:14px;background:#fff}.flash-kpi span{display:block;font-size:12px;color:#466964}.flash-kpi strong{display:block;font-size:22px;color:#173f35;margin-top:6px}.flash-tools{display:flex;gap:18px;flex-wrap:wrap;margin:16px 0}.flash-tools select{padding:10px;border-radius:8px}.flash-table th,.flash-table td{font-size:12px!important;padding:12px!important;white-space:nowrap}.flash-table thead th{background:#173f35!important;color:white!important}.flash-late{color:#a34424}.flash-auth{margin:14px 0}.flash-auth input{padding:10px;max-width:100%}';document.head.append(style);
    const section=document.createElement('section');section.id='section-flash-pilot';section.className='section';section.innerHTML='<div class="section-head"><div><span class="eyebrow">FLASH • RESULTADO DAS LOJAS</span><h1>Flash • Gestão do dia</h1><p>Vendas das lojas, grupos, produtos e trocas.</p></div><button id="flashPilotClear" class="btn secondary">Limpar coleta local</button></div><section class="card"><div class="section-actions"><button id="flashSharedLoad" class="btn secondary">Consultar histórico compartilhado</button><button id="flashSharedSave" class="btn secondary">Salvar coleta compartilhada</button></div><details class="flash-auth"><summary>Confirmar e-mail para sincronização</summary><p>Use um e-mail vinculado à sua matrícula pelo administrador. A confirmação é exclusiva para as coletas Flash.</p><form id="flashEmailForm"><input name="email" type="email" required placeholder="E-mail autorizado" autocomplete="email"><button class="btn secondary">Enviar código</button></form><form id="flashOtpForm" hidden><input name="code" inputmode="numeric" autocomplete="one-time-code" required placeholder="Código recebido"><button class="btn secondary">Confirmar código</button></form><p id="flashAuthStatus" role="status"></p></details><div id="flashPilotBody" aria-live="polite"></div></section>';main.append(section);
    document.getElementById('flashPilotClear').onclick=()=>{packet=null;history=[];paint();document.dispatchEvent(new CustomEvent('ma:flash-clear'));};
    document.getElementById('flashSharedLoad').onclick=loadShared;document.getElementById('flashSharedSave').onclick=()=>{sharePacket();};
