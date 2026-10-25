@@ -21,9 +21,9 @@ async function cycle(){
  const config=await chrome.storage.local.get(['flashAutoEnabled','flashStore','flashDcos']);if(!config.flashAutoEnabled)return;
  const store=MAFlashCore.stores.includes(config.flashStore)?config.flashStore:'108';
  const flashes=await chrome.tabs.query({url:'https://flash.riachuelo.com.br/vendas/lojas/total*'}),apps=await chrome.tabs.query({url:'https://frannlima.github.io/meu-acompanhamento/*'});
- if(flashes.length!==1)throw Error('Mantenha uma aba Total Lojas do Flash aberta.');if(!apps.length)throw Error('Abra o Meu Acompanhamento no mesmo perfil do navegador.');
+ if(!flashes.length)throw Error('Abra Total Lojas do Flash neste mesmo perfil do navegador.');if(!apps.length)throw Error('Abra o Meu Acompanhamento no mesmo perfil do navegador.');
  apps.sort((a,b)=>(b.lastAccessed||0)-(a.lastAccessed||0));const app=apps[0].id;
- const base=await readBase(flashes[0].id);await sendFlashPacket(app,base);sent++;
+ flashes.sort((a,b)=>(b.lastAccessed||0)-(a.lastAccessed||0));const base=await readBase(flashes[0].id);await sendFlashPacket(app,base);sent++;
  const [links]=await chrome.scripting.executeScript({target:{tabId:flashes[0].id},func:()=>Array.from(document.querySelectorAll('a[href]')).map(a=>a.href).filter(u=>/^https:\/\/flash\.riachuelo\.com\.br\/devolucao\/(loja|depto)\/\d{8}$/.test(u))});
  auxiliary=await chrome.tabs.create({active:false,url:'about:blank'});const date=base.business_date.replaceAll('-','');
  async function collect(url,options){
@@ -42,7 +42,7 @@ async function cycle(){
    if(top)try{await collect('https://flash.riachuelo.com.br/raio-x/item/'+top.sku+'/'+date,{kind:'flash-photos',store,dco,sku:top.sku});}catch{errors.push('Foto indisponível no DCO '+dco);}
   }catch(e){errors.push('Produtos '+dco+': '+e.message);}
  }
- await note(sent+' coletas confirmadas no app às '+new Date().toLocaleTimeString('pt-BR')+'. '+(errors.length?errors.join(' • '):'Confira a data e o horário de cada relatório no app.'));
+ await chrome.storage.local.set({flashLastSuccess:Date.now()});await note(sent+' coletas recebidas pelo app. '+(errors.length?'Atenção: '+errors.join(' • '):'Acompanhamento atualizado automaticamente. A publicação compartilhada exige e-mail confirmado no app.'));
  }catch(e){await note('Atualização pausada: '+e.message);}finally{if(auxiliary)await chrome.tabs.remove(auxiliary.id).catch(()=>{});running=false;}
 }
 chrome.alarms.onAlarm.addListener(alarm=>{if(alarm.name==='flashAuto')cycle();});
