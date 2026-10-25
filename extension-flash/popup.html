@@ -1,12 +1,28 @@
-<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Flash • Meu Acompanhamento</title>
-<style>body{font:14px system-ui;width:350px;padding:16px;color:#173f35}button,input,select{box-sizing:border-box;display:block;width:100%;padding:11px;margin-top:8px}p{line-height:1.5}label{display:block;margin-top:12px}#status,#autoStatus{white-space:pre-wrap;font-size:13px}</style>
+<!doctype html><html lang="pt-BR"><meta charset="utf-8"><title>Flash • Atualização automática</title>
+<style>
+body{font:14px system-ui;width:355px;padding:16px;color:#173f35;background:#fcfdfb}
+h2{margin:0 0 8px}p{line-height:1.45;font-size:12px}
+button,input,select{box-sizing:border-box;display:block;width:100%;padding:11px;margin-top:8px;border-radius:9px}
+button{cursor:pointer;border:1px solid #b3c8bc;font-weight:700}
+#startAuto{background:#173f35;color:#fff}#stopAuto{background:#fff;color:#873045}
+#status,#autoStatus{white-space:pre-wrap;font-size:12px;padding:9px;border-radius:8px;background:#f0f4f1}
+label{display:block;margin-top:12px;font-size:12px;font-weight:650}
+details{margin-top:12px;border-top:1px solid #d7e0da;padding-top:12px}
+summary{cursor:pointer;font-weight:700}
+</style>
 <h2>Flash → Meu Acompanhamento</h2><p id="version"></p>
-<p>Coleta das 18 lojas em Total Lojas e dos grupos, produtos e fotos da loja abaixo. Trocas seguem a última data publicada no Flash.</p>
-<label>Loja para grupos e produtos<select id="store"></select></label>
-<label>DCOs de produtos (até 5)<input id="dcos" placeholder="Automático: maior DCO de cada mundo"></label>
-<p>Em branco: maior DCO em venda de cada mundo. Você também pode indicar códigos separados por vírgula. O painel informa quais DCOs foram coletados.</p>
-<button id="capture">1. Conferir relatório aberto</button><button id="send" disabled>2. Enviar ao app</button>
-<button id="startAuto">Ativar coleta a cada 5 minutos</button><button id="stopAuto">Parar coleta automática</button>
-<p>A coleta automática atualiza Total Lojas e abre uma aba auxiliar para consultar os relatórios. Mantenha o Flash autenticado e o app aberto como administrador. Senhas e cookies não são coletados.</p>
-<p id="autoStatus" role="status"></p><p id="status" role="status"></p>
-<script src="flash-core-v1.js"></script><script src="flash-detail-core-v1.js"></script><script src="capture.js"></script><script src="transfer.js"></script><script src="popup.js"></script></html>
+<p><b>Uma configuração, coletas automáticas.</b> Deixe uma aba Total Lojas do Flash e o Meu Acompanhamento abertos no mesmo perfil do navegador, autenticados e autorizados. A coleta é realizada a cada 5 minutos, sem clicar novamente.</p>
+<button id="startAuto" type="button">▶ ATIVAR ATUALIZAÇÃO AUTOMÁTICA</button>
+<button id="stopAuto" type="button">■ Pausar coleta automática</button>
+<p id="autoStatus" role="status" aria-live="polite">Consultando status...</p>
+<details><summary>Configurações opcionais e coleta manual</summary>
+<label>Filial para os grupos e produtos<select id="store"></select></label>
+<label>DCOs de produtos (até cinco)<input id="dcos" placeholder="Automático: maior DCO de cada mundo"></label>
+<p>Deixe DCOs em branco para seleção automática. Total Lojas coleta as 18 filiais autorizadas.</p>
+<button id="capture" type="button">Conferir relatório aberto</button>
+<button id="send" type="button" disabled>Enviar coleta manualmente</button>
+<p id="status" role="status"></p>
+</details>
+<p>O Flash permanece como referência operacional, separado da venda oficial. O compartilhamento entre dispositivos exige e-mail administrativo autorizado no app. Não armazenamos a senha do Flash.</p>
+<script src="flash-core-v1.js"></script><script src="flash-detail-core-v1.js"></script>
+<script src="capture.js"></script><script src="transfer.js"></script><script src="popup.js"></script></html>
