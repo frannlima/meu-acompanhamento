@@ -1,0 +1,6 @@
+{
+  "name": "eStore Connect",
+  "enabled": false,
+  "phone_e164": "",
+  "note": "Preencher somente depois de confirmar o novo numero exclusivo do WhatsApp Business. Nao usar numero pessoal nem o chip anterior."
+}
