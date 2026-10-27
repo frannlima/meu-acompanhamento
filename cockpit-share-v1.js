@@ -197,8 +197,8 @@
       button.id="cockpitWhatsAppText";
       button.type="button";
       button.className="cp-btn-share";
-      button.textContent="📲 Mensagem WhatsApp";
-      button.title="Abrir resumo do Cockpit no WhatsApp Business (somente texto)";
+      button.textContent="📲 WhatsApp Business";
+      button.title="Preparar resumo do Cockpit para envio pelo WhatsApp Business (somente texto; envio manual)";
       button.addEventListener("click",openWhatsAppMessage);
       shareButton.insertAdjacentElement("afterend",button);
     }
