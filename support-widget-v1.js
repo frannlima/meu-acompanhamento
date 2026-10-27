@@ -67,7 +67,9 @@
     return [
       "Olá, equipe eStore Connect! Preciso de suporte.",
       "",
-      "Aplicativo: " + application,\n      "Colaborador: " + (identity().name || "Não identificado"),\n      "Função: " + (identity().role || "Não identificada"),
+      "Aplicativo: " + application,
+      "Colaborador: " + (identity().name || "Não identificado"),
+      "Função: " + (identity().role || "Não identificada"),
       "Filial: " + (store || "Não informada"),
       "Assunto: " + topic,
       "",
@@ -92,7 +94,8 @@
     trigger.setAttribute("aria-expanded", String(!panel.hidden));
     if (!panel.hidden) {
       placePanel();
-      refreshGuide();\n      questionInput.focus({preventScroll:true});
+      refreshGuide();
+      questionInput.focus({preventScroll:true});
     } else {
       trigger.focus({preventScroll:true});
     }
@@ -139,9 +142,13 @@
     css.id = "ec-help-styles";
     css.textContent = [
       ".ec-help-root{font-family:Arial,Helvetica,sans-serif;color:#19382f;z-index:2147480000}",
-      ".ec-help-trigger{position:fixed;right:16px;bottom:calc(100px + env(safe-area-inset-bottom,0px));width:82px;height:82px;border:0;border-radius:50%;background:radial-gradient(circle at center,#19c864 0 31%,#08573d 33% 100%);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px #15e87895,0 6px 20px #002d2180;cursor:grab;touch-action:none;z-index:2147480001}",\n      ".ec-help-trigger:before{content:\"\";position:absolute;inset:21px;border-radius:50%;box-shadow:0 0 0 3px #24f276,0 0 13px 6px #26ff80;animation:ec-help-glow 2.2s ease-in-out infinite;pointer-events:none}",\n      ".ec-help-ring-top,.ec-help-ring-bottom{position:absolute;left:3px;right:3px;text-align:center;font-weight:800;font-size:10px;letter-spacing:.2px;line-height:1;pointer-events:none}.ec-help-ring-top{top:8px}.ec-help-ring-bottom{bottom:8px}",\n      "@keyframes ec-help-glow{0%,100%{opacity:.4;box-shadow:0 0 0 2px #24f276,0 0 6px 3px #26ff80}50%{opacity:1;box-shadow:0 0 0 3px #24f276,0 0 19px 9px #26ff80}}@media(prefers-reduced-motion:reduce){.ec-help-trigger:before{animation:none}}",
+      ".ec-help-trigger{position:fixed;right:16px;bottom:calc(100px + env(safe-area-inset-bottom,0px));width:82px;height:82px;border:0;border-radius:50%;background:radial-gradient(circle at center,#19c864 0 31%,#08573d 33% 100%);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px #15e87895,0 6px 20px #002d2180;cursor:grab;touch-action:none;z-index:2147480001}",
+      ".ec-help-trigger:before{content:\"\";position:absolute;inset:21px;border-radius:50%;box-shadow:0 0 0 3px #24f276,0 0 13px 6px #26ff80;animation:ec-help-glow 2.2s ease-in-out infinite;pointer-events:none}",
+      ".ec-help-ring-top,.ec-help-ring-bottom{position:absolute;left:3px;right:3px;text-align:center;font-weight:800;font-size:10px;letter-spacing:.2px;line-height:1;pointer-events:none}.ec-help-ring-top{top:8px}.ec-help-ring-bottom{bottom:8px}",
+      "@keyframes ec-help-glow{0%,100%{opacity:.4;box-shadow:0 0 0 2px #24f276,0 0 6px 3px #26ff80}50%{opacity:1;box-shadow:0 0 0 3px #24f276,0 0 19px 9px #26ff80}}@media(prefers-reduced-motion:reduce){.ec-help-trigger:before{animation:none}}",
       ".ec-help-trigger:focus-visible,.ec-help-root button:focus-visible,.ec-help-root input:focus-visible,.ec-help-root select:focus-visible,.ec-help-root textarea:focus-visible{outline:3px solid #e2b651;outline-offset:2px}",
-      ".ec-help-trigger svg{width:35px;height:35px;pointer-events:none;position:relative;z-index:1}",\n      ".ec-help-welcome{white-space:pre-line;background:#e9faf0;border-radius:12px;padding:11px;margin:9px 0;font-size:13px;line-height:1.5}.ec-help-advice{white-space:pre-line;background:#f4f8f5;border-left:3px solid #18a95b;padding:10px;margin:10px 0;border-radius:8px;font-size:12px;line-height:1.5}",
+      ".ec-help-trigger svg{width:35px;height:35px;pointer-events:none;position:relative;z-index:1}",
+      ".ec-help-welcome{white-space:pre-line;background:#e9faf0;border-radius:12px;padding:11px;margin:9px 0;font-size:13px;line-height:1.5}.ec-help-advice{white-space:pre-line;background:#f4f8f5;border-left:3px solid #18a95b;padding:10px;margin:10px 0;border-radius:8px;font-size:12px;line-height:1.5}",
       ".ec-help-panel{position:fixed;box-sizing:border-box;background:#fff;border:1px solid #d7e1dc;border-radius:18px;padding:16px;box-shadow:0 8px 32px #08241d45;z-index:2147480002;max-height:calc(100dvh - 24px);overflow:auto;font-size:14px;line-height:1.35}",
       ".ec-help-panel[hidden]{display:none!important}.ec-help-panel *{box-sizing:border-box}",
       ".ec-help-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}.ec-help-title{font-size:17px;font-weight:800}.ec-help-close{background:transparent;border:0;font-size:24px;color:#315f50;cursor:pointer;line-height:1}",
