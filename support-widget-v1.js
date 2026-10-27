@@ -164,7 +164,7 @@
       '<p class="ec-help-subtitle">Atendimento contextual • ' + application + '</p><div id="ec-help-welcome" class="ec-help-welcome"></div>' +
       '<label class="ec-help-label" for="ec-help-store">Sua filial (opcional)</label><input id="ec-help-store" class="ec-help-field" inputmode="numeric" maxlength="4" placeholder="Ex.: 108"/>' +
       '<label class="ec-help-label" for="ec-help-topic">Qual o assunto?</label><select id="ec-help-topic" class="ec-help-field"><option>Acesso e login</option><option>Indicadores e resultados</option><option>Atualização de vendas</option><option>Funcionalidades do aplicativo</option><option>Suporte técnico</option><option>Outro assunto</option></select>' +
-      '<label class="ec-help-label" for="ec-help-question">Descreva sua dúvida (opcional)</label><textarea id="ec-help-question" class="ec-help-field" rows="3" maxlength="2000" placeholder="Como podemos ajudar?"></textarea>' +
+      '<div id="ec-help-advice" class="ec-help-advice" role="status" aria-live="polite"></div><label class="ec-help-label" for="ec-help-question">Descreva sua dúvida (opcional)</label><textarea id="ec-help-question" class="ec-help-field" rows="3" maxlength="2000" placeholder="Como podemos ajudar?"></textarea>' +
       '<div class="ec-help-actions"><button type="button" id="ec-help-copy" class="ec-help-action ec-help-secondary">Copiar mensagem</button><button type="button" id="ec-help-open" class="ec-help-action ec-help-primary" disabled>Abrir WhatsApp</button></div>' +
       '<span id="ec-help-feedback" class="ec-help-feedback" role="status" aria-live="polite"></span>' +
       '<p class="ec-help-note">O envio é gratuito e manual. Você confere a mensagem e o destinatário antes de enviar; não há leitura de conversas pelo aplicativo.</p></section>';
@@ -176,7 +176,9 @@
     storeInput = root.querySelector("#ec-help-store");
     topicInput = root.querySelector("#ec-help-topic");
     questionInput = root.querySelector("#ec-help-question");
-    storeInput.value = storeHint();\n    topicInput.addEventListener("change",refreshGuide);\n    refreshGuide();
+    storeInput.value = storeHint();
+    topicInput.addEventListener("change",refreshGuide);
+    refreshGuide();
     root.querySelector(".ec-help-close").addEventListener("click", togglePanel);
     root.querySelector("#ec-help-copy").addEventListener("click", copyMessage);
     openButton.addEventListener("click", openConversation);
