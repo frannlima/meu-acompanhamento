@@ -175,8 +175,33 @@
       if(button){button.disabled=false;button.innerHTML=old;}
     }
   }
+  // Compartilhamento gratuito de texto: abre a escolha de contato no WhatsApp Business.
+  // Não envia sozinho e não tenta anexar o card via wa.me.
+  function openWhatsAppMessage(){
+    try{
+      const {summary:rawSummary}=state();
+      const summary=typeof window.maShareTextWithLink==="function"
+        ?window.maShareTextWithLink(rawSummary,"cockpit"):rawSummary;
+      const url="https://wa.me/?text="+encodeURIComponent(summary);
+      const link=document.createElement("a");
+      link.href=url;link.target="_blank";link.rel="noopener noreferrer";
+      document.body.append(link);link.click();link.remove();
+      notice("Selecione o WhatsApp Business, confira o destinatário e confirme o envio da mensagem.");
+    }catch(error){notice(error?.message||"Não foi possível preparar a mensagem.",true);}
+  }
   function init(){
-    $("cockpitShareResult")?.addEventListener("click",()=>void shareResult());
+    const shareButton=$("cockpitShareResult");
+    shareButton?.addEventListener("click",()=>void shareResult());
+    if(shareButton&&!$("cockpitWhatsAppText")){
+      const button=document.createElement("button");
+      button.id="cockpitWhatsAppText";
+      button.type="button";
+      button.className="cp-btn-share";
+      button.textContent="📲 Mensagem WhatsApp";
+      button.title="Abrir resumo do Cockpit no WhatsApp Business (somente texto)";
+      button.addEventListener("click",openWhatsAppMessage);
+      shareButton.insertAdjacentElement("afterend",button);
+    }
   }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});
   else init();
