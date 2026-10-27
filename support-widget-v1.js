@@ -142,12 +142,12 @@
     css.id = "ec-help-styles";
     css.textContent = [
       ".ec-help-root{font-family:Arial,Helvetica,sans-serif;color:#19382f;z-index:2147480000}",
-      ".ec-help-trigger{position:fixed;right:16px;bottom:calc(100px + env(safe-area-inset-bottom,0px));width:82px;height:82px;border:0;border-radius:50%;background:radial-gradient(circle at center,#19c864 0 31%,#08573d 33% 100%);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px #15e87895,0 6px 20px #002d2180;cursor:grab;touch-action:none;z-index:2147480001}",
-      ".ec-help-trigger:before{content:\"\";position:absolute;inset:21px;border-radius:50%;box-shadow:0 0 0 3px #24f276,0 0 13px 6px #26ff80;animation:ec-help-glow 2.2s ease-in-out infinite;pointer-events:none}",
-      ".ec-help-ring-top,.ec-help-ring-bottom{position:absolute;left:3px;right:3px;text-align:center;font-weight:800;font-size:10px;letter-spacing:.2px;line-height:1;pointer-events:none}.ec-help-ring-top{top:8px}.ec-help-ring-bottom{bottom:8px}",
+      ".ec-help-trigger{position:fixed;right:16px;bottom:calc(100px + env(safe-area-inset-bottom,0px));width:100px;height:100px;border:0;border-radius:50%;background:radial-gradient(circle at center,#19c864 0 31%,#08573d 33% 100%);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 0 14px #15e87895,0 6px 20px #002d2180;cursor:grab;touch-action:none;z-index:2147480001}",
+      ".ec-help-trigger:before{content:\"\";position:absolute;inset:29px;border-radius:50%;box-shadow:0 0 0 3px #24f276,0 0 13px 6px #26ff80;animation:ec-help-glow 2.2s ease-in-out infinite;pointer-events:none}",
+      ".ec-help-ring{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}.ec-help-ring text{fill:#fff;font-family:Arial,Helvetica,sans-serif;font-weight:900;letter-spacing:.3px;paint-order:stroke;stroke:#06452e;stroke-width:1.5px;stroke-linejoin:round}.ec-help-ring .top{font-size:12.5px}.ec-help-ring .bottom{font-size:10.7px}",
       "@keyframes ec-help-glow{0%,100%{opacity:.4;box-shadow:0 0 0 2px #24f276,0 0 6px 3px #26ff80}50%{opacity:1;box-shadow:0 0 0 3px #24f276,0 0 19px 9px #26ff80}}@media(prefers-reduced-motion:reduce){.ec-help-trigger:before{animation:none}}",
       ".ec-help-trigger:focus-visible,.ec-help-root button:focus-visible,.ec-help-root input:focus-visible,.ec-help-root select:focus-visible,.ec-help-root textarea:focus-visible{outline:3px solid #e2b651;outline-offset:2px}",
-      ".ec-help-trigger svg{width:35px;height:35px;pointer-events:none;position:relative;z-index:1}",
+      ".ec-help-trigger svg.ec-help-phone{width:38px;height:38px;pointer-events:none;position:relative;z-index:1;filter:drop-shadow(0 0 4px #15eb78)}",
       ".ec-help-welcome{white-space:pre-line;background:#e9faf0;border-radius:12px;padding:11px;margin:9px 0;font-size:13px;line-height:1.5}.ec-help-advice{white-space:pre-line;background:#f4f8f5;border-left:3px solid #18a95b;padding:10px;margin:10px 0;border-radius:8px;font-size:12px;line-height:1.5}",
       ".ec-help-panel{position:fixed;box-sizing:border-box;background:#fff;border:1px solid #d7e1dc;border-radius:18px;padding:16px;box-shadow:0 8px 32px #08241d45;z-index:2147480002;max-height:calc(100dvh - 24px);overflow:auto;font-size:14px;line-height:1.35}",
       ".ec-help-panel[hidden]{display:none!important}.ec-help-panel *{box-sizing:border-box}",
@@ -165,7 +165,7 @@
     root.className = "ec-help-root";
     root.innerHTML =
       '<button type="button" class="ec-help-trigger" id="ec-help-trigger" aria-label="Abrir Central de Ajuda" aria-expanded="false" aria-controls="ec-help-panel" title="Central de Ajuda: toque para abrir, arraste para mover">' +
-      '<span class="ec-help-ring-top">Suporte</span><svg viewBox="0 0 32 32" aria-hidden="true" fill="currentColor"><path d="M16 3a12.8 12.8 0 0 0-11 19.4L3 29l6.8-1.9A12.8 12.8 0 1 0 16 3zm0 2.5a10.3 10.3 0 1 1-5.1 19.2l-.5-.3-3.6 1 1-3.5-.3-.5A10.3 10.3 0 0 1 16 5.5zm-5.3 4.4c-.5 0-1 .2-1.4.7-.5.6-1.1 1.4-1.1 3s1.2 3.2 1.4 3.4a14.2 14.2 0 0 0 5.7 5c2.4.8 2.9.6 3.5.5.5-.1 1.7-.7 2-1.4.2-.7.2-1.3.1-1.4-.1-.1-.5-.3-1.1-.6l-1.7-.8c-.3-.1-.6-.2-.8.2-.3.4-1 1.2-1.2 1.4-.2.2-.4.3-.8.1s-1.5-.6-2.8-1.8c-1-1-1.7-2.1-1.9-2.5-.2-.3 0-.5.2-.7l.6-.7c.2-.2.3-.4.4-.7.1-.2 0-.5-.1-.7l-.9-2.1c-.2-.6-.5-.6-.8-.6z"/></svg><span class="ec-help-ring-bottom">eStore Connect</span></button>' +
+      '<svg class="ec-help-ring" viewBox="0 0 100 100" aria-hidden="true"><defs><path id="ec-help-upper" d="M 10 50 A 40 40 0 0 1 90 50"/><path id="ec-help-lower" d="M 10 50 A 40 40 0 0 0 90 50"/></defs><text class="top" text-anchor="middle"><textPath href="#ec-help-upper" startOffset="50%">SUPORTE</textPath></text><text class="bottom" text-anchor="middle"><textPath href="#ec-help-lower" startOffset="50%">eSTORE CONNECT</textPath></text></svg><svg class="ec-help-phone" viewBox="0 0 32 32" aria-hidden="true" fill="currentColor"><path d="M16 3a12.8 12.8 0 0 0-11 19.4L3 29l6.8-1.9A12.8 12.8 0 1 0 16 3zm0 2.5a10.3 10.3 0 1 1-5.1 19.2l-.5-.3-3.6 1 1-3.5-.3-.5A10.3 10.3 0 0 1 16 5.5zm-5.3 4.4c-.5 0-1 .2-1.4.7-.5.6-1.1 1.4-1.1 3s1.2 3.2 1.4 3.4a14.2 14.2 0 0 0 5.7 5c2.4.8 2.9.6 3.5.5.5-.1 1.7-.7 2-1.4.2-.7.2-1.3.1-1.4-.1-.1-.5-.3-1.1-.6l-1.7-.8c-.3-.1-.6-.2-.8.2-.3.4-1 1.2-1.2 1.4-.2.2-.4.3-.8.1s-1.5-.6-2.8-1.8c-1-1-1.7-2.1-1.9-2.5-.2-.3 0-.5.2-.7l.6-.7c.2-.2.3-.4.4-.7.1-.2 0-.5-.1-.7l-.9-2.1c-.2-.6-.5-.6-.8-.6z"/></svg></button>' +
       '<section class="ec-help-panel" id="ec-help-panel" aria-label="Central de Ajuda eStore Connect" hidden>' +
       '<div class="ec-help-top"><strong class="ec-help-title">Central de Ajuda</strong><button class="ec-help-close" type="button" aria-label="Fechar central">×</button></div>' +
       '<p class="ec-help-subtitle">Atendimento contextual • ' + application + '</p><div id="ec-help-welcome" class="ec-help-welcome"></div>' +
@@ -202,8 +202,8 @@
       if (!pointer.moved) return;
       trigger.classList.add("ec-help-moved");
       trigger.style.right = "auto"; trigger.style.bottom = "auto";
-      trigger.style.left = clamp(pointer.left + dx, 8, window.innerWidth - 90) + "px";
-      trigger.style.top = clamp(pointer.top + dy, 8, window.innerHeight - 90) + "px";
+      trigger.style.left = clamp(pointer.left + dx, 8, window.innerWidth - 108) + "px";
+      trigger.style.top = clamp(pointer.top + dy, 8, window.innerHeight - 108) + "px";
       placePanel();
     });
     function endPointer(event) {
