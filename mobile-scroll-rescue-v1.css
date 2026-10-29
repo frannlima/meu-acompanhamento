@@ -1,0 +1,39 @@
+/* Meu Acompanhamento — correção de gestos e rolagem mobile (2026-10-29).
+   A página deve rolar na vertical; somente painéis modais abertos podem travar o fundo. */
+@media (max-width:1020px) {
+  html { overflow-y:auto!important; }
+  body:not(.mobile-sheet-open):not(.gl-landscape-open) {
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* Tabelas e visões largas devem aceitar arrastar com o dedo nos dois eixos. */
+  .table-wrap,
+  .clarity-table-wrap,
+  .group-share-scroll,
+  .gl-landscape-scroll,
+  .ma2-tabs,
+  .admin-tabs {
+    touch-action:pan-x pan-y!important;
+    -webkit-overflow-scrolling:touch;
+  }
+  .table-wrap,
+  .clarity-table-wrap,
+  .group-share-scroll,
+  .gl-landscape-scroll { overflow-x:auto; max-width:100%; }
+
+  /* O avatar flutuante não deve interceptar o gesto vertical de rolagem.
+     Arrastar lateralmente o avatar continua possível. */
+  #maPartialMascot .ma-mascot-portrait,
+  #maPartialMascot .ma-mascot-message {
+    touch-action:pan-y!important;
+  }
+
+  /* No menu Mais, bloquear apenas o fundo e permitir rolar opções longas. */
+  .mobile-more-panel {
+    max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
+  }
+}
