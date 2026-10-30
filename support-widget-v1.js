@@ -91,6 +91,7 @@
   }
   function togglePanel() {
     panel.hidden = !panel.hidden;
+    root.classList.toggle("ec-help-open", !panel.hidden);
     trigger.setAttribute("aria-expanded", String(!panel.hidden));
     if (!panel.hidden) {
       placePanel();
@@ -157,7 +158,25 @@
       ".ec-help-actions{display:flex;gap:8px;margin-top:12px}.ec-help-action{flex:1;min-width:0;border-radius:10px;padding:10px 8px;border:1px solid #126447;cursor:pointer;font-weight:700;font-size:13px}",
       ".ec-help-primary{background:#14684e;color:#fff}.ec-help-primary:disabled{background:#e8efea;color:#62746a;border-color:#c7d4cb;cursor:not-allowed}",
       ".ec-help-secondary{background:#fff;color:#14684e}.ec-help-note{margin:10px 0 0;font-size:11px;color:#687b71}.ec-help-feedback{min-height:15px;font-size:11px;margin-top:8px;display:block}",
-      "@media(max-width:420px){.ec-help-panel{padding:14px}.ec-help-trigger{bottom:calc(110px + env(safe-area-inset-bottom,0px))}}"
+      "@media(max-width:420px){.ec-help-panel{padding:14px}.ec-help-trigger{bottom:calc(110px + env(safe-area-inset-bottom,0px))}}",
+      "/* Acessos estáticos no cabeçalho: não cobrem resultados nem bloqueiam gestos. */",
+      "#ecHeaderActions{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-shrink:0;margin-left:auto;min-width:0}",
+      "#ec-help-trigger.ec-help-header-trigger{position:static!important;inset:auto!important;transform:none!important;flex:0 0 42px!important;width:42px!important;height:42px!important;min-width:42px!important;max-width:42px!important;min-height:42px!important;margin:0!important;padding:0!important;border-radius:12px!important;display:inline-flex!important;background:#edf8f1!important;color:#17613f!important;border:1px solid #c7dbcf!important;box-shadow:none!important;cursor:pointer!important;touch-action:manipulation!important;animation:none!important}",
+      "#ec-help-trigger.ec-help-header-trigger[hidden]{display:none!important}",
+      "#ec-help-trigger.ec-help-header-trigger:before,#ec-help-trigger.ec-help-header-trigger .ec-help-ring{display:none!important}",
+      "#ec-help-trigger.ec-help-header-trigger svg.ec-help-phone{width:23px!important;height:23px!important;filter:none!important}",
+      "#shell>.top #ec-help-trigger.ec-help-header-trigger{background:#eff7f2!important;border-color:#b8d0c3!important}",
+      "#appShell .mobile-header #ec-help-trigger.ec-help-header-trigger{background:rgba(255,255,255,.13)!important;color:#fff!important;border:1px solid rgba(255,255,255,.28)!important}",
+      "#appShell .mobile-header #ec-help-trigger.ec-help-header-trigger svg{color:#fff!important}",
+      "#appShell .sidebar-bottom #ec-help-trigger.ec-help-header-trigger{width:100%!important;max-width:none!important;flex-basis:auto!important;gap:8px!important;margin-bottom:10px!important}",
+      "#appShell .sidebar-bottom #ec-help-trigger.ec-help-header-trigger:after{content:'Suporte';font-size:12px;font-weight:800}",
+      "#appShell .mobile-header #ec-help-trigger.ec-help-header-trigger{margin-left:6px!important}",
+      ".ec-help-root:not(.ec-help-open){pointer-events:none}",
+      ".ec-help-root.ec-help-open{position:fixed;inset:0;z-index:2147480000;background:rgba(8,31,25,.56);pointer-events:auto}",
+      ".ec-help-root .ec-help-panel{pointer-events:auto}",
+      "@media(max-width:900px){.ec-help-root .ec-help-panel{position:fixed!important;left:50%!important;right:auto!important;top:calc(12px + env(safe-area-inset-top,0px))!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;width:min(440px,calc(100vw - 24px))!important;max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))!important;transform:translateX(-50%)!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.ec-help-actions{position:relative;flex-wrap:wrap}.ec-help-action{min-height:44px}.mobile-header .mobile-greeting{min-width:0!important;max-width:min(45vw,180px)}}",
+      "@media(min-width:901px){.ec-help-root .ec-help-panel{left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(480px,calc(100vw - 32px))!important;max-height:calc(100dvh - 40px)!important}}",
+      "@media(max-width:420px){#shell>.top #ecHeaderActions{gap:3px}#shell>.top .logo{width:112px!important;max-width:33vw!important}#shell>.top{gap:3px!important;padding:7px 7px!important}}"
     ].join("");
     document.head.appendChild(css);
 
@@ -177,6 +196,47 @@
       '<p class="ec-help-note">O envio é gratuito e manual. Você confere a mensagem e o destinatário antes de enviar; não há leitura de conversas pelo aplicativo.</p></section>';
     document.body.appendChild(root);
     trigger = root.querySelector("#ec-help-trigger");
+    trigger.classList.add("ec-help-header-trigger");
+    trigger.title = "Abrir Central de Ajuda";
+    const isPhone = () => window.matchMedia("(max-width:900px)").matches;
+    function dockTrigger() {
+      let destination = null;
+      if (application === "Meu Acompanhamento") {
+        const shell = document.querySelector("#appShell");
+        const signedIn = shell && !shell.classList.contains("hidden");
+        destination = signedIn
+          ? (isPhone() ? document.querySelector(".mobile-header") : document.querySelector(".sidebar-bottom"))
+          : document.querySelector("#loginScreen .login-card");
+      } else {
+        const shell = document.getElementById("shell");
+        const signedIn = shell && !shell.classList.contains("hide") && getComputedStyle(shell).display !== "none";
+        if (signedIn) {
+          const header = document.querySelector("#shell > header.top");
+          if (header) {
+            destination = header.querySelector("#ecHeaderActions");
+            if (!destination) {
+              destination = document.createElement("div");
+              destination.id = "ecHeaderActions";
+              destination.setAttribute("role","group");
+              destination.setAttribute("aria-label","Atalhos de ajuda e comunicados");
+              header.appendChild(destination);
+            }
+          }
+        } else {
+          destination = document.querySelector("#login .loginbox");
+        }
+      }
+      if (!destination) {
+        trigger.hidden = true;
+        return;
+      }
+      trigger.hidden = false;
+      if (trigger.parentElement !== destination) destination.appendChild(trigger);
+    }
+    dockTrigger();
+    window.addEventListener("resize",dockTrigger,{passive:true});
+    document.addEventListener("click",()=>requestAnimationFrame(dockTrigger));
+    setInterval(dockTrigger,2400);
     panel = root.querySelector("#ec-help-panel");
     feedback = root.querySelector("#ec-help-feedback");
     openButton = root.querySelector("#ec-help-open");
@@ -189,49 +249,9 @@
     root.querySelector(".ec-help-close").addEventListener("click", togglePanel);
     root.querySelector("#ec-help-copy").addEventListener("click", copyMessage);
     openButton.addEventListener("click", openConversation);
-    trigger.addEventListener("pointerdown", function (event) {
-      if (event.button !== 0 || pointer) return;
-      const r = trigger.getBoundingClientRect();
-      pointer = {id:event.pointerId,x:event.clientX,y:event.clientY,left:r.left,top:r.top,moved:false};
-      trigger.setPointerCapture(event.pointerId);
-    });
-    trigger.addEventListener("pointermove", function (event) {
-      if (!pointer || pointer.id !== event.pointerId) return;
-      const dx = event.clientX - pointer.x, dy = event.clientY - pointer.y;
-      if (Math.hypot(dx,dy) > 7) pointer.moved = true;
-      if (!pointer.moved) return;
-      trigger.classList.add("ec-help-moved");
-      trigger.style.right = "auto"; trigger.style.bottom = "auto";
-      trigger.style.left = clamp(pointer.left + dx, 8, window.innerWidth - 108) + "px";
-      trigger.style.top = clamp(pointer.top + dy, 8, window.innerHeight - 108) + "px";
-      placePanel();
-    });
-    function endPointer(event) {
-      if (!pointer || pointer.id !== event.pointerId) return;
-      suppressClick = pointer.moved;
-      if (pointer.moved) {
-        try { localStorage.setItem(storageKey, JSON.stringify({
-          x: Number.parseFloat(trigger.style.left), y: Number.parseFloat(trigger.style.top)
-        })); } catch (_) {}
-      }
-      pointer = null;
-    }
-    trigger.addEventListener("pointerup", endPointer);
-    trigger.addEventListener("pointercancel", endPointer);
-    trigger.addEventListener("click", function () {
-      if (suppressClick) { suppressClick = false; return; }
-      togglePanel();
-    });
+    trigger.addEventListener("click", togglePanel);
     document.addEventListener("keydown", function(e){if(e.key==="Escape"&&!panel.hidden)togglePanel();});
-    window.addEventListener("resize", resetPositionIfOffscreen);
-    try {
-      const pos = JSON.parse(localStorage.getItem(storageKey) || "null");
-      if (pos && Number.isFinite(pos.x) && Number.isFinite(pos.y)) {
-        trigger.style.right = "auto"; trigger.style.bottom = "auto";
-        trigger.style.left = clamp(pos.x, 8, window.innerWidth - 62) + "px";
-        trigger.style.top = clamp(pos.y, 8, window.innerHeight - 62) + "px";
-      }
-    } catch (_) {}
+    window.addEventListener("resize", placePanel,{passive:true});
     setFeedback("Verificando o canal de atendimento…");
     fetch(configUrl.href, {cache:"no-store"}).then(function(r){
       if (!r.ok) throw Error("Configuração indisponível");
