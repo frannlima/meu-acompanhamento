@@ -70,7 +70,8 @@
   }
   function data(){
     const d=state.day||{},target=Math.max(0,Number(d.target_financial)||0);
-    const has=!!d.has_input&&todayStamp(d.captured_at);
+    const has=!!d.has_input&&todayStamp(d.captured_at)&&Number.isFinite(Number(d.sales_financial))&&Number(d.sales_financial)>=0;
+    const suspectZero=has&&Number(d.sales_financial)===0&&Number(d.interval_growth_pct)<-100;
     const sale=has?Math.max(0,Number(d.sales_financial)||0):null;
     const rows=curve(),clock=has?hour(d.captured_at):null;
     const fraction=clock&&rows.length?elapsedFraction(rows,clock):null;
@@ -81,7 +82,8 @@
     // EV. da Venda Real: evolução financeira frente à venda do ano anterior.
     const ly=Number(d.ly_financial||0);
     const evolution=has&&ly>0?(sale/ly-1)*100:null;
-    const growth=has&&d.interval_growth_pct!=null&&Number.isFinite(Number(d.interval_growth_pct))?Number(d.interval_growth_pct):null;
+    const rawGrowth=Number(d.interval_growth_pct);
+    const growth=has&&!suspectZero&&d.interval_growth_pct!=null&&Number.isFinite(rawGrowth)&&rawGrowth>=-100&&rawGrowth<=1000?rawGrowth:null;
     const delta=has&&growth!==null&&Number.isFinite(Number(d.interval_delta_financial))?Number(d.interval_delta_financial):null;
     // Janela móvel das três próximas faixas (inclui a hora em andamento).
     // Respeita o horário da filial; a curva contém uma faixa residual pós-fechamento.
@@ -108,7 +110,7 @@
     const eAtt=cap!==null&&eTarget>0?cap/eTarget*100:null;
     const oAtt=orders!==null&&orderTarget>0?orders/orderTarget*100:null;
     const share=cap!==null&&sale!==null&&sale>0?cap/sale*100:null;
-    return {target,has,sale,attainment,dev,evolution,growth,delta,projection,projectedAtt,upcoming,liveClock,closing,rows,fraction,
+    return {target,has,suspectZero,sale,attainment,dev,evolution,growth,delta,projection,projectedAtt,upcoming,liveClock,closing,rows,fraction,
       curveDeviation,futureWeight,recoverable,
       best:group.best,pressures:group.pressures,e,cap,eTarget,orders,orderTarget,eAtt,oAtt,share,updated:d.captured_at};
   }
@@ -197,7 +199,7 @@
       '<div class="cp-sale-details">'+
         '<div class="cp-tile-label"><span class="cp-bag-mark">'+riaShoppingBag()+'</span><b>VENDA REAL</b></div>'+
         '<strong class="cp-tile-value">'+value+'</strong>'+
-        '<span class="cp-tile-sub">'+(x.has?"Venda Web acumulada":"Aguardando venda Web")+'</span>'+
+        '<span class="cp-tile-sub">'+(x.suspectZero?"⚠ Verificar carga da venda Web":x.has?"Venda Web acumulada":"Aguardando venda Web")+'</span>'+
       '</div>'+
       '<div class="cp-sale-analytics">'+
         '<div class="cp-pie" role="img" aria-label="Atingimento de '+attainment+' da meta" style="--cp-progress:'+ratio.toFixed(1)+'%">'+
@@ -213,7 +215,7 @@
     if(!root||!state.logged)return;
     const x=data();model=x;
     $("cockpitStore").textContent="LOJA "+store();
-    $("cockpitTimestamp").textContent=dayLabel()+" • "+(x.has?"Atualizado às "+time(x.updated):"Aguardando a primeira parcial");
+    $("cockpitTimestamp").textContent=dayLabel()+" • "+(x.suspectZero?"⚠ Venda zerada: conferir origem • "+time(x.updated):x.has?"Atualizado às "+time(x.updated):"Aguardando a primeira parcial");
     $("cockpitEstoreUpdated").textContent=x.e?.updated_at&&todayStamp(x.e.updated_at)?"eStore atualizado às "+time(x.e.updated_at):estoreStatus;
     const forecast=x.target>0&&x.rows.length?
       (x.upcoming.length?'<div class="cp-peaks">'+x.upcoming.map(r=>forecastCard(r,x)).join("")+'</div>':
