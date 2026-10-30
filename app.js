@@ -456,6 +456,16 @@ async function changeAdminStore(code){
   }
 }
 
+function compactMoney(v){return money(Number(v||0),0)}
+function validateOperationalDay(day){
+  if(!day || !day.has_input)return day;
+  const value=Number(day.sales_financial);
+  if(!Number.isFinite(value)||value<0){
+    console.error("[Meu Acompanhamento] Venda Automação Web inválida: rejeitada no painel", {store:state.storeCode,captured_at:day.captured_at,value});
+    return {...day,has_input:false,sales_financial:null,interval_sales_financial:null,interval_growth_pct:null,interval_delta_financial:null,data_quality_warning:"Venda Automação Web inconsistente. Confira a carga oficial da filial antes de usar os indicadores."};
+  }
+  return day;
+}
 async function loadAll(storeOverride=null){
   const requestedStore=String(storeOverride||state.storeCode||"").trim();
   const requestId=++loadAllRequestSeq;
@@ -474,7 +484,7 @@ async function loadAll(storeOverride=null){
 
     if(requestId!==loadAllRequestSeq || requestedStore!==String(state.storeCode)) return false;
 
-    state.day=day;
+    state.day=validateOperationalDay(day);
     state.detail=detail;
     state.groupSummary=groups;
     state.history=Array.isArray(history)?history:[];
@@ -486,6 +496,7 @@ async function loadAll(storeOverride=null){
     if($("identityStore")) $("identityStore").textContent="Loja "+requestedStore;
 
     renderDashboard();
+    if(state.day?.data_quality_warning){toast(state.day.data_quality_warning,true);const notice=$("metaNotice");if(notice){notice.textContent=state.day.data_quality_warning;notice.className="notice error";}}
     renderGroups();
     renderGroupSharePanel();
     renderHistory();
