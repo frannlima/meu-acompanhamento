@@ -45,18 +45,19 @@ test("Total Loja usa base A.A. oficial, evolução consolidada, desvio integral 
  assert.equal(m.totalPhysical,45);
  assert.ok(Math.abs(m.totalEvolution-(-31.666666666666664))<.001);
  model.render(true);
- assert.match(live.innerHTML,/R\$ 1\.200,00/);
- assert.match(live.innerHTML,/▼ -31,7%/);
- assert.match(live.innerHTML,/-R\$ 680,00/);
- assert.match(live.innerHTML,/gl-data gl-physical" role="cell">45/);
- assert.match(live.innerHTML,/gl-hly/);
- assert.match(live.innerHTML,/VENDA A\.A\./);
+ const output=live.innerHTML.replace(/\u00a0/g," ");
+ assert.match(output,/R\$ 1\.200,00/);
+ assert.match(output,/▼ -31,7%/);
+ assert.match(output,/-R\$ 680,00/);
+ assert.match(output,/gl-data gl-physical" role="cell">45/);
+ assert.match(output,/gl-hly/);
+ assert.match(output,/VENDA A\.A\./);
 });
 test("desvio não usa 'mil' nem no grupo nem no Total Loja",()=>{
  const {model,live}=harness({target_financial:10500});
  model.render(true);
- assert.match(live.innerHTML,/-R\$ 9\.680,00/);
- const html=live.innerHTML;
+ assert.match(live.innerHTML.replace(/\u00a0/g," "),/-R\$ 9\.680,00/);
+ const html=live.innerHTML.replace(/\u00a0/g," ");
  const cells=[...html.matchAll(/class="gl-data gl-dev"[^>]*>(.*?)<\/div>/g)].map(x=>x[1]);
  assert.ok(cells.length>0);
  assert.ok(cells.every(x=>!x.includes(" mil")));
