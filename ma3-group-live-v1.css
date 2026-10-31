@@ -375,3 +375,33 @@
   word-break:normal!important
  }
 }
+
+/* v8 — Total Loja completo e desvios monetários integrais (sem unidades "mil"). */
+@media(min-width:1021px){
+  #ma3LiveGroup .gl-live-table{overflow-x:auto;scrollbar-gutter:stable}
+  #ma3LiveGroup .gl-table-head,
+  #ma3LiveGroup .gl-row{
+    min-width:1120px;
+    grid-template-columns:minmax(148px,1.5fr) minmax(108px,1fr) minmax(108px,1fr)
+      minmax(65px,.7fr) minmax(110px,1fr) minmax(78px,.78fr)
+      minmax(130px,1.14fr) minmax(113px,1fr) minmax(54px,.60fr)
+  }
+  #ma3LiveGroup .gl-row>.gl-dev b{
+    white-space:nowrap;overflow-wrap:normal;word-break:normal;
+    font-size:clamp(10px,.86vw,13px)
+  }
+}
+@media(max-width:1020px){
+  #ma3LiveGroup .gl-landscape-width,
+  #ma3LiveGroup .gl-hhead,
+  #ma3LiveGroup .gl-hbody,
+  #ma3LiveGroup .gl-hrow{width:1206px!important;min-width:1206px!important;max-width:none!important}
+  #ma3LiveGroup .gl-hhead,
+  #ma3LiveGroup .gl-hrow{
+    grid-template-columns:140px 156px 156px 82px 156px 105px 175px 156px 80px!important
+  }
+  #ma3LiveGroup .gl-hly{font-weight:850;text-align:center;white-space:nowrap}
+  #ma3LiveGroup .gl-row,
+  #ma3LiveGroup .gl-mobile-head{grid-template-columns:minmax(0,27fr) minmax(0,26fr) minmax(0,16fr) minmax(0,31fr)}
+  #ma3LiveGroup .gl-row>.gl-dev b{font-variant-numeric:tabular-nums}
+}

@@ -11,7 +11,7 @@ const abbreviated=n=>{
  return (n<0?"−":"")+money(v);
 };
 const pct=v=>Number.isFinite(v)?v.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"%":"—";
-const signed=n=>(n<0?"− ":"+ ")+money(Math.abs(n));
+const signed=n=>(n<0?"-":"")+money(Math.abs(n));
 const time=iso=>iso&&Number.isFinite(Date.parse(iso))?new Date(iso).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit",timeZone:"America/Fortaleza"}):"sem parcial";
 let lastKey="",pending=false;
 function report(){
@@ -36,11 +36,29 @@ function report(){
    return {...g,physical,projection,isDay:x.day.has(g.key),isHour:x.hour.has(g.key)};
  });
  const totalMeta=Number(d.target_financial)>0?Number(d.target_financial):rows.reduce((s,r)=>s+r.meta,0);
- const totalSale=x.valid?Number(d.sales_financial):null;
- const effectiveSale=totalSale!==null&&Number.isFinite(totalSale)?totalSale: x.valid?rows.reduce((s,r)=>s+r.sale,0):null;
+ const totalSale=x.valid&&d.sales_financial!=null?Number(d.sales_financial):null;
+ const effectiveSale=totalSale!==null&&Number.isFinite(totalSale)?totalSale:x.valid?rows.reduce((s,r)=>s+r.sale,0):null;
  const projection=x.valid&&ratio>=.08&&effectiveSale!==null?effectiveSale/ratio:null;
  const attainment=x.valid&&totalMeta>0&&effectiveSale!==null?effectiveSale/totalMeta*100:null;
- return {rows,totalMeta,effectiveSale,projection,attainment,valid:x.valid,updated:d.captured_at,store:String(state.storeCode||""),day:typeof localDate==="function"?localDate():"",ratio};
+ const officialTotals=mapping.reduce((a,g)=>{
+   a.sale+=Number(g.sales_financial)||0;
+   a.ly+=Number(g.ly_financial)||0;
+   a.physical+=Number(g.sales_physical)||0;
+   return a;
+ },{sale:0,ly:0,physical:0});
+ // Fallback apenas quando a base dos grupos corresponde à venda oficial da loja.
+ const reconciled=effectiveSale!==null&&Math.abs(officialTotals.sale-effectiveSale)<0.02;
+ const officialLy=Number(d.ly_financial);
+ const totalLy=d.ly_financial!=null&&Number.isFinite(officialLy)&&officialLy>0?officialLy:
+   reconciled&&officialTotals.ly>0?officialTotals.ly:null;
+ const officialPhysical=Number(d.sales_physical);
+ const totalPhysical=x.valid&&d.sales_physical!=null&&Number.isFinite(officialPhysical)?officialPhysical:
+   x.valid&&reconciled?officialTotals.physical:null;
+ const totalEvolution=x.valid&&effectiveSale!==null&&totalLy!==null?
+   (effectiveSale/totalLy-1)*100:null;
+ return {rows,totalMeta,effectiveSale,projection,attainment,totalLy,totalPhysical,totalEvolution,
+   valid:x.valid,updated:d.captured_at,store:String(state.storeCode||""),
+   day:typeof localDate==="function"?localDate():"",ratio};
 }
 function indicator(row){
  return (row.isDay?'<span class="gl-alert gl-alert-day" title="Maior desvio financeiro acumulado do dia">D</span>':"")+
@@ -69,24 +87,28 @@ function tr(row){
    '<div class="gl-data gl-att" role="cell"><span class="gl-percentage '+(row.att!==null&&row.att>=100?"good":row.att!==null&&row.att>=90?"warn":"bad")+'">'+esc(att)+'</span></div>'+
    '<div class="gl-data gl-ly" role="cell">'+cell("A.A.",ly,abbreviated(row.ly))+'</div>'+
    '<div class="gl-data gl-evo" role="cell"><b class="'+(row.evo!==null&&row.evo<0?"gl-negative":"gl-positive")+'">'+esc(evo)+'</b></div>'+
-   '<div class="gl-data gl-dev" role="cell"><b class="'+(row.abs!==null&&row.abs<0?"gl-negative":"gl-positive")+'" title="'+esc(gap)+'">'+(row.abs===null?"—":esc(abbreviated(row.abs)))+'</b></div>'+
+   '<div class="gl-data gl-dev" role="cell"><b class="'+(row.abs!==null&&row.abs<0?"gl-negative":"gl-positive")+'" title="'+esc(gap)+'">'+(row.abs===null?"—":esc(gap))+'</b></div>'+
    '<div class="gl-data gl-projection" role="cell">'+cell("Projeção",projection,row.projection===null?"—":abbreviated(row.projection))+'</div>'+
    '<div class="gl-data gl-physical" role="cell"><b>'+Number(row.physical).toLocaleString("pt-BR")+'</b></div>'+
  '</div>';
 }
 function totalRow(m){
- const totalGap=m.effectiveSale===null?'—':abbreviated(m.effectiveSale-m.totalMeta);
- const totalAtt=m.attainment===null?'—':pct(m.attainment);
+ const totalGap=m.effectiveSale===null?"—":signed(m.effectiveSale-m.totalMeta);
+ const totalAtt=m.attainment===null?"—":pct(m.attainment);
+ const totalLy=m.totalLy===null?"—":money(m.totalLy);
+ const totalEvo=m.totalEvolution===null?"—":(m.totalEvolution>=0?"▲ ":"▼ ")+pct(m.totalEvolution);
+ const totalPhysical=m.totalPhysical===null?"—":Number(m.totalPhysical).toLocaleString("pt-BR");
  return '<div class="gl-row gl-total" role="row">'+
   '<div class="gl-name" role="cell"><strong>TOTAL LOJA</strong></div>'+
   '<div class="gl-data gl-target" role="cell">'+cell("Meta",money(m.totalMeta),abbreviated(m.totalMeta))+'</div>'+
   '<div class="gl-data gl-sale" role="cell">'+cell("Venda",m.effectiveSale===null?"—":money(m.effectiveSale),m.effectiveSale===null?"—":abbreviated(m.effectiveSale))+'</div>'+
   '<div class="gl-data gl-combined" role="cell"><div class="gl-mobile-pair"><small>Meta <b>'+esc(abbreviated(m.totalMeta))+'</b></small><strong>'+(m.effectiveSale===null?"—":esc(abbreviated(m.effectiveSale)))+'</strong></div></div>'+
-  '<div class="gl-data gl-att" role="cell"><span class="gl-percentage '+(m.attainment!==null&&m.attainment>=100?"good":"bad")+'">'+(m.attainment===null?"—":pct(m.attainment))+'</span></div>'+
-  '<div class="gl-data gl-ly" role="cell">—</div><div class="gl-data gl-evo" role="cell">—</div>'+
-  '<div class="gl-data gl-dev" role="cell"><b class="'+(m.effectiveSale!==null&&m.effectiveSale-m.totalMeta<0?"gl-negative":"gl-positive")+'">'+(m.effectiveSale===null?"—":esc(abbreviated(m.effectiveSale-m.totalMeta)))+'</b></div>'+
-  '<div class="gl-data gl-projection" role="cell">'+(m.projection===null?"—":esc(abbreviated(m.projection)))+'</div>'+
-  '<div class="gl-data gl-physical" role="cell">—</div></div>';
+  '<div class="gl-data gl-att" role="cell"><span class="gl-percentage '+(m.attainment!==null&&m.attainment>=100?"good":"bad")+'">'+esc(totalAtt)+'</span></div>'+
+  '<div class="gl-data gl-ly" role="cell">'+esc(totalLy)+'</div>'+
+  '<div class="gl-data gl-evo" role="cell"><b class="'+(m.totalEvolution!==null&&m.totalEvolution<0?"gl-negative":"gl-positive")+'">'+esc(totalEvo)+'</b></div>'+
+  '<div class="gl-data gl-dev" role="cell"><b class="'+(m.effectiveSale!==null&&m.effectiveSale-m.totalMeta<0?"gl-negative":"gl-positive")+'">'+esc(totalGap)+'</b></div>'+
+  '<div class="gl-data gl-projection" role="cell">'+(m.projection===null?"—":esc(money(m.projection)))+'</div>'+
+  '<div class="gl-data gl-physical" role="cell">'+esc(totalPhysical)+'</div></div>';
 }
 /* Mobile: painel horizontal completo com os grupos na mesma tabela e coluna fixa. */
 function mobileHorizontalRow(g){
@@ -94,19 +116,20 @@ function mobileHorizontalRow(g){
  const id=esc(g.key),name=esc(g.name);
  const att=g.att===null?"—":pct(g.att);
  const meta=money(g.meta),sale=g.att===null?"—":money(g.sale);
+ const ly=Number(g.ly)>0?money(g.ly):"—";
  const gap=g.abs===null?"—":signed(g.abs);
  const evo=g.evo===null?"—":(g.evo>=0?"▲ ":"▼ ")+pct(g.evo);
  const projection=g.projection===null?"—":money(g.projection);
  const physical=Number(g.physical).toLocaleString("pt-BR");
- // Valor integral, sem 'mil', sem arredondar centavos; largura controlada pela tabela horizontal.
  const value=full=>'<span class="gl-hval" title="'+esc(full)+'">'+esc(full)+'</span>';
  return '<button type="button" class="gl-hrow gi-mobile-trigger'+(g.isDay?" gl-hday":"")+(g.isHour?" gl-hhour":"")+'" data-gi-group="'+id+'" aria-label="Abrir Raio-X do grupo '+name+'">'+
  '<span class="gl-hname"><strong>'+name+'</strong>'+(badges?'<span class="gl-halerts">'+badges+'</span>':"")+'</span>'+
  '<span class="gl-hmeta">'+value(meta)+'</span>'+
  '<span class="gl-hsale">'+value(sale)+'</span>'+
  '<span class="gl-hatt"><b class="'+(g.att===null?"neutral":g.att>=100?"good":g.att>=90?"warn":"bad")+'">'+esc(att)+'</b></span>'+
- '<span class="gl-hgap '+(g.abs!==null&&g.abs<0?"gl-negative":"gl-positive")+'">'+value(gap)+'</span>'+
+ '<span class="gl-hly">'+value(ly)+'</span>'+
  '<span class="gl-hevo '+(g.evo!==null&&g.evo<0?"gl-negative":"gl-positive")+'">'+esc(evo)+'</span>'+
+ '<span class="gl-hgap '+(g.abs!==null&&g.abs<0?"gl-negative":"gl-positive")+'">'+value(gap)+'</span>'+
  '<span class="gl-hproject">'+value(projection)+'</span>'+
  '<span class="gl-hphysical">'+esc(physical)+'</span>'+
  '</button>';
@@ -114,18 +137,22 @@ function mobileHorizontalRow(g){
 function mobileHorizontalTotal(m){
  const diff=m.effectiveSale===null?null:m.effectiveSale-m.totalMeta;
  const att=m.attainment===null?"—":pct(m.attainment);
+ const ly=m.totalLy===null?"—":money(m.totalLy);
+ const evo=m.totalEvolution===null?"—":(m.totalEvolution>=0?"▲ ":"▼ ")+pct(m.totalEvolution);
+ const physical=m.totalPhysical===null?"—":Number(m.totalPhysical).toLocaleString("pt-BR");
  return '<div class="gl-hrow gl-htotal">'+
  '<span class="gl-hname"><strong>TOTAL LOJA</strong></span>'+
  '<span class="gl-hmeta">'+esc(money(m.totalMeta))+'</span>'+
  '<span class="gl-hsale">'+(m.effectiveSale===null?"—":esc(money(m.effectiveSale)))+'</span>'+
- '<span class="gl-hatt"><b class="'+(m.attainment===null?"neutral":m.attainment>=100?"good":"bad")+'">'+att+'</b></span>'+
+ '<span class="gl-hatt"><b class="'+(m.attainment===null?"neutral":m.attainment>=100?"good":"bad")+'">'+esc(att)+'</b></span>'+
+ '<span class="gl-hly">'+esc(ly)+'</span>'+
+ '<span class="gl-hevo '+(m.totalEvolution!==null&&m.totalEvolution<0?"gl-negative":"gl-positive")+'">'+esc(evo)+'</span>'+
  '<span class="gl-hgap '+(diff!==null&&diff<0?"gl-negative":"gl-positive")+'">'+(diff===null?"—":esc(signed(diff)))+'</span>'+
- '<span class="gl-hevo">—</span>'+
  '<span class="gl-hproject">'+(m.projection===null?"—":esc(money(m.projection)))+'</span>'+
- '<span class="gl-hphysical">—</span></div>';
+ '<span class="gl-hphysical">'+esc(physical)+'</span></div>';
 }
 function mobileHorizontal(m){
- const headings=["GRUPO","META","VENDA","ATING.","DESVIO","EV. VS A.A.","PROJEÇÃO","FÍSICA"];
+ const headings=["GRUPO","META","VENDA","ATING.","VENDA A.A.","EVOLUÇÃO","DESVIO","PROJEÇÃO","FÍSICA"];
  return '<section class="gl-landscape-panel" aria-label="Painel horizontal de todos os grupos">'+
  '<div class="gl-landscape-top"><span>Visão horizontal · todos os grupos</span>'+
  '<button type="button" class="gl-landscape-toggle" aria-expanded="false" aria-label="Ampliar painel horizontal de grupos">⛶ Ampliar</button></div>'+
@@ -171,8 +198,8 @@ function render(force=false){
  if(!state?.logged)return;
  const root=container();if(!root)return;
  const result=report();if(!result)return;
- const stamp=[result.store,result.day,result.updated,result.effectiveSale,result.totalMeta,
-   result.rows.map(r=>[r.key,r.sale,r.meta,r.abs,r.evo,r.actualInterval,r.hourGap,r.isDay,r.isHour].join("|")).join(";")].join(":");
+ const stamp=[result.store,result.day,result.updated,result.effectiveSale,result.totalMeta,result.totalLy,result.totalPhysical,result.projection,
+   result.rows.map(r=>[r.key,r.sale,r.meta,r.abs,r.ly,r.physical,r.projection,r.evo,r.actualInterval,r.hourGap,r.isDay,r.isHour].join("|")).join(";")].join(":");
  if(!force&&root.dataset.glStamp===stamp&&root.querySelector(".gl-panel"))return;
  const previousScroll=root.querySelector(".gl-landscape-scroll")?.scrollLeft||0;
  const expanded=root.querySelector(".gl-landscape-panel")?.classList.contains("gl-landscape-expanded")||false;
