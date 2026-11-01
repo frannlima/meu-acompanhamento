@@ -43,7 +43,7 @@
         store=field(headers,["loja"]);dco=field(headers,["dco"]);date=field(headers,["dia"]);
         fin=field(headers,["meta diaria"]);lyfin=field(headers,["vnd fin a a","vnd fin aa"]);
         lyfis=field(headers,["vnd fis a a","vnd fis aa"]);
-        if([store,dco,date,fin,lyfin,lyfis].some(x=>x<0))throw new Error("Arquivo financeiro: cabeçalhos Loja, GG, DCO, Dia, Meta Diária, Vnd. Fin. A.A. e Vnd. Fis. A.A. são obrigatórios.");
+        if([store,dco,date,fin,lyfin].some(x=>x<0))throw new Error("Arquivo financeiro: cabeçalhos Loja, DCO, Dia, Meta Diária e Vnd. Fin. A.A. são obrigatórios. Vnd. Fis. A.A. é opcional.");
       } else {
         store=field(headers,["loja"]);dco=field(headers,["cod dco","codigo dco"]);date=field(headers,["data"]);
         fis=field(headers,["meta fis"]);
@@ -58,7 +58,7 @@
         if(source==="financial"){
           item.target_financial=parseNumber(row[fin]);
           item.ly_financial=parseNumber(row[lyfin]);
-          item.ly_physical=parseNumber(row[lyfis]);
+          if(lyfis>=0 && row[lyfis]!==null && row[lyfis]!==undefined && row[lyfis]!=="")item.ly_physical=parseNumber(row[lyfis]);
         } else item.target_physical=parseNumber(row[fis]);
         records.set(business_date+"|"+store_code+"|"+dco_code,item);
       }
