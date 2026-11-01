@@ -598,27 +598,14 @@
   </div>
 
   <div id="dailyWelcomeModal" class="overlay hidden">
-    <div class="modal october-modal">
-      <button id="closeDailyWelcome" class="welcome-close" aria-label="Fechar">×</button>
-      <div class="october-top">
-        <div class="october-logo"><img src="./assets/riachuelo-logo-vertical.svg" alt="Riachuelo"></div>
-        <span>OUTUBRO ROSA</span>
-      </div>
-      <div class="october-ribbon">🎀</div>
-      <span class="eyebrow">SEU ACOLHIMENTO DE HOJE</span>
+    <div class="modal supervisor-checklist-prompt" role="dialog" aria-modal="true" aria-labelledby="supervisorChecklistPromptTitle">
+      <button id="closeDailyWelcome" class="welcome-close" aria-label="Fechar lembrete">×</button>
+      <span class="eyebrow">ROTINA DO SUPERVISOR</span>
       <h2 id="dailyWelcomeTitle">Bom dia!</h2>
-      <p>Neste Outubro Rosa, o autocuidado merece prioridade. Observe seu corpo, mantenha seus cuidados preventivos em dia e procure orientação profissional quando necessário.</p>
-      <div class="embrace-card">
-        <strong>♡ Você não precisa caminhar sozinho.</strong>
-        <span>Conte com o canal interno Abraçamos Você e os serviços de autocuidado disponíveis neste mês.</span>
-        <a href="https://abracamosvoce.com.br/inicioautocuidado" target="_blank" rel="noopener" class="btn october-btn">Conhecer o Abraçamos Você</a>
-      </div>
-      <div id="supervisorWelcomeBlock" class="supervisor-welcome hidden">
-        <h3>Você já planejou sua rotina na loja hoje?</h3>
-        <p>Acesse o checklist do supervisor e garanta uma operação ainda mais eficiente.</p>
-        <a id="supervisorChecklistLink" href="https://rotina-super-ria-ce-pi.franlimabreu.chatgpt.site/" target="_blank" rel="noopener noreferrer" class="btn accent">Abrir checklist do supervisor</a>
-      </div>
-      <button id="continueDailyWelcome" class="btn secondary full">Continuar para o acompanhamento</button>
+      <h3 id="supervisorChecklistPromptTitle">Seu checklist de hoje já está em dia?</h3>
+      <p>Antes de começar, organize as prioridades da operação e garanta o acompanhamento dos indicadores, a mobilização do time e os pontos de atenção da loja.</p>
+      <a id="supervisorChecklistLink" href="https://rotina-super-ria-ce-pi.franlimabreu.chatgpt.site/" target="_blank" rel="noopener noreferrer" class="btn accent">Abrir checklist do supervisor</a>
+      <button id="continueDailyWelcome" class="btn secondary full">Agora não, acessar meu acompanhamento</button>
     </div>
   </div>
 
