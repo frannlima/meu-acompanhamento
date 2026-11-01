@@ -91,46 +91,16 @@ window.afterMeuAcompanhamentoLogin = async function(person){
   updateIdentity(person);
   await refreshAdminStoreCatalog();
 
-  const day=localDate();
-  const key=dailyWelcomeKey(day);
-
-  // O controle local evita repetição no mesmo aparelho mesmo se o endpoint
-  // de status oscilar ou o PWA for recarregado ao voltar de um link externo.
-  if(localStorage.getItem(key)==="1"){
-    enterMainApp();
-    return;
-  }
-
-  let already=false;
-  // O acolhimento da Rebeca foi consumido num teste: ignorar apenas uma vez
-  // neste aparelho a marcação antiga, sem alterar o histórico do servidor.
-  if(!welcomeNeedsReplay(day)){
-    try{
-      already=!!(await api("welcomeStatus",{matricula:state.matricula,business_date:day}));
-    }catch(_){
-      already=false;
-    }
-  }
-
-  if(already){
-    localStorage.setItem(key,"1");
-    enterMainApp();
-    return;
-  }
-
-  // Marca antes de exibir para impedir duplicidade por reload/retorno do mobile.
-  localStorage.setItem(key,"1");
-  try{
-    await api("markWelcome",{matricula:state.matricula,business_date:day,store_code:state.storeCode});
-  }catch(e){
-    console.warn("Não foi possível registrar o acolhimento no servidor.",e);
-  }
-
   const sup=state.role==="supervisor" || /SUPERVISOR/i.test(String(person?.job_title||""));
+  enterMainApp();
+  if(!sup) return;
+
+  // Checklist de rotina: uma apresentação diária por matrícula, sem campanha sazonal.
+  const key="ma_checklist_supervisor_"+localDate()+"_"+state.matricula;
+  if(localStorage.getItem(key)==="1") return;
+  localStorage.setItem(key,"1");
   if($("dailyWelcomeTitle")) $("dailyWelcomeTitle").textContent=greetingByTime()+", "+personDisplayName(person)+"!";
-  if($("supervisorWelcomeBlock")) $("supervisorWelcomeBlock").classList.toggle("hidden",!sup);
-  setSection(getSavedSection()||state.section||"inicio");
-  $("dailyWelcomeModal").classList.remove("hidden");
+  if($("dailyWelcomeModal")) $("dailyWelcomeModal").classList.remove("hidden");
 };
 
 function closeDailyWelcomeFlow(){
