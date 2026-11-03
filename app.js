@@ -169,15 +169,20 @@ function splitSalesPasteLine(raw){
   const dco=prefix[2];
   const body=prefix[3].trim();
   const matches=salesNumericMatches(body);
-  if(matches.length<12) return [];
-
-  const values=matches.slice(-12);
+  // Relatórios copiados como texto simples perdem as células TAB vazias.
+  // Layout conhecido: 7 valores iniciais, 2 campos opcionais, desvio,
+  // 2 campos opcionais. Nunca deslocar o desvio para outra coluna.
+  if(matches.length<8) return [];
+  const values=matches.length>=12?matches.slice(-12):matches;
   const firstValue=values[0];
   const department=body.slice(0,firstValue.index).trim().replace(/\s+/g," ");
   if(!department) return [];
 
   const nums=values.map(m=>String(m[0]).replace(/^R\$\s*/i,"").replace(/%$/,"").trim());
-  return [group,dco+"-"+department,...nums];
+  if(nums.length===8) return [group,dco+"-"+department,...nums.slice(0,7),"","",nums[7],"",""];
+  if(nums.length===12) return [group,dco+"-"+department,...nums];
+  // Quantidades intermediárias ambíguas não são importadas automaticamente.
+  return [];
 }
 
 function buildSalesPasteBlocks(text){
