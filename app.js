@@ -129,19 +129,23 @@ function salesNumericMatches(text){
 }
 
 function splitSalesPasteLine(raw){
+  // Preservar TABs finais: representam colunas vazias do relatório Web.
   const clean=String(raw||"")
     .replace(/\u00a0/g," ")
     .replace(/[\u2007\u202f]/g," ")
     .replace(/[–—]/g,"-")
     .replace(/\r/g,"")
-    .replace(/\s+$/g,"")
-    .trim();
+    .replace(/^ +| +$/g,"");
   if(!clean) return [];
 
   // Clipboard estruturado (Excel/Web com células reais).
   if(clean.includes("\t")){
     const cols=clean.split("\t").map(v=>v.trim());
     if(cols.length===14) return cols;
+    // Algumas fontes omitem TABs finais; completar somente campos vazios.
+    if(cols.length>=11 && cols.length<14 && /^\\d+$/.test(cols[0]) && /^\\d{3}-/.test(cols[1])) {
+      return [...cols,...Array(14-cols.length).fill("")];
+    }
     // Remove apenas colunas vazias extras no início/fim, preservando vazios internos.
     while(cols.length>14 && cols[0]==="") cols.shift();
     while(cols.length>14 && cols[cols.length-1]==="") cols.pop();
