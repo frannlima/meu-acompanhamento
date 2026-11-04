@@ -31,10 +31,24 @@ function update(){
  let photo=portrait.querySelector(".ma-552-portrait");
  if(!photo){
   photo=document.createElement("img");photo.className="ma-552-portrait";photo.alt="Gerente da filial 552";photo.draggable=false;photo.src=SRC;
-  photo.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;z-index:2;pointer-events:none";
+  photo.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 18%;border-radius:inherit;z-index:2;pointer-events:none;mask-image:linear-gradient(#000 0%,#000 78%,transparent 100%);-webkit-mask-image:linear-gradient(#000 0%,#000 78%,transparent 100%)";
   portrait.appendChild(photo);
  }
  photo.hidden=!is552;photo.style.display=is552?"block":"none";
+ if(is552&&state.section==="inicio"&&root.hidden){
+  root.hidden=false;
+  document.body.classList.add("ma-mascot-active");
+  root.dataset.mood="waiting";
+  root.className="ma-partial-mascot ma-mascot--waiting";
+  const tag=root.querySelector("#maMascotTag"),title=root.querySelector("#maMascotTitle"),info=root.querySelector("#maMascotInfo"),elapsed=root.querySelector("#maMascotElapsed"),metrics=root.querySelector("#maMascotMetrics"),action=root.querySelector("#maMascotInput");
+  if(tag)tag.textContent="ACOMPANHAMENTO · 552";
+  if(title)title.textContent="Vamos acompanhar o resultado!";
+  if(info)info.textContent="Filial 552 • Aguardando parcial ou horário operacional.";
+  if(elapsed)elapsed.hidden=true;
+  if(metrics)metrics.hidden=true;
+  if(action)action.textContent="Registrar parcial →";
+ }
+ if(!is552&&root.querySelector("#maMascotTag")?.textContent==="ACOMPANHAMENTO · 552"&&typeof window.atualizarEstadoAvatarParcial==="function")window.atualizarEstadoAvatarParcial();
 }
 function start(){update();setInterval(update,1200);}
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
