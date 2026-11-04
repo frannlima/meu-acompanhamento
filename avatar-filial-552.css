@@ -48,3 +48,58 @@
 @media(prefers-reduced-motion:reduce){
  .ma-partial-mascot.ma-filial-552 .ma-552-portrait{animation:none!important}
 }
+
+/* v3 — assistente compacto, fechado por padrão e expandido sob demanda. */
+@media(max-width:900px){
+ .ma-partial-mascot.ma-filial-552{
+   position:fixed!important;left:auto!important;top:auto!important;
+   right:12px!important;bottom:calc(98px + env(safe-area-inset-bottom,0px))!important;
+   width:62px!important;height:62px!important;
+   transform:none!important;z-index:1240!important;
+ }
+ .ma-partial-mascot.ma-filial-552 .ma-mascot-portrait{
+   position:absolute!important;right:0!important;bottom:0!important;
+   width:62px!important;height:62px!important;border-radius:50%!important;
+   border:3px solid white!important;box-shadow:0 3px 14px #102f2740!important;
+   overflow:hidden!important;z-index:2!important;
+ }
+ .ma-partial-mascot.ma-filial-552 .ma-mascot-message{
+   display:none!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-552-expanded{
+   width:min(328px,calc(100vw - 24px))!important;
+   height:205px!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-552-expanded .ma-mascot-portrait{
+   width:54px!important;height:54px!important;right:4px!important;top:4px!important;bottom:auto!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-552-expanded .ma-mascot-message{
+   display:block!important;position:absolute!important;
+   inset:0!important;width:100%!important;height:205px!important;
+   max-height:205px!important;overflow:auto!important;
+   padding:13px 65px 12px 14px!important;
+   border-radius:17px!important;transform:none!important;
+   box-shadow:0 8px 24px #0f372a30!important;
+   box-sizing:border-box!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-552-expanded .ma-mascot-message strong{
+   font-size:15px!important;line-height:1.15!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-552-expanded .ma-mascot-message small{
+   font-size:10px!important;line-height:1.25!important;margin:5px 0!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-552-expanded .ma-mascot-metrics{
+   font-size:10px!important;padding:6px!important;margin:5px 0!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-552-expanded .ma-mascot-action{
+   padding:8px!important;min-height:32px!important;font-size:11px!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-552-expanded .ma-mascot-drag-hint{display:none!important}
+ .ma-partial-mascot.ma-filial-552.ma-mascot-docked{
+   width:62px!important;height:62px!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-mascot-docked .ma-mascot-portrait{
+   width:62px!important;height:62px!important;border-radius:50%!important;
+ }
+ .ma-partial-mascot.ma-filial-552.ma-mascot-docked .ma-mascot-message{display:none!important}
+}
