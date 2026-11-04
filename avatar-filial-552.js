@@ -1,7 +1,7 @@
 /* Filial 552: mesmo assistente operacional da 108; somente personagem muda. */
 (function(){
 "use strict";
-const SRC="./assets/avatar-gerente-552.svg?v=7";
+const SRC="./assets/avatar-gerente-552.svg?v=8";
 function update(){
  const root=document.getElementById("maPartialMascot");
  if(!root||typeof state==="undefined")return;
