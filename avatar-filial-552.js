@@ -35,6 +35,15 @@ function update(){
   portrait.appendChild(photo);
  }
  photo.hidden=!is552;photo.style.display=is552?"block":"none";
+ root.classList.toggle("ma-filial-552",is552);
+ // Ocultar por completo a personagem da filial 108, inclusive variantes triste/feliz.
+ // Sem isso, a personagem anterior permanece visível por baixo da foto.
+ const original=portrait.querySelector(".ma-mascot-happy");
+ const sad=portrait.querySelector(".ma-mascot-sad");
+ if(original)original.style.setProperty("display",is552?"none":"","important");
+ if(sad)sad.style.setProperty("display",is552?"none":"","important");
+ photo.style.setProperty("z-index","9","important");
+ photo.style.setProperty("opacity",is552?"1":"0","important");
  if(is552&&state.section==="inicio"&&root.hidden){
   root.hidden=false;
   document.body.classList.add("ma-mascot-active");
