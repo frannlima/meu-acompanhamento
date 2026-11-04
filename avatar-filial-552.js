@@ -31,7 +31,7 @@ function update(){
  let photo=portrait.querySelector(".ma-552-portrait");
  if(!photo){
   photo=document.createElement("img");photo.className="ma-552-portrait";photo.alt="Gerente da filial 552";photo.draggable=false;photo.src=SRC;
-  photo.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 18%;border-radius:inherit;z-index:2;pointer-events:none;mask-image:linear-gradient(#000 0%,#000 78%,transparent 100%);-webkit-mask-image:linear-gradient(#000 0%,#000 78%,transparent 100%)";
+  photo.style.cssText="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom;border-radius:inherit;z-index:2;pointer-events:none;filter:none";
   portrait.appendChild(photo);
  }
  photo.hidden=!is552;photo.style.display=is552?"block":"none";
